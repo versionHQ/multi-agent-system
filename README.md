@@ -25,7 +25,7 @@
 # Overview
 
 <p align="center">
-   <img src="https://res.cloudinary.com/dfeirxlea/image/upload/v1728219760/pj_m_home/wkxvmmyah5dvhbdah1qn.png" alt="version logo">
+   <img src="https://res.cloudinary.com/dfeirxlea/image/upload/v1728219760/pj_m_home/wkxvmmyah5dvhbdah1qn.png" alt="version logo" width="200">
 </p>
 
 
@@ -38,13 +38,15 @@ An open-source, multi-agent system that design, generate, and autopilot messagin
 - [Github repo - frontend](https://github.com/krik8235/pj_m_dev)
 
 
-![UI-1](https://res.cloudinary.com/dfeirxlea/image/upload/v1732801909/pj_m_home/ibi8b1ohv2sioqdkoq7n.png)
+<p align="center">
+   <img alt="UI1" src="https://res.cloudinary.com/dfeirxlea/image/upload/v1732801909/pj_m_home/ibi8b1ohv2sioqdkoq7n.png" width="35%">
+   &nbsp; &nbsp; &nbsp; &nbsp;
+   <img alt="UI2" src="https://res.cloudinary.com/dfeirxlea/image/upload/v1733414200/pj_m_home/tqgg3xfpk5x4i6rh3egv.png" width="35%">
+   &nbsp; &nbsp; &nbsp; &nbsp;
+   <img src="https://res.cloudinary.com/dfeirxlea/image/upload/v1728302420/pj_m_home/xy58a7imyquuvkgukqxt.png" width="15%" alt="messaging workflow">
+</p>
 
 
-![UI-2](https://res.cloudinary.com/dfeirxlea/image/upload/v1733414200/pj_m_home/tqgg3xfpk5x4i6rh3egv.png)
-
-
-![Messaging Workflow Image](https://res.cloudinary.com/dfeirxlea/image/upload/v1728302420/pj_m_home/xy58a7imyquuvkgukqxt.png)
 
 
 ## Key Features
@@ -179,8 +181,12 @@ src/
 2. Frontend (production) is available at `https://versi0n.io`.
 
 
+
 ## Mindmap
 
+<p align="center">
+   <img src="https://res.cloudinary.com/dfeirxlea/image/upload/v1733419370/pj_m_home/uto51prsvvoskiyoywo3.png" alt="mindmap" width="500">
+</p>
 
 
 ## Development
@@ -258,11 +264,9 @@ Common issues and solutions:
 ## Frequently Asked Questions (FAQ)
 **Q. Where can I see the version agents are working?**
 
-A. You can find a frontend app [here](https://versi0n.io) with real-world outbound use cases.
-
+> A. You can find a frontend app [here](https://versi0n.io) with real-world outbound use cases.
 
 **Q. How do you analyze the customer?**
 
-A. We employ soft clustering for each customer.
-
-![soft clustering approach](https://res.cloudinary.com/dfeirxlea/image/upload/v1732732628/pj_m_agents/ito937s5d5x0so8isvw6.png)
+> A. We employ soft clustering for each customer. 
+> <img width="200" src="https://res.cloudinary.com/dfeirxlea/image/upload/v1732732628/pj_m_agents/ito937s5d5x0so8isvw6.png">
