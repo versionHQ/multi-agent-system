@@ -1,0 +1,43 @@
+[project]
+name = "pj_m_multi_agent"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+  "pandas",
+  "matplotlib",
+  "seaborn",
+  "regex",
+  "requests",
+  "python-dotenv",
+  "pydantic",
+  "werkzeug",
+  "typing",
+  "flask",
+  "flask_cors",
+  "waitress",
+  "pre-commit",
+  "litellm",
+  "openai",
+  "langchain_openai",
+  "composio_core",
+  "composio_openai"
+]
+
+[build-system]
+requires = ["hatchling", "hatch-build-scripts"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = [{include = "src"}]
+
+
+[tool.black]
+line-length = 88
+
+[tool.isort]
+profile = "black"
+
+[tool.uv.workspace]
+members = ["kuriko"]
