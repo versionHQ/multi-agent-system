@@ -19,38 +19,17 @@
   - [Troubleshooting](#troubleshooting)
   - [Clustering](#clustering)
   - [Frequently Asked Questions (FAQ)](#frequently-asked-questions-faq)
-    - [**Q. Where can I see the version agents are working?**](#q-where-can-i-see-the-version-agents-are-working)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 # Overview
 
+<p align="center">
+   <img src="https://res.cloudinary.com/dfeirxlea/image/upload/v1728219760/pj_m_home/wkxvmmyah5dvhbdah1qn.png" alt="version logo">
+</p>
+
+
 An open-source, multi-agent system that design, generate, and autopilot messaging workflow levaraging various AI techniques.
-
-  ________________________
-
-| AI agent is future...?  |
-
-  ========================
-
-                \
-
-                 \
-
-                   ^__^
-
-                   (oo)\_______
-
-                   (__)\       )\/\
-
-                       ||----w |
-
-                       ||     ||
-
-
-agent => => => => => => [    this system     ]  => => => => => prediction & autopiloting => => => deployment
- cluetering analysis       tailoring workflow
-
 
 - [Client interface](https://versi0n.io/)
 
@@ -59,9 +38,13 @@ agent => => => => => => [    this system     ]  => => => => => prediction & auto
 - [Github repo - frontend](https://github.com/krik8235/pj_m_dev)
 
 
+![UI-1](https://res.cloudinary.com/dfeirxlea/image/upload/v1732801909/pj_m_home/ibi8b1ohv2sioqdkoq7n.png)
 
-![UI](https://res.cloudinary.com/dfeirxlea/image/upload/v1732801909/pj_m_home/ibi8b1ohv2sioqdkoq7n.png)
 
+![UI-2](https://res.cloudinary.com/dfeirxlea/image/upload/v1733414200/pj_m_home/tqgg3xfpk5x4i6rh3egv.png)
+
+
+![Messaging Workflow Image](https://res.cloudinary.com/dfeirxlea/image/upload/v1728302420/pj_m_home/xy58a7imyquuvkgukqxt.png)
 
 
 ## Key Features
@@ -106,7 +89,7 @@ Multiple `agent`s can form a `team` to complete complex tasks together.
    - Passes the information back to the relative agent/s to recreate.
 
 7. **Deploying Next Action**:
-   - Use [Composio Actions](https://docs.composio.dev/patterns/tools/use-tools/use-specific-actions) to deploy on the CRM or ad platform.
+   - Use Composio to deploy on the CRM or ad platform.
 
 
 
@@ -255,12 +238,11 @@ The RAG system uses Chroma DB to store and query contract clauses. To update the
 5. Open a pull request
 
 
-### Ideas
+### To Do
 - Agents with fine-tuned FM
 - Latency/memory saving
 - Improve cost performance
 - Third-party deployment options
-
 
 
 ## Troubleshooting
@@ -273,17 +255,14 @@ Common issues and solutions:
 - Issues related to the AI agents or RAG system: Check the `output.log` file for detailed error messages and stack traces.
 
 
-## Clustering
+## Frequently Asked Questions (FAQ)
+**Q. Where can I see the version agents are working?**
 
-Employ soft clustering approach using K-mean;
+A. You can find a frontend app [here](https://versi0n.io) with real-world outbound use cases.
+
+
+**Q. How do you analyze the customer?**
+
+A. We employ soft clustering for each customer.
 
 ![soft clustering approach](https://res.cloudinary.com/dfeirxlea/image/upload/v1732732628/pj_m_agents/ito937s5d5x0so8isvw6.png)
-
-Soft Clustering: In this type of clustering, instead of assigning each data point into a separate cluster, a probability or likelihood of that point being that cluster is evaluated. For example, Let’s say there are 4 data point and we have to cluster them into 2 clusters. So we will be evaluating a probability of a data point belonging to both clusters. This probability is calculated for all data points.
-<!-- https://www.geeksforgeeks.org/clustering-in-machine-learning/#types-of-clustering -->
-
-
-## Frequently Asked Questions (FAQ)
-### **Q. Where can I see the version agents are working?**
-
-A: You can find a frontend app [here](https://versi0n.io) with real-world outbound use cases.
