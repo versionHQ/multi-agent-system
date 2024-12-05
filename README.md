@@ -3,12 +3,12 @@
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
 - [Overview](#overview)
+  - [Mindmap](#mindmap)
   - [Key Features](#key-features)
   - [Technologies Used](#technologies-used)
   - [Project Structure](#project-structure)
   - [Setup](#setup)
   - [Usage](#usage)
-  - [Mindmap](#mindmap)
   - [Development](#development)
     - [Package Management with uv](#package-management-with-uv)
     - [Pre-commit Hooks](#pre-commit-hooks)
@@ -47,6 +47,11 @@ An open-source, multi-agent system that design, generate, and autopilot messagin
 </p>
 
 
+## Mindmap
+
+<p align="center">
+   <img src="https://res.cloudinary.com/dfeirxlea/image/upload/v1733419370/pj_m_home/uto51prsvvoskiyoywo3.png" alt="mindmap" width="800">
+</p>
 
 
 ## Key Features
@@ -179,14 +184,6 @@ src/
    The backend will be available at `http://localhost:5002`.
 
 2. Frontend (production) is available at `https://versi0n.io`.
-
-
-
-## Mindmap
-
-<p align="center">
-   <img src="https://res.cloudinary.com/dfeirxlea/image/upload/v1733419370/pj_m_home/uto51prsvvoskiyoywo3.png" alt="mindmap" width="500">
-</p>
 
 
 ## Development
