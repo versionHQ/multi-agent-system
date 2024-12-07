@@ -7,13 +7,6 @@
 
 An open-source, multi-agent system that designs, generates, and autopilots messaging workflow levaraging various AI models.
 
-- [Playground](https://versi0n.io/)
-
-- [Landing page](https://home.versi0n.io)
-
-- [Github - Frontend](https://github.com/krik8235/pj_m_dev)
-
-
 <p align="center">
    <img alt="UI1" src="https://res.cloudinary.com/dfeirxlea/image/upload/v1732801909/pj_m_home/ibi8b1ohv2sioqdkoq7n.png" width="35%">
    &nbsp; &nbsp; &nbsp; &nbsp;
@@ -23,34 +16,16 @@ An open-source, multi-agent system that designs, generates, and autopilots messa
 </p>
 
 
-**Table of Contents**
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-
-- [Mindmap](#mindmap)
-- [Key Features](#key-features)
-- [Technologies Used](#technologies-used)
-- [Project Structure](#project-structure)
-- [Setup](#setup)
-- [Usage](#usage)
-- [Development](#development)
-  - [Package Management with uv](#package-management-with-uv)
-  - [Pre-commit Hooks](#pre-commit-hooks)
-  - [Customizing AI Agents](#customizing-ai-agents)
-  - [Modifying RAG Functionality](#modifying-rag-functionality)
-- [Contributing](#contributing)
-  - [To Do](#to-do)
-- [Troubleshooting](#troubleshooting)
-- [Frequently Asked Questions (FAQ)](#frequently-asked-questions-faq)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
-
-## Mindmap
+### Mindmap
 
 <p align="center">
-   <img src="https://res.cloudinary.com/dfeirxlea/image/upload/v1733419370/pj_m_home/uto51prsvvoskiyoywo3.png" alt="mindmap" width="800">
+   <img src="https://res.cloudinary.com/dfeirxlea/image/upload/v1733556715/pj_m_home/urwte15at3h0dr8mdlyo.png" alt="mindmap" width="1000">
 </p>
+
+
+- [Playground](https://versi0n.io/)
+- [Landing page](https://home.versi0n.io)
+- [Frontend repo](https://github.com/krik8235/pj_m_dev)
 
 
 ## Key Features
