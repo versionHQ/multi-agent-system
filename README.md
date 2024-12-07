@@ -1,27 +1,3 @@
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
-
-- [Overview](#overview)
-  - [Mindmap](#mindmap)
-  - [Key Features](#key-features)
-  - [Technologies Used](#technologies-used)
-  - [Project Structure](#project-structure)
-  - [Setup](#setup)
-  - [Usage](#usage)
-  - [Development](#development)
-    - [Package Management with uv](#package-management-with-uv)
-    - [Pre-commit Hooks](#pre-commit-hooks)
-    - [Customizing AI Agents](#customizing-ai-agents)
-    - [Modifying RAG Functionality](#modifying-rag-functionality)
-  - [Contributing](#contributing)
-    - [Ideas](#ideas)
-  - [Troubleshooting](#troubleshooting)
-  - [Clustering](#clustering)
-  - [Frequently Asked Questions (FAQ)](#frequently-asked-questions-faq)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
 # Overview
 
 <p align="center">
@@ -29,13 +5,13 @@
 </p>
 
 
-An open-source, multi-agent system that design, generate, and autopilot messaging workflow levaraging various AI techniques.
+An open-source, multi-agent system that designs, generates, and autopilots messaging workflow levaraging various AI models.
 
-- [Client interface](https://versi0n.io/)
+- [Playground](https://versi0n.io/)
 
-- [Marketing landing page](https://home.versi0n.io)
+- [Landing page](https://home.versi0n.io)
 
-- [Github repo - frontend](https://github.com/krik8235/pj_m_dev)
+- [Github - Frontend](https://github.com/krik8235/pj_m_dev)
 
 
 <p align="center">
@@ -45,6 +21,29 @@ An open-source, multi-agent system that design, generate, and autopilot messagin
    &nbsp; &nbsp; &nbsp; &nbsp;
    <img src="https://res.cloudinary.com/dfeirxlea/image/upload/v1728302420/pj_m_home/xy58a7imyquuvkgukqxt.png" width="15%" alt="messaging workflow">
 </p>
+
+
+**Table of Contents**
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+- [Mindmap](#mindmap)
+- [Key Features](#key-features)
+- [Technologies Used](#technologies-used)
+- [Project Structure](#project-structure)
+- [Setup](#setup)
+- [Usage](#usage)
+- [Development](#development)
+  - [Package Management with uv](#package-management-with-uv)
+  - [Pre-commit Hooks](#pre-commit-hooks)
+  - [Customizing AI Agents](#customizing-ai-agents)
+  - [Modifying RAG Functionality](#modifying-rag-functionality)
+- [Contributing](#contributing)
+  - [To Do](#to-do)
+- [Troubleshooting](#troubleshooting)
+- [Frequently Asked Questions (FAQ)](#frequently-asked-questions-faq)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 
 ## Mindmap
@@ -77,7 +76,7 @@ Multiple `agent`s can form a `team` to complete complex tasks together.
    - Call `agent-c` and let it set up media channels and schedule based on the client inputs on audience and media mix.
    - Call `agent-d` and let it draft a first message to send.
 
-   (They are forming a `team`.)
+   (They form a `team`.)
 
    [*brain*]
    - Within each agent, user data (jsonl) is passed to the RAGTool function in Composio.
@@ -265,5 +264,5 @@ Common issues and solutions:
 
 **Q. How do you analyze the customer?**
 
-> A. We employ soft clustering for each customer. 
+> A. We employ soft clustering for each customer.
 > <img width="200" src="https://res.cloudinary.com/dfeirxlea/image/upload/v1732732628/pj_m_agents/ito937s5d5x0so8isvw6.png">

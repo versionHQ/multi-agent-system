@@ -1,8 +1,11 @@
+project/
+app.py
+app copy.py
 src/
 
 __pycache__/
-.env
 .DS_Store/
+.env
 .venv/
 uploads/
 sample_dataset/
