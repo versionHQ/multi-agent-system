@@ -25,12 +25,8 @@ class FilteredStream:
 
     def write(self, s) -> int:
         with self._lock:
-            if (
-                "Give Feedback / Get Help: https://github.com/BerriAI/litellm/issues/new"
-                in s
-                or "LiteLLM.Info: If you need to debug this error, use `litellm.set_verbose=True`"
-                in s
-            ):
+            if ("Give Feedback / Get Help: https://github.com/BerriAI/litellm/issues/new" in s
+                or "LiteLLM.Info: If you need to debug this error, use `litellm.set_verbose=True`" in s):
                 return 0
             return self._original_stream.write(s)
 
@@ -76,14 +72,7 @@ class LLMResponseSchema:
         if len(self.field_list) == 0:
             return
 
-        properties = [
-            {
-                field.title: {
-                    "type": field.type,
-                }
-            }
-            for field in self.field_list
-        ]
+        properties = [{ field.title: { "type": field.type, }} for field in self.field_list]
         required = [field.title for field in self.field_list if field.required == True]
         response_schema = {
             "type": self.type,
@@ -161,10 +150,9 @@ class LLM:
             try:
                 response_format = None
 
+                #! REFINEME
                 if OutputFormat.JSON in output_formats:
-                    response_format = LLMResponseSchema(
-                        response_type="json_object", field_list=field_list
-                    )
+                    response_format = LLMResponseSchema(response_type="json_object", field_list=field_list)
 
                 params = {
                     "model": self.model,
@@ -196,6 +184,7 @@ class LLM:
                 logging.error(f"LiteLLM call failed: {str(e)}")
                 raise
 
+
     def supports_function_calling(self) -> bool:
         try:
             params = get_supported_openai_params(model=self.model)
@@ -203,6 +192,7 @@ class LLM:
         except Exception as e:
             logging.error(f"Failed to get supported params: {str(e)}")
             return False
+
 
     def supports_stop_words(self) -> bool:
         try:
@@ -212,9 +202,11 @@ class LLM:
             logging.error(f"Failed to get supported params: {str(e)}")
             return False
 
+
     def get_context_window_size(self) -> int:
         # Only using 75% of the context window size to avoid cutting the message in the middle
         return int(LLM_CONTEXT_WINDOW_SIZES.get(self.model, 8192) * 0.75)
+
 
     def set_callbacks(self, callbacks: List[Any]):
         callback_types = [type(callback) for callback in callbacks]

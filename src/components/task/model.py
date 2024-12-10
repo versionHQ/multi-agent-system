@@ -17,7 +17,6 @@ class ResponseField(BaseModel):
     """
     Field class to use in the response schema for the JSON response.
     """
-
     title: str = Field(default=None)
     type: str = Field(default=None)
     required: bool = Field(dedault=True)
@@ -29,23 +28,14 @@ class TaskOutput(BaseModel):
     Depending on the task output format, use `raw`, `pydantic`, `json_dict` accordingly.
     """
 
-    task_id: UUID4 = Field(
-        default_factory=uuid.uuid4, frozen=True, description="store Task ID"
-    )
+    task_id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True, description="store Task ID")
     raw: str = Field(default="", description="Raw output of the task")
-    pydantic: Optional[BaseModel] = Field(
-        default=None, description="Pydantic output of task"
-    )
-    json_dict: Optional[Dict[str, Any]] = Field(
-        default=None, description="JSON dictionary of task"
-    )
+    pydantic: Optional[BaseModel] = Field(default=None, description="Pydantic output of task")
+    json_dict: Optional[Dict[str, Any]] = Field(default=None, description="JSON dictionary of task")
 
     def __str__(self) -> str:
-        return (
-            str(self.pydantic)
-            if self.pydantic
-            else str(self.json_dict) if self.json_dict else self.raw
-        )
+        return str(self.pydantic) if self.pydantic  else str(self.json_dict) if self.json_dict else self.raw
+
 
     @property
     def json(self) -> Optional[str]:
@@ -58,6 +48,7 @@ class TaskOutput(BaseModel):
                 """
             )
         return json.dumps(self.json_dict)
+
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert json_output and pydantic_output to a dictionary."""
@@ -78,53 +69,31 @@ class Task(BaseModel):
 
     __hash__ = object.__hash__
 
-    id: UUID4 = Field(
-        default_factory=uuid.uuid4,
-        frozen=True,
-        description="unique identifier for the object, not set by user",
-    )
+    id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True, description="unique identifier for the object, not set by user")
     name: Optional[str] = Field(default=None)
     description: str = Field(description="Description of the actual task")
 
     # output format & output
     expected_output_raw: bool = Field(default=False)
     expected_output_json: bool = Field(default=True)
-    output_json_field_list: Optional[List[ResponseField]] = Field(
-        default=[
-            ResponseField(title="output", type="str", required=True),
-        ]
-    )
+    output_json_field_list: Optional[List[ResponseField]] = Field(default=[ResponseField(title="output", type="str", required=True),])
     expected_output_pydantic: bool = Field(default=False)
-    output: Optional[TaskOutput] = Field(
-        default=None,
-        description="store the task output aligned with the expected output format",
-    )
+    output: Optional[TaskOutput] = Field(default=None,description="store the task output aligned with the expected output format")
 
     # task setups
-    context: Optional[List["Task"]] = Field(
-        default=None, description="other tasks whose outputs should be used as context"
-    )
-    tools: Optional[List[Tool]] = Field(
-        default_factory=list,
-        description="Tools the agent is limited to use for this task.",
-    )
+    context: Optional[List["Task"]] = Field(default=None, description="other tasks whose outputs should be used as context")
+    tools: Optional[List[Tool]] = Field(default_factory=list,description="Tools the agent is limited to use for this task")
     prompt_context: Optional[str] = None
-    async_execution: bool = Field(
-        default=False,
-        description="Whether the task should be executed asynchronously or not",
-    )
-    config: Optional[Dict[str, Any]] = Field(
-        default=None, description="Configuration for the agent"
-    )
-    callback: Optional[Any] = Field(
-        default=None, description="Callback to be executed after the task is completed."
-    )
+    async_execution: bool = Field(default=False,description="Whether the task should be executed asynchronously or not")
+    config: Optional[Dict[str, Any]] = Field(default=None, description="Configuration for the agent")
+    callback: Optional[Any] = Field(default=None, description="Callback to be executed after the task is completed.")
 
     # recording
     processed_by_agents: Set[str] = Field(default_factory=set)
     used_tools: int = 0
     tools_errors: int = 0
     delegations: int = 0
+
 
     @property
     def output_prompt(self):
@@ -144,33 +113,25 @@ class Task(BaseModel):
             """
         return output_prompt
 
+
     @property
     def expected_output_formats(self) -> List[OutputFormat]:
         outputs = []
         if self.expected_output_json:
             outputs.append(OutputFormat.JSON)
-
         if self.expected_output_pydantic:
             outputs.append(OutputFormat.PYDANTIC)
-
         if self.expected_output_raw:
             outputs.append(OutputFormat.RAW)
-
         return outputs
+
 
     @property
     def key(self) -> str:
-        output_format = (
-            OutputFormat.JSON
-            if self.expected_output_json == True
-            else (
-                OutputFormat.PYDANTIC
-                if self.expected_output_pydantic == True
-                else OutputFormat.RAW
-            )
-        )
+        output_format = OutputFormat.JSON if self.expected_output_json == True else OutputFormat.PYDANTIC if self.expected_output_pydantic == True else OutputFormat.RAW
         source = [self.description, output_format]
         return md5("|".join(source).encode(), usedforsecurity=False).hexdigest()
+
 
     # validators
     @model_validator(mode="before")
@@ -178,35 +139,34 @@ class Task(BaseModel):
     def process_model_config(cls, values):
         return process_config(values, cls)
 
+
     @field_validator("id", mode="before")
     @classmethod
     def _deny_user_set_id(cls, v: Optional[UUID4]) -> None:
         if v:
-            raise PydanticCustomError(
-                "may_not_set_field", "This field is not to be set by the user.", {}
-            )
+            raise PydanticCustomError("may_not_set_field", "This field is not to be set by the user.", {})
+
 
     @model_validator(mode="after")
     def validate_required_fields(self):
-        required_fields = [
-            "description",
-        ]
+        required_fields = ["description",]
         for field in required_fields:
             if getattr(self, field) is None:
-                raise ValueError(
-                    f"{field} must be provided either directly or through config"
-                )
+                raise ValueError(f"{field} must be provided either directly or through config")
         return self
+
 
     @model_validator(mode="after")
     def set_attributes_based_on_config(self) -> "Task":
         """
         Set attributes based on the agent configuration.
         """
+
         if self.config:
             for key, value in self.config.items():
                 setattr(self, key, value)
         return self
+
 
     @model_validator(mode="after")
     def validate_output_format(self):
@@ -249,9 +209,8 @@ class Task(BaseModel):
         ]
         return "\n".join(task_slices)
 
-    def _export_output(
-        self, result: Any
-    ) -> Tuple[Optional[BaseModel], Optional[Dict[str, Any]]]:
+
+    def _export_output(self, result: Any) -> Tuple[Optional[BaseModel], Optional[Dict[str, Any]]]:
         output_pydantic: Optional[BaseModel] = None
         output_json: Optional[Dict[str, Any]] = None
         dict_output = None
@@ -265,7 +224,6 @@ class Task(BaseModel):
                 except:
                     try:
                         import ast
-
                         dict_output = ast.literal_eval(result)
                     except:
                         dict_output = None
@@ -273,27 +231,21 @@ class Task(BaseModel):
         if self.expected_output_json:
             if isinstance(result, dict):
                 output_json = result
-
             elif isinstance(result, BaseModel):
                 output_json = result.model_dump()
-
             else:
                 output_json = dict_output
 
         if self.expected_output_pydantic:
             if isinstance(result, BaseModel):
                 output_pydantic = result
-
             elif isinstance(result, dict):
                 output_json = result
-
             else:
                 output_pydantic = None
 
-        return (
-            output_json,
-            output_pydantic,
-        )
+        return output_json, output_pydantic
+
 
     def _get_output_format(self) -> OutputFormat:
         if self.output_json:
@@ -312,6 +264,7 @@ class Task(BaseModel):
         """Execute the task synchronously."""
         return self._execute_core(agent, context, tools)
 
+
     def execute_async(
         self,
         agent,
@@ -327,6 +280,7 @@ class Task(BaseModel):
         ).start()
         return future
 
+
     def _execute_task_async(
         self,
         agent,
@@ -338,9 +292,8 @@ class Task(BaseModel):
         result = self._execute_core(agent, context, tools)
         future.set_result(result)
 
-    def _execute_core(
-        self, agent, context: Optional[str], tools: Optional[List[Any]]
-    ) -> TaskOutput:
+
+    def _execute_core(self, agent, context: Optional[str], tools: Optional[List[Any]]) -> TaskOutput:
         """
         Run the core execution logic of the task.
         """

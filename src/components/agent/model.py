@@ -125,8 +125,10 @@ class Agent(ABC, BaseModel):
     formatting_errors: int = Field(default=0, description="Number of formatting errors.")
     verbose: bool = Field(default=True, description="Verbose mode for the Agent Execution")
 
+
     def __repr__(self):
         return f"Agent(role={self.role}, goal={self.goal}, backstory={self.backstory})"
+
 
     @model_validator(mode="after")
     def post_init_setup(self):
@@ -136,11 +138,7 @@ class Agent(ABC, BaseModel):
         """
 
         self.agent_ops_agent_name = self.role
-        unaccepted_attributes = [
-            "AWS_ACCESS_KEY_ID",
-            "AWS_SECRET_ACCESS_KEY",
-            "AWS_REGION_NAME",
-        ]
+        unaccepted_attributes = ["AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_REGION_NAME",]
 
         if isinstance(self.llm, LLM):
             pass
@@ -149,13 +147,9 @@ class Agent(ABC, BaseModel):
             self.llm = LLM(model=self.llm)
 
         elif self.llm is None:
-            model_name = os.environ.get(
-                "LITELLM_MODEL_NAME", os.environ.get("MODEL", "gpt-4o-mini")
-            )
+            model_name = os.environ.get("LITELLM_MODEL_NAME", os.environ.get("MODEL", "gpt-4o-mini"))
             llm_params = {"model": model_name}
-            api_base = os.environ.get(
-                "OPENAI_API_BASE", os.environ.get("OPENAI_BASE_URL", None)
-            )
+            api_base = os.environ.get("OPENAI_API_BASE", os.environ.get("OPENAI_BASE_URL", None))
             if api_base:
                 llm_params["base_url"] = api_base
 
@@ -168,17 +162,9 @@ class Agent(ABC, BaseModel):
                         if key_name and key_name not in unaccepted_attributes:
                             env_value = os.environ.get(key_name)
                             if env_value:
-                                key_name = (
-                                    "api_key" if "API_KEY" in key_name else key_name
-                                )
-                                key_name = (
-                                    "api_base" if "API_BASE" in key_name else key_name
-                                )
-                                key_name = (
-                                    "api_version"
-                                    if "API_VERSION" in key_name
-                                    else key_name
-                                )
+                                key_name = ("api_key" if "API_KEY" in key_name else key_name)
+                                key_name = ("api_base" if "API_BASE" in key_name else key_name)
+                                key_name = ("api_version" if "API_VERSION" in key_name else key_name)
                                 llm_params[key_name] = env_value
                         elif env_var.get("default", False):
                             for key, value in env_var.items():
@@ -201,9 +187,7 @@ class Agent(ABC, BaseModel):
                 "base_url": getattr(self.llm, "base_url", None),
                 "organization": getattr(self.llm, "organization", None),
             }
-            llm_params = {
-                k: v for k, v in llm_params.items() if v is not None
-            }  # factor out None values
+            llm_params = { k: v for k, v in llm_params.items() if v is not None }  # factor out None values
             self.llm = LLM(**llm_params)
 
         if self.function_calling_llm:
@@ -219,13 +203,8 @@ class Agent(ABC, BaseModel):
 
         return self
 
-    def invoke(
-        self,
-        prompts: str,
-        output_formats: List[OutputFormat],
-        response_fields=List[ResponseField],
-        **kwargs,
-    ) -> Dict[str, Any]:
+
+    def invoke(self, prompts: str, output_formats: List[OutputFormat], response_fields=List[ResponseField], **kwargs) -> Dict[str, Any]:
         """
         Receive the system prompt in string and create formatted prompts using the system prompt and the agent's backstory.
         Then call the base model.
@@ -237,19 +216,11 @@ class Agent(ABC, BaseModel):
         print("Messages sent to the model:", messages)
 
         callbacks = kwargs.get("callbacks", None)
-
-        response = self.llm.call(
-            messages=messages,
-            output_formats=output_formats,
-            field_list=response_fields,
-            callbacks=callbacks,
-        )
+        response = self.llm.call( messages=messages, output_formats=output_formats, field_list=response_fields, callbacks=callbacks)
         print("Agent's answer", response)
 
         if response is None or response == "":
-            Printer.print(
-                content="Received None or empty response from LLM call.", color="red"
-            )
+            Printer.print(content="Received None or empty response from LLM call.", color="red")
             raise ValueError("Invalid response from LLM call - None or empty.")
 
         return {"output": response.output if hasattr(response, "output") else response}
