@@ -24,6 +24,7 @@ dependencies = [
   "composio_core",
   "composio_openai",
   "composio-langchain>=0.5.51",
+  "gunicorn>=23.0.0",
 ]
 
 [build-system]

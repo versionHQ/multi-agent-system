@@ -8,6 +8,7 @@ tool/
 
 
 __pycache__/
+.ruff_cache/
 .DS_Store/
 .DS_Store
 .vscode

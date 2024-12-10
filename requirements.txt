@@ -21,3 +21,5 @@ flask
 flask_cors
 waitress
 pre-commit
+
+gunicorn
