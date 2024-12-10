@@ -1,7 +1,9 @@
 import threading
 import time
 from typing import Optional
+
 from pydantic import BaseModel, Field, PrivateAttr, model_validator
+
 from components._utils.logger import Logger
 
 
@@ -13,7 +15,6 @@ class RPMController(BaseModel):
     _lock: Optional[threading.Lock] = PrivateAttr(default=None)
     _shutdown_flag: bool = PrivateAttr(default=False)
 
-
     @model_validator(mode="after")
     def reset_counter(self):
         if self.max_rpm is not None:
@@ -22,7 +23,6 @@ class RPMController(BaseModel):
                 self._reset_request_count()
         return self
 
-    
     def check_or_wait(self):
         if self.max_rpm is None:
             return True

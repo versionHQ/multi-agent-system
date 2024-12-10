@@ -7,11 +7,18 @@ class UsageMetrics(BaseModel):
     """
 
     total_tokens: int = Field(default=0, description="Total number of tokens used")
-    prompt_tokens: int = Field(default=0, description="Number of tokens used in prompts")
-    cached_prompt_tokens: int = Field(default=0, description="Number of cached prompt tokens used")
-    completion_tokens: int = Field(default=0, description="Number of tokens used in completions")
-    successful_requests: int = Field(default=0, description="Number of successful requests made")
-
+    prompt_tokens: int = Field(
+        default=0, description="Number of tokens used in prompts"
+    )
+    cached_prompt_tokens: int = Field(
+        default=0, description="Number of cached prompt tokens used"
+    )
+    completion_tokens: int = Field(
+        default=0, description="Number of tokens used in completions"
+    )
+    successful_requests: int = Field(
+        default=0, description="Number of successful requests made"
+    )
 
     def add_usage_metrics(self, usage_metrics: "UsageMetrics"):
         """

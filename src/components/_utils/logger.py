@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import Optional
+
 from pydantic import BaseModel, Field, PrivateAttr
 
 
@@ -42,7 +43,6 @@ class Printer:
 
     def _print_bold_yellow(self, content):
         print("\033[1m\033[93m {}\033[00m".format(content))
-
 
 
 class Logger(BaseModel):

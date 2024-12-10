@@ -1,25 +1,21 @@
 import os
 import uuid
-from abc import ABC, abstractmethod
-from copy import copy as shallow_copy
-from hashlib import md5
-from typing import Any, Dict, List, Literal, Optional, TypeVar, Optional, Union
-from pydantic import UUID4, BaseModel, Field, InstanceOf, PrivateAttr, model_validator
-from pydantic_core import PydanticCustomError
-from dotenv import load_dotenv
+from abc import ABC
+from typing import Any, Dict, List, Optional, TypeVar, Union
 
+from dotenv import load_dotenv
+from pydantic import UUID4, BaseModel, Field, InstanceOf, PrivateAttr, model_validator
+
+from components._utils.cache_handler import CacheHandler
+from components._utils.logger import Logger, Printer
+from components._utils.rpm_controller import RPMController
+from components._utils.usage_metrics import UsageMetrics
+from components.llm.llm_vars import LLM_VARS
+from components.llm.model import LLM
 from components.task import OutputFormat
 from components.task.model import ResponseField
 from components.tool.model import Tool
 from components.tool.tool_handler import ToolsHandler
-from components.llm.model import LLM
-from components.llm.llm_vars import LLM_VARS
-from components._utils.logger import Logger, Printer
-from components._utils.i18n import I18N
-from components._utils.rpm_controller import RPMController
-from components._utils.usage_metrics import UsageMetrics
-from components._utils.cache_handler import CacheHandler
-
 
 load_dotenv(override=True)
 T = TypeVar("T", bound="Agent")
@@ -77,7 +73,6 @@ class TokenProcess:
         )
 
 
-
 # @track_agent()
 class Agent(ABC, BaseModel):
     """
@@ -93,7 +88,6 @@ class Agent(ABC, BaseModel):
     _token_process: TokenProcess = PrivateAttr(default_factory=TokenProcess)
     _times_executed: int = PrivateAttr(default=0)
 
-
     id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True)
     # i18n: I18N = Field(default=I18N(), description="Internationalization settings.")
     agent_ops_agent_name: str = None
@@ -102,60 +96,114 @@ class Agent(ABC, BaseModel):
     goal: str = Field(description="goal of the agent")
     backstory: str = Field(description="Backstory of the agent")
     # tools: Optional[List[Any]] = Field(default_factory=list, description="Tools at agents' disposal")
-    tools_handler: InstanceOf[ToolsHandler] = Field(default=None, description="An instance of the ToolsHandler class.")
+    tools_handler: InstanceOf[ToolsHandler] = Field(
+        default=None, description="An instance of the ToolsHandler class."
+    )
     # tools_results: Optional[List[Any]] = Field(default=[], description="Results of the tools used by the agent.")
-    team: Optional[List[Any]] = Field(default=None, description="Team to which the agent belongs.")
-    allow_delegation: bool = Field(default=False, description="Enable agent to delegate and ask questions among each other")
+    team: Optional[List[Any]] = Field(
+        default=None, description="Team to which the agent belongs."
+    )
+    allow_delegation: bool = Field(
+        default=False,
+        description="Enable agent to delegate and ask questions among each other",
+    )
     agent_executor: InstanceOf = Field(default=None)
-    allow_code_execution: Optional[bool] = Field(default=False, description="Enable code execution for the agent.")
+    allow_code_execution: Optional[bool] = Field(
+        default=False, description="Enable code execution for the agent."
+    )
 
     # llm settings
     llm: Union[str, InstanceOf[LLM], Any] = Field(default=None)
-    respect_context_window: bool = Field(default=True, description="Keep messages under the context window size by summarizing content")
-    max_retry_limit: int = Field(default=2, description="Maximum number of retries for an agent to execute a task when an error occurs")
-    max_tokens: Optional[int] = Field(default=None, description="Maximum number of tokens for the agent's execution" )
-    max_execution_time: Optional[int] = Field(default=None, description="Maximum execution time for an agent to execute a task")
-    max_rpm: Optional[int] = Field(default=None, description="Maximum number of requests per minute for the agent execution to be respect")
-    max_iter: Optional[int] = Field(default=25, description="Maximum iterations for an agent to execute a task" )
-    step_callback: Optional[Any] = Field(default=None, description="Callback to be executed after each step of the agent execution")
-    use_system_prompt: Optional[bool] = Field(default=True, description="Use system prompt for the agent")
-    function_calling_llm: Optional[Any] = Field(default=None, description="Language model that will run the agent")
-    system_template: Optional[str] = Field(default=None, description="System format for the agent.")
-    prompt_template: Optional[str] = Field(default=None, description="Prompt format for the agent.")
-    response_template: Optional[str] = Field(default=None, description="Response format for the agent.")
+    respect_context_window: bool = Field(
+        default=True,
+        description="Keep messages under the context window size by summarizing content",
+    )
+    max_retry_limit: int = Field(
+        default=2,
+        description="Maximum number of retries for an agent to execute a task when an error occurs",
+    )
+    max_tokens: Optional[int] = Field(
+        default=None, description="Maximum number of tokens for the agent's execution"
+    )
+    max_execution_time: Optional[int] = Field(
+        default=None,
+        description="Maximum execution time for an agent to execute a task",
+    )
+    max_rpm: Optional[int] = Field(
+        default=None,
+        description="Maximum number of requests per minute for the agent execution to be respect",
+    )
+    max_iter: Optional[int] = Field(
+        default=25, description="Maximum iterations for an agent to execute a task"
+    )
+    step_callback: Optional[Any] = Field(
+        default=None,
+        description="Callback to be executed after each step of the agent execution",
+    )
+    use_system_prompt: Optional[bool] = Field(
+        default=True, description="Use system prompt for the agent"
+    )
+    function_calling_llm: Optional[Any] = Field(
+        default=None, description="Language model that will run the agent"
+    )
+    system_template: Optional[str] = Field(
+        default=None, description="System format for the agent."
+    )
+    prompt_template: Optional[str] = Field(
+        default=None, description="Prompt format for the agent."
+    )
+    response_template: Optional[str] = Field(
+        default=None, description="Response format for the agent."
+    )
 
     # config, cache, error handling
-    config: Optional[Dict[str, Any]] = Field(default=None, exclude=True, description="Configuration for the agent")
-    cache: bool = Field(default=True, description="Whether the agent should use a cache for tool usage.")
-    cache_handler: InstanceOf[CacheHandler] = Field(default=None, description="An instance of the CacheHandler class.")
-    formatting_errors: int = Field(default=0, description="Number of formatting errors.")
-    verbose: bool = Field(default=True, description="Verbose mode for the Agent Execution")
-
+    config: Optional[Dict[str, Any]] = Field(
+        default=None, exclude=True, description="Configuration for the agent"
+    )
+    cache: bool = Field(
+        default=True, description="Whether the agent should use a cache for tool usage."
+    )
+    cache_handler: InstanceOf[CacheHandler] = Field(
+        default=None, description="An instance of the CacheHandler class."
+    )
+    formatting_errors: int = Field(
+        default=0, description="Number of formatting errors."
+    )
+    verbose: bool = Field(
+        default=True, description="Verbose mode for the Agent Execution"
+    )
 
     def __repr__(self):
         return f"Agent(role={self.role}, goal={self.goal}, backstory={self.backstory})"
-        
 
     @model_validator(mode="after")
     def post_init_setup(self):
         """
-        Set up the base model and function calling model (if any) using the LLM class. 
+        Set up the base model and function calling model (if any) using the LLM class.
         The base model is passed from the client app, else use the default model.
         """
 
         self.agent_ops_agent_name = self.role
-        unaccepted_attributes = ["AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_REGION_NAME"]
+        unaccepted_attributes = [
+            "AWS_ACCESS_KEY_ID",
+            "AWS_SECRET_ACCESS_KEY",
+            "AWS_REGION_NAME",
+        ]
 
         if isinstance(self.llm, LLM):
             pass
 
         elif isinstance(self.llm, str):
             self.llm = LLM(model=self.llm)
-        
+
         elif self.llm is None:
-            model_name = os.environ.get("LITELLM_MODEL_NAME", os.environ.get("MODEL", "gpt-4o-mini"))
+            model_name = os.environ.get(
+                "LITELLM_MODEL_NAME", os.environ.get("MODEL", "gpt-4o-mini")
+            )
             llm_params = {"model": model_name}
-            api_base = os.environ.get("OPENAI_API_BASE", os.environ.get("OPENAI_BASE_URL", None))
+            api_base = os.environ.get(
+                "OPENAI_API_BASE", os.environ.get("OPENAI_BASE_URL", None)
+            )
             if api_base:
                 llm_params["base_url"] = api_base
 
@@ -168,9 +216,17 @@ class Agent(ABC, BaseModel):
                         if key_name and key_name not in unaccepted_attributes:
                             env_value = os.environ.get(key_name)
                             if env_value:
-                                key_name = ("api_key" if "API_KEY" in key_name else key_name)
-                                key_name = ("api_base" if "API_BASE" in key_name else key_name)
-                                key_name = ("api_version" if "API_VERSION" in key_name else key_name)
+                                key_name = (
+                                    "api_key" if "API_KEY" in key_name else key_name
+                                )
+                                key_name = (
+                                    "api_base" if "API_BASE" in key_name else key_name
+                                )
+                                key_name = (
+                                    "api_version"
+                                    if "API_VERSION" in key_name
+                                    else key_name
+                                )
                                 llm_params[key_name] = env_value
                         elif env_var.get("default", False):
                             for key, value in env_var.items():
@@ -181,7 +237,9 @@ class Agent(ABC, BaseModel):
 
         else:
             llm_params = {
-                "model": getattr(self.llm, "model_name", None) or getattr(self.llm, "deployment_name", None) or str(self.llm),
+                "model": getattr(self.llm, "model_name", None)
+                or getattr(self.llm, "deployment_name", None)
+                or str(self.llm),
                 "temperature": getattr(self.llm, "temperature", None),
                 "max_tokens": getattr(self.llm, "max_tokens", None),
                 "logprobs": getattr(self.llm, "logprobs", None),
@@ -191,7 +249,9 @@ class Agent(ABC, BaseModel):
                 "base_url": getattr(self.llm, "base_url", None),
                 "organization": getattr(self.llm, "organization", None),
             }
-            llm_params = { k: v for k, v in llm_params.items() if v is not None } # factor out None values
+            llm_params = {
+                k: v for k, v in llm_params.items() if v is not None
+            }  # factor out None values
             self.llm = LLM(**llm_params)
 
         if self.function_calling_llm:
@@ -207,52 +267,58 @@ class Agent(ABC, BaseModel):
 
         return self
 
-
     def invoke(
-            self, 
-            prompts: str, 
-            output_formats: List[OutputFormat], 
-            response_fields=List[ResponseField],
-            **kwargs
-        ) -> Dict[str, Any]:
+        self,
+        prompts: str,
+        output_formats: List[OutputFormat],
+        response_fields=List[ResponseField],
+        **kwargs,
+    ) -> Dict[str, Any]:
         """
         Receive the system prompt in string and create formatted prompts using the system prompt and the agent's backstory.
         Then call the base model.
         """
 
         messages = []
-        messages.append({ "role": "user", "content": prompts }) #! REFINEME
-        messages.append({ "role": "assistant", "content": self.backstory })
+        messages.append({"role": "user", "content": prompts})  #! REFINEME
+        messages.append({"role": "assistant", "content": self.backstory})
         print("Messages sent to the model:", messages)
-        
+
         callbacks = kwargs.get("callbacks", None)
 
-        response = self.llm.call(messages=messages, output_formats=output_formats, field_list=response_fields, callbacks=callbacks)
+        response = self.llm.call(
+            messages=messages,
+            output_formats=output_formats,
+            field_list=response_fields,
+            callbacks=callbacks,
+        )
         print("Agent's answer", response)
-        
+
         if response is None or response == "":
-            Printer.print(content="Received None or empty response from LLM call.", color="red")
+            Printer.print(
+                content="Received None or empty response from LLM call.", color="red"
+            )
             raise ValueError("Invalid response from LLM call - None or empty.")
 
-        return { "output": response.output if hasattr(response, "output") else response }
-    
+        return {"output": response.output if hasattr(response, "output") else response}
 
-
-    def execute_task(self, task, context: Optional[str] = None, tools: Optional[List[Tool]] = []) -> str:
+    def execute_task(
+        self, task, context: Optional[str] = None, tools: Optional[List[Tool]] = []
+    ) -> str:
         """
         Let the agent execute the task and return the output in string.
-        When the tool/s are given, the agent must use them. 
+        When the tool/s are given, the agent must use them.
         The agent must consider the context to excute the task as well when it is given.
         """
 
         if self.tools_handler:
             self.tools_handler.last_used_tool = {}
 
-        task_prompt = task.prompt() # return description + exepected output in string
+        task_prompt = task.prompt()  # return description + exepected output in string
 
         # if context:
         #     task_prompt = self.i18n.slice("task_with_context").format(task=task_prompt, context=context)
-      
+
         # tools = tools or self.tools or []
         # self.create_agent_executor(tools=tools, task=task)
 
@@ -265,9 +331,9 @@ class Agent(ABC, BaseModel):
             result = self.invoke(
                 prompts=task_prompt,
                 output_formats=task.expected_output_formats,
-                response_fields=task.output_json_field_list
+                response_fields=task.output_json_field_list,
             )["output"]
-            
+
         except Exception as e:
             self._times_executed += 1
             if self._times_executed > self.max_retry_limit:
@@ -276,11 +342,9 @@ class Agent(ABC, BaseModel):
 
         if self.max_rpm and self._rpm_controller:
             self._rpm_controller.stop_rpm_counter()
- 
+
         # for tool_result in self.tools_results:
         #     if tool_result.get("result_as_answer", False):
         #         result = tool_result["result"]
 
         return result
-
-

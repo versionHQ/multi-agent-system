@@ -1,14 +1,19 @@
 from typing import Any, Dict, Type
+
 from pydantic import BaseModel
 
 
-def process_config(values_to_update: Dict[str, Any], model_class: Type[BaseModel]) -> Dict[str, Any]:
+def process_config(
+    values_to_update: Dict[str, Any], model_class: Type[BaseModel]
+) -> Dict[str, Any]:
     """
     Process the config dictionary and update the values accordingly.
     Refer to the Pydantic model class for field validation.
     """
 
-    config = values_to_update.pop("config", {}) # to avoid duplicated operation, pop the config 
+    config = values_to_update.pop(
+        "config", {}
+    )  # to avoid duplicated operation, pop the config
     if not config:
         return values_to_update
 
@@ -21,5 +26,5 @@ def process_config(values_to_update: Dict[str, Any], model_class: Type[BaseModel
             values_to_update[key].update(value)
         else:
             values_to_update[key] = value
-    
+
     return values_to_update

@@ -1,14 +1,16 @@
 import json
 import os
 from typing import Dict, Optional
+
 from pydantic import BaseModel, Field, PrivateAttr, model_validator
 
 
 class I18N(BaseModel):
     _prompts: Dict[str, Dict[str, str]] = PrivateAttr()
-    prompt_file: Optional[str] = Field(default=None, description="Path to the prompt_file file to load")
+    prompt_file: Optional[str] = Field(
+        default=None, description="Path to the prompt_file file to load"
+    )
 
-    
     @model_validator(mode="after")
     def load_prompts(self) -> "I18N":
         """Load prompts from a JSON file."""
