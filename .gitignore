@@ -1,10 +1,16 @@
 project/
-app.py
+
 app copy.py
-src/
+main.py
+
+team/
+tool/
+
 
 __pycache__/
 .DS_Store/
+.DS_Store
+.vscode
 .env
 .venv/
 uploads/

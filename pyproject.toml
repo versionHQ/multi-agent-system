@@ -22,7 +22,8 @@ dependencies = [
   "openai",
   "langchain_openai",
   "composio_core",
-  "composio_openai"
+  "composio_openai",
+  "composio-langchain>=0.5.51",
 ]
 
 [build-system]
@@ -30,7 +31,7 @@ requires = ["hatchling", "hatch-build-scripts"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = [{include = "src"}]
+packages = ["src"]
 
 
 [tool.black]

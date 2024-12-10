@@ -2,9 +2,9 @@
 
 An open-source, multi-agent RAG system that designs, generates, and autopilots messaging workflow.
 
-The workflow is at individual level, and we will deploy it on third-party service destinations using composio.
-
 RAG agents are model agnostic.
+
+The workflow is created at individual level, and we will deploy it on third-party service destinations.
 
 - [Playground (beta)](https://versi0n.io/)
 - [Landing page](https://home.versi0n.io)
@@ -13,11 +13,11 @@ RAG agents are model agnostic.
 
 ## Mindmap
 
+LLM-powered RAG `agent` and `team` use `tool` and their own knowledge to complete the `task` given by the client or the system.
+
 <p align="center">
    <img src="https://res.cloudinary.com/dfeirxlea/image/upload/v1733556715/pj_m_home/urwte15at3h0dr8mdlyo.png" alt="mindmap" width="1000">
 </p>
-
-LLM-powered RAG `agent` and `team` use `tool` and their own knowledge to complete the `task` given by the client or the system.
 
 
 ## UI
@@ -30,14 +30,17 @@ LLM-powered RAG `agent` and `team` use `tool` and their own knowledge to complet
 
 <p align="center">
    <img alt="UI1" src="https://res.cloudinary.com/dfeirxlea/image/upload/v1732801909/pj_m_home/ibi8b1ohv2sioqdkoq7n.png" width="45%">
-   &nbsp; &nbsp; &nbsp; &nbsp;
+   &nbsp; &nbsp;
    <img alt="UI2" src="https://res.cloudinary.com/dfeirxlea/image/upload/v1733414200/pj_m_home/tqgg3xfpk5x4i6rh3egv.png" width="45%">
 </p>
 
 
+<hr />
 
+**Table of Content**
 <!-- START doctoc -->
 <!-- END doctoc -->
+
 
 ## Key Features
 

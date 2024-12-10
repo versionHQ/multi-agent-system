@@ -15,6 +15,7 @@ openai
 langchain_openai
 composio_core
 composio_openai
+composio-langchain
 
 flask
 flask_cors
