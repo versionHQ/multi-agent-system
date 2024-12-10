@@ -96,82 +96,34 @@ class Agent(ABC, BaseModel):
     goal: str = Field(description="goal of the agent")
     backstory: str = Field(description="Backstory of the agent")
     # tools: Optional[List[Any]] = Field(default_factory=list, description="Tools at agents' disposal")
-    tools_handler: InstanceOf[ToolsHandler] = Field(
-        default=None, description="An instance of the ToolsHandler class."
-    )
+    tools_handler: InstanceOf[ToolsHandler] = Field(default=None, description="An instance of the ToolsHandler class")
     # tools_results: Optional[List[Any]] = Field(default=[], description="Results of the tools used by the agent.")
-    team: Optional[List[Any]] = Field(
-        default=None, description="Team to which the agent belongs."
-    )
-    allow_delegation: bool = Field(
-        default=False,
-        description="Enable agent to delegate and ask questions among each other",
-    )
+    team: Optional[List[Any]] = Field(default=None, description="Team to which the agent belongs")
+    allow_delegation: bool = Field(default=False, description="Enable agent to delegate and ask questions among each other")
     agent_executor: InstanceOf = Field(default=None)
-    allow_code_execution: Optional[bool] = Field(
-        default=False, description="Enable code execution for the agent."
-    )
+    allow_code_execution: Optional[bool] = Field(default=False, description="Enable code execution for the agent.")
 
     # llm settings
     llm: Union[str, InstanceOf[LLM], Any] = Field(default=None)
-    respect_context_window: bool = Field(
-        default=True,
-        description="Keep messages under the context window size by summarizing content",
-    )
-    max_retry_limit: int = Field(
-        default=2,
-        description="Maximum number of retries for an agent to execute a task when an error occurs",
-    )
-    max_tokens: Optional[int] = Field(
-        default=None, description="Maximum number of tokens for the agent's execution"
-    )
-    max_execution_time: Optional[int] = Field(
-        default=None,
-        description="Maximum execution time for an agent to execute a task",
-    )
-    max_rpm: Optional[int] = Field(
-        default=None,
-        description="Maximum number of requests per minute for the agent execution to be respect",
-    )
-    max_iter: Optional[int] = Field(
-        default=25, description="Maximum iterations for an agent to execute a task"
-    )
-    step_callback: Optional[Any] = Field(
-        default=None,
-        description="Callback to be executed after each step of the agent execution",
-    )
-    use_system_prompt: Optional[bool] = Field(
-        default=True, description="Use system prompt for the agent"
-    )
-    function_calling_llm: Optional[Any] = Field(
-        default=None, description="Language model that will run the agent"
-    )
-    system_template: Optional[str] = Field(
-        default=None, description="System format for the agent."
-    )
-    prompt_template: Optional[str] = Field(
-        default=None, description="Prompt format for the agent."
-    )
-    response_template: Optional[str] = Field(
-        default=None, description="Response format for the agent."
-    )
+    respect_context_window: bool = Field(default=True, description="Keep messages under the context window size by summarizing content")
+    max_retry_limit: int = Field(default=2, description="max. number of retries for an agent to execute a task when an error occurs")
+    max_tokens: Optional[int] = Field(default=None, description="max. number of tokens for the agent's execution")
+    max_execution_time: Optional[int] = Field(default=None, description="max. execution time for an agent to execute a task")
+    max_rpm: Optional[int] = Field(default=None, description="max. number of requests per minute for the agent execution")
+    max_iter: Optional[int] = Field(default=25, description="max. number of iterations for an agent to execute a task")
+    step_callback: Optional[Any] = Field(default=None, description="Callback to be executed after each step of the agent execution")
+    use_system_prompt: Optional[bool] = Field(default=True, description="Use system prompt for the agent")
+    function_calling_llm: Optional[Any] = Field(default=None, description="Language model that will run the agent")
+    system_template: Optional[str] = Field(default=None, description="System format for the agent.")
+    prompt_template: Optional[str] = Field(default=None, description="Prompt format for the agent.")
+    response_template: Optional[str] = Field(default=None, description="Response format for the agent.")
 
     # config, cache, error handling
-    config: Optional[Dict[str, Any]] = Field(
-        default=None, exclude=True, description="Configuration for the agent"
-    )
-    cache: bool = Field(
-        default=True, description="Whether the agent should use a cache for tool usage."
-    )
-    cache_handler: InstanceOf[CacheHandler] = Field(
-        default=None, description="An instance of the CacheHandler class."
-    )
-    formatting_errors: int = Field(
-        default=0, description="Number of formatting errors."
-    )
-    verbose: bool = Field(
-        default=True, description="Verbose mode for the Agent Execution"
-    )
+    config: Optional[Dict[str, Any]] = Field(default=None, exclude=True, description="Configuration for the agent")
+    cache: bool = Field(default=True, description="Whether the agent should use a cache for tool usage.")
+    cache_handler: InstanceOf[CacheHandler] = Field(default=None, description="An instance of the CacheHandler class.")
+    formatting_errors: int = Field(default=0, description="Number of formatting errors.")
+    verbose: bool = Field(default=True, description="Verbose mode for the Agent Execution")
 
     def __repr__(self):
         return f"Agent(role={self.role}, goal={self.goal}, backstory={self.backstory})"
