@@ -1,10 +1,11 @@
 # Overview
 
-An open-source, multi-agent RAG system that designs, generates, and autopilots messaging workflow.
+A framework for orchestration and multi-agent system that designs, generates, and autopilots messaging workflow.
 
-RAG agents are model agnostic.
+Agents are model agnostic.
 
-The workflow is created at individual level, and we will deploy it on third-party service destinations.
+Messaging workflows are created at individual user level, and will be deployed on third-party services.
+
 
 - [Playground (beta)](https://versi0n.io/)
 - [Landing page](https://home.versi0n.io)
@@ -22,9 +23,14 @@ LLM-powered RAG `agent` and `team` use `tool` and their own knowledge to complet
 
 ## UI
 <p align="center">
-   <img src="https://res.cloudinary.com/dfeirxlea/image/upload/v1728219760/pj_m_home/wkxvmmyah5dvhbdah1qn.png" alt="version logo" width="200">
-   &nbsp; &nbsp; &nbsp; &nbsp;
-   <img src="https://res.cloudinary.com/dfeirxlea/image/upload/v1728302420/pj_m_home/xy58a7imyquuvkgukqxt.png" width="30%" alt="messaging workflow">
+   <!-- <img src="https://res.cloudinary.com/dfeirxlea/image/upload/v1728219760/pj_m_home/wkxvmmyah5dvhbdah1qn.png" alt="version logo" width="200">
+   &nbsp; &nbsp; &nbsp; &nbsp; -->
+   <img src="https://res.cloudinary.com/dfeirxlea/image/upload/v1728302420/pj_m_home/xy58a7imyquuvkgukqxt.png" width="30%" alt="messaging workflow" />
+
+   <p>
+   - Build a messaging workflow at individual level
+   - Autopilot and track the performance.
+   </p>
 </p>
 
 
@@ -38,9 +44,28 @@ LLM-powered RAG `agent` and `team` use `tool` and their own knowledge to complet
 <hr />
 
 **Table of Content**
-<!-- START doctoc -->
-<!-- END doctoc -->
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
+- [Key Features](#key-features)
+- [Technologies Used](#technologies-used)
+- [Project Structure](#project-structure)
+- [Setup](#setup)
+- [Usage](#usage)
+- [Development](#development)
+  - [Package Management with uv](#package-management-with-uv)
+  - [Pre-commit Hooks](#pre-commit-hooks)
+  - [Customizing AI Agents](#customizing-ai-agents)
+  - [Modifying RAG Functionality](#modifying-rag-functionality)
+- [Contributing](#contributing)
+  - [To Do](#to-do)
+- [Troubleshooting](#troubleshooting)
+- [Frequently Asked Questions (FAQ)](#frequently-asked-questions-faq)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
+
+<hr />
 
 ## Key Features
 

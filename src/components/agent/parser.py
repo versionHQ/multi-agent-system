@@ -1,9 +1,9 @@
 import re
 from typing import Any, Union
-
 from json_repair import repair_json
 
 from components._utils.i18n import I18N
+
 
 FINAL_ANSWER_ACTION = "Final Answer:"
 MISSING_ACTION_AFTER_THOUGHT_ERROR_MESSAGE = "I did it wrong. Invalid Format: I missed the 'Action:' after 'Thought:'. I will do right next, and don't use a tool I have already used.\n"
@@ -44,7 +44,8 @@ class OutputParserException(Exception):
 
 
 class AgentParser:
-    """Parses ReAct-style LLM calls that have a single tool input.
+    """
+    Parses ReAct-style LLM calls that have a single tool input.
 
     Expects output to be in one of two formats.
 
@@ -73,15 +74,11 @@ class AgentParser:
     def parse(self, text: str) -> Union[AgentAction, AgentFinish]:
         thought = self._extract_thought(text)
         includes_answer = FINAL_ANSWER_ACTION in text
-        regex = (
-            r"Action\s*\d*\s*:[\s]*(.*?)[\s]*Action\s*\d*\s*Input\s*\d*\s*:[\s]*(.*)"
-        )
+        regex = r"Action\s*\d*\s*:[\s]*(.*?)[\s]*Action\s*\d*\s*Input\s*\d*\s*:[\s]*(.*)"
         action_match = re.search(regex, text, re.DOTALL)
         if action_match:
             if includes_answer:
-                raise OutputParserException(
-                    f"{FINAL_ANSWER_AND_PARSABLE_ACTION_ERROR_MESSAGE}"
-                )
+                raise OutputParserException(f"{FINAL_ANSWER_AND_PARSABLE_ACTION_ERROR_MESSAGE}")
             action = action_match.group(1)
             clean_action = self._clean_action(action)
 
@@ -112,9 +109,8 @@ class AgentParser:
             format = self._i18n.slice("format_without_tools")
             error = f"{format}"
             # self.agent.increment_formatting_errors()
-            raise OutputParserException(
-                error,
-            )
+            raise OutputParserException(error)
+        
 
     def _extract_thought(self, text: str) -> str:
         regex = r"(.*?)(?:\n\nAction|\n\nFinal Answer)"

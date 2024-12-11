@@ -2,7 +2,6 @@ import os
 import uuid
 from abc import ABC
 from typing import Any, Dict, List, Optional, TypeVar, Union
-
 from dotenv import load_dotenv
 from pydantic import UUID4, BaseModel, Field, InstanceOf, PrivateAttr, model_validator
 
@@ -12,7 +11,7 @@ from components._utils.rpm_controller import RPMController
 from components._utils.usage_metrics import UsageMetrics
 from components.llm.llm_vars import LLM_VARS
 from components.llm.model import LLM
-from components.task import OutputFormat
+from components.task import TaskOutputFormat
 from components.task.model import ResponseField
 from components.tool.model import Tool
 from components.tool.tool_handler import ToolsHandler
@@ -204,7 +203,13 @@ class Agent(ABC, BaseModel):
         return self
 
 
-    def invoke(self, prompts: str, output_formats: List[OutputFormat], response_fields=List[ResponseField], **kwargs) -> Dict[str, Any]:
+    def invoke(
+            self,
+            prompts: str,
+            output_formats: List[TaskOutputFormat],
+            response_fields=List[ResponseField],
+            **kwargs
+        ) -> Dict[str, Any]:
         """
         Receive the system prompt in string and create formatted prompts using the system prompt and the agent's backstory.
         Then call the base model.
@@ -216,7 +221,7 @@ class Agent(ABC, BaseModel):
         print("Messages sent to the model:", messages)
 
         callbacks = kwargs.get("callbacks", None)
-        response = self.llm.call( messages=messages, output_formats=output_formats, field_list=response_fields, callbacks=callbacks)
+        response = self.llm.call(messages=messages, output_formats=output_formats, field_list=response_fields, callbacks=callbacks)
         print("Agent's answer", response)
 
         if response is None or response == "":
@@ -225,11 +230,10 @@ class Agent(ABC, BaseModel):
 
         return {"output": response.output if hasattr(response, "output") else response}
 
-    def execute_task(
-        self, task, context: Optional[str] = None, tools: Optional[List[Tool]] = []
-    ) -> str:
+
+    def execute_task(self, task, context: Optional[str] = None, tools: Optional[List[Tool]] = []) -> str:
         """
-        Let the agent execute the task and return the output in string.
+        Execute the task and return the output in string.
         When the tool/s are given, the agent must use them.
         The agent must consider the context to excute the task as well when it is given.
         """
@@ -254,7 +258,7 @@ class Agent(ABC, BaseModel):
             result = self.invoke(
                 prompts=task_prompt,
                 output_formats=task.expected_output_formats,
-                response_fields=task.output_json_field_list,
+                response_fields=task.output_field_list,
             )["output"]
 
         except Exception as e:

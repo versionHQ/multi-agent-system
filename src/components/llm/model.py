@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 from litellm import get_supported_openai_params
 
 from components.llm.llm_vars import LLM_CONTEXT_WINDOW_SIZES
-from components.task import OutputFormat
+from components.task import TaskOutputFormat
 from components.task.model import ResponseField
 
 load_dotenv(override=True)
@@ -137,7 +137,7 @@ class LLM:
 
     def call(
         self,
-        output_formats: List[OutputFormat],
+        output_formats: List[TaskOutputFormat],
         field_list: Optional[List[ResponseField]],
         messages: List[Dict[str, str]],
         callbacks: List[Any] = [],
@@ -151,7 +151,7 @@ class LLM:
                 response_format = None
 
                 #! REFINEME
-                if OutputFormat.JSON in output_formats:
+                if TaskOutputFormat.JSON in output_formats:
                     response_format = LLMResponseSchema(response_type="json_object", field_list=field_list)
 
                 params = {
