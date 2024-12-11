@@ -1,20 +1,23 @@
 # Overview
 
-A framework for orchestration and multi-agent system that designs, generates, and autopilots messaging workflow.
+A framework for orchestration and multi-agent system that design, deploy, and autopilot messaging workflows based on performance.
 
 Agents are model agnostic.
 
-Messaging workflows are created at individual user level, and will be deployed on third-party services.
+Messaging workflows are created at individual level, and will be deployed on third-party services via `Composio`.
 
 
-- [Playground (beta)](https://versi0n.io/)
+Visit:
+
+- [Client interface (beta)](https://versi0n.io/)
 - [Landing page](https://home.versi0n.io)
-- [Frontend repo](https://github.com/krik8235/pj_m_dev)
+
+- [Github (client app)](https://github.com/krik8235/pj_m_dev)
 
 
 ## Mindmap
 
-LLM-powered RAG `agent` and `team` use `tool` and their own knowledge to complete the `task` given by the client or the system.
+LLM-powered `agent`s and `team`s use `tool`s and their own knowledge to complete the `task` given by the client or the system.
 
 <p align="center">
    <img src="https://res.cloudinary.com/dfeirxlea/image/upload/v1733556715/pj_m_home/urwte15at3h0dr8mdlyo.png" alt="mindmap" width="1000">
@@ -25,25 +28,20 @@ LLM-powered RAG `agent` and `team` use `tool` and their own knowledge to complet
 <p align="center">
    <!-- <img src="https://res.cloudinary.com/dfeirxlea/image/upload/v1728219760/pj_m_home/wkxvmmyah5dvhbdah1qn.png" alt="version logo" width="200">
    &nbsp; &nbsp; &nbsp; &nbsp; -->
-   <img src="https://res.cloudinary.com/dfeirxlea/image/upload/v1728302420/pj_m_home/xy58a7imyquuvkgukqxt.png" width="30%" alt="messaging workflow" />
-
-   <p>
-   - Build a messaging workflow at individual level
-   - Autopilot and track the performance.
-   </p>
+   <img src="https://res.cloudinary.com/dfeirxlea/image/upload/v1728302420/pj_m_home/xy58a7imyquuvkgukqxt.png" width="45%" alt="messaging workflow" />
 </p>
 
 
 <p align="center">
-   <img alt="UI1" src="https://res.cloudinary.com/dfeirxlea/image/upload/v1732801909/pj_m_home/ibi8b1ohv2sioqdkoq7n.png" width="45%">
-   &nbsp; &nbsp;
-   <img alt="UI2" src="https://res.cloudinary.com/dfeirxlea/image/upload/v1733414200/pj_m_home/tqgg3xfpk5x4i6rh3egv.png" width="45%">
+   <!-- <img alt="UI1" src="https://res.cloudinary.com/dfeirxlea/image/upload/v1732801909/pj_m_home/ibi8b1ohv2sioqdkoq7n.png" width="45%">
+   &nbsp; &nbsp; -->
+   <img alt="UI2" src="https://res.cloudinary.com/dfeirxlea/image/upload/v1733414200/pj_m_home/tqgg3xfpk5x4i6rh3egv.png" width="80%">
 </p>
 
 
 <hr />
 
-**Table of Content**
+##**Table of Content**
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
@@ -58,8 +56,8 @@ LLM-powered RAG `agent` and `team` use `tool` and their own knowledge to complet
   - [Customizing AI Agents](#customizing-ai-agents)
   - [Modifying RAG Functionality](#modifying-rag-functionality)
 - [Contributing](#contributing)
-  - [To Do](#to-do)
-- [Troubleshooting](#troubleshooting)
+  - [Product Roadmap](#product-roadmap)
+- [Trouble Shooting](#trouble-shooting)
 - [Frequently Asked Questions (FAQ)](#frequently-asked-questions-faq)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -254,14 +252,14 @@ The RAG system uses Chroma DB to store and query contract clauses. To update the
 5. Open a pull request
 
 
-### To Do
-- Agents with fine-tuned FM
+### Product Roadmap
+- Agents with fine-tuned FMs
 - Latency/memory saving
 - Improve cost performance
 - Third-party deployment options
 
 
-## Troubleshooting
+## Trouble Shooting
 
 Common issues and solutions:
 - API key errors: Ensure all API keys in the `.env` file are correct and up to date. Make sure to add `load_dotenv()` on the top of the python file to apply the latest environment values.
