@@ -33,10 +33,10 @@ repos:
   rev: v17.1.1
   hooks:
     - id: standard
-- repo: https://github.com/pycqa/isort
-  rev: 5.13.2
-  hooks:
-    - id: isort
+# - repo: https://github.com/pycqa/isort
+#   rev: 5.13.2
+#   hooks:
+#     - id: isort
 # - repo: https://github.com/thlorenz/doctoc
 #   rev: v2.2.0
 #   hooks:
