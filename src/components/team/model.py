@@ -135,7 +135,6 @@ class Team(BaseModel):
 
     @property
     def key(self) -> str:
-        from components.agent.model import Agent
         source = [Agent(id=member.agent_id).key for member in self.members] + [task.key for task in self.tasks]
         return md5("|".join(source).encode(), usedforsecurity=False).hexdigest()
     
@@ -146,12 +145,26 @@ class Team(BaseModel):
         return manager_agent[0] if len(manager_agent) > 0 else None
     
     @property
+    def manager_task(self) -> Task:
+        """
+        Aside from the team task, return the task that the `manager_agent` needs to handle.
+        The task is set as second priority following to the team tasks.
+        """
+        task = [member.task for member in self.members if member.is_manager == True]
+        return task[0] if len(task) > 0 else None
+
+    
+    @property
     def tasks(self):
         """
-        Return all the tasks that the team needs to handle
+        Return all the tasks that the team needs to handle in order of priority:
+        1. team tasks, 
+        2. manager_task, 
+        3. members' tasks
         """
-        return self.team_tasks + [member.task for member in self.members] if len(self.team_tasks) > 0 else [member.task for member in self.members]
-
+        sorted_member_tasks = [member.task for member in self.members if member.is_manager == True] + [member.task for member in self.members if member.is_manager == False]
+        return self.team_tasks + sorted_member_tasks if len(self.team_tasks) > 0 else sorted_member_tasks
+        
 
     # validators
     @field_validator("id", mode="before")
@@ -234,31 +247,27 @@ class Team(BaseModel):
     
 
     def _get_responsible_agent(self, task: Task) -> Agent:
-        from components.agent.model import Agent
         res = [member.agent for member in self.members if member.task.id == task.id]
         return None if len(res) == 0 else res[0]
 
 
     # setup team planner
-    def _handle_team_planning(self) -> None:
+    def _handle_team_planning(self):
         # self._logger.log("info", "Planning the crew execution")
         
         team_planner = TeamPlanner(tasks=self.tasks, planner_llm=self.planning_llm)
         result = team_planner._handle_task_planning()
 
-        if result is None:
-            return
-
-        print(result)
-
-        for task in self.tasks:
-            task_id = task.id
-            task.description += result[task_id] if hasattr(result, str(task_id)) else result
+        if result is not None:
+            for task in self.tasks:
+                task_id = task.id
+                task.description += result[task_id] if hasattr(result, str(task_id)) else result
 
 
     # task execution
-    def _process_async_tasks(self, futures: List[Tuple[Task, Future[TaskOutput], int]], was_replayed: bool = False
-                             ) -> List[TaskOutput]:
+    def _process_async_tasks(
+            self, futures: List[Tuple[Task, Future[TaskOutput], int]], was_replayed: bool = False
+        ) -> List[TaskOutput]:
         task_outputs: List[TaskOutput] = []
         for future_task, future, task_index in futures:
             task_output = future.result()
@@ -300,6 +309,7 @@ class Team(BaseModel):
     def _create_team_output(self, task_outputs: List[TaskOutput]) -> TeamOutput:
         if len(task_outputs) != 1:
             raise ValueError("Something went wrong. Kickoff should return only one task output.")
+        
         final_task_output = task_outputs[0]
         # final_string_output = final_task_output.raw
         # self._finish_execution(final_string_output)
@@ -313,6 +323,7 @@ class Team(BaseModel):
             task_output_list=[task.output for task in self.tasks if task.output],
             token_usage=token_usage,
         )
+
 
     def _calculate_usage_metrics(self) -> UsageMetrics:
         """
@@ -337,11 +348,15 @@ class Team(BaseModel):
     def _execute_tasks(self, tasks: List[Task], start_index: Optional[int] = 0, was_replayed: bool = False) -> TeamOutput:
         """
         Executes tasks sequentially and returns the final output in TeamOutput class.
-        """       
+        When we have a manager agent, we will start from executing manager agent's tasks.
+        Priority
+        1. Team tasks > 2. Manager task > 3. Member tasks (in order of index)
+        """
 
         task_outputs: List[TaskOutput] = []
         futures: List[Tuple[Task, Future[TaskOutput], int]] = []
         last_sync_output: Optional[TaskOutput] = None
+
 
         for task_index, task in enumerate(tasks):
             if start_index is not None and task_index < start_index:
@@ -356,10 +371,7 @@ class Team(BaseModel):
             responsible_agent = self._get_responsible_agent(task)
             if responsible_agent is None:
                 responsible_agent = self.members[0].agent #! REFINEME - select a suitable agent for the task
-                # raise ValueError(
-                #     f"No agent available for task: {task.description}. Ensure that either the task has an assigned agent or a manager agent is provided."
-                # )
-
+            
             # self._prepare_agent_tools(task)
             # self._log_task_start(task, responsible_agent)
 
@@ -399,16 +411,6 @@ class Team(BaseModel):
         return self._create_team_output(task_outputs)
 
 
-    def _run_sequential_process(self) -> TeamOutput:
-        """Executes tasks sequentially and returns the final output."""
-        return self._execute_tasks(self.tasks)
-
-    def _run_hierarchical_process(self) -> TeamOutput:
-        """Creates and assigns a manager agent to make sure the crew completes the tasks."""
-        self._create_manager_agent()
-        return self._execute_tasks(self.tasks)
-
-
 
     def kickoff(self, kwargs_before: Optional[Dict[str, str]] = None, kwargs_after: Optional[Dict[str, Any]] = None) -> TeamOutput:
         """
@@ -419,10 +421,11 @@ class Team(BaseModel):
         3. Address `after_kickoff_callbacks` if any.
         """
 
+        metrics: List[UsageMetrics] = []
+
         if len(self.team_tasks) > 0 or self.planning_llm is not None:
             self._handle_team_planning()
 
-        
         if kwargs_before is not None:
             for before_callback in self.before_kickoff_callbacks:
                 before_callback(**kwargs_before)
@@ -459,18 +462,11 @@ class Team(BaseModel):
             if not agent.step_callback:
                 agent.step_callback = self.step_callback
 
-            # agent.create_agent_executor()
 
+        if self.process is None:
+            self.process = TaskHandlingProcess.sequential
 
-
-        metrics: List[UsageMetrics] = []
-
-        if self.process == TaskHandlingProcess.sequential:
-            result = self._run_sequential_process()
-        elif self.process == TaskHandlingProcess.hierarchical:
-            result = self._run_hierarchical_process()
-        else:
-            raise NotImplementedError(f"The process '{self.process}' is not implemented yet.")
+        result = self._execute_tasks(self.tasks)
 
         for after_callback in self.after_kickoff_callbacks:
             result = after_callback(result, **kwargs_after)
