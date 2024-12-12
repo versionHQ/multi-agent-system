@@ -11,7 +11,6 @@ Visit:
 
 - [Client interface (beta)](https://versi0n.io/)
 - [Landing page](https://home.versi0n.io)
-
 - [Github (client app)](https://github.com/krik8235/pj_m_dev)
 
 

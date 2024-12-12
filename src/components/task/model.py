@@ -135,7 +135,7 @@ class Task(BaseModel):
     @property
     def summary(self) -> str:
         return f"""
-        Task: {self.idx + 1} - {self.description}
+        Task: {self.id} - {self.description}
         "task_description": {self.description}
         "task_expected_output": {self.output_prompt}
         "task_tools": {self.tools}

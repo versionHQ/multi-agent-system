@@ -99,7 +99,7 @@ class Team(BaseModel):
     __hash__ = object.__hash__
     _execution_span: Any = PrivateAttr()
     _logger: Logger = PrivateAttr()
-    _inputs: Optional[Dict[str, Any]] = PrivateAttr(default=None)
+    # _inputs: Optional[Dict[str, Any]] = PrivateAttr(default=None)
     
     id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True)
     name: Optional[str] = Field(default=None)
@@ -123,13 +123,15 @@ class Team(BaseModel):
     )
     task_callback: Optional[Any] = Field(default=None, description="callback to be executed after each task for all agents execution")
     step_callback: Optional[Any] = Field(default=None, description="callback to be executed after each step for all agents execution")
-    
+
     verbose: bool = Field(default=True)
     cache: bool = Field(default=True)
     memory: bool = Field(default=False, description="whether the team should use memory to store memories of its execution")
     execution_logs: List[Dict[str, Any]] = Field(default=[], description="list of execution logs for tasks")
     usage_metrics: Optional[UsageMetrics] = Field(default=None, description="usage metrics for all the llm executions")
     
+    def __name__(self) -> str:
+        return self.name if self.name is not None else self.id
 
     @property
     def key(self) -> str:
@@ -239,13 +241,19 @@ class Team(BaseModel):
 
     # setup team planner
     def _handle_team_planning(self) -> None:
-        self._logger.log("info", "Planning the crew execution")
+        # self._logger.log("info", "Planning the crew execution")
         
         team_planner = TeamPlanner(tasks=self.tasks, planner_llm=self.planning_llm)
         result = team_planner._handle_task_planning()
 
+        if result is None:
+            return
+
+        print(result)
+
         for task in self.tasks:
-            task.description += result[task.id]
+            task_id = task.id
+            task.description += result[task_id] if hasattr(result, str(task_id)) else result
 
 
     # task execution
@@ -291,9 +299,7 @@ class Team(BaseModel):
 
     def _create_team_output(self, task_outputs: List[TaskOutput]) -> TeamOutput:
         if len(task_outputs) != 1:
-            raise ValueError(
-                "Something went wrong. Kickoff should return only one task output."
-            )
+            raise ValueError("Something went wrong. Kickoff should return only one task output.")
         final_task_output = task_outputs[0]
         # final_string_output = final_task_output.raw
         # self._finish_execution(final_string_output)
@@ -349,9 +355,10 @@ class Team(BaseModel):
 
             responsible_agent = self._get_responsible_agent(task)
             if responsible_agent is None:
-                raise ValueError(
-                    f"No agent available for task: {task.description}. Ensure that either the task has an assigned agent or a manager agent is provided."
-                )
+                responsible_agent = self.members[0].agent #! REFINEME - select a suitable agent for the task
+                # raise ValueError(
+                #     f"No agent available for task: {task.description}. Ensure that either the task has an assigned agent or a manager agent is provided."
+                # )
 
             # self._prepare_agent_tools(task)
             # self._log_task_start(task, responsible_agent)
@@ -403,7 +410,7 @@ class Team(BaseModel):
 
 
 
-    def kickoff(self, inputs: Optional[Dict[str, Any]] = None) -> TeamOutput:
+    def kickoff(self, kwargs_before: Optional[Dict[str, str]] = None, kwargs_after: Optional[Dict[str, Any]] = None) -> TeamOutput:
         """
         Kickoff the team:
         0. Plan the team action if we have `team_tasks` using `planning_llm`.
@@ -412,20 +419,21 @@ class Team(BaseModel):
         3. Address `after_kickoff_callbacks` if any.
         """
 
-        if len(self.team_tasks) > 0 or self.planning_llm != None:
+        if len(self.team_tasks) > 0 or self.planning_llm is not None:
             self._handle_team_planning()
 
         
-        for before_callback in self.before_kickoff_callbacks:
-            inputs = before_callback(inputs)
+        if kwargs_before is not None:
+            for before_callback in self.before_kickoff_callbacks:
+                before_callback(**kwargs_before)
 
         
         # self._execution_span = self._telemetry.team_execution_span(self, inputs)
         # self._task_output_handler.reset()
         # self._logging_color = "bold_purple"
 
-        if inputs is not None:
-            self._inputs = inputs
+        # if inputs is not None:
+        #     self._inputs = inputs
             # self._interpolate_inputs(inputs)
         
 
@@ -465,7 +473,7 @@ class Team(BaseModel):
             raise NotImplementedError(f"The process '{self.process}' is not implemented yet.")
 
         for after_callback in self.after_kickoff_callbacks:
-            result = after_callback(result)
+            result = after_callback(result, **kwargs_after)
 
         metrics += [member.agent._token_process.get_summary() for member in self.members]
 

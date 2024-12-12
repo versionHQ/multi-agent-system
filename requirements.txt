@@ -13,7 +13,7 @@ litellm
 
 openai
 langchain_openai
-composio_core
+composio_core==0.6.0
 composio_openai
 composio-langchain
 
