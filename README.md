@@ -41,7 +41,7 @@ LLM-powered `agent`s and `team`s use `tool`s and their own knowledge to complete
 
 <hr />
 
-##**Table of Content**
+## Table of Content
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
@@ -301,7 +301,7 @@ Common issues and solutions:
 
 ## Overall Project Structure
 
-| Marketing page | Client app (beta) | Orchestration/agent system | Analyics
-| :---: | :---: | :---: | :---: |
-|  [repo_1](https://github.com/krik8235/pj_m_dev_home)  | [repo_a](https://github.com/krik8235/pj_m_dev) | **this repository** | [repo_b](https://github.com/versionHQ/clutering-analysis) |
-| [home](https://home.versi0n.io) | [client app](https://versi0n.io) | - | - |
+|  | Marketing page | Client app (beta) | Orchestration/agent system | Analyics
+| :---: | :---: | :---: | :---: | :---: |
+| Github |  [repo_1](https://github.com/krik8235/pj_m_dev_home)  | [repo_a](https://github.com/krik8235/pj_m_dev) | **this repository** | [repo_b](https://github.com/versionHQ/clutering-analysis) |
+| Website | [home](https://home.versi0n.io) | [client app](https://versi0n.io) | - | - |
