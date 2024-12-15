@@ -1,11 +1,12 @@
 # Overview
 
+[![PyPI version](https://badge.fury.io/py/tensorflow.svg)](https://badge.fury.io/py/tensorflow)
+
 A framework for orchestration and multi-agent system that design, deploy, and autopilot messaging workflows based on performance.
 
 Agents are model agnostic.
 
 Messaging workflows are created at individual level, and will be deployed on third-party services via `Composio`.
-
 
 Visit:
 
@@ -58,6 +59,7 @@ LLM-powered `agent`s and `team`s use `tool`s and their own knowledge to complete
   - [Product Roadmap](#product-roadmap)
 - [Trouble Shooting](#trouble-shooting)
 - [Frequently Asked Questions (FAQ)](#frequently-asked-questions-faq)
+- [Overall Project Structure](#overall-project-structure)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -66,7 +68,7 @@ LLM-powered `agent`s and `team`s use `tool`s and their own knowledge to complete
 
 ## Key Features
 
-A mulit-agent RAG system that tailors messaging workflow, predicts its performance, and deploys it on third-party tools.
+A mulit-agent system that tailors messaging workflow, predicts its performance, and deploys it on third-party tools.
 
 The `agent` is model agnostic. The default model is set Chat GTP 4o. We ask the client their preference and switch it accordingly using llm variable stored in the `BaseAgent` class.
 
@@ -111,15 +113,14 @@ Multiple `agent`s can form a `team` to complete complex tasks together.
 
 
 ## Technologies Used
-[data-handling]
+[data-model-handling]
    - [Pydantic](https://docs.pydantic.dev/latest/): Data validation and serialization library for Python
    - [pydantic-core](https://pypi.org/project/pydantic-core/): Core functionality for Pydantic validation and serialization
    - [Chroma DB](https://docs.trychroma.com/): Vector database for storing and querying usage data
    - [SQLite](https://www.sqlite.org/docs.html): C-language library to implements a small SQL database engine
    - [Upstage](https://console.upstage.ai/docs/getting-started/overview): Document processer for ML tasks. (Use `Document Parser API` to extract data from documents)
 
-
-[model-handling-curation]
+[LLM-curation]
    - OpenAI GPT-4: Advanced language model for analysis and recommendations
    - [LiteLLM](https://docs.litellm.ai/docs/providers): Curation platform to access LLMs
 
@@ -266,14 +267,41 @@ Common issues and solutions:
 - Memory errors: If processing large contracts, you may need to increase the available memory for the Python process.
 - Issues related to dependencies: Delete the `uv.lock` file and `.venv` and run `uv pip install -r requirements.txt -v`.
 - Issues related to the AI agents or RAG system: Check the `output.log` file for detailed error messages and stack traces.
+- Issues related to `Python quit unexpectedly`: Check [this stackoverflow article](https://stackoverflow.com/questions/59888499/macos-catalina-python-quit-unexpectedly-error).
 
 
 ## Frequently Asked Questions (FAQ)
-**Q. Where can I see the version agents are working?**
+**Q. Where can I see if the agent is working?**
 
-> A. You can find a frontend app [here](https://versi0n.io) with real-world outbound use cases.
+> A. You can find a frontend app [here](https://beta.versi0n.io) with real-world outbound use cases. Also refer to the structure.
 
 **Q. How do you analyze the customer?**
 
 > A. We employ soft clustering for each customer.
 > <img width="200" src="https://res.cloudinary.com/dfeirxlea/image/upload/v1732732628/pj_m_agents/ito937s5d5x0so8isvw6.png">
+
+
+**Q. When should I use a team vs an agent?**
+
+> A. In essence, use a team for intricate, evolving projects, and agents for quick, straightforward tasks.
+
+> Use a team when:
+
+> **Complex tasks**: You need to complete multiple, interconnected tasks that require sequential or hierarchical processing.
+
+> **Iterative refinement**: You want to iteratively improve upon the output through multiple rounds of feedback and revision.
+
+> Use an agent when:
+
+> **Simple tasks**: You have a straightforward, one-off task that doesn't require significant complexity or iteration.
+
+> **Human input**: You need to provide initial input or guidance to the agent, or you expect to review and refine the output.
+
+
+
+## Overall Project Structure
+
+| Marketing page | Client app (beta) | Orchestration/agent system | Analyics
+| :---: | :---: | :---: | :---: |
+|  [repo_1](https://github.com/krik8235/pj_m_dev_home)  | [repo_a](https://github.com/krik8235/pj_m_dev) | **this repository** | [repo_b](https://github.com/versionHQ/clutering-analysis) |
+| [home](https://home.versi0n.io) | [client app](https://versi0n.io) | - | - |

@@ -1,5 +1,5 @@
 from typing import List
-from components.task.model import Task, TaskOutput
+from src.components.task.model import Task, TaskOutput
 
 
 def create_raw_outputs(tasks: List[Task], task_outputs: List[TaskOutput]) -> str:

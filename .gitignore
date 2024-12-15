@@ -6,6 +6,10 @@ main.py
 # team/
 tool/
 
+test_client_app/
+
+memo.txt
+
 
 __pycache__/
 .ruff_cache/

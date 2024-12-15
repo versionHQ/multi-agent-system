@@ -10,12 +10,13 @@ import litellm
 from dotenv import load_dotenv
 from litellm import get_supported_openai_params
 
-from components.llm.llm_vars import LLM_CONTEXT_WINDOW_SIZES
-from components.task import TaskOutputFormat
-from components.task.model import ResponseField
+from src.components.llm.llm_vars import LLM_CONTEXT_WINDOW_SIZES
+from src.components.task import TaskOutputFormat
+from src.components.task.model import ResponseField
 
 load_dotenv(override=True)
 API_KEY_LITELLM = os.environ.get("API_KEY_LITELLM")
+os.environ['LITELLM_LOG'] = 'DEBUG'
 
 
 class FilteredStream:
@@ -26,7 +27,7 @@ class FilteredStream:
     def write(self, s) -> int:
         with self._lock:
             if ("Give Feedback / Get Help: https://github.com/BerriAI/litellm/issues/new" in s
-                or "LiteLLM.Info: If you need to debug this error, use `litellm.set_verbose=True`" in s):
+                or "LiteLLM.Info: If you need to debug this error, use `os.environ['LITELLM_LOG'] = 'DEBUG'`" in s):
                 return 0
             return self._original_stream.write(s)
 
@@ -132,7 +133,6 @@ class LLM:
         self.kwargs = kwargs
 
         litellm.drop_params = True
-        litellm.set_verbose = True
         self.set_callbacks(callbacks)
 
     def call(

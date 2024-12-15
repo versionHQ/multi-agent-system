@@ -5,16 +5,16 @@ from typing import Any, Dict, List, Optional, TypeVar, Union
 from dotenv import load_dotenv
 from pydantic import UUID4, BaseModel, Field, InstanceOf, PrivateAttr, model_validator
 
-from components._utils.cache_handler import CacheHandler
-from components._utils.logger import Logger, Printer
-from components._utils.rpm_controller import RPMController
-from components._utils.usage_metrics import UsageMetrics
-from components.llm.llm_vars import LLM_VARS
-from components.llm.model import LLM
-from components.task import TaskOutputFormat
-from components.task.model import ResponseField
-from components.tool.model import Tool
-from components.tool.tool_handler import ToolsHandler
+from src.components._utils.cache_handler import CacheHandler
+from src.components._utils.logger import Logger, Printer
+from src.components._utils.rpm_controller import RPMController
+from src.components._utils.usage_metrics import UsageMetrics
+from src.components.llm.llm_vars import LLM_VARS
+from src.components.llm.model import LLM
+from src.components.task import TaskOutputFormat
+from src.components.task.model import ResponseField
+from src.components.tool.model import Tool
+from src.components.tool.tool_handler import ToolsHandler
 
 load_dotenv(override=True)
 T = TypeVar("T", bound="Agent")
@@ -99,7 +99,7 @@ class Agent(ABC, BaseModel):
     # tools_results: Optional[List[Any]] = Field(default=[], description="Results of the tools used by the agent.")
     team: Optional[List[Any]] = Field(default=None, description="Team to which the agent belongs")
     allow_delegation: bool = Field(default=False, description="Enable agent to delegate and ask questions among each other")
-    agent_executor: InstanceOf = Field(default=None)
+    # agent_executor: InstanceOf = Field(default=None)
     allow_code_execution: Optional[bool] = Field(default=False, description="Enable code execution for the agent.")
 
     # llm settings

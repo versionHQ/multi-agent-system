@@ -8,9 +8,9 @@ from typing import Any, Dict, List, Set, Optional, Tuple, Callable
 from pydantic import UUID4, BaseModel, Field, PrivateAttr, field_validator, model_validator
 from pydantic_core import PydanticCustomError
 
-from components._utils.process_config import process_config
-from components.task import TaskOutputFormat
-from components.tool.model import Tool
+from src.components._utils.process_config import process_config
+from src.components.task import TaskOutputFormat
+from src.components.tool.model import Tool
 
 
 class ResponseField(BaseModel):
@@ -145,8 +145,10 @@ class Task(BaseModel):
     # validators
     @model_validator(mode="before")
     @classmethod
-    def process_model_config(cls, values):
-        return process_config(values, cls)
+    def process_model_config(cls, values: Dict[str, Any]):
+        print("task config-values", values)
+        print("task-config-cls", cls)
+        return process_config(values_to_update=values, model_class=cls)
 
 
     @field_validator("id", mode="before")

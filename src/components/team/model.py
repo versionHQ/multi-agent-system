@@ -3,6 +3,7 @@ import uuid
 import warnings
 import asyncio
 import json
+from abc import ABC
 from enum import Enum
 from dotenv import load_dotenv
 from concurrent.futures import Future
@@ -11,12 +12,27 @@ from typing import Any, Dict, List, TYPE_CHECKING, Callable, Optional, Tuple, Un
 from pydantic import UUID4, InstanceOf, Json, BaseModel, Field, PrivateAttr, field_validator, model_validator
 from pydantic_core import PydanticCustomError
 
-from components.agent.model import Agent
-from components.task.model import Task, TaskOutput, ConditionalTask, TaskOutputFormat
-from components.task.formatter import create_raw_outputs
-from components.team.team_planner import TeamPlanner
-from components._utils.logger import Logger
-from components._utils.usage_metrics import UsageMetrics
+from src.components.agent.model import Agent
+from src.components.task.model import Task, TaskOutput, ConditionalTask, TaskOutputFormat
+from src.components.task.formatter import create_raw_outputs
+from src.components.team.team_planner import TeamPlanner
+from src.components._utils.logger import Logger
+from src.components._utils.usage_metrics import UsageMetrics
+
+
+from pydantic._internal._generate_schema import GenerateSchema
+from pydantic_core import core_schema
+
+initial_match_type = GenerateSchema.match_type
+
+
+def match_type(self, obj):
+    if getattr(obj, "__name__", None) == "datetime":
+        return core_schema.datetime_schema()
+    return initial_match_type(self, obj)
+
+
+GenerateSchema.match_type = match_type
 
 warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")
 load_dotenv(override=True)
@@ -42,11 +58,11 @@ class TaskHandlingProcess(str, Enum):
 class TeamOutput(BaseModel):
     """Class that represents the result of a team."""
 
-    team_id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True, description="store Team ID")
-    raw: str = Field(description="Raw output", default="")
-    pydantic: Optional[BaseModel] = Field(description="Pydantic output of team", default=None)
-    json_dict: Optional[Dict[str, Any]] = Field(description="JSON dict output of team", default=None)
-    task_output_list: list[TaskOutput] = Field(default=list, description="store output of each task")
+    team_id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True, description="store the team ID that generate the TeamOutput")
+    raw: str = Field(default="", description="raw output")
+    pydantic: Optional[BaseModel] = Field(default=None, description="pydantic output")
+    json_dict: Optional[Dict[str, Any]] = Field(default=None, description="JSON dict output")
+    task_output_list: list[TaskOutput] = Field(default=list, description="store output of all the tasks that the team has executed")
     token_usage: UsageMetrics = Field(default=dict, description="processed token summary")
 
 
@@ -59,7 +75,7 @@ class TeamOutput(BaseModel):
         elif self.json_dict and key in self.json_dict:
             return self.json_dict[key]
         else:
-            raise KeyError(f"Key '{key}' not found in teamOutput.")
+            raise KeyError(f"Key '{key}' not found in the team output.")
 
     @property
     def json(self) -> Optional[str]:
@@ -79,14 +95,25 @@ class TeamOutput(BaseModel):
             output_dict.update(self.json_dict)
         elif self.pydantic:
             output_dict.update(self.pydantic.model_dump())
+        else:
+            output_dict.update({ "raw", self.raw })
         return output_dict
+    
+
+    def return_all_task_outputs(self) -> List[Dict[str, Any]]:
+        res = []
+        for output in self.task_output_list:
+            if output is not None:
+                res.append(output.to_dict())
+        
+        return res
 
 
 
-class TeamMember(BaseModel):
-    agent: Agent = Field(default=None, description="store the agent to be a member")
+class TeamMember(ABC, BaseModel):
+    agent: Agent | None = Field(default=None, description="store the agent to be a member")
     is_manager: bool = Field(default=False)
-    task: Task = Field(default=None)
+    task: Task | None = Field(default=None)
 
 
 
@@ -135,7 +162,7 @@ class Team(BaseModel):
 
     @property
     def key(self) -> str:
-        source = [Agent(id=member.agent_id).key for member in self.members] + [task.key for task in self.tasks]
+        source = [member.agent.key for member in self.members] + [task.key for task in self.tasks]
         return md5("|".join(source).encode(), usedforsecurity=False).hexdigest()
     
     
@@ -176,10 +203,8 @@ class Team(BaseModel):
 
     # @field_validator("config", mode="before")
     # @classmethod
-    # def check_config_type(
-    #     cls, v: Union[Json, Dict[str, Any]]
-    # ) -> Union[Json, Dict[str, Any]]:
-    #     return json.loads(v) if isinstance(v, Json) else v  # type: ignore
+    # def check_config_type(cls, v: Union[Json, Dict[str, Any]]) -> Union[Json, Dict[str, Any]]:
+    #     return json.loads(v) if isinstance(v, Json) else v
 
 
     @model_validator(mode="after")
@@ -189,7 +214,7 @@ class Team(BaseModel):
         """
         
         if self.process == TaskHandlingProcess.hierarchical:
-            if self.manager_agent == None:
+            if self.manager_agent is None:
                 raise PydanticCustomError(
                     "missing_manager_llm_or_manager_agent",
                     "Attribute `manager_llm` or `manager_agent` is required when using hierarchical process.",
@@ -254,7 +279,6 @@ class Team(BaseModel):
     # setup team planner
     def _handle_team_planning(self):
         # self._logger.log("info", "Planning the crew execution")
-        
         team_planner = TeamPlanner(tasks=self.tasks, planner_llm=self.planning_llm)
         result = team_planner._handle_task_planning()
 

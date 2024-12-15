@@ -1,20 +1,16 @@
 from typing import Any, Dict, Type
-
 from pydantic import BaseModel
 
 
-def process_config(
-    values_to_update: Dict[str, Any], model_class: Type[BaseModel]
-) -> Dict[str, Any]:
+def process_config(values_to_update: Dict[str, Any], model_class: Type[BaseModel]) -> Dict[str, Any]:
     """
     Process the config dictionary and update the values accordingly.
     Refer to the Pydantic model class for field validation.
     """
 
-    config = values_to_update.pop(
-        "config", {}
-    )  # to avoid duplicated operation, pop the config
-    if not config:
+    if hasattr(values_to_update, "config"):
+        config = values_to_update.pop("config", {})
+    else:
         return values_to_update
 
     # copy values from config to the model's attributes if the attribute isn't already set.
