@@ -83,7 +83,7 @@ class Task(BaseModel):
 
     # task setup
     context: Optional[List["Task"]] = Field(default=None, description="other tasks whose outputs should be used as context")
-    tools: Optional[List[Tool]] = Field(default_factory=list, description="Tools the agent is limited to use for this task")
+    tools: Optional[List[Tool]] = Field(default_factory=list, description="tools that the agent can use for this task")
     prompt_context: Optional[str] = None
     async_execution: bool = Field(default=False, description="whether the task should be executed asynchronously or not")
     config: Optional[Dict[str, Any]] = Field(default=None, description="configuration for the agent")
@@ -198,7 +198,11 @@ class Task(BaseModel):
 
     # @model_validator(mode="after")
     # def check_tools(self):
-    #     """Check if the tools are set."""
+    #     """
+    #     Check if the tools are set.
+    #     Use the agent's tools if the task's tools are empty.
+    #     """
+
     #     if not self.tools:
     #         self.tools.extend(self.agent.tools)
     #     return self

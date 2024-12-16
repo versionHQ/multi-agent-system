@@ -98,13 +98,9 @@ class AgentParser:
             raise OutputParserException(
                 f"{MISSING_ACTION_AFTER_THOUGHT_ERROR_MESSAGE}",
             )
-        elif not re.search(
-            r"[\s]*Action\s*\d*\s*Input\s*\d*\s*:[\s]*(.*)", text, re.DOTALL
-        ):
+        elif not re.search(r"[\s]*Action\s*\d*\s*Input\s*\d*\s*:[\s]*(.*)", text, re.DOTALL):
             # self.agent.increment_formatting_errors()
-            raise OutputParserException(
-                MISSING_ACTION_INPUT_AFTER_ACTION_ERROR_MESSAGE,
-            )
+            raise OutputParserException(MISSING_ACTION_INPUT_AFTER_ACTION_ERROR_MESSAGE)
         else:
             format = self._i18n.slice("format_without_tools")
             error = f"{format}"

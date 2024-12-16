@@ -113,22 +113,21 @@ Multiple `agent`s can form a `team` to complete complex tasks together.
 
 
 ## Technologies Used
-[data-model-handling]
+**Schema, Database**
    - [Pydantic](https://docs.pydantic.dev/latest/): Data validation and serialization library for Python
    - [pydantic-core](https://pypi.org/project/pydantic-core/): Core functionality for Pydantic validation and serialization
    - [Chroma DB](https://docs.trychroma.com/): Vector database for storing and querying usage data
    - [SQLite](https://www.sqlite.org/docs.html): C-language library to implements a small SQL database engine
    - [Upstage](https://console.upstage.ai/docs/getting-started/overview): Document processer for ML tasks. (Use `Document Parser API` to extract data from documents)
 
-[LLM-curation]
+**LLM-curation**
    - OpenAI GPT-4: Advanced language model for analysis and recommendations
    - [LiteLLM](https://docs.litellm.ai/docs/providers): Curation platform to access LLMs
 
-[rag-tools]
+**Tools**
    - [Composio](https://composio.dev/): Conect RAG agents with external tools, Apps, and APIs to perform actions and receive triggers. We use [tools](https://composio.dev/tools) and [RAG tools](https://app.composio.dev/app/ragtool) from Composio toolset.
 
-
-[deployment-framework]
+**Deployment**
    - Python: Primary programming language. We use 3.12 in this project
    - [Flask](https://flask.palletsprojects.com/en/stable/quickstart/): Web framework for the backend API. Communicate with the client app.
    - [Flask Cors](https://pypi.org/project/Flask-Cors/): A Flask extension for handling Cross Origin Resource Sharing (CORS), making cross-origin AJAX possible

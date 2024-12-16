@@ -114,9 +114,9 @@ class Agent(ABC, BaseModel):
     respect_context_window: bool = Field(default=True, description="Keep messages under the context window size by summarizing content")
     max_tokens: Optional[int] = Field(default=None, description="max. number of tokens for the agent's execution")
     max_execution_time: Optional[int] = Field(default=None, description="max. execution time for an agent to execute a task")
-    # max_rpm: Optional[int] = Field(default=None, description="max. number of requests per minute for the agent execution")
+    max_rpm: Optional[int] = Field(default=None, description="max. number of requests per minute for the agent execution")
     
-    # prompting rules
+    # prompt rules
     use_system_prompt: Optional[bool] = Field(default=True, description="Use system prompt for the agent")
     system_template: Optional[str] = Field(default=None, description="System format for the agent.")
     prompt_template: Optional[str] = Field(default=None, description="Prompt format for the agent.")
@@ -135,7 +135,7 @@ class Agent(ABC, BaseModel):
 
 
     @model_validator(mode="after")
-    def post_init_setup(self):
+    def set_up_llm(self):
         """
         Set up the base model and function calling model (if any) using the LLM class.
         Pass the model config params: `llm`, `max_tokens`, `max_execution_time`, `step_callback`,`respect_context_window` to the LLM class.
@@ -148,7 +148,7 @@ class Agent(ABC, BaseModel):
 
         if isinstance(self.llm, LLM):
             self.llm.timeout = self.max_execution_time
-            self.llm.max_token = self.max_token
+            self.llm.max_token = self.max_tokens
             self.llm.context_window_size = self.llm.get_context_window_size() if self.respect_context_window == True else DEFAULT_CONTEXT_WINDOW
             self.llm.callbacks = callbacks
 
@@ -189,10 +189,10 @@ class Agent(ABC, BaseModel):
 
         else:
             llm_params = {
-                "model": getattr(self.llm, "model_name", getattr(self.llm, "deployment_name", str(self.llm))),
-                "max_tokens": getattr(self.llm, self.max_tokens, 3000),
-                "timeout": getattr(self.llm, self.max_execution_time, None),
-                "callbacks": getattr(self.llm, callbacks),
+                "model": (getattr(self.llm, "model_name") or getattr(self.llm, "deployment_name") or str(self.llm)),
+                "max_tokens":(getattr(self.llm, "max_tokens") or self.max_tokens or 3000),
+                "timeout": getattr(self.llm, "timeout", self.max_execution_time),
+                "callbacks": getattr(self.llm, "callbacks") or callbacks,
 
                 "temperature": getattr(self.llm, "temperature", None),
                 "logprobs": getattr(self.llm, "logprobs", None),
@@ -238,11 +238,38 @@ class Agent(ABC, BaseModel):
         return self
 
 
+    @model_validator(mode="after")
+    def set_up_tools(self):
+        """
+        Similar to the LLM set up, when the agent has tools, we will declare them using the Tool class.
+        """
+
+        if not self.tools:
+            pass
+
+        else:
+            tools_in_class_format = []
+            for tool in self.tools:
+                if isinstance(tool, Tool):
+                    tools_in_class_format.append(tool)
+
+                elif isinstance(tool, str):
+                    tool_to_add = Tool(name=tool)
+                    tools_in_class_format.append(tool)
+
+                else:
+                    pass
+            
+            self.tools = tools_in_class_format
+
+        return self
+                    
+
     def invoke(
             self,
             prompts: str,
             output_formats: List[TaskOutputFormat],
-            response_fields=List[ResponseField],
+            response_fields: List[ResponseField],
             **kwargs
         ) -> Dict[str, Any]:
         """
@@ -250,6 +277,7 @@ class Agent(ABC, BaseModel):
         Then call the base model.
         When encountering errors, we try the task execution up to `self.max_retry_limit` times.
         """
+
         task_execution_counter = 0
 
         messages = []
@@ -263,14 +291,14 @@ class Agent(ABC, BaseModel):
         task_execution_counter += 1
         print("Agent's #1 res: ", response)
         
-        if (response is None or response == "") and task_execution_counter <= self.max_retry_limit:
+        if (response is None or response == "") and task_execution_counter < self.max_retry_limit:
             while task_execution_counter <= self.max_retry_limit:
                 response = self.llm.call(messages=messages, output_formats=output_formats, field_list=response_fields, callbacks=callbacks)
                 task_execution_counter += 1
                 print(f"Agent's #{task_execution_counter} res: ", response)
 
-        else:
-            Printer.print(content="Received None or empty response from LLM call.", color="red")
+        elif response is None or response == "":
+            print("Received None or empty response from LLM call.")
             raise ValueError("Invalid response from LLM call - None or empty.")
 
         return {"output": response.output if hasattr(response, "output") else response}
