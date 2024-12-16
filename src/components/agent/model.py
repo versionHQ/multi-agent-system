@@ -9,12 +9,13 @@ from src.components._utils.cache_handler import CacheHandler
 from src.components._utils.logger import Logger, Printer
 from src.components._utils.rpm_controller import RPMController
 from src.components._utils.usage_metrics import UsageMetrics
+from src.components.agent.parser import AgentAction
 from src.components.llm.llm_vars import LLM_VARS
 from src.components.llm.model import LLM, DEFAULT_CONTEXT_WINDOW
 from src.components.task import TaskOutputFormat
 from src.components.task.model import ResponseField
-from src.components.tool.model import Tool
-from src.components.tool.tool_handler import ToolsHandler
+from src.components.tool.model import Tool, ToolCalled
+from src.components.tool.tool_handler import ToolHandler
 
 load_dotenv(override=True)
 T = TypeVar("T", bound="Agent")
@@ -97,8 +98,8 @@ class Agent(ABC, BaseModel):
 
     # tools
     tools: Optional[List[Any]] = Field(default_factory=list)
-    tools_handler: InstanceOf[ToolsHandler] = Field(default=None, description="An instance of the ToolsHandler class")
-    tools_results: Optional[List[Any]] = Field(default=[], description="Results of the tools used by the agent.")
+    tool_handler: InstanceOf[ToolHandler] = Field(default=None, description="handle tool cache and last used tool")
+    # tools_results: Optional[List[Any]] = Field(default=[], description="Results of the tools used by the agent.")
 
     # team, rules of task executions
     team: Optional[List[Any]] = Field(default=None, description="Team to which the agent belongs")
@@ -252,18 +253,15 @@ class Agent(ABC, BaseModel):
             for tool in self.tools:
                 if isinstance(tool, Tool):
                     tools_in_class_format.append(tool)
-
                 elif isinstance(tool, str):
                     tool_to_add = Tool(name=tool)
-                    tools_in_class_format.append(tool)
-
+                    tools_in_class_format.append(tool_to_add)
                 else:
                     pass
-            
             self.tools = tools_in_class_format
 
         return self
-                    
+    
 
     def invoke(
             self,
@@ -304,23 +302,28 @@ class Agent(ABC, BaseModel):
         return {"output": response.output if hasattr(response, "output") else response}
 
 
-    def execute_task(self, task, context: Optional[str] = None, tools: Optional[List[Tool]] = []) -> str:
+    def execute_task(self, task, context: Optional[str] = None) -> str:
         """
         Execute the task and return the output in string.
-        When the tool/s are given, the agent must use them.
+        To simplify, the tools are cascaded from the `tools_called` under the `task` Task instance if any.
+        When the tools are given, the agent must use them.
         The agent must consider the context to excute the task as well when it is given.
         """
 
-        if self.tools_handler:
-            self.tools_handler.last_used_tool = {}
-
-        task_prompt = task.prompt()  # return description + exepected output in string
-
+        task_prompt = task.prompt()
         # if context:
         #     task_prompt = self.i18n.slice("task_with_context").format(task=task_prompt, context=context)
+        
+        
+        tool_results = []
+        if task.tools_called:
+            for tool_called in task.tools_called:
+                tool_result = tool_called.tool.run()
+                tool_results.append(tool_result)
 
-        # tools = tools or self.tools or []
-        # self.create_agent_executor(tools=tools, task=task)
+            if task.take_tool_res_as_final:
+                return tool_results
+        
 
         # if self.team and self.team._train:
         #     task_prompt = self._training_handler(task_prompt=task_prompt)
@@ -338,7 +341,7 @@ class Agent(ABC, BaseModel):
             self._times_executed += 1
             if self._times_executed > self.max_retry_limit:
                 raise e
-            result = self.execute_task(task, context, tools)
+            result = self.execute_task(task, context, [tool_called.tool for tool_called in task.tools_called])
 
         if self.max_rpm and self._rpm_controller:
             self._rpm_controller.stop_rpm_counter()

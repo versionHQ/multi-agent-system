@@ -65,7 +65,6 @@ class AgentParser:
     Final Answer: The temperature is 100 degrees
     """
 
-    _i18n: I18N = I18N()
     agent: Any = None
 
     def __init__(self, agent: Any):
@@ -102,6 +101,7 @@ class AgentParser:
             # self.agent.increment_formatting_errors()
             raise OutputParserException(MISSING_ACTION_INPUT_AFTER_ACTION_ERROR_MESSAGE)
         else:
+            _i18n = I18N()
             format = self._i18n.slice("format_without_tools")
             error = f"{format}"
             # self.agent.increment_formatting_errors()
@@ -118,6 +118,7 @@ class AgentParser:
     def _clean_action(self, text: str) -> str:
         """Clean action string by removing non-essential formatting characters."""
         return re.sub(r"^\s*\*+\s*|\s*\*+\s*$", "", text).strip()
+
 
     def _safe_repair_json(self, tool_input: str) -> str:
         UNABLE_TO_REPAIR_JSON_RESULTS = ['""', "{}"]

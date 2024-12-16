@@ -10,7 +10,7 @@ from pydantic_core import PydanticCustomError
 
 from src.components._utils.process_config import process_config
 from src.components.task import TaskOutputFormat
-from src.components.tool.model import Tool
+from src.components.tool.model import Tool, ToolCalled
 
 
 class ResponseField(BaseModel):
@@ -83,7 +83,9 @@ class Task(BaseModel):
 
     # task setup
     context: Optional[List["Task"]] = Field(default=None, description="other tasks whose outputs should be used as context")
-    tools: Optional[List[Tool]] = Field(default_factory=list, description="tools that the agent can use for this task")
+    tools_called: Optional[List[ToolCalled]] = Field(default_factory=list, description="tools that the agent can use for this task")
+    take_tool_res_as_final: bool = Field(default=False, description="when set True, tools res will be stored in the `TaskOutput`")
+
     prompt_context: Optional[str] = None
     async_execution: bool = Field(default=False, description="whether the task should be executed asynchronously or not")
     config: Optional[Dict[str, Any]] = Field(default=None, description="configuration for the agent")
@@ -138,7 +140,7 @@ class Task(BaseModel):
         Task: {self.id} - {self.description}
         "task_description": {self.description}
         "task_expected_output": {self.output_prompt}
-        "task_tools": {self.tools}
+        "task_tools": {", ".join([tool_called.tool.name for tool_called in self.tools_called])}
         """
 
 
@@ -146,8 +148,6 @@ class Task(BaseModel):
     @model_validator(mode="before")
     @classmethod
     def process_model_config(cls, values: Dict[str, Any]):
-        print("task config-values", values)
-        print("task-config-cls", cls)
         return process_config(values_to_update=values, model_class=cls)
 
 
@@ -196,38 +196,17 @@ class Task(BaseModel):
             self._original_description = self.description
         return self
 
-    # @model_validator(mode="after")
-    # def check_tools(self):
-    #     """
-    #     Check if the tools are set.
-    #     Use the agent's tools if the task's tools are empty.
-    #     """
-
-    #     if not self.tools:
-    #         self.tools.extend(self.agent.tools)
-    #     return self
-
-    # @model_validator(mode="after")
-    # def check_output(self):
-    #     """Check if an output type is set."""
-    #     output_types = [self.output_json, self.output_pydantic]
-    #     if len([type for type in output_types if type]) > 1:
-    #         raise PydanticCustomError(
-    #             "output_type",
-    #             "Only one output type can be set, either output_pydantic or output_json.",
-    #             {},
-    #         )
-    #     return self
 
     def prompt(self, customer=str | None, client_business=str | None) -> str:
         """
         Return the prompt of the task.
         """
+
         task_slices = [
             self.description,
             f"Customer overview: {customer}",
             f"Client business overview: {client_business}",
-            f"Follow the output formats: {self.output_prompt}",
+            f"Follow the output formats decribled below. Your response should NOT contain any other element from the following formats.: {self.output_prompt}",
         ]
         return "\n".join(task_slices)
 
@@ -287,53 +266,40 @@ class Task(BaseModel):
 
 
     # task execution
-    def execute_sync(
-        self,
-        agent,
-        context: Optional[str] = None,
-        tools: Optional[List[Tool]] = None,
-    ) -> TaskOutput:
-        """Execute the task synchronously."""
-        return self._execute_core(agent, context, tools)
+    def execute_sync(self, agent, context: Optional[str] = None) -> TaskOutput:
+        """
+        Execute the task synchronously.
+        """
+        return self._execute_core(agent, context)
 
 
-    def execute_async(
-        self,
-        agent,
-        context: Optional[str] = None,
-        tools: Optional[List[Tool]] = None,
-    ) -> Future[TaskOutput]:
-        """Execute the task asynchronously."""
+    def execute_async(self, agent, context: Optional[str] = None) -> Future[TaskOutput]:
+        """
+        Execute the task asynchronously.
+        """
+
         future: Future[TaskOutput] = Future()
         threading.Thread(
             daemon=True,
             target=self._execute_task_async,
-            args=(agent, context, tools, future),
+            args=(agent, context, future),
         ).start()
         return future
 
 
-    def _execute_task_async(
-        self,
-        agent,
-        context: Optional[str],
-        tools: Optional[List[Any]],
-        future: Future[TaskOutput],
-    ) -> None:
+    def _execute_task_async(self, agent, context: Optional[str], future: Future[TaskOutput]) -> None:
         """Execute the task asynchronously with context handling."""
-        result = self._execute_core(agent, context, tools)
+        result = self._execute_core(agent, context)
         future.set_result(result)
 
 
-    def _execute_core(self, agent, context: Optional[str], tools: Optional[List[Any]]) -> TaskOutput:
+    def _execute_core(self, agent, context: Optional[str]) -> TaskOutput:
         """
         Run the core execution logic of the task.
         """
 
         self.prompt_context = context
-        tools = tools or []
-        self.processed_by_agents.add(agent.role)
-        result = agent.execute_task(task=self, context=context, tools=tools)
+        result = agent.execute_task(task=self, context=context)
         output_json, output_pydantic = self._export_output(result)
         task_output = TaskOutput(
             task_id=self.id,
@@ -342,6 +308,7 @@ class Task(BaseModel):
             json_dict=output_json,
         )
         self.output = task_output
+        self.processed_by_agents.add(agent.role)
 
         # self._set_end_execution_time(start_time)
 

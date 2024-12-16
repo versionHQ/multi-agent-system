@@ -211,8 +211,10 @@ class LLM:
 
 
     def get_context_window_size(self) -> int:
-        # Only using 75% of the context window size to avoid cutting the message in the middle
-        return int(LLM_CONTEXT_WINDOW_SIZES.get(self.model) * 0.75) 
+        """
+        Only use 75% of the context window size to avoid cutting the message in the middle.
+        """
+        return int(LLM_CONTEXT_WINDOW_SIZES.get(self.model) * 0.75) if hasattr(LLM_CONTEXT_WINDOW_SIZES, self.model) else DEFAULT_CONTEXT_WINDOW
 
     def set_callbacks(self, callbacks: List[Any]):
         callback_types = [type(callback) for callback in callbacks]

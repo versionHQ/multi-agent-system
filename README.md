@@ -115,7 +115,7 @@ Multiple `agent`s can form a `team` to complete complex tasks together.
 ## Technologies Used
 **Schema, Database**
    - [Pydantic](https://docs.pydantic.dev/latest/): Data validation and serialization library for Python
-   - [pydantic-core](https://pypi.org/project/pydantic-core/): Core functionality for Pydantic validation and serialization
+   <!-- - [pydantic-core](https://pypi.org/project/pydantic-core/): Core functionality for Pydantic validation and serialization -->
    - [Chroma DB](https://docs.trychroma.com/): Vector database for storing and querying usage data
    - [SQLite](https://www.sqlite.org/docs.html): C-language library to implements a small SQL database engine
    - [Upstage](https://console.upstage.ai/docs/getting-started/overview): Document processer for ML tasks. (Use `Document Parser API` to extract data from documents)

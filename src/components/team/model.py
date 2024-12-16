@@ -278,7 +278,6 @@ class Team(BaseModel):
 
     # setup team planner
     def _handle_team_planning(self):
-        # self._logger.log("info", "Planning the crew execution")
         team_planner = TeamPlanner(tasks=self.tasks, planner_llm=self.planning_llm)
         result = team_planner._handle_task_planning()
 
