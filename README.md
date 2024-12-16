@@ -125,7 +125,7 @@ Multiple `agent`s can form a `team` to complete complex tasks together.
    - [LiteLLM](https://docs.litellm.ai/docs/providers): Curation platform to access LLMs
 
 [rag-tools]
-   - [Composio](https://composio.dev/): Conect RAG agents with external tools, Apps, and APIs to perform actions and receive triggers. We use [RagTool](https://app.composio.dev/app/ragtool) from Composio toolset.
+   - [Composio](https://composio.dev/): Conect RAG agents with external tools, Apps, and APIs to perform actions and receive triggers. We use [tools](https://composio.dev/tools) and [RAG tools](https://app.composio.dev/app/ragtool) from Composio toolset.
 
 
 [deployment-framework]
@@ -305,3 +305,17 @@ Common issues and solutions:
 | :---: | :---: | :---: | :---: | :---: |
 | Github |  [repo_1](https://github.com/krik8235/pj_m_dev_home)  | [repo_a](https://github.com/krik8235/pj_m_dev) | **this repository** | [repo_b](https://github.com/versionHQ/clutering-analysis) |
 | Website | [home](https://home.versi0n.io) | [client app](https://versi0n.io) | - | - |
+
+
+
+<--- Remaining basic tasks --->
+
+- llm handling - agent
+- more llms integration
+- simpler prompting
+- team leader (do we need it?)
+- tools
+- broader knowledge
+
+- utils - log
+- utils - time

@@ -16,7 +16,8 @@ from src.components.task.model import ResponseField
 
 load_dotenv(override=True)
 API_KEY_LITELLM = os.environ.get("API_KEY_LITELLM")
-os.environ['LITELLM_LOG'] = 'DEBUG'
+DEFAULT_CONTEXT_WINDOW = int(8192 * 0.75)
+os.environ["LITELLM_LOG"] = "DEBUG"
 
 
 class FilteredStream:
@@ -86,18 +87,22 @@ class LLMResponseSchema:
 class LLM:
     """
     Use LiteLLM to connect with the model of choice.
+    (Memo) Response formats will be given at the Task handling.
     """
 
     def __init__(
         self,
         model: str,
         timeout: Optional[Union[float, int]] = None,
+        max_tokens: Optional[int] = None,
+        max_completion_tokens: Optional[int] = None,
+        context_window_size: Optional[int] = DEFAULT_CONTEXT_WINDOW,
+        callbacks: List[Any] = [],
+
         temperature: Optional[float] = None,
         top_p: Optional[float] = None,
         n: Optional[int] = None,
         stop: Optional[Union[str, List[str]]] = None,
-        max_completion_tokens: Optional[int] = None,
-        max_tokens: Optional[int] = None,
         presence_penalty: Optional[float] = None,
         frequency_penalty: Optional[float] = None,
         logit_bias: Optional[Dict[int, float]] = None,
@@ -108,17 +113,19 @@ class LLM:
         base_url: Optional[str] = None,
         api_version: Optional[str] = None,
         api_key: Optional[str] = None,
-        callbacks: List[Any] = [],
         **kwargs,
     ):
         self.model = model
         self.timeout = timeout
+        self.max_tokens = max_tokens
+        self.max_completion_tokens = max_completion_tokens
+        self.context_window_size = context_window_size
+        self.callbacks = callbacks
+
         self.temperature = temperature
         self.top_p = top_p
         self.n = n
         self.stop = stop
-        self.max_completion_tokens = max_completion_tokens
-        self.max_tokens = max_tokens
         self.presence_penalty = presence_penalty
         self.frequency_penalty = frequency_penalty
         self.logit_bias = logit_bias
@@ -126,22 +133,22 @@ class LLM:
         self.seed = seed
         self.logprobs = logprobs
         self.top_logprobs = top_logprobs
+
         self.base_url = base_url
         self.api_version = api_version
         self.api_key = api_key if api_key else API_KEY_LITELLM
-        self.callbacks = callbacks
+        
         self.kwargs = kwargs
 
         litellm.drop_params = True
         self.set_callbacks(callbacks)
 
     def call(
-        self,
-        output_formats: List[TaskOutputFormat],
-        field_list: Optional[List[ResponseField]],
-        messages: List[Dict[str, str]],
-        callbacks: List[Any] = [],
-    ) -> str:
+            self, output_formats: List[TaskOutputFormat], field_list: Optional[List[ResponseField]], messages: List[Dict[str, str]], callbacks: List[Any] = []
+        ) -> str:
+        """
+        Execute LLM based on Agent's controls.
+        """
 
         with suppress_warnings():
             if callbacks and len(callbacks) > 0:
@@ -182,7 +189,7 @@ class LLM:
 
             except Exception as e:
                 logging.error(f"LiteLLM call failed: {str(e)}")
-                raise
+                return None
 
 
     def supports_function_calling(self) -> bool:
@@ -205,7 +212,7 @@ class LLM:
 
     def get_context_window_size(self) -> int:
         # Only using 75% of the context window size to avoid cutting the message in the middle
-        return int(LLM_CONTEXT_WINDOW_SIZES.get(self.model, 8192) * 0.75)
+        return int(LLM_CONTEXT_WINDOW_SIZES.get(self.model) * 0.75)
 
 
     def set_callbacks(self, callbacks: List[Any]):
