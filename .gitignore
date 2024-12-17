@@ -1,7 +1,6 @@
 project/
 
 app copy.py
-# main.py
 composio.py
 
 test_client_app/

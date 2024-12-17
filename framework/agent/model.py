@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from pydantic import UUID4, BaseModel, Field, InstanceOf, PrivateAttr, model_validator
 
 from framework._utils.cache_handler import CacheHandler
-from framework._utils.logger import Logger, Printer
+from framework._utils.logger import Logger
 from framework._utils.rpm_controller import RPMController
 from framework._utils.usage_metrics import UsageMetrics
 from framework.agent.parser import AgentAction
