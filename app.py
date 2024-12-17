@@ -26,7 +26,12 @@ def allowed_file(filename):
 
 @app.route("/")
 def hello_world():
-    return "<p>Hello, World!</p>"
+    return """
+    <p>Hello, world</p>
+    <p>I am Version HQ's Flask backend.</p>
+    <p>The orchestration framework is <a href="https://github.com/versionHQ/multi-agent-system" target="_blank" rel="noreferrer">here</a></p>
+    <p>You can check our current bata from <a href="https://versi0n.io" target="_blank" rel="noreferrer">here</p>
+    """
 
 
 @app.route('/api/base-setting', methods=['POST', 'OPTIONS', 'GET'])

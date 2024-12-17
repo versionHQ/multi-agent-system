@@ -10,6 +10,7 @@ Messaging workflows are created at individual level, and will be deployed on thi
 
 Visit:
 
+- [Flask backend](https://blank-minta-krik8235-b534ee83.koyeb.app/)
 - [Client interface (beta)](https://versi0n.io/)
 - [Landing page](https://home.versi0n.io)
 - [Github (client app)](https://github.com/krik8235/pj_m_dev)
@@ -50,14 +51,12 @@ LLM-powered `agent`s and `team`s use `tool`s and their own knowledge to complete
 - [Project Structure](#project-structure)
 - [Setup](#setup)
 - [Usage](#usage)
-- [Development](#development)
-  - [Package Management with uv](#package-management-with-uv)
-  - [CLI Test](#cli-test)
-  - [Pre-commit Hooks](#pre-commit-hooks)
+- [Contributing & Customizing](#contributing--customizing)
   - [Customizing AI Agents](#customizing-ai-agents)
   - [Modifying RAG Functionality](#modifying-rag-functionality)
-- [Contributing](#contributing)
-  - [Product Roadmap](#product-roadmap)
+  - [Package Management with uv](#package-management-with-uv)
+  - [CLI Test](#cli-test)
+  - [Pre-Commit Hooks](#pre-commit-hooks)
 - [Trouble Shooting](#trouble-shooting)
 - [Frequently Asked Questions (FAQ)](#frequently-asked-questions-faq)
 - [Overall Project Structure](#overall-project-structure)
@@ -135,6 +134,7 @@ Multiple `agent`s can form a `team` to complete complex tasks together.
    - [uv](https://docs.astral.sh/uv/): Python package installer and resolver
    - [pre-commit](https://pre-commit.com/): Manage and maintain pre-commit hooks
    - [Hatch/Hatchling](https://hatch.pypa.io/latest/): Build package management
+   - [Koyeb](https://www.koyeb.com/docs): Serverless deployment platform
 
 
 ## Project Structure
@@ -196,10 +196,40 @@ sample/
    ```
    The backend will be available at `http://localhost:5002`.
 
-2. Frontend (production) is available at `https://versi0n.io`.
+2. Add new API endpoint. You can call them from the [api base url](https://blank-minta-krik8235-b534ee83.koyeb.app/).
+
+3. Frontend (production) is available at `https://versi0n.io`. Currently we are on beta.
 
 
-## Development
+## Contributing & Customizing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/your-amazing-feature`)
+3. Pull the latest version of source code from the main branch (`git pull origin main`) *Address conflicts if any.
+4. Commit your changes (`git add .` / `git commit -m 'Add your-amazing-feature'`)
+5. Push to the branch (`git push origin feature/your-amazing-feature`)
+6. Open a pull request
+
+0. Flag with `#! REFINEME` for any improvements and `#! FIXME` for any errors.
+
+
+### Customizing AI Agents
+
+To add an agent, use `sample` directory to add new `project`. You can define an agent with a specific role, goal, and set of tools.
+
+Your new agent needs to follow the `Agent` model defined in the `framework.agent.model.py`.
+
+You can also add any fields and functions to the `Agent` model **universally** by modifying `framework.agent.model.py`.
+
+
+### Modifying RAG Functionality
+
+The RAG system uses Chroma DB to store and query past campaign dataset. To update the knowledge base:
+
+1. Add new files to the `uploads/` directory. (This will not be pushed to Github.)
+2. Modify the `tools.py` file to update the ingestion process if necessary.
+3. Run the ingestion process to update the Chroma DB.
+
 
 ### Package Management with uv
 
@@ -211,12 +241,12 @@ sample/
 
 ### CLI Test
 
-- To test new feature on CLI, import the features to `framework._cli.test_cli.py` as `test` and run the following command:
+- To test new features on CLI, import the features to `framework._cli.test_cli.py` as `test` and run the following command:
    ```
    uv run test
    ```
 
-### Pre-commit Hooks
+### Pre-Commit Hooks
 
 1. Install pre-commit hooks:
    ```
@@ -230,42 +260,10 @@ sample/
 
 Pre-commit hooks help maintain code quality by running checks for formatting, linting, and other issues before each commit.
 
-* We dont recommend, but to skip pre-commit hooks -
+* To skip pre-commit hooks (NOT RECOMMENDED)
    ```
    git commit --no-verify -m "your-commit-message"
    ```
-
-### Customizing AI Agents
-
-To modify or add new AI agents, edit the `agents.py` file. Each agent is defined with a specific role, goal, and set of tools.
-
-Your new agent needs to follow the `BaseAgent` model defined on `models.py` using Pydantic.
-
-
-### Modifying RAG Functionality
-
-The RAG system uses Chroma DB to store and query contract clauses. To update the knowledge base:
-
-1. Add new files to the `uploads/` directory. (This will not be pushed to Github.)
-2. Modify the `tools.py` file to update the ingestion process if necessary.
-3. Run the ingestion process to update the Chroma DB.
-
-
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/your-amazing-feature`)
-3. Commit your changes (`git commit -m 'Add your-amazing-feature'`)
-4. Push to the branch (`git push origin feature/your-amazing-feature`)
-5. Open a pull request
-
-
-### Product Roadmap
-- Agents with fine-tuned FMs
-- Latency/memory saving
-- Improve cost performance
-- Third-party deployment options
-
 
 ## Trouble Shooting
 
@@ -313,7 +311,6 @@ Common issues and solutions:
 | :---: | :---: | :---: | :---: | :---: |
 | Github |  [repo_1](https://github.com/krik8235/pj_m_dev_home)  | [repo_a](https://github.com/krik8235/pj_m_dev) | **this repository** | [repo_b](https://github.com/versionHQ/clutering-analysis) |
 | Website | [home](https://home.versi0n.io) | [client app](https://versi0n.io) | - | - |
-
 
 
 <--- Remaining basic tasks --->
