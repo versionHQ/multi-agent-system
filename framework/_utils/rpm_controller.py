@@ -4,7 +4,7 @@ from typing import Optional
 
 from pydantic import BaseModel, Field, PrivateAttr, model_validator
 
-from src.components._utils.logger import Logger
+from framework._utils.logger import Logger
 
 
 class RPMController(BaseModel):

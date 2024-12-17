@@ -10,9 +10,9 @@ import litellm
 from dotenv import load_dotenv
 from litellm import get_supported_openai_params
 
-from src.components.llm.llm_vars import LLM_CONTEXT_WINDOW_SIZES
-from src.components.task import TaskOutputFormat
-from src.components.task.model import ResponseField
+from framework.llm.llm_vars import LLM_CONTEXT_WINDOW_SIZES
+from framework.task import TaskOutputFormat
+from framework.task.model import ResponseField
 
 load_dotenv(override=True)
 API_KEY_LITELLM = os.environ.get("API_KEY_LITELLM")

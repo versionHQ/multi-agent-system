@@ -38,7 +38,7 @@ Repository = "https://github.com/versionHQ/multi-agent-system"
 Issues = "https://github.com/versionHQ/multi-agent-system/issues"
 
 [project.scripts]
-test = "src.components._cli.main:test"
+test = "framework._cli.test_cli:test"
 
 
 [build-system]
@@ -46,7 +46,7 @@ requires = ["hatchling", "hatch-build-scripts"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src"]
+packages = ["framework","src"]
 
 [tool.black]
 line-length = 88

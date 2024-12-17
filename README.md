@@ -140,25 +140,24 @@ Multiple `agent`s can form a `team` to complete complex tasks together.
 
 ```
 .
-src/
-├── __init__.py
-├── app.py                  # Flask application
-├── components/             # Pydantic base classes and other utils for agent, team, task, tool
+framework/                  # Orchestration frameworks on Pydantic
 │   ├── agent/
 │   └── llm/
 │   └── task/
 │   └── team/
 │   └── tool/
-│   └── _cli/               # cli to test new features
+│   └── clients/            # Classes to store the client related information
+│   └── _cli/               # CLI commands
 │   └── ...
-├── project/                # Project-specific agent, task, team, tools
-│   ├── agents.py
-│   └── ...
+│
+src/
+├── __init__.py
+├── app.py                  # Flask application
+├── project/                # Project-specific settings
 ├── db/                     # Database files
 │   ├── chroma.sqlite3
 │   └── ...
-└── uploads/                # Uploaded files
-
+└── uploads/                # Uploaded files for the project
 ```
 
 ## Setup

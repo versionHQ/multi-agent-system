@@ -3,17 +3,18 @@ from inspect import signature
 from typing import Any, Dict, Callable, Type, Optional, get_args, get_origin
 from pydantic import InstanceOf, BaseModel, ConfigDict, Field, create_model, field_validator, model_validator
 
-from src.components._utils.cache_handler import CacheHandler
+from framework._utils.cache_handler import CacheHandler
 
 
-class Tool(ABC, BaseModel):
+class Customer(ABC, BaseModel):
     """
-    The function that will be executed when the tool is called.
+    Store the information on the customer of the client.
     """
    
     class ArgsSchema(BaseModel):
         pass
-
+    
+    id: UUID = 
     model_config = ConfigDict()
     name: str = Field(default=None)
     func: Callable = Field(default=None)
@@ -49,7 +50,7 @@ class Tool(ABC, BaseModel):
 
     @model_validator(mode="after")
     def set_up_tool_handler_instance(self):
-        from src.components.tool.tool_handler import ToolHandler
+        from framework.tool.tool_handler import ToolHandler
 
         if self.tool_handler:
             ToolHandler(**self.tool_handler)
@@ -145,7 +146,7 @@ class Tool(ABC, BaseModel):
                         result = self.invoke(input=arguments)  
 
             else:
-                from src.components.tool.tool_handler import ToolHandler
+                from framework.tool.tool_handler import ToolHandler
                 tool_handler = ToolHandler(last_used_tool=tool_called, cache=CacheHandler())
                 self.tool_handler = tool_handler
                 result = self.invoke(input=arguments)
@@ -160,7 +161,6 @@ class ToolCalled(BaseModel):
     """
     tool: InstanceOf[Tool] = Field(..., description="store the tool instance to be called.")
     arguments: Optional[Dict[str, Any]] = Field(..., description="kwargs passed to the tool")
-
 
 
 class InstructorToolCalled(BaseModel):

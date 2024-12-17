@@ -7,7 +7,7 @@ from flask import Flask, request, jsonify, flash, redirect
 from flask_cors import CORS, cross_origin
 from waitress import serve
 
-from src.components.task.model import TaskOutput
+from framework.task.model import TaskOutput
 
 load_dotenv(override=True)
 
