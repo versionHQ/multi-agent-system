@@ -1,1 +1,1 @@
-web: gunicorn --bind :$PORT src.app:app
+web: gunicorn --bind :$PORT app:app

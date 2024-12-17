@@ -33,7 +33,7 @@ def hello_world():
 @cross_origin(origin='*', headers=['Access-Control-Allow-Origin',])
 def test2():
     print("test2")
-    from src.test import test_2
+    from sample.test import test_2
     res = test_2()
     return  jsonify({ "output": res }), 200
 

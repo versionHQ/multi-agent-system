@@ -257,7 +257,7 @@ wheels = [
 
 [[package]]
 name = "composio-core"
-version = "0.6.0"
+version = "0.6.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiohttp" },
@@ -277,9 +277,9 @@ dependencies = [
     { name = "sentry-sdk" },
     { name = "uvicorn" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/ee/1d/fe9be1c55456e89e385cde78bedb14fedc63a5488d4e5482c885aa891131/composio_core-0.6.0.tar.gz", hash = "sha256:79e2464c62134c8fcce98f734d6dbb59e27c4347800ec62a3dd407e84f7c8681", size = 304516 }
+sdist = { url = "https://files.pythonhosted.org/packages/f9/04/0e173e3025aecd78ba7c099b6ee5ec64821b2d929d6a30d03cdffe8deba0/composio_core-0.6.2.tar.gz", hash = "sha256:cbc99e2c81ec04951f2e7e0b39735aefec2c96dddfb03cec1c1593e9918e85b1", size = 304563 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/b6/d8/f3a8208b1d9b85a22bbae28c0969fb521a593c1bba6dd3383097c58bff30/composio_core-0.6.0-py3-none-any.whl", hash = "sha256:81deaeefbe657a45593c288604e08d7c539b70aa155d55853a08343d8d39062d", size = 468321 },
+    { url = "https://files.pythonhosted.org/packages/3e/2d/94ea3f52df606f3a077c025b3b44377d43a0ccecc92a00fe59767e1fe618/composio_core-0.6.2-py3-none-any.whl", hash = "sha256:0fa6a5ea60fedd0acc7f126233d22948685b3bdb74427de2961b08c3e7d736f7", size = 468401 },
 ]
 
 [[package]]
@@ -933,7 +933,7 @@ wheels = [
 
 [[package]]
 name = "litellm"
-version = "1.55.2"
+version = "1.55.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiohttp" },
@@ -949,9 +949,9 @@ dependencies = [
     { name = "tiktoken" },
     { name = "tokenizers" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/a7/91/32dcf577830f6d0689400e2fe06d868b7aae097dcd6bf322cdcafce05b76/litellm-1.55.2.tar.gz", hash = "sha256:e410499136ae98f932df152942d8bf9b06f917663d2de25529af761a7260fcd8", size = 6199387 }
+sdist = { url = "https://files.pythonhosted.org/packages/ed/40/b699373b45d7a60c655bb88fe729bf6a7024ea998634bfd17433a41ec9ab/litellm-1.55.3.tar.gz", hash = "sha256:83f7fd5c7b6eec1d431e786be9d73fbb72f1f1bc9aff333169a4a8eb61e72018", size = 6197498 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f8/42/2e97c6796a4d0bd96915676e7beaf9f2b56a3df97ec1877a4e9881244ad6/litellm-1.55.2-py3-none-any.whl", hash = "sha256:499b2a1713a9fa35cc9ff4bf82ac42f5eb0a675ae9e6909f9d8dcee208181d4a", size = 6467956 },
+    { url = "https://files.pythonhosted.org/packages/70/c8/28cab3182263f6f5e92da66f648855af4ac1074fb2c2b8b343bf5f6e2505/litellm-1.55.3-py3-none-any.whl", hash = "sha256:83e48a6104f2b30edb62f708ca47dfd42f22416ed2ab34702770b3a57d866aa5", size = 6470432 },
 ]
 
 [[package]]

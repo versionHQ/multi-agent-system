@@ -46,7 +46,7 @@ requires = ["hatchling", "hatch-build-scripts"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["framework","src"]
+packages = ["framework"]
 
 [tool.black]
 line-length = 88
@@ -61,4 +61,4 @@ members = ["kuriko"]
 ignore_missing_imports = true
 
 [tool.bandit]
-exclude_dirs = ["src/project"]
+exclude_dirs = [""]

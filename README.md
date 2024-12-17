@@ -151,14 +151,16 @@ framework/                  # Orchestration frameworks on Pydantic
 │   └── _cli/               # CLI commands
 │   └── ...
 │
-src/
-├── __init__.py
-├── app.py                  # Flask application
-├── project/                # Project-specific settings
 ├── db/                     # Database files
 │   ├── chroma.sqlite3
 │   └── ...
-└── uploads/                # Uploaded files for the project
+│
+sample/
+├── __init__.py
+├── project/                # Store a sample project
+├── uploads/                # Uploaded files for the project
+│
+└── app.py                  # Flask application
 ```
 
 ## Setup
@@ -190,7 +192,7 @@ src/
 
 1. Start the Flask backend:
    ```
-   uv run python src/app.py
+   uv run python app.py
    ```
    The backend will be available at `http://localhost:5002`.
 
@@ -209,7 +211,7 @@ src/
 
 ### CLI Test
 
-- To test new feature on CLI, import features to `_cli.main.py` as `callable: test` and run the following command:
+- To test new feature on CLI, import the features to `framework._cli.test_cli.py` as `test` and run the following command:
    ```
    uv run test
    ```
