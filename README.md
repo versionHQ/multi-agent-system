@@ -10,7 +10,6 @@ Messaging workflows are created at individual level, and will be deployed on thi
 
 Visit:
 
-- [Flask backend](https://blank-minta-krik8235-b534ee83.koyeb.app/)
 - [Client interface (beta)](https://versi0n.io/)
 - [Landing page](https://home.versi0n.io)
 - [Github (client app)](https://github.com/krik8235/pj_m_dev)
@@ -196,7 +195,7 @@ sample/
    ```
    The backend will be available at `http://localhost:5002`.
 
-2. Add new API endpoint. You can call them from the [api base url](https://blank-minta-krik8235-b534ee83.koyeb.app/).
+2. Add new API endpoint.
 
 3. Frontend (production) is available at `https://versi0n.io`. Currently we are on beta.
 
