@@ -1,12 +1,10 @@
 project/
 
 app copy.py
-main.py
-
-# team/
-# tool/
+# main.py
 
 test_client_app/
+test.py
 
 memo.txt
 

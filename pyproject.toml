@@ -1,32 +1,45 @@
 [project]
-name = "pj_m_multi_agent"
+name = "versionHQ"
 version = "0.1.0"
-description = "Add your description here"
+authors = [{ name = "Kuriko Iwai", email = "kuriko@versi0n.io" }]
+description = "Orchestration frameworks for model-agnostic AI agents that handle outbound efforts"
 readme = "README.md"
 requires-python = ">=3.12"
+license = {file = "LICENSE"}
+keywords = ["orchestration framework", "orchestration", "ai agent", "multi-agent system", "RAG", "agent", "version"]
 dependencies = [
-  "pandas",
-  "matplotlib",
-  "seaborn",
-  "regex",
-  "requests",
-  "python-dotenv",
-  "pydantic",
-  "werkzeug",
-  "typing",
-  "flask",
-  "flask_cors",
-  "waitress",
-  "pre-commit",
-  "litellm",
-  "openai",
-  "langchain_openai",
-  "composio_core==0.6.0",
-  "composio_openai",
-  "composio-langchain>=0.5.51",
-  "gunicorn>=23.0.0",
+  "pandas>=2.2.3",
+  "matplotlib>=3.9.3",
+  "seaborn>=0.13.2",
+  "regex>=2024.11.6",
+  "requests>=2.32.3",
+  "python-dotenv>=1.0.1",
+  "pydantic>=2.9.2",
+  "werkzeug>=3.1.3",
+  "typing>=3.10.0.0",
   "json-repair>=0.31.0",
+  "litellm>=1.53.9",
+  "openai>=1.57.0",
+  "langchain-openai>=0.2.11",
+  "composio-core>=0.6.0",
+  "composio-langchain>=0.6.0",
+  "composio-openai>=0.6.0",
+  "flask>=3.1.0",
+  "flask-cors>=5.0.0",
+  "waitress>=3.0.2",
+  "pre-commit>=4.0.1",
+  "gunicorn>=23.0.0"
 ]
+classifiers = ["Programming Language :: Python"]
+
+[project.urls]
+Homepage = "https://versi0n.io"
+Repository = "https://github.com/versionHQ/multi-agent-system"
+Issues = "https://github.com/versionHQ/multi-agent-system/issues"
+
+[project.scripts]
+test = "src.components._cli.main:test"
+
 
 [build-system]
 requires = ["hatchling", "hatch-build-scripts"]
@@ -34,7 +47,6 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src"]
-
 
 [tool.black]
 line-length = 88
@@ -44,3 +56,9 @@ profile = "black"
 
 [tool.uv.workspace]
 members = ["kuriko"]
+
+[tool.mypy]
+ignore_missing_imports = true
+
+[tool.bandit]
+exclude_dirs = ["src/project"]

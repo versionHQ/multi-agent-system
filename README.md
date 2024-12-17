@@ -52,6 +52,7 @@ LLM-powered `agent`s and `team`s use `tool`s and their own knowledge to complete
 - [Usage](#usage)
 - [Development](#development)
   - [Package Management with uv](#package-management-with-uv)
+  - [CLI Test](#cli-test)
   - [Pre-commit Hooks](#pre-commit-hooks)
   - [Customizing AI Agents](#customizing-ai-agents)
   - [Modifying RAG Functionality](#modifying-rag-functionality)
@@ -115,7 +116,6 @@ Multiple `agent`s can form a `team` to complete complex tasks together.
 ## Technologies Used
 **Schema, Database**
    - [Pydantic](https://docs.pydantic.dev/latest/): Data validation and serialization library for Python
-   <!-- - [pydantic-core](https://pypi.org/project/pydantic-core/): Core functionality for Pydantic validation and serialization -->
    - [Chroma DB](https://docs.trychroma.com/): Vector database for storing and querying usage data
    - [SQLite](https://www.sqlite.org/docs.html): C-language library to implements a small SQL database engine
    - [Upstage](https://console.upstage.ai/docs/getting-started/overview): Document processer for ML tasks. (Use `Document Parser API` to extract data from documents)
@@ -149,6 +149,7 @@ src/
 │   └── task/
 │   └── team/
 │   └── tool/
+│   └── _cli/               # cli to test new features
 │   └── ...
 ├── project/                # Project-specific agent, task, team, tools
 │   ├── agents.py
@@ -206,6 +207,12 @@ src/
 
 * After updating dependencies, update `requirements.txt` accordingly or run `uv pip freeze > requirements.txt`
 
+### CLI Test
+
+- To test new feature on CLI, import features to `_cli.main.py` as `callable: test` and run the following command:
+   ```
+   uv run test
+   ```
 
 ### Pre-commit Hooks
 
@@ -313,8 +320,10 @@ Common issues and solutions:
 - more llms integration
 - simpler prompting
 - team leader (do we need it?)
-- tools
+- tools (test)
 - broader knowledge
 
 - utils - log
 - utils - time
+
+- end to end client app test

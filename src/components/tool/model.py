@@ -158,13 +158,13 @@ class ToolCalled(BaseModel):
     """
     Store the tool called and any kwargs used.
     """
-    tool: InstanceOf[Tool] = Field(..., description="The name of the tool to be called.")
+    tool: InstanceOf[Tool] = Field(..., description="store the tool instance to be called.")
     arguments: Optional[Dict[str, Any]] = Field(..., description="kwargs passed to the tool")
 
 
 
 class InstructorToolCalled(BaseModel):
-    tool: InstanceOf[Tool] = Field(..., description="The name of the tool to be called.")
+    tool: InstanceOf[Tool] = Field(..., description="store the tool instance to be called.")
     arguments: Optional[Dict[str, Any]] = Field(..., description="kwargs passed to the tool")
 
 

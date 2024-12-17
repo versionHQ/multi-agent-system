@@ -29,48 +29,11 @@ def hello_world():
     return "<p>Hello, World!</p>"
 
 
-# @app.route("/api/define-cohort")
-# def define_cohort(customer=Dict[str, str], client_input=Dict[str, Any]) -> TaskOutput:
-#     from src.components.task.model import ResponseField, Task
-#     from src.project.agents import cohort_analyst
-#     from src.project.tasks import TASK_DESCRIPTION_TEMPLATE
-
-#     task_description = TASK_DESCRIPTION_TEMPLATE.format(
-#         customer_data=json.dumps(customer),
-#         client_business=client_input.business_overview,
-#         target_audience=client_input.target_audience,
-#         instruction="""Analyze the client's business model, target audience, and customer information and define the optimal cohort timeframe based on customer lifecycle and product usage patterns.""",
-#         output="""Select three relevant KPIs to measure the success of the cohort-based messaging workflow and return these KPIs by order of priority for the client. Then also return suitable xcohort timeframe in days."""
-#     )
-#     task = Task(
-#         description=task_description,
-#         expected_output_raw=False,
-#         expected_output_json=True,
-#         output_field_list=[
-#             ResponseField(title="cohort_timeframe", type="int", required=True),
-#             ResponseField(title="kpi", type="array", required=True),
-#         ],
-#         expected_output_pydantic=True,
-#         context=[],
-#         tools=[],
-#         callback=None,
-#     )
-
-#     res = task.execute_sync(agent=cohort_analyst)  # -> TaskOutput class
-#     print("Task is completed. ID:", res.task_id)
-#     print("Raw result: ", res.raw)
-#     print("JSON: ", res.json_dict)
-#     print("Pydantic: ", res.pydantic)
-
-#     return res
-
-
-
 @app.route('/api/base-setting', methods=['POST', 'OPTIONS', 'GET'])
 @cross_origin(origin='*', headers=['Access-Control-Allow-Origin',])
 def test2():
     print("test2")
-    from src.main import test_2
+    from src.test import test_2
     res = test_2()
     return  jsonify({ "output": res }), 200
 
