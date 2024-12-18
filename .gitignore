@@ -3,12 +3,11 @@ project/
 app copy.py
 composio.py
 
-test_client_app/
 test.py
 
 memo.txt
 
-
+dist/
 __pycache__/
 .ruff_cache/
 .DS_Store/

@@ -13,8 +13,7 @@ json-repair==0.31.0
 litellm==1.53.9
 
 openai==1.57.0
-langchain-openai==0.2.11
-composio-core==0.6.0
+composio==0.1.0
 composio-langchain==0.6.0
 composio-openai==0.6.0
 

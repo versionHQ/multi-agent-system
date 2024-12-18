@@ -8,11 +8,14 @@ Agents are model agnostic.
 
 Messaging workflows are created at individual level, and will be deployed on third-party services via `Composio`.
 
-Visit:
 
-- [Client interface (beta)](https://versi0n.io/)
-- [Landing page](https://home.versi0n.io)
-- [Github (client app)](https://github.com/krik8235/pj_m_dev)
+**Visit:**
+
+- Marketing:   [Landing page](https://home.versi0n.io)
+- Client app:  [Production](https://versi0n.io/)
+
+- Backend:     [Orchestration + multi-agent RAG system](https://github.com/versionHQ/multi-agent-system)
+- Test CI:     [Test client app (React)](https://github.com/versionHQ/test-client-app)
 
 
 ## Mindmap
@@ -26,18 +29,10 @@ LLM-powered `agent`s and `team`s use `tool`s and their own knowledge to complete
 
 ## UI
 <p align="center">
-   <!-- <img src="https://res.cloudinary.com/dfeirxlea/image/upload/v1728219760/pj_m_home/wkxvmmyah5dvhbdah1qn.png" alt="version logo" width="200">
-   &nbsp; &nbsp; &nbsp; &nbsp; -->
-   <img src="https://res.cloudinary.com/dfeirxlea/image/upload/v1728302420/pj_m_home/xy58a7imyquuvkgukqxt.png" width="45%" alt="messaging workflow" />
+    <img alt="UI" src="https://res.cloudinary.com/dfeirxlea/image/upload/v1733414200/pj_m_home/tqgg3xfpk5x4i6rh3egv.png" width="60%">
+&nbsp;&nbsp;&nbsp;
+   <img src="https://res.cloudinary.com/dfeirxlea/image/upload/v1728302420/pj_m_home/xy58a7imyquuvkgukqxt.png" width="25%" alt="messaging workflow">
 </p>
-
-
-<p align="center">
-   <!-- <img alt="UI1" src="https://res.cloudinary.com/dfeirxlea/image/upload/v1732801909/pj_m_home/ibi8b1ohv2sioqdkoq7n.png" width="45%">
-   &nbsp; &nbsp; -->
-   <img alt="UI2" src="https://res.cloudinary.com/dfeirxlea/image/upload/v1733414200/pj_m_home/tqgg3xfpk5x4i6rh3egv.png" width="80%">
-</p>
-
 
 <hr />
 
@@ -197,7 +192,14 @@ sample/
 
 2. Add new API endpoint.
 
-3. Frontend (production) is available at `https://versi0n.io`. Currently we are on beta.
+3. Run a React demo app: [React demo app](https://github.com/versionHQ/test-client-app)
+   ```
+   npm i
+   npm start
+   ```
+   The frontend will be available at `http://localhost:3000`.
+
+4. `production` is available at `https://versi0n.io`. Currently, we are running beta.
 
 
 ## Contributing & Customizing
@@ -278,7 +280,8 @@ Common issues and solutions:
 ## Frequently Asked Questions (FAQ)
 **Q. Where can I see if the agent is working?**
 
-> A. You can find a frontend app [here](https://beta.versi0n.io) with real-world outbound use cases. Also refer to the structure.
+> A. You can find a frontend app [here](https://versi0n.io) with real-world outbound use cases.
+> You can also test features [here](https://github.com/versionHQ/test-client-app) using React app.
 
 **Q. How do you analyze the customer?**
 
@@ -306,10 +309,10 @@ Common issues and solutions:
 
 ## Overall Project Structure
 
-|  | Marketing page | Client app (beta) | Orchestration/agent system | Analyics
-| :---: | :---: | :---: | :---: | :---: |
-| Github |  [repo_1](https://github.com/krik8235/pj_m_dev_home)  | [repo_a](https://github.com/krik8235/pj_m_dev) | **this repository** | [repo_b](https://github.com/versionHQ/clutering-analysis) |
-| Website | [home](https://home.versi0n.io) | [client app](https://versi0n.io) | - | - |
+|  | Marketing page | Client app (beta) | Test app | Orchestration/agent system | Analyics |
+| :---: | :---: | :---: | :---: | :---: | :---: |
+| Github |  [repo_1](https://github.com/krik8235/pj_m_dev_home)  | [repo_a](https://github.com/krik8235/pj_m_dev) | [repo_b](https://github.com/versionHQ/test-client-app) | [repo_c](https://github.com/versionHQ/multi-agent-system)  | [repo_d](https://github.com/versionHQ/clutering-analysis) |
+| Website | [home](https://home.versi0n.io) | [client app](https://versi0n.io) | (localhost) | - | - |
 
 
 <--- Remaining basic tasks --->
@@ -317,8 +320,6 @@ Common issues and solutions:
 - llm handling - agent
 - more llms integration
 - simpler prompting
-- team leader (do we need it?)
-- tools (test)
 - broader knowledge
 
 - utils - log

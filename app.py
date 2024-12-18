@@ -7,7 +7,6 @@ from flask import Flask, request, jsonify, flash, redirect
 from flask_cors import CORS, cross_origin
 from waitress import serve
 
-from framework.task.model import TaskOutput
 
 load_dotenv(override=True)
 
@@ -31,6 +30,16 @@ def hello_world():
     <p>I am Version HQ's Flask backend.</p>
     <p>The orchestration framework is <a href="https://github.com/versionHQ/multi-agent-system" target="_blank" rel="noreferrer">here</a>.</p>
     <p>You can check our current bata from <a href="https://versi0n.io" target="_blank" rel="noreferrer">here</a>.</p>
+    """
+
+@app.route("/test")
+def test():
+    res = test2()
+    print(res)
+    if res:
+        te = res["output"][0].cohort_timeframe
+    return f"""
+    <p>{te}</p>
     """
 
 
