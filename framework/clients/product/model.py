@@ -36,9 +36,11 @@ class Product(BaseModel):
 
     id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True)
     name: Optional[str] = Field(default=None, description="product name")
-    provider: Optional[ProductProvider] = Field(default=None)
-    landing_url: Optional[str] = Field(default=None, description="marketing url of the product if any")
     description: Optional[str] = Field(default=None, max_length=256, description="product description scraped from landing url or client input. cascade to the agent")
+    provider: Optional[ProductProvider] = Field(default=None)
+    audience: Optional[str] = Field(default=None, description="target audience")
+    usp: Optional[str] = Field(default=None)
+    landing_url: Optional[str] = Field(default=None, description="marketing url of the product if any")
     cohort_timeframe: Optional[int] = Field(default=30, description="ideal cohort timeframe of the product in days")
     
     @field_validator("id", mode="before")

@@ -107,7 +107,7 @@ Multiple `agent`s can form a `team` to complete complex tasks together.
 
 
 ## Technologies Used
-**Schema, Database**
+**Schema, Database, Data Validation**
    - [Pydantic](https://docs.pydantic.dev/latest/): Data validation and serialization library for Python
    - [Pydantic_core](https://pypi.org/project/pydantic-core/): Core func packages for Pydantic
    - [Chroma DB](https://docs.trychroma.com/): Vector database for storing and querying usage data
@@ -151,7 +151,7 @@ framework/                  # Orchestration frameworks on Pydantic
 │
 sample/
 ├── __init__.py
-├── project/                # Store a sample project
+├── demo/                   # Store a demo project
 ├── uploads/                # Uploaded files for the project
 │
 └── app.py                  # Flask application

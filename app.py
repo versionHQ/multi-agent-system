@@ -7,7 +7,6 @@ from flask import Flask, request, jsonify, flash, redirect
 from flask_cors import CORS, cross_origin
 from waitress import serve
 
-
 load_dotenv(override=True)
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -32,24 +31,34 @@ def hello_world():
     <p>You can check our current bata from <a href="https://versi0n.io" target="_blank" rel="noreferrer">here</a>.</p>
     """
 
-@app.route("/test")
-def test():
-    res = test2()
-    print(res)
-    if res:
-        te = res["output"][0].cohort_timeframe
-    return f"""
-    <p>{te}</p>
-    """
+
+@app.route('/api/draft-instruction', methods=['POST', 'OPTIONS', 'GET'])
+@cross_origin(origin='*', headers=['Access-Control-Allow-Origin'])
+def draft_instruction():
+    from core.main import draft_instruction, read_url
+    data = request.json
+    url, goal = data.get('url', None), data.get('goal', None)
+    if not url:
+        return jsonify({ "output": res }), 400
+    
+    html_source_code = read_url(url=url)
+    try:
+        res = draft_instruction(html_source_code=html_source_code, goal=goal)
+        return jsonify({ "output": res }), 200
+    except:
+        return jsonify({ "output":  None }), 400
 
 
-@app.route('/api/base-setting', methods=['POST', 'OPTIONS', 'GET'])
-@cross_origin(origin='*', headers=['Access-Control-Allow-Origin',])
-def test2():
-    print("test2")
-    from sample.test import test_2
-    res = test_2()
-    return  jsonify({ "output": res }), 200
+@app.route('/api/assess', methods=['POST', 'OPTIONS', 'GET'])
+@cross_origin(origin='*', headers=['Access-Control-Allow-Origin'])
+def run_initial_assessment():
+    from core.main import assess
+    try:
+        res = assess()
+        return  jsonify({ "output": res }), 200
+    except:
+        return jsonify({ "output":  None }), 400
+    
 
 
 if __name__ == "__main__":

@@ -28,9 +28,22 @@ class TaskOutput(BaseModel):
     Depending on the task output format, use `raw`, `pydantic`, `json_dict` accordingly.
     """
 
+    class AgentOutput(BaseModel):
+        """
+        Keep adding agents' learning and recommendation and store it in `pydantic` field of `TaskOutput` class.
+        Since the TaskOutput class has `agent` field, we don't add any info on the agent that handled the task.
+        """
+        customer_id: str = Field(default=None, max_length=126, description="customer uuid")
+        customer_analysis: str = Field(default=None, max_length=256, description="analysis of the customer") 
+        business_overview: str = Field(default=None, max_length=256, description="analysis of the client's business")
+        cohort_timeframe: int = Field(default=None, max_length=256, description="Suitable cohort timeframe in days")
+        kpi_metrics: List[str] = Field(default=list, description="Ideal KPIs to be tracked")
+        assumptions: List[Dict[str, Any]] = Field(default=list, description="assumptions to test")
+
+
     task_id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True, description="store Task ID")
     raw: str = Field(default="", description="Raw output of the task")
-    pydantic: Optional[BaseModel] = Field(default=None, description="Pydantic output of task")
+    pydantic: Optional[BaseModel | AgentOutput] = Field(default=None, description="Pydantic output of task")
     json_dict: Optional[Dict[str, Any]] = Field(default=None, description="JSON dictionary of task")
 
 
@@ -197,7 +210,7 @@ class Task(BaseModel):
         return self
 
 
-    def prompt(self, customer=str | None, client_business=str | None) -> str:
+    def prompt(self, customer=str | None, product_overview=str | None) -> str:
         """
         Return the prompt of the task.
         """
@@ -205,7 +218,7 @@ class Task(BaseModel):
         task_slices = [
             self.description,
             f"Customer overview: {customer}",
-            f"Client business overview: {client_business}",
+            f"Product overview: {product_overview}",
             f"Follow the output formats decribled below. Your response should NOT contain any other element from the following formats.: {self.output_prompt}",
         ]
         return "\n".join(task_slices)

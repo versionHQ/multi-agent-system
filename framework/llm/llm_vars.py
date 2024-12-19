@@ -116,6 +116,7 @@ PROVIDERS = [
     "bedrock",
     "azure",
     "cerebras",
+    "llama",
 ]
 
 MODELS = {
