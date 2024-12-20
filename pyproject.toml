@@ -8,9 +8,6 @@ requires-python = ">=3.12"
 license = {file = "LICENSE"}
 keywords = ["orchestration framework", "orchestration", "ai agent", "multi-agent system", "RAG", "agent", "version"]
 dependencies = [
-  "pandas==2.2.3",
-  "matplotlib>=3.9.3",
-  "seaborn>=0.13.2",
   "regex>=2024.11.6",
   "requests>=2.32.3",
   "python-dotenv>=1.0.1",
