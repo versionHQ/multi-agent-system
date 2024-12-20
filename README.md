@@ -3,7 +3,7 @@
 ![python ver](https://img.shields.io/badge/Python-3.13.1-blue) ![pyenv ver](https://img.shields.io/badge/pyenv-2.4.23-orange)
 
 
-A framework for orchestration and multi-agent system that design, deploy, and autopilot messaging workflows based on performance.
+An LLM orchestration frameworks for multi-agent systems with RAG to autopilot outbound workflows.
 
 Agents are model agnostic.
 
@@ -204,9 +204,9 @@ agent = Agent(llm="your-llm"...)
 
 To add an agent, use `sample` directory to add new `project`. You can define an agent with a specific role, goal, and set of tools.
 
-Your new agent needs to follow the `Agent` model defined in the `framework.agent.model.py`.
+Your new agent needs to follow the `Agent` model defined in the `verionhq.agent.model.py`.
 
-You can also add any fields and functions to the `Agent` model **universally** by modifying `framework.agent.model.py`.
+You can also add any fields and functions to the `Agent` model **universally** by modifying `verionhq.agent.model.py`.
 
 
 ### Modifying RAG Functionality
