@@ -42,7 +42,6 @@ LLM-powered `agent`s and `team`s use `tool`s and their own knowledge to complete
   - [Customizing AI Agents](#customizing-ai-agents)
   - [Modifying RAG Functionality](#modifying-rag-functionality)
   - [Package Management with uv](#package-management-with-uv)
-  - [Testing](#testing)
   - [Pre-Commit Hooks](#pre-commit-hooks)
 - [Trouble Shooting](#trouble-shooting)
 - [Frequently Asked Questions (FAQ)](#frequently-asked-questions-faq)
@@ -156,15 +155,19 @@ src/
 
 ## Usage
 
-1. Start the Flask backend:
-   ```
-   uv run python app.py
-   ```
-   The backend will be available at `http://localhost:5002`.
+1. Add features.
 
-2. Add new API endpoint.
+2. Test the features using the `tests` directory.
 
-3. Run a React demo app: [React demo app](https://github.com/versionHQ/test-client-app)
+- Add a file to the `tests` directory.
+- Run a test.
+```
+uv run <your file name>
+```
+* All the `.py` files' names in the `tests` have to be ended with `_test.py`.
+
+
+3. Run a React demo app: [React demo app](https://github.com/versionHQ/test-client-app) to check it on the client endpoint.
    ```
    npm i
    npm start
@@ -186,7 +189,6 @@ uv pip install git+https://github.com/versionHQ/multi-agent-system.git
 from versionhq.agent.model import Agent
 agent = Agent(llm="your-llm"...)
 ```
-
 
 ## Contributing & Customizing
 
@@ -226,10 +228,6 @@ The RAG system uses Chroma DB to store and query past campaign dataset. To updat
 
 * After updating dependencies, update `requirements.txt` accordingly or run `uv pip freeze > requirements.txt`
 
-### Testing
-
-- To test new features, add features to the `tests` directory.
-- All the `.py` files' names in the `tests` have to be ended with `_test.py`.
 
 ### Pre-Commit Hooks
 
