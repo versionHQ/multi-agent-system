@@ -3,7 +3,6 @@
 ![python ver](https://img.shields.io/badge/Python-3.13.1-blue) ![pyenv ver](https://img.shields.io/badge/pyenv-2.4.23-orange)
 
 
-
 A framework for orchestration and multi-agent system that design, deploy, and autopilot messaging workflows based on performance.
 
 Agents are model agnostic.
@@ -27,14 +26,6 @@ LLM-powered `agent`s and `team`s use `tool`s and their own knowledge to complete
    <img src="https://res.cloudinary.com/dfeirxlea/image/upload/v1733556715/pj_m_home/urwte15at3h0dr8mdlyo.png" alt="mindmap" width="1000">
 </p>
 
-
-## UI
-<p align="center">
-    <img alt="UI" src="https://res.cloudinary.com/dfeirxlea/image/upload/v1733414200/pj_m_home/tqgg3xfpk5x4i6rh3egv.png" width="60%">
-&nbsp;&nbsp;&nbsp;
-   <img src="https://res.cloudinary.com/dfeirxlea/image/upload/v1728302420/pj_m_home/xy58a7imyquuvkgukqxt.png" width="25%" alt="messaging workflow">
-</p>
-
 <hr />
 
 ## Table of Content
@@ -46,6 +37,7 @@ LLM-powered `agent`s and `team`s use `tool`s and their own knowledge to complete
 - [Project Structure](#project-structure)
 - [Setup](#setup)
 - [Usage](#usage)
+- [Installing as a Package Module (Alpha)](#installing-as-a-package-module-alpha)
 - [Contributing & Customizing](#contributing--customizing)
   - [Customizing AI Agents](#customizing-ai-agents)
   - [Modifying RAG Functionality](#modifying-rag-functionality)
@@ -55,7 +47,6 @@ LLM-powered `agent`s and `team`s use `tool`s and their own knowledge to complete
 - [Trouble Shooting](#trouble-shooting)
 - [Frequently Asked Questions (FAQ)](#frequently-asked-questions-faq)
 - [Overall Project Structure](#overall-project-structure)
-- [Version control](#version-control)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -63,47 +54,22 @@ LLM-powered `agent`s and `team`s use `tool`s and their own knowledge to complete
 
 ## Key Features
 
-A mulit-agent system that tailors messaging workflow, predicts its performance, and deploys it on third-party tools.
+A mulit-agent systems with Rag that tailors messaging workflow, predicts its performance, and deploys it on third-party tools.
 
 The `agent` is model agnostic. The default model is set Chat GTP 4o. We ask the client their preference and switch it accordingly using llm variable stored in the `BaseAgent` class.
 
-Multiple `agent`s can form a `team` to complete complex tasks together.
+Multiple `agents` can form a `team` to complete complex tasks together.
 
+**1. Analysis**
+- Professional `agents` handle the analysis `tasks` on each client, customer, and product. 
 
-1. **Client & Customer Analysis**:
-   - Fetch clustering analysis results of each customer.
-   - Retrieve outbound campaign conditions such as objective, media mix, target audience from the React client interface.
-   - Employ default conditions in case no client inputs are available.
+**2. Messaging Workflow Creation**
+- Several `teams` receive the analysis and design initial messaging workflow with several layers.
+- Ask the client for their inputs
+- Deploy the workflow on the third party tools using `composio`.
 
-2. **Assumption Building**:
-   - Call `agent-a` and let it build assumptions we will test on each user to achieve the goal.
-   - Ask the client for the approval.
-
-3. **Workflow Tailoring**:
-   - Call `agent-b` and let it draft messaging workflow with 3 conditional layers.
-   - Call `agent-c` and let it set up media channels and schedule based on the client inputs on audience and media mix.
-   - Call `agent-d` and let it draft a first message to send.
-
-   (They form a `team`.)
-
-   [*brain*]
-   - Within each agent, user data (jsonl) is passed to the RAGTool function in Composio.
-   - This RAG system queries a Chroma DB that has been pre-trained on a repository of past outbound campaigns.
-   - Utilizes LLM to generate the output on next best action, comparing with past similar campaigns in the Chroma DB.
-
-4. **Performance Predicting**
-   - Call `agent-x` from the versionHQ module, and estimate performance of the first layer of the workflow.
-
-5. **Client Interaction**:
-   - Presents the workflow, next best action, and performance prediction to the client through a React client interface.
-   - Allows the user to choose whether to accept or ask for change on the action recommended.
-
-6. **Finalizing Workflow**:
-   - Collects all client feedback.
-   - Passes the information back to the relative agent/s to recreate.
-
-7. **Deploying Next Action**:
-   - Use Composio to deploy on the CRM or ad platform.
+**3. Autopiloting**
+- Responsible `agents` or `teams` autopilot executing and refining the messaging workflow.
 
 
 ## Technologies Used
@@ -123,12 +89,9 @@ Multiple `agent`s can form a `team` to complete complex tasks together.
 
 **Deployment**
    - Python: Primary programming language. We use 3.12 in this project
-   - [Flask](https://flask.palletsprojects.com/en/stable/quickstart/): Web framework for the backend API. Communicate with the client app.
-   - [Flask Cors](https://pypi.org/project/Flask-Cors/): A Flask extension for handling Cross Origin Resource Sharing (CORS), making cross-origin AJAX possible
    - [uv](https://docs.astral.sh/uv/): Python package installer and resolver
    - [pre-commit](https://pre-commit.com/): Manage and maintain pre-commit hooks
-   - [Hatch/Hatchling](https://hatch.pypa.io/latest/): Build package management
-   - [Koyeb](https://www.koyeb.com/docs): Serverless deployment platform
+   - [setuptools](https://pypi.org/project/setuptools/): Build python modules
 
 
 ## Project Structure
@@ -209,6 +172,20 @@ src/
    The frontend will be available at `http://localhost:3000`.
 
 4. `production` is available at `https://versi0n.io`. Currently, we are running beta.
+
+
+## Installing as a Package Module (Alpha)
+
+1. Open another terminal, set your repository as root, and run
+```
+uv pip install git+https://github.com/versionHQ/multi-agent-system.git
+```
+
+2. You can use the `versionhq` module in your Python app.
+```
+from versionhq.agent.model import Agent
+agent = Agent(llm="your-llm"...)
+```
 
 
 ## Contributing & Customizing
@@ -333,6 +310,3 @@ Common issues and solutions:
 - utils - time
 
 - end to end client app test
-
-
-## Version control
