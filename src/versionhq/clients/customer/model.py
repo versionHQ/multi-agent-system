@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Callable, Type, Optional, get_args, get_orig
 from pydantic import UUID4, InstanceOf, BaseModel, ConfigDict, Field, create_model, field_validator, model_validator
 from pydantic_core import PydanticCustomError
 
-from framework.clients.product.model import Product, ProductProvider
+from versionhq.clients.product.model import Product, ProductProvider
 
 
 class Customer(ABC, BaseModel):

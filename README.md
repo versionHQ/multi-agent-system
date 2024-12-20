@@ -50,7 +50,7 @@ LLM-powered `agent`s and `team`s use `tool`s and their own knowledge to complete
   - [Customizing AI Agents](#customizing-ai-agents)
   - [Modifying RAG Functionality](#modifying-rag-functionality)
   - [Package Management with uv](#package-management-with-uv)
-  - [CLI Test](#cli-test)
+  - [Testing](#testing)
   - [Pre-Commit Hooks](#pre-commit-hooks)
 - [Trouble Shooting](#trouble-shooting)
 - [Frequently Asked Questions (FAQ)](#frequently-asked-questions-faq)
@@ -135,26 +135,28 @@ Multiple `agent`s can form a `team` to complete complex tasks together.
 
 ```
 .
-framework/                  # Orchestration frameworks on Pydantic
-│   ├── agent/
-│   └── llm/
-│   └── task/
-│   └── team/
-│   └── tool/
-│   └── clients/            # Classes to store the client related information
-│   └── _cli/               # CLI commands
-│   └── ...
+src/
+└── versionHQ/                  # Orchestration frameworks on Pydantic
+│      ├── agent/
+│      └── llm/
+│      └── task/
+│      └── team/
+│      └── tool/
+│      └── clients/            # Classes to store the client related information
+│      └── cli/                # CLI commands
+│      └── ...
+│      │
+│      ├── db/                 # Database files
+│      ├── chroma.sqlite3
+│      └── ...
 │
-├── db/                     # Database files
-│   ├── chroma.sqlite3
-│   └── ...
-│
-sample/
-├── __init__.py
-├── demo/                   # Store a demo project
-├── uploads/                # Uploaded files for the project
-│
-└── app.py                  # Flask application
+└──tests/
+      └── cli/   
+      └── team/
+      └── ...
+      │        
+      └── uploads/    # Uploaded files for the project
+
 ```
 
 ## Setup
@@ -247,12 +249,10 @@ The RAG system uses Chroma DB to store and query past campaign dataset. To updat
 
 * After updating dependencies, update `requirements.txt` accordingly or run `uv pip freeze > requirements.txt`
 
-### CLI Test
+### Testing
 
-- To test new features, use `tests`. Import the features to `tests.cli.test_cli.py` as `test` and run the following command:
-   ```
-   uv run test
-   ```
+- To test new features, add features to the `tests` directory.
+- All the `.py` files' names in the `tests` have to be ended with `_test.py`.
 
 ### Pre-Commit Hooks
 

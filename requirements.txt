@@ -23,3 +23,5 @@ waitress>=3.0.2
 pre-commit>=4.0.1
 
 gunicorn>=23.0.0
+setuptools
+wheel

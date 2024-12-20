@@ -5,17 +5,17 @@ from typing import Any, Dict, List, Optional, TypeVar, Union
 from dotenv import load_dotenv
 from pydantic import UUID4, BaseModel, Field, InstanceOf, PrivateAttr, model_validator
 
-from framework._utils.cache_handler import CacheHandler
-from framework._utils.logger import Logger
-from framework._utils.rpm_controller import RPMController
-from framework._utils.usage_metrics import UsageMetrics
-from framework.agent.parser import AgentAction
-from framework.llm.llm_vars import LLM_VARS
-from framework.llm.model import LLM, DEFAULT_CONTEXT_WINDOW
-from framework.task import TaskOutputFormat
-from framework.task.model import ResponseField
-from framework.tool.model import Tool, ToolCalled
-from framework.tool.tool_handler import ToolHandler
+from versionhq._utils.cache_handler import CacheHandler
+from versionhq._utils.logger import Logger
+from versionhq._utils.rpm_controller import RPMController
+from versionhq._utils.usage_metrics import UsageMetrics
+from versionhq.agent.parser import AgentAction
+from versionhq.llm.llm_vars import LLM_VARS
+from versionhq.llm.model import LLM, DEFAULT_CONTEXT_WINDOW
+from versionhq.task import TaskOutputFormat
+from versionhq.task.model import ResponseField
+from versionhq.tool.model import Tool, ToolCalled
+from versionhq.tool.tool_handler import ToolHandler
 
 load_dotenv(override=True)
 T = TypeVar("T", bound="Agent")

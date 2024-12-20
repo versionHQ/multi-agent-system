@@ -8,9 +8,9 @@ from typing import Any, Dict, List, Set, Optional, Tuple, Callable
 from pydantic import UUID4, BaseModel, Field, PrivateAttr, field_validator, model_validator
 from pydantic_core import PydanticCustomError
 
-from framework._utils.process_config import process_config
-from framework.task import TaskOutputFormat
-from framework.tool.model import Tool, ToolCalled
+from versionhq._utils.process_config import process_config
+from versionhq.task import TaskOutputFormat
+from versionhq.tool.model import Tool, ToolCalled
 
 
 class ResponseField(BaseModel):

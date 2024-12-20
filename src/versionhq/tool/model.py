@@ -3,7 +3,7 @@ from inspect import signature
 from typing import Any, Dict, Callable, Type, Optional, get_args, get_origin
 from pydantic import InstanceOf, BaseModel, ConfigDict, Field, create_model, field_validator, model_validator
 
-from framework._utils.cache_handler import CacheHandler
+from versionhq._utils.cache_handler import CacheHandler
 
 
 class Tool(ABC, BaseModel):
@@ -49,7 +49,7 @@ class Tool(ABC, BaseModel):
 
     @model_validator(mode="after")
     def set_up_tool_handler_instance(self):
-        from framework.tool.tool_handler import ToolHandler
+        from versionhq.tool.tool_handler import ToolHandler
 
         if self.tool_handler:
             ToolHandler(**self.tool_handler)
@@ -145,7 +145,7 @@ class Tool(ABC, BaseModel):
                         result = self.invoke(input=arguments)  
 
             else:
-                from framework.tool.tool_handler import ToolHandler
+                from versionhq.tool.tool_handler import ToolHandler
                 tool_handler = ToolHandler(last_used_tool=tool_called, cache=CacheHandler())
                 self.tool_handler = tool_handler
                 result = self.invoke(input=arguments)

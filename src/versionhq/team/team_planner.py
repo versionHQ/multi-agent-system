@@ -3,8 +3,8 @@ from dotenv import load_dotenv
 from typing import Any, List, Optional
 from pydantic import BaseModel, Field
 
-from framework.agent.model import Agent
-from framework.task.model import Task, ResponseField
+from versionhq.agent.model import Agent
+from versionhq.task.model import Task, ResponseField
 
 load_dotenv(override=True)
 

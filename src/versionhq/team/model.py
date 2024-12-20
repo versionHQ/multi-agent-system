@@ -10,12 +10,12 @@ from typing import Any, Dict, List, TYPE_CHECKING, Callable, Optional, Tuple, Un
 from pydantic import UUID4, InstanceOf, Json, BaseModel, Field, PrivateAttr, field_validator, model_validator
 from pydantic_core import PydanticCustomError
 
-from framework.agent.model import Agent
-from framework.task.model import Task, TaskOutput, ConditionalTask, TaskOutputFormat
-from framework.task.formatter import create_raw_outputs
-from framework.team.team_planner import TeamPlanner
-from framework._utils.logger import Logger
-from framework._utils.usage_metrics import UsageMetrics
+from versionhq.agent.model import Agent
+from versionhq.task.model import Task, TaskOutput, ConditionalTask, TaskOutputFormat
+from versionhq.task.formatter import create_raw_outputs
+from versionhq.team.team_planner import TeamPlanner
+from versionhq._utils.logger import Logger
+from versionhq._utils.usage_metrics import UsageMetrics
 
 
 from pydantic._internal._generate_schema import GenerateSchema

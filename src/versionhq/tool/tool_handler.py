@@ -1,6 +1,6 @@
 from typing import Any, Optional, Union
-from framework.tool.model import ToolCalled, InstructorToolCalled, CacheTool
-from framework._utils.cache_handler import CacheHandler
+from versionhq.tool.model import ToolCalled, InstructorToolCalled, CacheTool
+from versionhq._utils.cache_handler import CacheHandler
 
 
 class ToolHandler:

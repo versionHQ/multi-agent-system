@@ -30,16 +30,20 @@ dependencies = [
   "setuptools>=75.6.0",
   "wheel>=0.45.1",
 ]
-classifiers = ["Programming Language :: Python"]
+classifiers = [
+  "Programming Language :: Python",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+]
 
 [project.urls]
 Homepage = "https://versi0n.io"
 Repository = "https://github.com/versionHQ/multi-agent-system"
 Issues = "https://github.com/versionHQ/multi-agent-system/issues"
 
-[project.scripts]
-test = "tests.cli.test:test"
-
+[tool.setuptools]
+packages = ["versionhq"]
+package-dir = {"" = "src"}
 
 [tool.black]
 line-length = 88
@@ -56,13 +60,9 @@ ignore_missing_imports = true
 [tool.bandit]
 exclude_dirs = [""]
 
-
 [build-system]
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
-
-[tool.setuptools.packages.find]
-where = ["framework"]
 
 [tool.setuptools.dynamic]
 version = {attr = "versionHQ.__version__"}

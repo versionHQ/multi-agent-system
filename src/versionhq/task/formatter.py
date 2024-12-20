@@ -1,5 +1,5 @@
 from typing import List
-from framework.task.model import Task, TaskOutput
+from versionhq.task.model import Task, TaskOutput
 
 
 def create_raw_outputs(tasks: List[Task], task_outputs: List[TaskOutput]) -> str:

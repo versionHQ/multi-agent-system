@@ -1,6 +1,6 @@
 from typing import Callable
 from pydantic import BaseModel
-from framework.tool.model import Tool
+from versionhq.tool.model import Tool
 
 
 def tool(*args):

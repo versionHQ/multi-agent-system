@@ -5,10 +5,10 @@ from typing import Any, Dict, List, Union, Callable, Type, Optional, get_args, g
 from pydantic import UUID4, InstanceOf, BaseModel, ConfigDict, Field, create_model, field_validator, model_validator
 from pydantic_core import PydanticCustomError
 
-from framework.clients.product.model import Product
-from framework.clients.customer.model import Customer
-from framework.agent.model import Agent
-from framework.team.model import Team
+from versionhq.clients.product.model import Product
+from versionhq.clients.customer.model import Customer
+from versionhq.agent.model import Agent
+from versionhq.team.model import Team
 
 
 class ScoreFormat:

@@ -3,8 +3,6 @@ core/
 app copy.py
 composio.py
 
-test.py
-
 memo.txt
 
 dist/
