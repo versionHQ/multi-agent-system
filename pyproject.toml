@@ -42,7 +42,6 @@ Repository = "https://github.com/versionHQ/multi-agent-system"
 Issues = "https://github.com/versionHQ/multi-agent-system/issues"
 
 [tool.setuptools]
-packages = ["versionhq"]
 package-dir = {"" = "src"}
 
 [tool.black]
@@ -52,7 +51,7 @@ line-length = 88
 profile = "black"
 
 [tool.uv.workspace]
-members = ["kuriko"]
+members = ["krik8235"]
 
 [tool.mypy]
 ignore_missing_imports = true
