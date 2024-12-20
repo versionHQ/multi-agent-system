@@ -92,14 +92,13 @@ class Agent(ABC, BaseModel):
     id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True)
     agent_ops_agent_name: str = None
     agent_ops_agent_id: str = None
-    role: str = Field(description="Role of the agent")
-    goal: str = Field(description="goal of the agent")
-    backstory: str = Field(description="Backstory of the agent")
+    role: str = Field(description="role of the agent - used in summary and logs")
+    goal: str = Field(description="concise goal of the agent (details are set in the Task instance)")
+    backstory: str = Field(description="context passed to the LLM")
 
     # tools
     tools: Optional[List[Any]] = Field(default_factory=list)
     tool_handler: InstanceOf[ToolHandler] = Field(default=None, description="handle tool cache and last used tool")
-    # tools_results: Optional[List[Any]] = Field(default=[], description="Results of the tools used by the agent.")
 
     # team, rules of task executions
     team: Optional[List[Any]] = Field(default=None, description="Team to which the agent belongs")

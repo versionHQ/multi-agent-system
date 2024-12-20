@@ -1,6 +1,8 @@
 # Overview
 
-[![PyPI version](https://badge.fury.io/py/tensorflow.svg)](https://badge.fury.io/py/tensorflow)
+![python ver](https://img.shields.io/badge/Python-3.13.1-blue) ![pyenv ver](https://img.shields.io/badge/pyenv-2.4.23-orange)
+
+
 
 A framework for orchestration and multi-agent system that design, deploy, and autopilot messaging workflows based on performance.
 
@@ -13,7 +15,6 @@ Messaging workflows are created at individual level, and will be deployed on thi
 
 - Marketing:   [Landing page](https://home.versi0n.io)
 - Client app:  [Production](https://versi0n.io/)
-
 - Backend:     [Orchestration + multi-agent RAG system](https://github.com/versionHQ/multi-agent-system)
 - Test CI:     [Test client app (React)](https://github.com/versionHQ/test-client-app)
 
@@ -54,9 +55,9 @@ LLM-powered `agent`s and `team`s use `tool`s and their own knowledge to complete
 - [Trouble Shooting](#trouble-shooting)
 - [Frequently Asked Questions (FAQ)](#frequently-asked-questions-faq)
 - [Overall Project Structure](#overall-project-structure)
+- [Version control](#version-control)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
 
 <hr />
 
@@ -103,7 +104,6 @@ Multiple `agent`s can form a `team` to complete complex tasks together.
 
 7. **Deploying Next Action**:
    - Use Composio to deploy on the CRM or ad platform.
-
 
 
 ## Technologies Used
@@ -161,15 +161,22 @@ sample/
 
 1. Install the `uv` package manager:
    ```
-   pip install uv
+   brew install uv
    ```
 
 2. Install dependencies:
    ```
-   uv venv --python=python3.12
+   uv venv
    source .venv/bin/activate
 
    uv pip install -r requirements.txt -v
+   ```
+
+* In case of AssertionError/module mismatch, run Python version control using `.pyenv`
+   ```
+   pyenv install 3.13.1
+   pyenv global 3.13.1  (optional: `pyenv global system` to get back to the system default ver.)
+   uv python pin 3.13.1
    ```
 
 3. Set up environment variables:
@@ -242,7 +249,7 @@ The RAG system uses Chroma DB to store and query past campaign dataset. To updat
 
 ### CLI Test
 
-- To test new features on CLI, import the features to `framework._cli.test_cli.py` as `test` and run the following command:
+- To test new features, use `tests`. Import the features to `tests.cli.test_cli.py` as `test` and run the following command:
    ```
    uv run test
    ```
@@ -272,7 +279,7 @@ Common issues and solutions:
 - API key errors: Ensure all API keys in the `.env` file are correct and up to date. Make sure to add `load_dotenv()` on the top of the python file to apply the latest environment values.
 - Database connection issues: Check if the Chroma DB is properly initialized and accessible.
 - Memory errors: If processing large contracts, you may need to increase the available memory for the Python process.
-- Issues related to dependencies: Delete the `uv.lock` file and `.venv` and run `uv pip install -r requirements.txt -v`.
+- Issues related to dependencies:`rm -rf .venv uv.lock`, `uv cache clean`  and run `uv run pip install -r requirements.txt -v`.
 - Issues related to the AI agents or RAG system: Check the `output.log` file for detailed error messages and stack traces.
 - Issues related to `Python quit unexpectedly`: Check [this stackoverflow article](https://stackoverflow.com/questions/59888499/macos-catalina-python-quit-unexpectedly-error).
 
@@ -326,3 +333,6 @@ Common issues and solutions:
 - utils - time
 
 - end to end client app test
+
+
+## Version control

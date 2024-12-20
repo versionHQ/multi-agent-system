@@ -12,9 +12,8 @@ load_dotenv(override=True)
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_FOLDER, ALLOWED_EXTENSIONS = "uploads", {"pdf", "docx", "csv", "xls"}
 app = Flask(__name__)
-cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
+cors = CORS(app, resources={r"/api/*": {"origins": "*"}}, allow_headers=['Access-Control-Allow-Origin', 'Content-Type'])
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
-app.config["CORS_HEADERS"] = "Content-Type"
 logging.getLogger("flask_cors").level = logging.DEBUG
 
 
@@ -33,7 +32,7 @@ def hello_world():
 
 
 @app.route('/api/draft-instruction', methods=['POST', 'OPTIONS', 'GET'])
-@cross_origin(origin='*', headers=['Access-Control-Allow-Origin'])
+@cross_origin(origin='*', headers=['Access-Control-Allow-Origin', 'Content-Type'])
 def draft_instruction():
     from core.main import draft_instruction, read_url
     data = request.json
@@ -62,7 +61,7 @@ def run_initial_assessment():
 
 
 if __name__ == "__main__":
-    print("...start the operation...")
+    print("...start the operation...") 
 
     os.makedirs(UPLOAD_FOLDER, exist_ok=True)
     serve(app, host="0.0.0.0", port=5002)
