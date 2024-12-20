@@ -181,7 +181,7 @@ uv run <your file name>
 
 1. Open another terminal, set your repository as root, and run
 ```
-uv pip install git+https://github.com/versionHQ/multi-agent-system.git
+uv pip install git+https://github.com/versionHQ/multi-agent-system.git#egg=versionhq
 ```
 
 2. You can use the `versionhq` module in your Python app.
