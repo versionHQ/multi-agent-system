@@ -1,12 +1,16 @@
 import os
 from dotenv import load_dotenv
+from typing import Union, Any, Dict
+
+from vesionhq.team.model import TeamOutput
+
+
 load_dotenv(override=True)
 MODEL_NAME = os.environ.get("LITELLM_MODEL_NAME", "gpt-3.5-turbo")
 
 
 
-
-def kickoff_test():
+def kickoff_test() -> Union[TeamOutput | Dict[str, Any]]:
     from versionhq.agent.model import Agent
     from versionhq.task.model import Task, ResponseField
     from versionhq.team.model import Team, TeamMember, TaskHandlingProcess
