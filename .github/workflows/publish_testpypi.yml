@@ -1,0 +1,53 @@
+name: Test-PyPi Publisher
+
+on: push
+
+jobs:
+  pypi-publish:
+    name: Publish on TestPyPI
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://test.pypi.org/p/versionhq
+    permissions:
+      id-token: write
+    
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v4
+      with:
+        version: "0.5.11"
+
+    - name: Set up vertual environment
+      run: |
+        uv venv --python=python3.13.1
+        source .venv/bin/activate
+
+    - name: Install pip, twine
+      run: uv pip install --upgrade pip twine
+
+    - name: Install dependencies
+      run: uv pip install -r requirements.txt
+
+    - name: Build a binary wheel and a source tarball
+      run: |
+        rm -rf dist
+        uv build --sdist --wheel
+
+    - name: Publish on TestPyPi
+      run: uv run twine upload --repository testpypi dist/* --verbose
+      with:
+        user: __token__
+        password: ${{ secrets.TESTPYPI_API_TOKEN }}
+
+    # - name: Publish distribution 📦 to PyPI
+    #   uses: pypa/gh-action-pypi-publish@release/v1
+    #   with:
+    #     repositories: https://test.pypi.org/legacy/
+    #   with:
+    #     verbose: true
+    #   with:
+    #     user: __token__
+    #     password: ${{ secrets.TESTPYPI_API_TOKEN }}

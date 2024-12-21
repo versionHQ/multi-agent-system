@@ -5,9 +5,15 @@ on:
     types: [created]
 
 jobs:
-  build-n-publish:
-    name: Publish Python 🐍 distributions 📦 to PyPI
+  pypi-publish:
+    name: Publish on PyPI
+
     runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/versionhq
+    permissions:
+      id-token: write 
     steps:
     - uses: actions/checkout@v4
 
@@ -22,16 +28,15 @@ jobs:
         python-version: "3.13.1"
 
     - name: Set up vertual environment
-      run: uv venv --python=python3.13.1
+      run: |
+        uv venv --python=python3.13.1
+        source .venv/bin/activate
 
-    - name: Install pip
-      run: uv pip install --upgrade pip
+    - name: Install pip, twine, black
+      run: uv pip install --upgrade pip twine black
 
     - name: Install dependencies
       run: uv pip install -r requirements.txt
-
-    - name : Install black
-      run: uv pip install black
 
     - name: Run black
       run: uv run black .
@@ -41,8 +46,8 @@ jobs:
 
     - name: Publish distribution 📦 to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
-      with:
+      with: |
+        repositories: https://upload.pypi.org/legacy/
         verbose: true
-      # with:
-      #   user: __token__
-      #   password: ${{ secrets.PYPI_API_TOKEN }}
+        user: __token__
+        password: ${{ secrets.PYPI_API_TOKEN }}

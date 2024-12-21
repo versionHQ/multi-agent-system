@@ -3,9 +3,9 @@ memo.txt
 
 dist/
 build/
+.pypirc
 __pycache__/
 .ruff_cache/
-.DS_Store/
 .DS_Store
 .vscode
 .env
