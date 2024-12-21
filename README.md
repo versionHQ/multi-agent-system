@@ -1,6 +1,7 @@
 # Overview
 
-![python ver](https://img.shields.io/badge/Python-3.13.1-blue) ![pyenv ver](https://img.shields.io/badge/pyenv-2.4.23-orange)
+![MIT license](https://img.shields.io/badge/License-MIT-green) ![Static Badge](https://img.shields.io/badge/pypi-v1.1.6.3-blue)
+![python ver](https://img.shields.io/badge/Python-3.13.1-purple) ![pyenv ver](https://img.shields.io/badge/pyenv-2.4.23-orange)
 
 
 An LLM orchestration frameworks for multi-agent systems with RAG to autopilot outbound workflows.
@@ -23,7 +24,7 @@ Messaging workflows are created at individual level, and will be deployed on thi
 LLM-powered `agent`s and `team`s use `tool`s and their own knowledge to complete the `task` given by the client or the system.
 
 <p align="center">
-   <img src="https://res.cloudinary.com/dfeirxlea/image/upload/v1733556715/pj_m_home/urwte15at3h0dr8mdlyo.png" alt="mindmap" width="1000">
+   <img src="https://res.cloudinary.com/dfeirxlea/image/upload/v1733556715/pj_m_home/urwte15at3h0dr8mdlyo.png" alt="mindmap" width="400">
 </p>
 
 <hr />
@@ -37,7 +38,7 @@ LLM-powered `agent`s and `team`s use `tool`s and their own knowledge to complete
 - [Project Structure](#project-structure)
 - [Setup](#setup)
 - [Usage](#usage)
-- [Installing as a Package Module (Alpha)](#installing-as-a-package-module-alpha)
+- [Installing `versionhq` as Package (Alpha)](#installing-versionhq-as-package-alpha)
 - [Contributing & Customizing](#contributing--customizing)
   - [Customizing AI Agents](#customizing-ai-agents)
   - [Modifying RAG Functionality](#modifying-rag-functionality)
@@ -69,6 +70,8 @@ Multiple `agents` can form a `team` to complete complex tasks together.
 **3. Autopiloting**
 - Responsible `agents` or `teams` autopilot executing and refining the messaging workflow.
 
+
+<hr />
 
 ## Technologies Used
 **Schema, Database, Data Validation**
@@ -120,6 +123,8 @@ src/
 
 ```
 
+<hr />
+
 ## Setup
 
 1. Install the `uv` package manager:
@@ -152,6 +157,8 @@ src/
    COMPOSIO_CLI_KEY=your-composio-cli-key
    ```
 
+<hr />
+
 ## Usage
 
 1. Add features.
@@ -175,12 +182,17 @@ uv run <your file name>
 
 4. `production` is available at `https://versi0n.io`. Currently, we are running beta.
 
+<hr />
 
-## Installing as a Package Module (Alpha)
+## Installing `versionhq` as Package (Alpha)
+
+![Static Badge](https://img.shields.io/badge/pypi-v1.1.6.2-blue) 
+
+- [PyPi Package](https://pypi.org/project/versionhq/)
 
 1. Open another terminal, set your repository as root, and run
 ```
-uv pip install git+https://github.com/versionHQ/multi-agent-system.git#egg=versionhq
+uv pip install versionhq
 ```
 
 2. You can use the `versionhq` module in your Python app.
@@ -188,6 +200,8 @@ uv pip install git+https://github.com/versionHQ/multi-agent-system.git#egg=versi
 from versionhq.agent.model import Agent
 agent = Agent(llm="your-llm"...)
 ```
+
+<hr />
 
 ## Contributing & Customizing
 
@@ -247,6 +261,8 @@ Pre-commit hooks help maintain code quality by running checks for formatting, li
    git commit --no-verify -m "your-commit-message"
    ```
 
+<hr />
+
 ## Trouble Shooting
 
 Common issues and solutions:
@@ -257,6 +273,7 @@ Common issues and solutions:
 - Issues related to the AI agents or RAG system: Check the `output.log` file for detailed error messages and stack traces.
 - Issues related to `Python quit unexpectedly`: Check [this stackoverflow article](https://stackoverflow.com/questions/59888499/macos-catalina-python-quit-unexpectedly-error).
 
+<hr />
 
 ## Frequently Asked Questions (FAQ)
 **Q. Where can I see if the agent is working?**
