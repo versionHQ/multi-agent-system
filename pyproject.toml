@@ -9,8 +9,8 @@ package-dir = {"" = "src"}
 version = {attr = "versionHQ.__version__"}
 
 [tool.setuptools.packages.find]
-where = ["versionhq"]
-include = ["*"]
+where = ["src"]
+include = ["versionhq"]
 exclude = ["test*", "__pycache__"]
 
 [project]
