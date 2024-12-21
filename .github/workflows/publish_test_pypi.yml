@@ -1,0 +1,59 @@
+name: Upload Python Package to TestPyPi
+
+on:
+  push:
+    branches:
+      - 'main'
+
+permissions:
+  contents: read
+
+jobs:
+  release-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "0.5.11"
+  
+      - name: Build release distributions
+        run: |
+          uv venv --python=python3.13.1
+          source .venv/bin/activate
+          uv pip install --upgrade pip twine
+          uv pip install -r requirements.txt
+          uv build --sdist --wheel
+
+      - name: Upload distributions
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-dists
+          path: dist/
+
+  pypi-publish:
+    runs-on: ubuntu-latest
+    needs:
+      - release-build
+      
+    permissions:
+      id-token: write
+
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/p/versionhq
+
+    steps:
+      - name: Retrieve release distributions
+        uses: actions/download-artifact@v4
+        with:
+          name: release-dists
+          path: dist/
+
+      - name: Publish release distributions to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist/
