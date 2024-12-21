@@ -24,19 +24,13 @@ jobs:
         rm -rf dist
         mkdir dist
         uv build --sdist --wheel
-      
-    # - name: Retrieve release distributions
-    #   uses: actions/upload-artifact@v4
-    #   with:
-    #     name: release-dists
-    #     path: dist/
 
-  publish-to-testpypi:
+  test-publish:
     name: Publish to TestPyPi
+    runs-on: ubuntu-latest
     needs:
     - build
-    runs-on: ubuntu-latest
-
+   
     environment:
       name: testpypi
       url: https://test.pypi.org/p/versionhq
@@ -47,7 +41,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
-        name: python-package-distributions
+        # name: python-package-distributions
         path: dist/
     
     - name: Publish to TestPyPi
@@ -56,5 +50,5 @@ jobs:
         repository-url: https://test.pypi.org/legacy/
         verbose: true
         # oidc: false
-        username: __token__
+        # user: 
         password: ${{ secrets.TESTPYPI_API_TOKEN }} # gets ignored if oidc is true
