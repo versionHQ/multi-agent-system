@@ -44,7 +44,7 @@ jobs:
 
     environment:
       name: testpypi
-      url: https://test.pypi.org/p/versionhq
+      url: https://test.pypi.org/p/versionhq/
 
     steps:
       - name: Retrieve release distributions
@@ -57,3 +57,7 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: dist/
+          repository-url: https://test.pypi.org/legacy/
+          verbose: true,
+          user: __token__
+          password: ${{ secrets.TESTPYPI_API_TOKEN }}
