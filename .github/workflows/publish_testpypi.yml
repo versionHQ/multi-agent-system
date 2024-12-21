@@ -34,7 +34,7 @@ jobs:
     name: Publish to TestPyPi
     needs:
     - build
-    runs-on: ubuntu-lates
+    runs-on: ubuntu-latest
 
     environment:
       name: testpypi
