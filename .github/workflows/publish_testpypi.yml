@@ -22,6 +22,7 @@ jobs:
         uv pip install --upgrade pip twine black
         uv pip install -r requirements.txt
         rm -rf dist
+        mkdir dist
         uv build --sdist --wheel
       
     # - name: Retrieve release distributions
@@ -44,12 +45,14 @@ jobs:
       id-token: write
 
     steps:
-    # - name: Download all the dists
-    #   uses: actions/download-artifact@v4
-    #   with:
-    #     name: python-package-distributions
-    #     path: dist/
+    - uses: actions/checkout@v4
+      with:
+        name: python-package-distributions
+        path: dist/
     - name: Publish to TestPyPi
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         repository-url: https://test.pypi.org/legacy/
+        verbose: true
+        oidc: false
+        password: ${{ secrets.TESTPYPI_API_TOKEN }} # gets ignored if oidc is true
