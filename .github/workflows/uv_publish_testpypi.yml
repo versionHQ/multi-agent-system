@@ -1,4 +1,4 @@
-name: Upload Python Package to TestPyPi
+name: TestPyPi Publisher
 
 on:
   push:

@@ -2,7 +2,7 @@ name: Publisher
 
 on:
   release:
-    types: [created]
+    types: [released]
 
 permissions:
   contents: read
