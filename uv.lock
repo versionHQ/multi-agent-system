@@ -658,7 +658,7 @@ wheels = [
 
 [[package]]
 name = "litellm"
-version = "1.55.7"
+version = "1.55.8"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiohttp" },
@@ -674,9 +674,9 @@ dependencies = [
     { name = "tiktoken" },
     { name = "tokenizers" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/46/52/d423903004c220bb465a4247daabd8de8b03c7a18342f5c9fbb520e20ce0/litellm-1.55.7.tar.gz", hash = "sha256:3b950f36431cfca75b7d764f92695c4087c9c4e5182718f9526066b78d542e0d", size = 6205707 }
+sdist = { url = "https://files.pythonhosted.org/packages/c1/75/4bb2be20701b7a5778c0a4ed35c449535563775e3e4680eb739ce8c94e87/litellm-1.55.8.tar.gz", hash = "sha256:4b91722aee3af02d6ea2006b7121afe98c9205ef1d9ba1bf799107199cdfdb65", size = 6201816 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/81/2b/4cdb905fd4b43c030724dd41af6843a5b1bf28e78cdf285df12c2818e535/litellm-1.55.7-py3-none-any.whl", hash = "sha256:fb447810fa7a9f8d2958e1a91ac5667458d6294d13d342f0a40d892e7e9b2888", size = 6479753 },
+    { url = "https://files.pythonhosted.org/packages/0c/52/817f9197522915f6ce783e0cb1ce1166908c387c97ecbb56a25b81a6637b/litellm-1.55.8-py3-none-any.whl", hash = "sha256:1e668cde65318ec906fba511b8960d461e6f521a2a2cc511b51ca8476ab4197b", size = 6472631 },
 ]
 
 [[package]]
@@ -1348,7 +1348,7 @@ requires-dist = [
     { name = "flask-cors", specifier = ">=5.0.0" },
     { name = "gunicorn", specifier = ">=23.0.0" },
     { name = "json-repair", specifier = ">=0.31.0" },
-    { name = "litellm", specifier = ">=1.55.7" },
+    { name = "litellm", specifier = ">=1.55.8" },
     { name = "openai", specifier = ">=1.57.0" },
     { name = "pre-commit", specifier = ">=4.0.1" },
     { name = "pydantic", specifier = ">=2.9.2" },

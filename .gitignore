@@ -1,8 +1,4 @@
-core/
-
-app copy.py
 composio.py
-
 memo.txt
 
 dist/

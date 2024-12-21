@@ -45,7 +45,6 @@ LLM-powered `agent`s and `team`s use `tool`s and their own knowledge to complete
   - [Pre-Commit Hooks](#pre-commit-hooks)
 - [Trouble Shooting](#trouble-shooting)
 - [Frequently Asked Questions (FAQ)](#frequently-asked-questions-faq)
-- [Overall Project Structure](#overall-project-structure)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -289,15 +288,7 @@ Common issues and solutions:
 
 
 
-## Overall Project Structure
-
-|  | Marketing page | Client app (beta) | Test app | Orchestration/agent system | Analyics |
-| :---: | :---: | :---: | :---: | :---: | :---: |
-| Github |  [repo_1](https://github.com/krik8235/pj_m_dev_home)  | [repo_a](https://github.com/krik8235/pj_m_dev) | [repo_b](https://github.com/versionHQ/test-client-app) | [repo_c](https://github.com/versionHQ/multi-agent-system)  | [repo_d](https://github.com/versionHQ/clutering-analysis) |
-| Website | [home](https://home.versi0n.io) | [client app](https://versi0n.io) | (localhost) | - | - |
-
-
-<--- Remaining basic tasks --->
+<--- Remaining tasks --->
 
 - llm handling - agent
 - more llms integration
