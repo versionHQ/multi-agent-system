@@ -3,15 +3,11 @@ requires = ["setuptools", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
+packages = ["versionhq"]
 package-dir = {"" = "src"}
 
 [tool.setuptools.dynamic]
 version = {attr = "versionHQ.__version__"}
-
-[tool.setuptools.packages.find]
-where = ["src"]
-include = ["versionhq"]
-exclude = ["tests*", "__pycache__*"]
 
 [project]
 name = "versionHQ"
