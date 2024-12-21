@@ -21,6 +21,9 @@ jobs:
       with:
         python-version: "3.13.1"
 
+    - name: Set up vertual environment
+      run: uv venv --python=python3.13.1
+
     - name: Install pip
       run: uv pip install --upgrade pip
 
