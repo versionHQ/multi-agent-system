@@ -2,15 +2,13 @@ name: Test-PyPi Publisher
 
 on: push
 
+env:
+  UV_SYSTEM_PYTHON: 1
+
 jobs:
-  pypi-publish:
-    name: Publish on TestPyPI
+  build:
+    name: Build package
     runs-on: ubuntu-latest
-    environment:
-      name: pypi
-      url: https://test.pypi.org/p/versionhq
-    permissions:
-      id-token: write
     
     steps:
     - uses: actions/checkout@v4
@@ -20,26 +18,41 @@ jobs:
       with:
         version: "0.5.11"
 
-    - name: Set up vertual environment
+    - name: Build release distributions
       run: |
         uv venv --python=python3.13.1
         source .venv/bin/activate
-
-    - name: Install pip, twine
-      run: uv pip install --upgrade pip twine
-
-    - name: Install dependencies
-      run: uv pip install -r requirements.txt
-
-    - name: Build a binary wheel and a source tarball
-      run: |
+        uv pip install --upgrade pip twine black
+        uv pip install -r requirements.txt
         rm -rf dist
         uv build --sdist --wheel
+      
+    - name: Retrieve release distributions
+      uses: actions/upload-artifact@v4
+      with:
+        name: release-dists
+        path: dist/
 
-    - name: Publish on TestPyPi
+  publish-to-testpypi:
+    name: Publish to TestPyPi
+    needs:
+    - build
+    runs-on: ubuntu-lates
+
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/p/versionhq
+
+    permissions:
+      id-token: write
+
+    steps:
+    - name: Download all the dists
+      uses: actions/download-artifact@v4
+      with:
+        name: python-package-distributions
+        path: dist/
+    - name: Publish to TestPyPi
       uses: pypa/gh-action-pypi-publish@release/v1
-      with: |
-        repositories: https://test.pypi.org/legacy/
-        verbose: true
-        user: __token__
-        password: ${{ secrets.TESTPYPI_API_TOKEN }}
+      with:
+        repository-url: https://test.pypi.org/legacy/

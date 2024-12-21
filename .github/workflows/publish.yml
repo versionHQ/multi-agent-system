@@ -2,18 +2,18 @@ name: Publisher
 
 on:
   release:
-    types: [created]
+    types: [published]
+
+permissions:
+  contents: read
+
+env:
+  UV_SYSTEM_PYTHON: 1
 
 jobs:
-  pypi-publish:
-    name: Publish on PyPI
-
+  release-build:
     runs-on: ubuntu-latest
-    environment:
-      name: pypi
-      url: https://pypi.org/p/versionhq
-    permissions:
-      id-token: write 
+
     steps:
     - uses: actions/checkout@v4
 
@@ -22,32 +22,27 @@ jobs:
       with:
         version: "0.5.11"
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: "3.13.1"
-
-    - name: Set up vertual environment
+    - name: Build release distributions
       run: |
         uv venv --python=python3.13.1
         source .venv/bin/activate
+        uv pip install --upgrade pip twine black
+        uv pip install -r requirements.txt
+        rm -rf dist
+        uv build --sdist --wheel
 
-    - name: Install pip, twine, black
-      run: uv pip install --upgrade pip twine black
+    - name: Retrieve release distributions
+      uses: actions/upload-artifact@v4
+      with:
+        name: release-dists
+        path: dist/
 
-    - name: Install dependencies
-      run: uv pip install -r requirements.txt
-
-    - name: Run black
-      run: uv run black .
-
-    - name: Build a binary wheel and a source tarball
-      run: uv build --sdist --wheel
-
-    - name: Publish distribution 📦 to PyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
-      with: |
-        repositories: https://upload.pypi.org/legacy/
-        verbose: true
-        user: __token__
-        password: ${{ secrets.PYPI_API_TOKEN }}
+  pypi-publish:
+    runs-on: ubuntu-latest
+    needs:
+    - release-build
+    permissions:
+      id-token: write
+    environment:
+      name: pypi
+      url: https://pypi.org/p/versionhq
