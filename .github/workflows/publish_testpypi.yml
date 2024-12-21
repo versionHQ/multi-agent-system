@@ -48,5 +48,5 @@ jobs:
       with:
         repository-url: https://test.pypi.org/legacy/
         verbose: true
-        oidc: false 
+        user: krik8235
         password: ${{ secrets.TESTPYPI_API_TOKEN }} # gets ignored if oidc is true
