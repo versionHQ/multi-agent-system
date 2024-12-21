@@ -2,9 +2,6 @@ name: Test-PyPi Publisher
 
 on: push
 
-env:
-  UV_SYSTEM_PYTHON: 1
-
 jobs:
   build:
     name: Build package
