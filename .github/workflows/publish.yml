@@ -56,7 +56,7 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: dist/
-          repository-url: https://upload.pypi.org/
+          repository-url: https://upload.pypi.org/legacy/
           verbose: true
           user: __token__
           password: ${{ secrets.PYPI_API_TOKEN }}
