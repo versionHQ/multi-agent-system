@@ -1,1 +1,1 @@
-MY_AMAZING_PROMPT="""amazing prompt with {variable}"""
+MY_AMAZING_PROMPT = """amazing prompt with {variable}"""

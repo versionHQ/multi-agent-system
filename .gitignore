@@ -2,6 +2,7 @@ composio.py
 memo.txt
 
 dist/
+build/
 __pycache__/
 .ruff_cache/
 .DS_Store/

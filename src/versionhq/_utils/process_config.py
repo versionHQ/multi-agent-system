@@ -2,7 +2,9 @@ from typing import Any, Dict, Type
 from pydantic import BaseModel
 
 
-def process_config(values_to_update: Dict[str, Any], model_class: Type[BaseModel]) -> Dict[str, Any]:
+def process_config(
+    values_to_update: Dict[str, Any], model_class: Type[BaseModel]
+) -> Dict[str, Any]:
     """
     Process the config dictionary and update the values accordingly.
     Refer to the Pydantic model class for field validation.

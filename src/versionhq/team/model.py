@@ -7,7 +7,16 @@ from dotenv import load_dotenv
 from concurrent.futures import Future
 from hashlib import md5
 from typing import Any, Dict, List, TYPE_CHECKING, Callable, Optional, Tuple, Union
-from pydantic import UUID4, InstanceOf, Json, BaseModel, Field, PrivateAttr, field_validator, model_validator
+from pydantic import (
+    UUID4,
+    InstanceOf,
+    Json,
+    BaseModel,
+    Field,
+    PrivateAttr,
+    field_validator,
+    model_validator,
+)
 from pydantic_core import PydanticCustomError
 
 from versionhq.agent.model import Agent
@@ -47,26 +56,40 @@ class TaskHandlingProcess(str, Enum):
     """
     Class representing the different processes that can be used to tackle multiple tasks.
     """
+
     sequential = "sequential"
     hierarchical = "hierarchical"
     consensual = "consensual"
 
 
-
 class TeamOutput(BaseModel):
     """Class that represents the result of a team."""
 
-    team_id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True, description="store the team ID that generate the TeamOutput")
+    team_id: UUID4 = Field(
+        default_factory=uuid.uuid4,
+        frozen=True,
+        description="store the team ID that generate the TeamOutput",
+    )
     raw: str = Field(default="", description="raw output")
     pydantic: Optional[BaseModel] = Field(default=None, description="pydantic output")
-    json_dict: Optional[Dict[str, Any]] = Field(default=None, description="JSON dict output")
-    task_output_list: list[TaskOutput] = Field(default=list, description="store output of all the tasks that the team has executed")
-    token_usage: UsageMetrics = Field(default=dict, description="processed token summary")
-
+    json_dict: Optional[Dict[str, Any]] = Field(
+        default=None, description="JSON dict output"
+    )
+    task_output_list: list[TaskOutput] = Field(
+        default=list,
+        description="store output of all the tasks that the team has executed",
+    )
+    token_usage: UsageMetrics = Field(
+        default=dict, description="processed token summary"
+    )
 
     def __str__(self):
-        return str(self.pydantic) if self.pydantic else str(self.json_dict) if  self.json_dict else self.raw
-    
+        return (
+            str(self.pydantic)
+            if self.pydantic
+            else str(self.json_dict) if self.json_dict else self.raw
+        )
+
     def __getitem__(self, key):
         if self.pydantic and hasattr(self.pydantic, key):
             return getattr(self.pydantic, key)
@@ -82,7 +105,6 @@ class TeamOutput(BaseModel):
                 "No JSON output found in the final task. Please make sure to set the output_json property in the final task in your team."
             )
         return json.dumps(self.json_dict)
-    
 
     def to_dict(self) -> Dict[str, Any]:
         """
@@ -94,25 +116,24 @@ class TeamOutput(BaseModel):
         elif self.pydantic:
             output_dict.update(self.pydantic.model_dump())
         else:
-            output_dict.update({ "raw", self.raw })
+            output_dict.update({"raw", self.raw})
         return output_dict
-    
 
     def return_all_task_outputs(self) -> List[Dict[str, Any]]:
         res = []
         for output in self.task_output_list:
             if output is not None:
                 res.append(output.to_dict())
-        
+
         return res
 
 
-
 class TeamMember(ABC, BaseModel):
-    agent: Agent | None = Field(default=None, description="store the agent to be a member")
+    agent: Agent | None = Field(
+        default=None, description="store the agent to be a member"
+    )
     is_manager: bool = Field(default=False)
     task: Task | None = Field(default=None)
-
 
 
 class Team(BaseModel):
@@ -125,50 +146,81 @@ class Team(BaseModel):
     _execution_span: Any = PrivateAttr()
     _logger: Logger = PrivateAttr()
     # _inputs: Optional[Dict[str, Any]] = PrivateAttr(default=None)
-    
+
     id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True)
     name: Optional[str] = Field(default=None)
-    members: List[TeamMember] = Field(default_factory=list, description="store agents' uuids and bool if it is manager")
+    members: List[TeamMember] = Field(
+        default_factory=list,
+        description="store agents' uuids and bool if it is manager",
+    )
 
     # work as a team
-    team_tasks: Optional[List[Task]] = Field(default_factory=list, description="optional tasks for the team")
-    planning_llm: Optional[Any] = Field(default=None, description="llm to handle the planning of the team tasks (if any)")
-    function_calling_llm: Optional[Any] = Field(default=None, description="llm to execute func after all agent execution (if any)")
-    prompt_file: str = Field(default="", description="path to the prompt json file to be used by the team.")
+    team_tasks: Optional[List[Task]] = Field(
+        default_factory=list, description="optional tasks for the team"
+    )
+    planning_llm: Optional[Any] = Field(
+        default=None,
+        description="llm to handle the planning of the team tasks (if any)",
+    )
+    function_calling_llm: Optional[Any] = Field(
+        default=None,
+        description="llm to execute func after all agent execution (if any)",
+    )
+    prompt_file: str = Field(
+        default="", description="path to the prompt json file to be used by the team."
+    )
     process: TaskHandlingProcess = Field(default=TaskHandlingProcess.sequential)
 
     # callbacks
-    before_kickoff_callbacks: List[Callable[[Optional[Dict[str, Any]]], Optional[Dict[str, Any]]]] = Field(
+    before_kickoff_callbacks: List[
+        Callable[[Optional[Dict[str, Any]]], Optional[Dict[str, Any]]]
+    ] = Field(
         default_factory=list,
-        description="list of callback functions to be executed before the team kickoff. i.e., adjust inputs"
+        description="list of callback functions to be executed before the team kickoff. i.e., adjust inputs",
     )
     after_kickoff_callbacks: List[Callable[[TeamOutput], TeamOutput]] = Field(
         default_factory=list,
-        description="list of callback functions to be executed after the team kickoff. i.e., store the result in repo"
+        description="list of callback functions to be executed after the team kickoff. i.e., store the result in repo",
     )
-    task_callback: Optional[Any] = Field(default=None, description="callback to be executed after each task for all agents execution")
-    step_callback: Optional[Any] = Field(default=None, description="callback to be executed after each step for all agents execution")
+    task_callback: Optional[Any] = Field(
+        default=None,
+        description="callback to be executed after each task for all agents execution",
+    )
+    step_callback: Optional[Any] = Field(
+        default=None,
+        description="callback to be executed after each step for all agents execution",
+    )
 
     verbose: bool = Field(default=True)
     cache: bool = Field(default=True)
-    memory: bool = Field(default=False, description="whether the team should use memory to store memories of its execution")
-    execution_logs: List[Dict[str, Any]] = Field(default=[], description="list of execution logs for tasks")
-    usage_metrics: Optional[UsageMetrics] = Field(default=None, description="usage metrics for all the llm executions")
-    
+    memory: bool = Field(
+        default=False,
+        description="whether the team should use memory to store memories of its execution",
+    )
+    execution_logs: List[Dict[str, Any]] = Field(
+        default=[], description="list of execution logs for tasks"
+    )
+    usage_metrics: Optional[UsageMetrics] = Field(
+        default=None, description="usage metrics for all the llm executions"
+    )
+
     def __name__(self) -> str:
         return self.name if self.name is not None else self.id
 
     @property
     def key(self) -> str:
-        source = [member.agent.key for member in self.members] + [task.key for task in self.tasks]
+        source = [member.agent.key for member in self.members] + [
+            task.key for task in self.tasks
+        ]
         return md5("|".join(source).encode(), usedforsecurity=False).hexdigest()
-    
-    
+
     @property
     def manager_agent(self) -> Agent:
-        manager_agent = [member.agent for member in self.members if member.is_manager == True]
+        manager_agent = [
+            member.agent for member in self.members if member.is_manager == True
+        ]
         return manager_agent[0] if len(manager_agent) > 0 else None
-    
+
     @property
     def manager_task(self) -> Task:
         """
@@ -178,18 +230,22 @@ class Team(BaseModel):
         task = [member.task for member in self.members if member.is_manager == True]
         return task[0] if len(task) > 0 else None
 
-    
     @property
     def tasks(self):
         """
         Return all the tasks that the team needs to handle in order of priority:
-        1. team tasks, 
-        2. manager_task, 
+        1. team tasks,
+        2. manager_task,
         3. members' tasks
         """
-        sorted_member_tasks = [member.task for member in self.members if member.is_manager == True] + [member.task for member in self.members if member.is_manager == False]
-        return self.team_tasks + sorted_member_tasks if len(self.team_tasks) > 0 else sorted_member_tasks
-        
+        sorted_member_tasks = [
+            member.task for member in self.members if member.is_manager == True
+        ] + [member.task for member in self.members if member.is_manager == False]
+        return (
+            self.team_tasks + sorted_member_tasks
+            if len(self.team_tasks) > 0
+            else sorted_member_tasks
+        )
 
     # validators
     @field_validator("id", mode="before")
@@ -197,20 +253,21 @@ class Team(BaseModel):
     def _deny_user_set_id(cls, v: Optional[UUID4]) -> None:
         """Prevent manual setting of the 'id' field by users."""
         if v:
-            raise PydanticCustomError("may_not_set_field", "The 'id' field cannot be set by the user.", {})
+            raise PydanticCustomError(
+                "may_not_set_field", "The 'id' field cannot be set by the user.", {}
+            )
 
     # @field_validator("config", mode="before")
     # @classmethod
     # def check_config_type(cls, v: Union[Json, Dict[str, Any]]) -> Union[Json, Dict[str, Any]]:
     #     return json.loads(v) if isinstance(v, Json) else v
 
-
     @model_validator(mode="after")
     def check_manager_llm(self):
         """
         Validates that the language model is set when using hierarchical process.
         """
-        
+
         if self.process == TaskHandlingProcess.hierarchical:
             if self.manager_agent is None:
                 raise PydanticCustomError(
@@ -229,7 +286,6 @@ class Team(BaseModel):
                 )
         return self
 
-
     @model_validator(mode="after")
     def validate_tasks(self):
         """
@@ -241,11 +297,10 @@ class Team(BaseModel):
                 if member.task is None:
                     raise PydanticCustomError(
                         "missing_agent_in_task",
-                        f"Sequential process error: Agent is missing in the task with the following description: {member.task.description}", 
-                        {}
+                        f"Sequential process error: Agent is missing in the task with the following description: {member.task.description}",
+                        {},
                     )
         return self
-
 
     @model_validator(mode="after")
     def validate_end_with_at_most_one_async_task(self):
@@ -267,12 +322,10 @@ class Team(BaseModel):
                 {},
             )
         return self
-    
 
     def _get_responsible_agent(self, task: Task) -> Agent:
         res = [member.agent for member in self.members if member.task.id == task.id]
         return None if len(res) == 0 else res[0]
-
 
     # setup team planner
     def _handle_team_planning(self):
@@ -282,13 +335,16 @@ class Team(BaseModel):
         if result is not None:
             for task in self.tasks:
                 task_id = task.id
-                task.description += result[task_id] if hasattr(result, str(task_id)) else result
-
+                task.description += (
+                    result[task_id] if hasattr(result, str(task_id)) else result
+                )
 
     # task execution
     def _process_async_tasks(
-            self, futures: List[Tuple[Task, Future[TaskOutput], int]], was_replayed: bool = False
-        ) -> List[TaskOutput]:
+        self,
+        futures: List[Tuple[Task, Future[TaskOutput], int]],
+        was_replayed: bool = False,
+    ) -> List[TaskOutput]:
         task_outputs: List[TaskOutput] = []
         for future_task, future, task_index in futures:
             task_output = future.result()
@@ -298,7 +354,6 @@ class Team(BaseModel):
                 future_task, task_output, task_index, was_replayed
             )
         return task_outputs
-
 
     def _handle_conditional_task(
         self,
@@ -326,11 +381,12 @@ class Team(BaseModel):
             return skipped_task_output
         return None
 
-
     def _create_team_output(self, task_outputs: List[TaskOutput]) -> TeamOutput:
         if len(task_outputs) != 1:
-            raise ValueError("Something went wrong. Kickoff should return only one task output.")
-        
+            raise ValueError(
+                "Something went wrong. Kickoff should return only one task output."
+            )
+
         final_task_output = task_outputs[0]
         # final_string_output = final_task_output.raw
         # self._finish_execution(final_string_output)
@@ -344,7 +400,6 @@ class Team(BaseModel):
             task_output_list=[task.output for task in self.tasks if task.output],
             token_usage=token_usage,
         )
-
 
     def _calculate_usage_metrics(self) -> UsageMetrics:
         """
@@ -364,9 +419,13 @@ class Team(BaseModel):
 
         self.usage_metrics = total_usage_metrics
         return total_usage_metrics
-    
 
-    def _execute_tasks(self, tasks: List[Task], start_index: Optional[int] = 0, was_replayed: bool = False) -> TeamOutput:
+    def _execute_tasks(
+        self,
+        tasks: List[Task],
+        start_index: Optional[int] = 0,
+        was_replayed: bool = False,
+    ) -> TeamOutput:
         """
         Executes tasks sequentially and returns the final output in TeamOutput class.
         When we have a manager agent, we will start from executing manager agent's tasks.
@@ -377,7 +436,6 @@ class Team(BaseModel):
         task_outputs: List[TaskOutput] = []
         futures: List[Tuple[Task, Future[TaskOutput], int]] = []
         last_sync_output: Optional[TaskOutput] = None
-
 
         for task_index, task in enumerate(tasks):
             if start_index is not None and task_index < start_index:
@@ -391,8 +449,10 @@ class Team(BaseModel):
 
             responsible_agent = self._get_responsible_agent(task)
             if responsible_agent is None:
-                responsible_agent = self.members[0].agent #! REFINEME - select a suitable agent for the task
-            
+                responsible_agent = self.members[
+                    0
+                ].agent  #! REFINEME - select a suitable agent for the task
+
             # self._prepare_agent_tools(task)
             # self._log_task_start(task, responsible_agent)
 
@@ -404,7 +464,18 @@ class Team(BaseModel):
                     continue
 
             if task.async_execution:
-                context = create_raw_outputs(tasks=[task,], task_outputs=[last_sync_output,] if last_sync_output else [])
+                context = create_raw_outputs(
+                    tasks=[
+                        task,
+                    ],
+                    task_outputs=(
+                        [
+                            last_sync_output,
+                        ]
+                        if last_sync_output
+                        else []
+                    ),
+                )
                 future = task.execute_async(
                     agent=responsible_agent,
                     context=context,
@@ -416,29 +487,44 @@ class Team(BaseModel):
                     task_outputs = self._process_async_tasks(futures, was_replayed)
                     futures.clear()
 
-                context = create_raw_outputs(tasks=[task,], task_outputs=[last_sync_output,] if last_sync_output else [])
+                context = create_raw_outputs(
+                    tasks=[
+                        task,
+                    ],
+                    task_outputs=(
+                        [
+                            last_sync_output,
+                        ]
+                        if last_sync_output
+                        else []
+                    ),
+                )
                 task_output = task.execute_sync(
                     agent=responsible_agent,
                     context=context,
                     # tools=responsible_agent.tools,
                 )
-                task_outputs = [task_output,]
+                task_outputs = [
+                    task_output,
+                ]
                 # self._process_task_result(task, task_output)
                 # self._store_execution_log(task, task_output, task_index, was_replayed)
 
         # if futures:
-            # task_outputs = self._process_async_tasks(futures, was_replayed)
+        # task_outputs = self._process_async_tasks(futures, was_replayed)
 
         return self._create_team_output(task_outputs)
 
-
-
-    def kickoff(self, kwargs_before: Optional[Dict[str, str]] = None, kwargs_after: Optional[Dict[str, Any]] = None) -> TeamOutput:
+    def kickoff(
+        self,
+        kwargs_before: Optional[Dict[str, str]] = None,
+        kwargs_after: Optional[Dict[str, Any]] = None,
+    ) -> TeamOutput:
         """
         Kickoff the team:
         0. Plan the team action if we have `team_tasks` using `planning_llm`.
         1. Address `before_kickoff_callbacks` if any.
-        2. Handle team members' tasks in accordance with the `process`. 
+        2. Handle team members' tasks in accordance with the `process`.
         3. Address `after_kickoff_callbacks` if any.
         """
 
@@ -451,15 +537,13 @@ class Team(BaseModel):
             for before_callback in self.before_kickoff_callbacks:
                 before_callback(**kwargs_before)
 
-        
         # self._execution_span = self._telemetry.team_execution_span(self, inputs)
         # self._task_output_handler.reset()
         # self._logging_color = "bold_purple"
 
         # if inputs is not None:
         #     self._inputs = inputs
-            # self._interpolate_inputs(inputs)
-        
+        # self._interpolate_inputs(inputs)
 
         for task in self.tasks:
             if not task.callback:
@@ -472,7 +556,6 @@ class Team(BaseModel):
             # agent.i18n = i18n
             agent.team = self
 
-
             # add the team's common callbacks to each agent.
             if not agent.function_calling_llm:
                 agent.function_calling_llm = self.function_calling_llm
@@ -483,7 +566,6 @@ class Team(BaseModel):
             if not agent.step_callback:
                 agent.step_callback = self.step_callback
 
-
         if self.process is None:
             self.process = TaskHandlingProcess.sequential
 
@@ -492,7 +574,9 @@ class Team(BaseModel):
         for after_callback in self.after_kickoff_callbacks:
             result = after_callback(result, **kwargs_after)
 
-        metrics += [member.agent._token_process.get_summary() for member in self.members]
+        metrics += [
+            member.agent._token_process.get_summary() for member in self.members
+        ]
 
         self.usage_metrics = UsageMetrics()
         for metric in metrics:

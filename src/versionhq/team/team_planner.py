@@ -16,8 +16,9 @@ class TeamPlanner:
 
     def __init__(self, tasks: List[Task], planner_llm: Optional[Any] = None):
         self.tasks = tasks
-        self.planner_llm = planner_llm if planner_llm != None else os.environ.get("LITELLM_MODEL_NAME")
-
+        self.planner_llm = (
+            planner_llm if planner_llm != None else os.environ.get("LITELLM_MODEL_NAME")
+        )
 
     def _handle_task_planning(self) -> BaseModel:
         """
@@ -40,12 +41,15 @@ class TeamPlanner:
              """,
             expected_output_json=False,
             expected_output_pydantic=True,
-            output_field_list=[ResponseField(title=f"{task.id}", type="str", required=True) for task in self.tasks],
+            output_field_list=[
+                ResponseField(title=f"{task.id}", type="str", required=True)
+                for task in self.tasks
+            ],
         )
         task_output = task_to_handle.execute_sync(agent=planning_agent)
-   
+
         if isinstance(task_output.pydantic, BaseModel):
             return task_output.pydantic
 
         else:
-           return None
+            return None

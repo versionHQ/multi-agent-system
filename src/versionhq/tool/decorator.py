@@ -30,12 +30,11 @@ def tool(*args):
 
         return _make_tool
 
-
     if len(args) == 1 and callable(args[0]):
         return create_tool(args[0].__name__)(args[0])
-    
+
     elif len(args) == 1 and isinstance(args[0], str):
         return create_tool(args[0])
-    
+
     else:
         raise ValueError("Invalid arguments")

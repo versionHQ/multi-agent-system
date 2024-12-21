@@ -73,11 +73,15 @@ class AgentParser:
     def parse(self, text: str) -> Union[AgentAction, AgentFinish]:
         thought = self._extract_thought(text)
         includes_answer = FINAL_ANSWER_ACTION in text
-        regex = r"Action\s*\d*\s*:[\s]*(.*?)[\s]*Action\s*\d*\s*Input\s*\d*\s*:[\s]*(.*)"
+        regex = (
+            r"Action\s*\d*\s*:[\s]*(.*?)[\s]*Action\s*\d*\s*Input\s*\d*\s*:[\s]*(.*)"
+        )
         action_match = re.search(regex, text, re.DOTALL)
         if action_match:
             if includes_answer:
-                raise OutputParserException(f"{FINAL_ANSWER_AND_PARSABLE_ACTION_ERROR_MESSAGE}")
+                raise OutputParserException(
+                    f"{FINAL_ANSWER_AND_PARSABLE_ACTION_ERROR_MESSAGE}"
+                )
             action = action_match.group(1)
             clean_action = self._clean_action(action)
 
@@ -97,7 +101,9 @@ class AgentParser:
             raise OutputParserException(
                 f"{MISSING_ACTION_AFTER_THOUGHT_ERROR_MESSAGE}",
             )
-        elif not re.search(r"[\s]*Action\s*\d*\s*Input\s*\d*\s*:[\s]*(.*)", text, re.DOTALL):
+        elif not re.search(
+            r"[\s]*Action\s*\d*\s*Input\s*\d*\s*:[\s]*(.*)", text, re.DOTALL
+        ):
             # self.agent.increment_formatting_errors()
             raise OutputParserException(MISSING_ACTION_INPUT_AFTER_ACTION_ERROR_MESSAGE)
         else:
@@ -106,7 +112,6 @@ class AgentParser:
             error = f"{format}"
             # self.agent.increment_formatting_errors()
             raise OutputParserException(error)
-        
 
     def _extract_thought(self, text: str) -> str:
         regex = r"(.*?)(?:\n\nAction|\n\nFinal Answer)"
@@ -118,7 +123,6 @@ class AgentParser:
     def _clean_action(self, text: str) -> str:
         """Clean action string by removing non-essential formatting characters."""
         return re.sub(r"^\s*\*+\s*|\s*\*+\s*$", "", text).strip()
-
 
     def _safe_repair_json(self, tool_input: str) -> str:
         UNABLE_TO_REPAIR_JSON_RESULTS = ['""', "{}"]
