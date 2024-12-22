@@ -13,10 +13,10 @@ Messaging workflows are created at individual level, and will be deployed on thi
 
 **Visit:**
 
-- Marketing:   [Landing page](https://home.versi0n.io)
-- Client app:  [Production](https://versi0n.io/)
-- Backend:     [Orchestration + multi-agent RAG system](https://github.com/versionHQ/multi-agent-system)
-- Test CI:     [Test client app (React)](https://github.com/versionHQ/test-client-app)
+- [Landing page](https://home.versi0n.io)
+- [Client app](https://versi0n.io/)
+- [Orchestration frameworks](https://github.com/versionHQ/multi-agent-system)
+- [Test client app](https://github.com/versionHQ/test-client-app)
 
 
 ## Mindmap
