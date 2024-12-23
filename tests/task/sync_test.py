@@ -16,7 +16,7 @@ def sync_test():
         backstory="My amazing backstory",
         verbose=True,
         llm=MODEL_NAME,
-        max_token=3000,
+        max_tokens=3000,
     )
     task = Task(
         description="Analyze the client's business model, target audience, and customer information and define the optimal cohort timeframe based on customer lifecycle and product usage patterns.",

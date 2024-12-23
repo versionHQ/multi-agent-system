@@ -20,7 +20,7 @@ def kickoff_test() -> Union[TeamOutput | Dict[str, Any]]:
         backstory="My amazing backstory",
         verbose=True,
         llm=MODEL_NAME,
-        max_token=3000,
+        max_tokens=3000,
     )
 
     agent_b1 = Agent(
@@ -29,7 +29,7 @@ def kickoff_test() -> Union[TeamOutput | Dict[str, Any]]:
         backstory="My amazing backstory",
         verbose=True,
         llm=MODEL_NAME,
-        max_token=3000,
+        max_tokens=3000,
     )
 
     task_1 = Task(

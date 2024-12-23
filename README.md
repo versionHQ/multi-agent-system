@@ -1,6 +1,6 @@
 # Overview
 
-![MIT license](https://img.shields.io/badge/License-MIT-green) ![Static Badge](https://img.shields.io/badge/pypi-v1.1.6.3-blue)
+![MIT license](https://img.shields.io/badge/License-MIT-green) ![PyPi](https://img.shields.io/badge/pypi-v1.1.6.3-blue)
 ![python ver](https://img.shields.io/badge/Python-3.13.1-purple) ![pyenv ver](https://img.shields.io/badge/pyenv-2.4.23-orange)
 
 
@@ -38,8 +38,7 @@ LLM-powered `agent`s and `team`s use `tool`s and their own knowledge to complete
 - [Project Structure](#project-structure)
 - [Setup](#setup)
 - [Usage](#usage)
-- [Installing `versionhq` as Package (Alpha)](#installing-versionhq-as-package-alpha)
-- [Contributing & Customizing](#contributing--customizing)
+- [Contributing](#contributing)
   - [Customizing AI Agents](#customizing-ai-agents)
   - [Modifying RAG Functionality](#modifying-rag-functionality)
   - [Package Management with uv](#package-management-with-uv)
@@ -161,36 +160,7 @@ src/
 
 ## Usage
 
-1. Add features.
-
-2. Test the features using the `tests` directory.
-
-- Add a file to the `tests` directory.
-- Run a test.
-```
-uv run <your file name>
-```
-* All the `.py` files' names in the `tests` have to be ended with `_test.py`.
-
-
-3. Run a React demo app: [React demo app](https://github.com/versionHQ/test-client-app) to check it on the client endpoint.
-   ```
-   npm i
-   npm start
-   ```
-   The frontend will be available at `http://localhost:3000`.
-
-4. `production` is available at `https://versi0n.io`. Currently, we are running beta.
-
-<hr />
-
-## Installing `versionhq` as Package (Alpha)
-
-![Static Badge](https://img.shields.io/badge/pypi-v1.1.6.2-blue) 
-
-- [PyPi Package](https://pypi.org/project/versionhq/)
-
-1. Open another terminal, set your repository as root, and run
+1. Install `versionhq` package:
 ```
 uv pip install versionhq
 ```
@@ -198,21 +168,51 @@ uv pip install versionhq
 2. You can use the `versionhq` module in your Python app.
 ```
 from versionhq.agent.model import Agent
-agent = Agent(llm="your-llm"...)
+agent = Agent(llm="your-llm", ...)
 ```
+
+For more details:
+
+[PyPi package](https://pypi.org/project/versionhq/)
 
 <hr />
 
-## Contributing & Customizing
+## Contributing
 
 1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/your-amazing-feature`)
-3. Pull the latest version of source code from the main branch (`git pull origin main`) *Address conflicts if any.
-4. Commit your changes (`git add .` / `git commit -m 'Add your-amazing-feature'`)
-5. Push to the branch (`git push origin feature/your-amazing-feature`)
-6. Open a pull request
 
-0. Flag with `#! REFINEME` for any improvements and `#! FIXME` for any errors.
+2. Create your feature branch (`git checkout -b feature/your-amazing-feature`)
+
+3. Create amazing features
+
+4. Test the features using the `tests` directory.
+
+   - Add a file to the `tests` directory.
+   - Run a test.
+      ```
+      uv run <your file name>
+      ```
+
+   * All the `.py` files' names in the `tests` have to be ended with `_test.py`.
+
+5. Pull the latest version of source code from the main branch (`git pull origin main`) *Address conflicts if any.
+6. Commit your changes (`git add .` / `git commit -m 'Add your-amazing-feature'`)
+7. Push to the branch (`git push origin feature/your-amazing-feature`)
+8. Open a pull request
+
+
+**Optional**
+* Flag with `#! REFINEME` for any improvements needed and `#! FIXME` for any errors.
+
+* Run a React demo app: [React demo app](https://github.com/versionHQ/test-client-app) to check it on the client endpoint.
+   ```
+   npm i
+   npm start
+   ```
+   The frontend will be available at `http://localhost:3000`.
+
+* `production` is available at `https://versi0n.io`. Currently, we are running alpha test.
+
 
 
 ### Customizing AI Agents

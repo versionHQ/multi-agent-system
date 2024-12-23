@@ -204,7 +204,7 @@ class Agent(ABC, BaseModel):
 
         if isinstance(self.llm, LLM):
             self.llm.timeout = self.max_execution_time
-            self.llm.max_token = self.max_tokens
+            self.llm.max_tokens = self.max_tokens
             self.llm.context_window_size = (
                 self.llm.get_context_window_size()
                 if self.respect_context_window == True

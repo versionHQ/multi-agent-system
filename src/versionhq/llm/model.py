@@ -150,6 +150,7 @@ class LLM:
         self.kwargs = kwargs
 
         litellm.drop_params = True
+        litellm.set_verbose=True
         self.set_callbacks(callbacks)
 
     def call(
