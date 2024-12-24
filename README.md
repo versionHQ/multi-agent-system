@@ -307,17 +307,3 @@ Common issues and solutions:
 > **Simple tasks**: You have a straightforward, one-off task that doesn't require significant complexity or iteration.
 
 > **Human input**: You need to provide initial input or guidance to the agent, or you expect to review and refine the output.
-
-
-
-<--- Remaining tasks --->
-
-- llm handling - agent
-- more llms integration
-- simpler prompting
-- broader knowledge
-
-- utils - log
-- utils - time
-
-- end to end client app test
