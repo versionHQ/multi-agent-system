@@ -1,6 +1,5 @@
 import os
 from dotenv import load_dotenv
-from typing import Union, Any, Dict
 from pydantic import BaseModel
 
 from versionhq.agent.model import Agent
@@ -8,14 +7,11 @@ from versionhq.task.model import Task, ResponseField, TaskOutput
 from versionhq.team.model import Team, TeamMember, TaskHandlingProcess, TeamOutput
 from versionhq._utils.usage_metrics import UsageMetrics
 
-
-
 load_dotenv(override=True)
 MODEL_NAME = os.environ.get("LITELLM_MODEL_NAME", "gpt-3.5-turbo")
 
 
-def kickoff_test() -> Union[TeamOutput | Dict[str, Any]]:
-
+def kickoff_test():
     agent_a = Agent(
         role="Demo Agent A",
         goal="""My amazing goals""",

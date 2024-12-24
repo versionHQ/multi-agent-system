@@ -6,10 +6,10 @@ permissions:
   contents: write
 
 env:
-  OPENAI_API_KEY: fake-api-key
+  LITELLM_API_KEY: ${{ secrets.LITELLM_API_KEY }}
 
 jobs:
-  tests:
+  run_test:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -20,9 +20,6 @@ jobs:
         uses: astral-sh/setup-uv@v3
         with:
           enable-cache: true
-
-      # - name: Set up Python
-      #   run: uv python install 3.13.1
 
       - name: Install the project
         run: uv sync --dev --all-extras
