@@ -59,7 +59,7 @@ dev-dependencies = [
   "black",
   "bandit",
   "twine",
-  "pytest"
+  "pytest>=8.0.0",
 ]
 
 [tool.uv.workspace]

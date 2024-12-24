@@ -266,14 +266,14 @@ wheels = [
 
 [[package]]
 name = "click"
-version = "8.1.7"
+version = "8.1.8"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "colorama", marker = "sys_platform == 'win32'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/96/d3/f04c7bfcf5c1862a2a5b845c6b2b360488cf47af55dfa79c98f6a6bf98b5/click-8.1.7.tar.gz", hash = "sha256:ca9853ad459e787e2192211578cc907e7594e294c7ccc834310722b41b9ca6de", size = 336121 }
+sdist = { url = "https://files.pythonhosted.org/packages/b9/2e/0090cbf739cee7d23781ad4b89a9894a41538e4fcf4c31dcdd705b78eb8b/click-8.1.8.tar.gz", hash = "sha256:ed53c9d8990d83c2a27deae68e4ee337473f6330c040a31d4225c9574d16096a", size = 226593 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/00/2e/d53fa4befbf2cfa713304affc7ca780ce4fc1fd8710527771b58311a3229/click-8.1.7-py3-none-any.whl", hash = "sha256:ae74fb96c20a0277a1d615f1e4d73c8414f5a98db8b799a7931d1582f3390c28", size = 97941 },
+    { url = "https://files.pythonhosted.org/packages/7e/d4/7ebdbd03970677812aac39c869717059dbb71a4cfc033ca6e5221787892c/click-8.1.8-py3-none-any.whl", hash = "sha256:63c132bbbed01578a06712a2d1f497bb62d9c1c0d329b7903a866228027263b2", size = 98188 },
 ]
 
 [[package]]
@@ -296,7 +296,7 @@ wheels = [
 
 [[package]]
 name = "composio-core"
-version = "0.6.5"
+version = "0.6.7"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiohttp" },
@@ -316,22 +316,22 @@ dependencies = [
     { name = "sentry-sdk" },
     { name = "uvicorn" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/b4/6f/86138b049b66d6084f8426a8f2b577a0b35380772ed239be5271d3becf2a/composio_core-0.6.5.tar.gz", hash = "sha256:68fbed320e39110c37cb8bc3aecec402879e5c6dccb1cbb91f0743b113505ab8", size = 306347 }
+sdist = { url = "https://files.pythonhosted.org/packages/07/d0/e5a43b4c2ebdd994262c682ecaa9641dc2dbc0c57cbe63fa735bec17b626/composio_core-0.6.7.tar.gz", hash = "sha256:b87f0b804d87945b4eae556468b9efc75f751d256bbf2c20fb8ae5b6a31a2818", size = 306803 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/66/1a/be409af5a9efb59497669eee594e2e7d98861ada6c1991953d7ec547025a/composio_core-0.6.5-py3-none-any.whl", hash = "sha256:eaa352e36f9220434a3de233271787990f6ebaaf1adac4f6c3ebadb3a94d9356", size = 469041 },
+    { url = "https://files.pythonhosted.org/packages/e4/73/c7cec57beaa7846d22eb87b3d15048fd014032a7be06ad4d297b99feeabc/composio_core-0.6.7-py3-none-any.whl", hash = "sha256:03cedeffe417b919d1021c1bc4751f54bd05829b52ff3285f7984e14bdf91efe", size = 469603 },
 ]
 
 [[package]]
 name = "composio-openai"
-version = "0.6.5"
+version = "0.6.7"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "composio-core" },
     { name = "openai" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/bb/01/444b5ab4f6be3c45503b43783ea519e3f8bc9d9997b496f2d1d374b2fdf4/composio_openai-0.6.5.tar.gz", hash = "sha256:0bd5aa8d31c69c3461c0724016913877eb706a7e26d4c60d714310419865e622", size = 4421 }
+sdist = { url = "https://files.pythonhosted.org/packages/18/a9/2cb2a30963a89d1940e43c115b2c24f3ad488fff9d8e3999c1f8ced34400/composio_openai-0.6.7.tar.gz", hash = "sha256:9171e1b127ffc02862c5ef573eba38ed93cbd8dd853891b699cf02d295b59f78", size = 4420 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/fd/69/ef8c6e62858643d0506b790e3cc0d30e7051438101af0ad259bd6c501808/composio_openai-0.6.5-py3-none-any.whl", hash = "sha256:4b26ce338fe1c5253c62bd59d9b3a83e3b9bcfefcb39deda85bcc42d1e109233", size = 4882 },
+    { url = "https://files.pythonhosted.org/packages/7c/24/485f56d056cdbbd1d828205e3487ed209847de2c2174943afcc0fbce51a8/composio_openai-0.6.7-py3-none-any.whl", hash = "sha256:d75f4656c325aa4fb76e6e1e18c0820622c24c9665500e02efc38fa6d08a989a", size = 4884 },
 ]
 
 [[package]]
@@ -623,14 +623,14 @@ wheels = [
 
 [[package]]
 name = "jinja2"
-version = "3.1.4"
+version = "3.1.5"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "markupsafe" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/ed/55/39036716d19cab0747a5020fc7e907f362fbf48c984b14e62127f7e68e5d/jinja2-3.1.4.tar.gz", hash = "sha256:4a3aee7acbbe7303aede8e9648d13b8bf88a429282aa6122a993f0ac800cb369", size = 240245 }
+sdist = { url = "https://files.pythonhosted.org/packages/af/92/b3130cbbf5591acf9ade8708c365f3238046ac7cb8ccba6e81abccb0ccff/jinja2-3.1.5.tar.gz", hash = "sha256:8fefff8dc3034e27bb80d67c671eb8a9bc424c0ef4c0826edbff304cceff43bb", size = 244674 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/31/80/3a54838c3fb461f6fec263ebf3a3a41771bd05190238de3486aae8540c36/jinja2-3.1.4-py3-none-any.whl", hash = "sha256:bc5dd2abb727a5319567b7a813e6a2e7318c39f4f487cfe6c89c6f9c7d25197d", size = 133271 },
+    { url = "https://files.pythonhosted.org/packages/bd/0f/2ba5fbcd631e3e88689309dbe978c5769e883e4b84ebfe7da30b43275c5a/jinja2-3.1.5-py3-none-any.whl", hash = "sha256:aba0f4dc9ed8013c424088f68a5c226f7d6097ed89b246d7749c2ec4175c6adb", size = 134596 },
 ]
 
 [[package]]
@@ -670,11 +670,11 @@ wheels = [
 
 [[package]]
 name = "json-repair"
-version = "0.32.0"
+version = "0.33.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/ed/00/850d481c0cb290f399610d5b5693f95634780b6a21d04719ab32d772d8bf/json_repair-0.32.0.tar.gz", hash = "sha256:eed776fb24dbcce5bcd200f3c254a7d70fda40405c31c97f52a5ca8cfb7cf3e4", size = 28169 }
+sdist = { url = "https://files.pythonhosted.org/packages/d3/7d/1462a9815a1fe320dc6395e0e632a438b670b5f0699085c437812f6116c1/json_repair-0.33.0.tar.gz", hash = "sha256:1796062b8acf3b081141cb0293c80cad5f5ad29be1cd141de601361ee3e533ac", size = 28447 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/0d/13/8a660fa1966882ff2d82ddd17943865d2ad560e5773d9b878938dc336c4c/json_repair-0.32.0-py3-none-any.whl", hash = "sha256:a06a83c62e75c69a58cda5902f5631adec567d6584413cf233b412b491cf8580", size = 19149 },
+    { url = "https://files.pythonhosted.org/packages/70/42/0cec26df976de2a355dd7d908e3c2a1b6ef6c16a51d38e2621f9c60d83d0/json_repair-0.33.0-py3-none-any.whl", hash = "sha256:6285148ef06d059a3ae5de2c665c441ac20999d1248f8795faaa864fa88b796d", size = 19301 },
 ]
 
 [[package]]
@@ -732,7 +732,7 @@ wheels = [
 
 [[package]]
 name = "litellm"
-version = "1.55.9"
+version = "1.55.10"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiohttp" },
@@ -744,13 +744,12 @@ dependencies = [
     { name = "openai" },
     { name = "pydantic" },
     { name = "python-dotenv" },
-    { name = "requests" },
     { name = "tiktoken" },
     { name = "tokenizers" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/6b/91/55e49113193156d5fcb695169721f70816363301582525d4dcf5ec5e982c/litellm-1.55.9.tar.gz", hash = "sha256:861be3447552db32da05abff8af4945d1dd84df2f4b10985f97120dca5c07a42", size = 6203068 }
+sdist = { url = "https://files.pythonhosted.org/packages/37/9e/73038697461aa0c5b4933ddc3e5240121c0ba72fab2b772bb59133c66d2a/litellm-1.55.10.tar.gz", hash = "sha256:e346f89244d4c9dd79524ab4b6e5fff3ada8488a25382a299aeb9dc6d535fa15", size = 6205322 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/d6/83/ae45fa54668abfa24a845a5976ca9cdd0e1c3f28702c61e00196a79cb7e8/litellm-1.55.9-py3-none-any.whl", hash = "sha256:5ea931bee64535090d49a54e6b9842883fa6cabd6849c3c9674c12b166145da0", size = 6474898 },
+    { url = "https://files.pythonhosted.org/packages/82/72/8fe6fc098d78c2738cf2256cac73eafd6bd9fa519bc15a27360c9fff1640/litellm-1.55.10-py3-none-any.whl", hash = "sha256:ed5c940105c1953dccb42d376f62de0a417b670f57752e76d6138bba1fba769a", size = 6481250 },
 ]
 
 [[package]]
@@ -1595,11 +1594,11 @@ wheels = [
 
 [[package]]
 name = "urllib3"
-version = "2.2.3"
+version = "2.3.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/ed/63/22ba4ebfe7430b76388e7cd448d5478814d3032121827c12a2cc287e2260/urllib3-2.2.3.tar.gz", hash = "sha256:e7d814a81dad81e6caf2ec9fdedb284ecc9c73076b62654547cc64ccdcae26e9", size = 300677 }
+sdist = { url = "https://files.pythonhosted.org/packages/aa/63/e53da845320b757bf29ef6a9062f5c669fe997973f966045cb019c3f4b66/urllib3-2.3.0.tar.gz", hash = "sha256:f8c5449b3cf0861679ce7e0503c7b44b5ec981bec0d1d3795a07f1ba96f0204d", size = 307268 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ce/d9/5f4c13cecde62396b0d3fe530a50ccea91e7dfc1ccf0e09c228841bb5ba8/urllib3-2.2.3-py3-none-any.whl", hash = "sha256:ca899ca043dcb1bafa3e262d73aa25c465bfb49e0bd9dd5d59f1d0acba2f8fac", size = 126338 },
+    { url = "https://files.pythonhosted.org/packages/c8/19/4ec628951a74043532ca2cf5d97b7b14863931476d117c471e8e2b1eb39f/urllib3-2.3.0-py3-none-any.whl", hash = "sha256:1cee9ad369867bfdbbb48b7dd50374c0967a0bb7710050facf0dd6911440e3df", size = 128369 },
 ]
 
 [[package]]
@@ -1707,7 +1706,6 @@ dev = [
     { name = "black" },
     { name = "mypy", specifier = ">=1.10.0" },
     { name = "pre-commit", specifier = ">=3.6.0" },
-    { name = "pytest" },
     { name = "pytest", specifier = ">=8.0.0" },
     { name = "pytest-vcr", specifier = ">=1.0.2" },
     { name = "python-dotenv", specifier = ">=1.0.0" },

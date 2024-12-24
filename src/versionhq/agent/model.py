@@ -172,14 +172,14 @@ class Agent(ABC, BaseModel):
             self.llm.context_window_size = (self.llm.get_context_window_size() if self.respect_context_window == True else DEFAULT_CONTEXT_WINDOW)
             self.llm.callbacks = callbacks
 
-        elif isinstance(self.llm, str):
-            self.llm = LLM(model=self.llm, timeout=self.max_execution_time, max_tokens=self.max_tokens, callbacks=callbacks)
-            context_window_size = (self.llm.get_context_window_size() if self.respect_context_window == True else DEFAULT_CONTEXT_WINDOW)
-            self.llm.context_window_size = context_window_size
-
-        elif self.llm is None:
+        elif isinstance(self.llm, str) or self.llm is None:
             model_name = os.environ.get("LITELLM_MODEL_NAME", os.environ.get("MODEL", "gpt-4o-mini"))
-            llm_params = { "model": model_name, "timeout": self.max_execution_time, "max_tokens": self.max_tokens, "callbacks": callbacks }
+            llm_params = {
+                "model": model_name if self.llm is None else self.llm,
+                "timeout": self.max_execution_time,
+                "max_tokens": self.max_tokens,
+                "callbacks": callbacks
+            }
             api_base = os.environ.get("OPENAI_API_BASE", os.environ.get("OPENAI_BASE_URL", None))
             if api_base:
                 llm_params["base_url"] = api_base
@@ -341,9 +341,7 @@ class Agent(ABC, BaseModel):
         task_execution_counter += 1
         print("Agent's #1 res: ", response)
 
-        if (
-            response is None or response == ""
-        ) and task_execution_counter < self.max_retry_limit:
+        if (response is None or response == "") and task_execution_counter < self.max_retry_limit:
             while task_execution_counter <= self.max_retry_limit:
                 response = self.llm.call(
                     messages=messages,

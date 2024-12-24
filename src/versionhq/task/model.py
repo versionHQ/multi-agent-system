@@ -3,16 +3,10 @@ import threading
 import uuid
 from concurrent.futures import Future
 from hashlib import md5
-from typing import Any, Dict, List, Set, Optional, Tuple, Callable
+from typing import Any, Dict, List, Set, Optional, Tuple, Callable, Union, Type
+from typing_extensions import Annotated
 
-from pydantic import (
-    UUID4,
-    BaseModel,
-    Field,
-    PrivateAttr,
-    field_validator,
-    model_validator,
-)
+from pydantic import UUID4, BaseModel, Field, PrivateAttr, field_validator, model_validator, create_model
 from pydantic_core import PydanticCustomError
 
 from versionhq._utils.process_config import process_config
@@ -24,10 +18,36 @@ class ResponseField(BaseModel):
     """
     Field class to use in the response schema for the JSON response.
     """
-
     title: str = Field(default=None)
-    type: str = Field(default=None)
+    type: Type = Field(default=str)
     required: bool = Field(default=True)
+
+    def _annotate(self, value: Any) -> Annotated:
+        """
+        Address `create_model`
+        """
+        return Annotated[self.type, value] if isinstance(value, self.type) else Annotated[str, str(value)]
+
+
+    def create_pydantic_model(self, result: Dict, base_model: Union[BaseModel | Any]) -> Any:
+        for k, v in result.items():
+            if k is not self.title or type(v) is not self.type:
+                pass
+            setattr(base_model, k, v)
+        return base_model
+
+
+class AgentOutput(BaseModel):
+    """
+    Keep adding agents' learning and recommendation and store it in `pydantic` field of `TaskOutput` class.
+    Since the TaskOutput class has `agent` field, we don't add any info on the agent that handled the task.
+    """
+    customer_id: str = Field(default=None, max_length=126, description="customer uuid")
+    customer_analysis: str = Field(default=None, max_length=256, description="analysis of the customer")
+    business_overview: str = Field(default=None,max_length=256,description="analysis of the client's business")
+    cohort_timeframe: int = Field(default=None,max_length=256,description="Suitable cohort timeframe in days")
+    kpi_metrics: List[str] = Field(default=list, description="Ideal KPIs to be tracked")
+    assumptions: List[Dict[str, Any]] = Field(default=list, description="assumptions to test")
 
 
 class TaskOutput(BaseModel):
@@ -36,45 +56,10 @@ class TaskOutput(BaseModel):
     Depending on the task output format, use `raw`, `pydantic`, `json_dict` accordingly.
     """
 
-    class AgentOutput(BaseModel):
-        """
-        Keep adding agents' learning and recommendation and store it in `pydantic` field of `TaskOutput` class.
-        Since the TaskOutput class has `agent` field, we don't add any info on the agent that handled the task.
-        """
-
-        customer_id: str = Field(
-            default=None, max_length=126, description="customer uuid"
-        )
-        customer_analysis: str = Field(
-            default=None, max_length=256, description="analysis of the customer"
-        )
-        business_overview: str = Field(
-            default=None,
-            max_length=256,
-            description="analysis of the client's business",
-        )
-        cohort_timeframe: int = Field(
-            default=None,
-            max_length=256,
-            description="Suitable cohort timeframe in days",
-        )
-        kpi_metrics: List[str] = Field(
-            default=list, description="Ideal KPIs to be tracked"
-        )
-        assumptions: List[Dict[str, Any]] = Field(
-            default=list, description="assumptions to test"
-        )
-
-    task_id: UUID4 = Field(
-        default_factory=uuid.uuid4, frozen=True, description="store Task ID"
-    )
+    task_id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True, description="store Task ID")
     raw: str = Field(default="", description="Raw output of the task")
-    pydantic: Optional[BaseModel | AgentOutput] = Field(
-        default=None, description="Pydantic output of task"
-    )
-    json_dict: Optional[Dict[str, Any]] = Field(
-        default=None, description="JSON dictionary of task"
-    )
+    pydantic: Optional[Any] = Field(default=None, description="`raw` converted to the abs. pydantic model")
+    json_dict: Union[Dict[str, Any]] = Field(default=None, description="`raw` converted to dictionary")
 
     def __str__(self) -> str:
         return (
@@ -114,57 +99,33 @@ class Task(BaseModel):
 
     __hash__ = object.__hash__
 
-    id: UUID4 = Field(
-        default_factory=uuid.uuid4,
-        frozen=True,
-        description="unique identifier for the object, not set by user",
-    )
+    id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True, description="unique identifier for the object, not set by user")
     name: Optional[str] = Field(default=None)
     description: str = Field(description="Description of the actual task")
     _original_description: str = PrivateAttr(default=None)
 
     # output
-    expected_output_raw: bool = Field(default=False)
     expected_output_json: bool = Field(default=True)
     expected_output_pydantic: bool = Field(default=False)
-    output_field_list: Optional[List[ResponseField]] = Field(
-        default=[
-            ResponseField(title="output", type="str", required=True),
-        ]
-    )
-    output: Optional[TaskOutput] = Field(
-        default=None, description="store the final task output in TaskOutput class"
-    )
+    output_field_list: Optional[List[ResponseField]] = Field(default=[ResponseField(title="output")])
+    output: Optional[TaskOutput] = Field(default=None, description="store the final task output in TaskOutput class")
 
     # task setup
-    context: Optional[List["Task"]] = Field(
-        default=None, description="other tasks whose outputs should be used as context"
-    )
-    tools_called: Optional[List[ToolCalled]] = Field(
-        default_factory=list, description="tools that the agent can use for this task"
-    )
-    take_tool_res_as_final: bool = Field(
-        default=False,
-        description="when set True, tools res will be stored in the `TaskOutput`",
-    )
+    context: Optional[List["Task"]] = Field(default=None, description="other tasks whose outputs should be used as context")
+    tools_called: Optional[List[ToolCalled]] = Field(default_factory=list, description="tools that the agent can use for this task")
+    take_tool_res_as_final: bool = Field(default=False,description="when set True, tools res will be stored in the `TaskOutput`")
 
     prompt_context: Optional[str] = None
-    async_execution: bool = Field(
-        default=False,
-        description="whether the task should be executed asynchronously or not",
-    )
-    config: Optional[Dict[str, Any]] = Field(
-        default=None, description="configuration for the agent"
-    )
-    callback: Optional[Any] = Field(
-        default=None, description="callback to be executed after the task is completed."
-    )
+    async_execution: bool = Field(default=False,description="whether the task should be executed asynchronously or not")
+    config: Optional[Dict[str, Any]] = Field(default=None, description="configuration for the agent")
+    callback: Optional[Any] = Field(default=None, description="callback to be executed after the task is completed.")
 
     # recording
     processed_by_agents: Set[str] = Field(default_factory=set)
     used_tools: int = 0
     tools_errors: int = 0
     delegations: int = 0
+
 
     @property
     def output_prompt(self):
@@ -174,24 +135,28 @@ class Task(BaseModel):
 
         output_prompt, output_dict = "", dict()
         for item in self.output_field_list:
-            output_dict[item.title] = f"your answer in {item.type}"
+            output_dict[item.title] = f"<Return your answer in {item.type.__name__}>"
 
         output_prompt = f"""
-        The output formats include the following format:
+        Your outputs STRICTLY follow the following format and should NOT contain any other irrevant elements that not specified in the following format:
         {output_dict}
         """
         return output_prompt
 
+
     @property
     def expected_output_formats(self) -> List[TaskOutputFormat]:
-        outputs = []
+        """
+        Return output formats in list with the ENUM item.
+        `TaskOutputFormat.RAW` is set as default.
+        """
+        outputs = [TaskOutputFormat.RAW,]
         if self.expected_output_json:
             outputs.append(TaskOutputFormat.JSON)
         if self.expected_output_pydantic:
             outputs.append(TaskOutputFormat.PYDANTIC)
-        if self.expected_output_raw:
-            outputs.append(TaskOutputFormat.RAW)
         return outputs
+
 
     @property
     def key(self) -> str:
@@ -207,6 +172,7 @@ class Task(BaseModel):
         source = [self.description, output_format]
         return md5("|".join(source).encode(), usedforsecurity=False).hexdigest()
 
+
     @property
     def summary(self) -> str:
         return f"""
@@ -215,6 +181,7 @@ class Task(BaseModel):
         "task_expected_output": {self.output_prompt}
         "task_tools": {", ".join([tool_called.tool.name for tool_called in self.tools_called])}
         """
+
 
     # validators
     @model_validator(mode="before")
@@ -250,15 +217,14 @@ class Task(BaseModel):
                 setattr(self, key, value)
         return self
 
-    @model_validator(mode="after")
-    def validate_output_format(self):
-        if (
-            self.expected_output_json == False
-            and self.expected_output_pydantic == False
-            and self.expeceted_output_raw == False
-        ):
-            raise PydanticCustomError("Need to choose at least one output format.")
-        return self
+
+    ## comment out as we set raw as the default TaskOutputFormat
+    # @model_validator(mode="after")
+    # def validate_output_format(self):
+    #     if self.expected_output_json == False  and self.expected_output_pydantic == False:
+    #         raise PydanticCustomError("Need to choose at least one output format.")
+    #     return self
+
 
     @model_validator(mode="after")
     def backup_description(self):
@@ -266,57 +232,57 @@ class Task(BaseModel):
             self._original_description = self.description
         return self
 
+
     def prompt(self, customer=str | None, product_overview=str | None) -> str:
         """
-        Return the prompt of the task.
+        Format the task prompt.
         """
-
         task_slices = [
             self.description,
             f"Customer overview: {customer}",
             f"Product overview: {product_overview}",
-            f"Follow the output formats decribled below. Your response should NOT contain any other element from the following formats.: {self.output_prompt}",
+            f"{self.output_prompt}",
         ]
         return "\n".join(task_slices)
 
-    def _export_output(
-        self, result: Any
-    ) -> Tuple[Optional[BaseModel], Optional[Dict[str, Any]]]:
-        output_pydantic: Optional[BaseModel] = None
-        output_json: Optional[Dict[str, Any]] = None
-        dict_output = None
 
-        if isinstance(result, str):
+    def _export_output(self, raw_result: Any) -> Tuple[Optional[Dict[str, Any]], Optional[BaseModel]]:
+        """
+        Create json (dict) output and pydantic output accordingly from the raw result depending on its instance type.
+        """
+
+        output_pydantic: Optional[BaseModel | AgentOutput] = None #! REFINEME
+        output_json: Optional[Dict[str, Any]] = None
+
+        if isinstance(raw_result, dict):
+            output_json = raw_result
+
+        elif isinstance(raw_result, BaseModel):
+            output_json = raw_result.model_dump()
+            output_pydantic = raw_result
+
+        elif isinstance(raw_result, str):
             try:
-                dict_output = json.loads(result)
+                output_json = json.loads(raw_result)
             except json.JSONDecodeError:
                 try:
-                    dict_output = eval(result)
+                    output_json = eval(raw_result)
                 except:
                     try:
                         import ast
-
-                        dict_output = ast.literal_eval(result)
+                        output_json = ast.literal_eval(raw_result)
                     except:
-                        dict_output = None
+                        output_json = { "output": raw_result }
+                        output_pydantic = create_model(model_name="PydanticTaskOutput", output=raw_result, __base__=BaseModel)
 
-        if self.expected_output_json:
-            if isinstance(result, dict):
-                output_json = result
-            elif isinstance(result, BaseModel):
-                output_json = result.model_dump()
-            else:
-                output_json = dict_output
+        if output_pydantic is None:
+            output_pydantic = create_model("PydanticTaskOutput", __base__=BaseModel)
 
-        if self.expected_output_pydantic:
-            if isinstance(result, BaseModel):
-                output_pydantic = result
-            elif isinstance(result, dict):
-                output_json = result
-            else:
-                output_pydantic = None
+            for item in self.output_field_list:
+                item.create_pydantic_model(result=output_json, base_model=output_pydantic)
 
         return output_json, output_pydantic
+
 
     def _get_output_format(self) -> TaskOutputFormat:
         if self.output_json == True:
@@ -324,6 +290,7 @@ class Task(BaseModel):
         if self.output_pydantic == True:
             return TaskOutputFormat.PYDANTIC
         return TaskOutputFormat.RAW
+
 
     def interpolate_inputs(self, inputs: Dict[str, Any]) -> None:
         """
@@ -353,12 +320,12 @@ class Task(BaseModel):
         ).start()
         return future
 
-    def _execute_task_async(
-        self, agent, context: Optional[str], future: Future[TaskOutput]
-    ) -> None:
+
+    def _execute_task_async(self, agent, context: Optional[str], future: Future[TaskOutput]) -> None:
         """Execute the task asynchronously with context handling."""
         result = self._execute_core(agent, context)
         future.set_result(result)
+
 
     def _execute_core(self, agent, context: Optional[str]) -> TaskOutput:
         """
@@ -366,13 +333,13 @@ class Task(BaseModel):
         """
 
         self.prompt_context = context
-        result = agent.execute_task(task=self, context=context)
-        output_json, output_pydantic = self._export_output(result)
+        raw_result = agent.execute_task(task=self, context=context)
+        output_json, output_pydantic = self._export_output(raw_result=raw_result)
         task_output = TaskOutput(
             task_id=self.id,
-            raw=result,
-            pydantic=output_pydantic,
-            json_dict=output_json,
+            raw=raw_result,
+            pydantic=output_pydantic if self.expected_output_pydantic else None,
+            json_dict=output_json if self.expected_output_json else None
         )
         self.output = task_output
         self.processed_by_agents.add(agent.role)

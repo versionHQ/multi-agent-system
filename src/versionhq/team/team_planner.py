@@ -36,13 +36,13 @@ class TeamPlanner:
         task_to_handle = Task(
             description=f"""
                 Based on the following task summaries, create the most descriptive plan that the team can execute most efficiently. Take all the task summaries - task's description and tools available - into consideration. Your answer only contains a dictionary.
-                
+
                 Task summaries: {" ".join(task_summary_list)}
              """,
             expected_output_json=False,
             expected_output_pydantic=True,
             output_field_list=[
-                ResponseField(title=f"{task.id}", type="str", required=True)
+                ResponseField(title=f"{task.id}", type=str, required=True)
                 for task in self.tasks
             ],
         )
