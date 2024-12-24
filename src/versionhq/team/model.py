@@ -65,23 +65,12 @@ class TaskHandlingProcess(str, Enum):
 class TeamOutput(BaseModel):
     """Class that represents the result of a team."""
 
-    team_id: UUID4 = Field(
-        default_factory=uuid.uuid4,
-        frozen=True,
-        description="store the team ID that generate the TeamOutput",
-    )
+    team_id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True, description="store the team ID that generate the TeamOutput")
     raw: str = Field(default="", description="raw output")
     pydantic: Optional[BaseModel] = Field(default=None, description="pydantic output")
-    json_dict: Optional[Dict[str, Any]] = Field(
-        default=None, description="JSON dict output"
-    )
-    task_output_list: list[TaskOutput] = Field(
-        default=list,
-        description="store output of all the tasks that the team has executed",
-    )
-    token_usage: UsageMetrics = Field(
-        default=dict, description="processed token summary"
-    )
+    json_dict: Optional[Dict[str, Any]] = Field(default=None, description="JSON dict output")
+    task_output_list: list[TaskOutput] = Field(default=list, description="store output of all the tasks that the team has executed")
+    token_usage: UsageMetrics = Field(default=dict, description="processed token summary")
 
     def __str__(self):
         return (

@@ -1,8 +1,13 @@
 import os
 from dotenv import load_dotenv
 from typing import Union, Any, Dict
+from pydantic import BaseModel
 
-from vesionhq.team.model import TeamOutput
+from versionhq.agent.model import Agent
+from versionhq.task.model import Task, ResponseField, TaskOutput
+from versionhq.team.model import Team, TeamMember, TaskHandlingProcess, TeamOutput
+from versionhq._utils.usage_metrics import UsageMetrics
+
 
 
 load_dotenv(override=True)
@@ -10,9 +15,6 @@ MODEL_NAME = os.environ.get("LITELLM_MODEL_NAME", "gpt-3.5-turbo")
 
 
 def kickoff_test() -> Union[TeamOutput | Dict[str, Any]]:
-    from versionhq.agent.model import Agent
-    from versionhq.task.model import Task, ResponseField
-    from versionhq.team.model import Team, TeamMember, TaskHandlingProcess
 
     agent_a = Agent(
         role="Demo Agent A",
@@ -88,14 +90,23 @@ def kickoff_test() -> Union[TeamOutput | Dict[str, Any]]:
         prompt_file="sample.demo.Prompts.demo.py",
     )
 
-    print("...team will kickoff...")
-    res = team.kickoff()  # return TeamOutput
-    print("Task is completed by team ID:", res.team_id)
-    print("Raw result: ", res.raw)
-    print("JSON: ", res.json_dict)
-    print("Pydantic: ", res.pydantic)
-    print("All task output: ", res.return_all_task_outputs)
+    res = team.kickoff()
+    res_all = res.return_all_task_outputs()
 
+    assert isinstance(res, TeamOutput)
+    assert res.team_id == team.id
+    assert res.raw is not None
+    assert isinstance(res.raw, str)
+    assert res.json_dict is not None
+    assert isinstance(res.json_dict, dict)
+    assert isinstance(res.pydantic, BaseModel)
 
-if __name__ == "__main__":
-    kickoff_test()
+    assert isinstance(res_all, list)
+    assert len(res_all) == 2
+    for item in res_all:
+        assert isinstance(item, TaskOutput)
+        assert "field-1" in item
+        assert "field-2" in item
+
+    assert isinstance(res.token_usage, UsageMetrics)
+    assert res.token_usage.total_tokens > 0

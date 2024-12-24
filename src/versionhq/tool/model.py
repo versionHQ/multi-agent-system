@@ -35,13 +35,11 @@ class Tool(ABC, BaseModel):
     @property
     def description(self):
         args_schema = {
-            name: {
-                "description": field.description,
-                "type": Tool._get_arg_annotations(field.annotation),
-            }
+            name: { "description": field.description,  "type": Tool._get_arg_annotations(field.annotation) }
             for name, field in self.args_schema.model_fields.items()
         }
         return f"Tool Name: {self.name}\nTool Arguments: {args_schema}\nTool Description: {self.description}"
+
 
     @field_validator("args_schema", mode="before")
     @classmethod
@@ -188,21 +186,13 @@ class ToolCalled(BaseModel):
     Store the tool called and any kwargs used.
     """
 
-    tool: InstanceOf[Tool] = Field(
-        ..., description="store the tool instance to be called."
-    )
-    arguments: Optional[Dict[str, Any]] = Field(
-        ..., description="kwargs passed to the tool"
-    )
+    tool: InstanceOf[Tool] = Field(..., description="store the tool instance to be called.")
+    arguments: Optional[Dict[str, Any]] = Field(..., description="kwargs passed to the tool")
 
 
 class InstructorToolCalled(BaseModel):
-    tool: InstanceOf[Tool] = Field(
-        ..., description="store the tool instance to be called."
-    )
-    arguments: Optional[Dict[str, Any]] = Field(
-        ..., description="kwargs passed to the tool"
-    )
+    tool: InstanceOf[Tool] = Field(..., description="store the tool instance to be called.")
+    arguments: Optional[Dict[str, Any]] = Field(..., description="kwargs passed to the tool")
 
 
 class CacheTool(BaseModel):

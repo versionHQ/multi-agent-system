@@ -58,14 +58,9 @@ dev-dependencies = [
   "python-dotenv>=1.0.0",
   "black",
   "bandit",
-  "twine"
+  "twine",
+  "pytest"
 ]
-
-[tool.black]
-line-length = 88
-
-[tool.isort]
-profile = "black"
 
 [tool.uv.workspace]
 members = ["krik8235"]

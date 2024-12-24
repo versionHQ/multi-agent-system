@@ -1,7 +1,7 @@
 # Overview
 
 ![MIT license](https://img.shields.io/badge/License-MIT-green) ![PyPi](https://img.shields.io/badge/pypi-v1.1.6.3-blue)
-![python ver](https://img.shields.io/badge/Python-3.13.1-purple) ![pyenv ver](https://img.shields.io/badge/pyenv-2.4.23-orange)
+![python ver](https://img.shields.io/badge/Python-3.12/3.13-purple) ![pyenv ver](https://img.shields.io/badge/pyenv-2.4.23-orange)
 
 
 An LLM orchestration frameworks for multi-agent systems with RAG to autopilot outbound workflows.
@@ -59,7 +59,7 @@ The `agent` is model agnostic. The default model is set Chat GTP 4o. We ask the 
 Multiple `agents` can form a `team` to complete complex tasks together.
 
 **1. Analysis**
-- Professional `agents` handle the analysis `tasks` on each client, customer, and product. 
+- Professional `agents` handle the analysis `tasks` on each client, customer, and product.
 
 **2. Messaging Workflow Creation**
 - Several `teams` receive the analysis and design initial messaging workflow with several layers.
@@ -114,10 +114,10 @@ src/
 │      └── ...
 │
 └──tests/
-      └── cli/   
+      └── cli/
       └── team/
       └── ...
-      │        
+      │
       └── uploads/    # Uploaded files for the project
 
 ```
@@ -187,10 +187,10 @@ For more details:
 
 4. Test the features using the `tests` directory.
 
-   - Add a file to the `tests` directory.
+   - Add a test function to respective components in the `tests` directory.
    - Run a test.
       ```
-      uv run <your file name>
+      uv run pytest tests --vv
       ```
 
    * All the `.py` files' names in the `tests` have to be ended with `_test.py`.
@@ -272,6 +272,7 @@ Common issues and solutions:
 - Issues related to dependencies:`rm -rf .venv uv.lock`, `uv cache clean`  and run `uv run pip install -r requirements.txt -v`.
 - Issues related to the AI agents or RAG system: Check the `output.log` file for detailed error messages and stack traces.
 - Issues related to `Python quit unexpectedly`: Check [this stackoverflow article](https://stackoverflow.com/questions/59888499/macos-catalina-python-quit-unexpectedly-error).
+- `reportMissingImports` error from pyright after installing the package: This might occur when installing new libraries while VSCode is running. Open the command pallete (ctrl + shift + p) and run the Python: Restart language server task.
 
 <hr />
 

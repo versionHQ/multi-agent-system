@@ -222,25 +222,22 @@ class Task(BaseModel):
     def process_model_config(cls, values: Dict[str, Any]):
         return process_config(values_to_update=values, model_class=cls)
 
+
     @field_validator("id", mode="before")
     @classmethod
     def _deny_user_set_id(cls, v: Optional[UUID4]) -> None:
         if v:
-            raise PydanticCustomError(
-                "may_not_set_field", "This field is not to be set by the user.", {}
-            )
+            raise PydanticCustomError("may_not_set_field", "This field is not to be set by the user.", {})
+
 
     @model_validator(mode="after")
     def validate_required_fields(self):
-        required_fields = [
-            "description",
-        ]
+        required_fields = ["description",]
         for field in required_fields:
             if getattr(self, field) is None:
-                raise ValueError(
-                    f"{field} must be provided either directly or through config"
-                )
+                raise ValueError( f"{field} must be provided either directly or through config")
         return self
+
 
     @model_validator(mode="after")
     def set_attributes_based_on_config(self) -> "Task":
