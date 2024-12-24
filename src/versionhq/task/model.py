@@ -28,7 +28,6 @@ class ResponseField(BaseModel):
         """
         return Annotated[self.type, value] if isinstance(value, self.type) else Annotated[str, str(value)]
 
-
     def create_pydantic_model(self, result: Dict, base_model: Union[BaseModel | Any]) -> Any:
         for k, v in result.items():
             if k is not self.title or type(v) is not self.type:
@@ -62,11 +61,7 @@ class TaskOutput(BaseModel):
     json_dict: Union[Dict[str, Any]] = Field(default=None, description="`raw` converted to dictionary")
 
     def __str__(self) -> str:
-        return (
-            str(self.pydantic)
-            if self.pydantic
-            else str(self.json_dict) if self.json_dict else self.raw
-        )
+        return str(self.pydantic) if self.pydantic else str(self.json_dict) if self.json_dict else self.raw
 
     @property
     def json(self) -> Optional[str]:
@@ -246,42 +241,54 @@ class Task(BaseModel):
         return "\n".join(task_slices)
 
 
-    def _export_output(self, raw_result: Any) -> Tuple[Optional[Dict[str, Any]], Optional[BaseModel]]:
+    def create_json_output(self, raw_result: Any) -> Optional[Dict[str, Any]]:
         """
-        Create json (dict) output and pydantic output accordingly from the raw result depending on its instance type.
+        Create json (dict) output from the raw result.
         """
 
-        output_pydantic: Optional[BaseModel | AgentOutput] = None #! REFINEME
-        output_json: Optional[Dict[str, Any]] = None
+        output_json_dict: Optional[Dict[str, Any]] = None
 
-        if isinstance(raw_result, dict):
-            output_json = raw_result
+        if isinstance(raw_result, BaseModel):
+            output_json_dict = raw_result.model_dump()
 
-        elif isinstance(raw_result, BaseModel):
-            output_json = raw_result.model_dump()
-            output_pydantic = raw_result
+        elif isinstance(raw_result, dict):
+            output_json_dict = raw_result
 
         elif isinstance(raw_result, str):
             try:
-                output_json = json.loads(raw_result)
+                output_json_dict = json.loads(raw_result)
             except json.JSONDecodeError:
                 try:
-                    output_json = eval(raw_result)
+                    output_json_dict = eval(raw_result)
                 except:
                     try:
                         import ast
-                        output_json = ast.literal_eval(raw_result)
+                        output_json_dict = ast.literal_eval(raw_result)
                     except:
-                        output_json = { "output": raw_result }
-                        output_pydantic = create_model(model_name="PydanticTaskOutput", output=raw_result, __base__=BaseModel)
+                        output_json_dict = { "output": raw_result }
 
-        if output_pydantic is None:
+        return output_json_dict
+
+
+
+    def create_pydantic_output(self, output_json_dict: Dict[str, Any], raw_result: Any = None) -> Optional[Any]:
+        """
+        Create pydantic output from the raw result.
+        """
+
+        output_pydantic = None #! REFINEME
+        if isinstance(raw_result, BaseModel):
+            output_pydantic = raw_result
+
+        elif hasattr(output_json_dict, "output"):
+            output_pydantic = create_model("PydanticTaskOutput", output=output_json_dict["output"], __base__=BaseModel)
+
+        else:
             output_pydantic = create_model("PydanticTaskOutput", __base__=BaseModel)
-
             for item in self.output_field_list:
-                item.create_pydantic_model(result=output_json, base_model=output_pydantic)
+                item.create_pydantic_model(result=output_json_dict, base_model=output_pydantic)
 
-        return output_json, output_pydantic
+        return output_pydantic
 
 
     def _get_output_format(self) -> TaskOutputFormat:
@@ -306,6 +313,7 @@ class Task(BaseModel):
         Execute the task synchronously.
         """
         return self._execute_core(agent, context)
+
 
     def execute_async(self, agent, context: Optional[str] = None) -> Future[TaskOutput]:
         """
@@ -334,12 +342,13 @@ class Task(BaseModel):
 
         self.prompt_context = context
         raw_result = agent.execute_task(task=self, context=context)
-        output_json, output_pydantic = self._export_output(raw_result=raw_result)
+        output_json_dict = self.create_json_output(raw_result=raw_result)
+        output_pydantic = self.create_pydantic_output(output_json_dict=output_json_dict)
         task_output = TaskOutput(
             task_id=self.id,
             raw=raw_result,
-            pydantic=output_pydantic if self.expected_output_pydantic else None,
-            json_dict=output_json if self.expected_output_json else None
+            pydantic=output_pydantic,
+            json_dict=output_json_dict
         )
         self.output = task_output
         self.processed_by_agents.add(agent.role)
@@ -360,7 +369,6 @@ class Task(BaseModel):
         #         else pydantic_output.model_dump_json() if pydantic_output else result
         #     )
         #     self._save_file(content)
-
         return task_output
 
 

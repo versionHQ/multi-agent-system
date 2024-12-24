@@ -10,7 +10,7 @@ MODEL_NAME = os.environ.get("LITELLM_MODEL_NAME", "gpt-3.5-turbo")
 def test_sync_execute_task():
     agent_a = Agent(
         role="Demo Agent A",
-        goal="""My amazing goals""",
+        goal="My amazing goals",
         backstory="My amazing backstory",
         verbose=True,
         llm=MODEL_NAME,
@@ -29,7 +29,7 @@ def test_sync_execute_task():
         tools=[],
         callback=None,
     )
-    res = task.execute_sync(agent=agent_a)  # -> TaskOutput class
+    res = task.execute_sync(agent=agent_a)
 
     assert isinstance(res, TaskOutput)
     assert res.task_id is task.id
@@ -43,6 +43,4 @@ def test_sync_execute_task():
     assert hasattr(res.pydantic, "test2")
     assert type(res.pydantic.test2) == list
 
-
-if __name__ == "__main__":
-    test_sync_execute_task()
+# CALLBACKS, TASK HANDLED BY AGENTS WITH TOOLS, FUTURE, ASYNC, CONDITIONAL, token usage
