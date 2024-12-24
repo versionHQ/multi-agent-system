@@ -23,11 +23,12 @@ jobs:
         with:
           version: "0.5.11"
 
-      - name: Install the project
+      - name: Set up the project
         run: |
-          uv venv
+          uv venv --python=python3.13.1
           source .venv/bin/activate
-          uv sync --dev --all-extras
+          uv pip install --upgrade pip pytest
+          uv pip install -r requirements.txt
 
       - name: Run tests
         run: uv run pytest tests -vv
