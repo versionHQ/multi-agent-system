@@ -4,7 +4,7 @@ from versionhq.agent.model import Agent
 from versionhq.llm.model import LLM
 
 MODEL_NAME = os.environ.get("LITELLM_MODEL_NAME", "gpt-3.5-turbo")
-LLM_API_KEY = os.environ.get("LITELLM_API_KEY")
+LITELLM_API_KEY = os.environ.get("LITELLM_API_KEY")
 
 
 def test_build_agent_with_minimal_input():
@@ -18,7 +18,7 @@ def test_build_agent_with_minimal_input():
     assert agent.goal in agent.backstory
     assert isinstance(agent.llm, LLM)
     assert agent.llm.model == "gpt-3.5-turbo"
-    assert agent.llm.api_key == LLM_API_KEY
+    assert agent.llm.api_key == LITELLM_API_KEY
     assert agent.tools == []
 
 
@@ -33,7 +33,7 @@ def test_build_agent_with_backstory():
     assert agent.backstory == "You are competitive analysts who have abundand knowledge in marketing, product management."
     assert isinstance(agent.llm, LLM)
     assert agent.llm.model == "gpt-3.5-turbo"
-    assert agent.llm.api_key == LLM_API_KEY
+    assert agent.llm.api_key == LITELLM_API_KEY
     assert agent.tools == []
 
 
@@ -53,7 +53,7 @@ def test_build_agent():
         assert item in agent.backstory
     assert isinstance(agent.llm, LLM)
     assert agent.llm.model == "gpt-3.5-turbo"
-    assert agent.llm.api_key == LLM_API_KEY
+    assert agent.llm.api_key == LITELLM_API_KEY
     assert agent.tools == []
 
 
@@ -73,5 +73,5 @@ def test_build_agent_with_llm():
         assert item in agent.backstory
     assert isinstance(agent.llm, LLM)
     assert agent.llm.model == "gpt-4o"
-    assert agent.llm.api_key == LLM_API_KEY
+    assert agent.llm.api_key == LITELLM_API_KEY
     assert agent.tools == []

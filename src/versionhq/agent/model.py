@@ -178,13 +178,12 @@ class Agent(ABC, BaseModel):
                 "model": model_name if self.llm is None else self.llm,
                 "timeout": self.max_execution_time,
                 "max_tokens": self.max_tokens,
-                "callbacks": callbacks
+                "callbacks": callbacks,
+                "api_key": os.environ.get("LITELLM_API_KEY", None),
+                "base_url": os.environ.get("OPENAI_API_BASE", os.environ.get("OPENAI_BASE_URL", None))
             }
-            api_base = os.environ.get("OPENAI_API_BASE", os.environ.get("OPENAI_BASE_URL", None))
-            if api_base:
-                llm_params["base_url"] = api_base
 
-            set_provider = model_name.split("/")[0] if "/" in model_name else "openai"
+            set_provider = model_name.split("/")[0] if "/" in model_name else "openai" #! REFINEME
             for provider, env_vars in LLM_VARS.items():
                 if provider == set_provider:
                     for env_var in env_vars:
@@ -214,7 +213,7 @@ class Agent(ABC, BaseModel):
                 "callbacks": getattr(self.llm, "callbacks") or callbacks,
                 "temperature": getattr(self.llm, "temperature", None),
                 "logprobs": getattr(self.llm, "logprobs", None),
-                "api_key": getattr(self.llm, "api_key", None),
+                "api_key": getattr(self.llm, "api_key", os.environ.get("LITELLM_API_KEY", None)),
                 "base_url": getattr(self.llm, "base_url", None),
                 "organization": getattr(self.llm, "organization", None),
             }

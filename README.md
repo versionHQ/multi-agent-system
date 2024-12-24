@@ -188,9 +188,10 @@ For more details:
 4. Test the features using the `tests` directory.
 
    - Add a test function to respective components in the `tests` directory.
+   - Add your `LITELLM_API_KEY` and `OPENAI_API_KEY` to the Tithub repo `secrets`.
    - Run a test.
       ```
-      uv run pytest tests --vv
+      uv run pytest tests -vv
       ```
 
    **pytest**
