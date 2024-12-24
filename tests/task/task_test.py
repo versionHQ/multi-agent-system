@@ -33,13 +33,10 @@ def test_sync_execute_task():
 
     assert isinstance(res, TaskOutput)
     assert res.task_id is task.id
-
     assert res.raw is not None
     assert isinstance(res.raw, str)
-
     assert res.json_dict is not None
     assert isinstance(res.json_dict, dict)
-
     assert res.pydantic is not None
     assert hasattr(res.pydantic, "test1")
     assert type(res.pydantic.test1) == str

@@ -173,7 +173,7 @@ class Agent(ABC, BaseModel):
             self.llm.callbacks = callbacks
 
         elif isinstance(self.llm, str) or self.llm is None:
-            model_name = os.environ.get("LITELLM_MODEL_NAME", os.environ.get("MODEL", "gpt-4o-mini"))
+            model_name = os.environ.get("LITELLM_MODEL_NAME", os.environ.get("MODEL", "gpt-3.5-turbo"))
             llm_params = {
                 "model": model_name if self.llm is None else self.llm,
                 "timeout": self.max_execution_time,
