@@ -14,7 +14,7 @@ repos:
     -   id: forbid-submodules
     -   id: name-tests-test
     # -   id: no-commit-to-branch
-    -   id: pretty-format-json
+    # -   id: pretty-format-json
 # -   repo: https://github.com/psf/black
 #     rev: 24.8.0
 #     hooks:

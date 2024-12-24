@@ -93,92 +93,46 @@ class Agent(ABC, BaseModel):
     agent_ops_agent_name: str = None
     agent_ops_agent_id: str = None
     role: str = Field(description="role of the agent - used in summary and logs")
-    goal: str = Field(
-        description="concise goal of the agent (details are set in the Task instance)"
-    )
+    goal: str = Field(description="concise goal of the agent (details are set in the Task instance)")
     backstory: str = Field(description="context passed to the LLM")
 
     # tools
     tools: Optional[List[Any]] = Field(default_factory=list)
-    tool_handler: InstanceOf[ToolHandler] = Field(
-        default=None, description="handle tool cache and last used tool"
-    )
+    tool_handler: InstanceOf[ToolHandler] = Field(default=None, description="handle tool cache and last used tool")
 
     # team, rules of task executions
-    team: Optional[List[Any]] = Field(
-        default=None, description="Team to which the agent belongs"
-    )
-    allow_delegation: bool = Field(
-        default=False,
-        description="Enable agent to delegate and ask questions among each other",
-    )
-    allow_code_execution: Optional[bool] = Field(
-        default=False, description="Enable code execution for the agent."
-    )
-    max_retry_limit: int = Field(
-        default=2,
-        description="max. number of retries for the task execution when an error occurs. cascaed to the `invoke` function",
-    )
-    max_iter: Optional[int] = Field(
-        default=25,
-        description="max. number of iterations for an agent to execute a task",
-    )
-    step_callback: Optional[Any] = Field(
-        default=None,
-        description="Callback to be executed after each step of the agent execution",
-    )
+    team: Optional[List[Any]] = Field(default=None, description="Team to which the agent belongs")
+    allow_delegation: bool = Field(default=False,description="Enable agent to delegate and ask questions among each other",)
+    allow_code_execution: Optional[bool] = Field(default=False, description="Enable code execution for the agent.")
+    max_retry_limit: int = Field(default=2,description="max. number of retries for the task execution when an error occurs. cascaed to the `invoke` function",)
+    max_iter: Optional[int] = Field(default=25,description="max. number of iterations for an agent to execute a task",)
+    step_callback: Optional[Any] = Field(default=None,description="Callback to be executed after each step of the agent execution",)
 
     # llm settings cascaded to the LLM model
     llm: Union[str, InstanceOf[LLM], Any] = Field(default=None)
     function_calling_llm: Union[str, InstanceOf[LLM], Any] = Field(default=None)
-    respect_context_window: bool = Field(
-        default=True,
-        description="Keep messages under the context window size by summarizing content",
-    )
-    max_tokens: Optional[int] = Field(
-        default=None, description="max. number of tokens for the agent's execution"
-    )
-    max_execution_time: Optional[int] = Field(
-        default=None, description="max. execution time for an agent to execute a task"
-    )
-    max_rpm: Optional[int] = Field(
-        default=None,
-        description="max. number of requests per minute for the agent execution",
-    )
+    respect_context_window: bool = Field(default=True,description="Keep messages under the context window size by summarizing content",)
+    max_tokens: Optional[int] = Field(default=None, description="max. number of tokens for the agent's execution")
+    max_execution_time: Optional[int] = Field(default=None, description="max. execution time for an agent to execute a task")
+    max_rpm: Optional[int] = Field(default=None,description="max. number of requests per minute for the agent execution",)
 
     # prompt rules
-    use_system_prompt: Optional[bool] = Field(
-        default=True, description="Use system prompt for the agent"
-    )
-    system_template: Optional[str] = Field(
-        default=None, description="System format for the agent."
-    )
-    prompt_template: Optional[str] = Field(
-        default=None, description="Prompt format for the agent."
-    )
-    response_template: Optional[str] = Field(
-        default=None, description="Response format for the agent."
-    )
+    use_system_prompt: Optional[bool] = Field(default=True, description="Use system prompt for the agent")
+    system_template: Optional[str] = Field(default=None, description="System format for the agent.")
+    prompt_template: Optional[str] = Field(default=None, description="Prompt format for the agent.")
+    response_template: Optional[str] = Field(default=None, description="Response format for the agent.")
 
     # config, cache, error handling
-    config: Optional[Dict[str, Any]] = Field(
-        default=None, exclude=True, description="Configuration for the agent"
-    )
-    cache: bool = Field(
-        default=True, description="Whether the agent should use a cache for tool usage."
-    )
-    cache_handler: InstanceOf[CacheHandler] = Field(
-        default=None, description="An instance of the CacheHandler class."
-    )
-    formatting_errors: int = Field(
-        default=0, description="Number of formatting errors."
-    )
-    verbose: bool = Field(
-        default=True, description="Verbose mode for the Agent Execution"
-    )
+    config: Optional[Dict[str, Any]] = Field(default=None, exclude=True, description="Configuration for the agent")
+    cache: bool = Field(default=True, description="Whether the agent should use a cache for tool usage.")
+    cache_handler: InstanceOf[CacheHandler] = Field(default=None, description="An instance of the CacheHandler class.")
+    formatting_errors: int = Field(default=0, description="Number of formatting errors.")
+    verbose: bool = Field(default=True, description="Verbose mode for the Agent Execution")
+
 
     def __repr__(self):
         return f"Agent(role={self.role}, goal={self.goal}, backstory={self.backstory})"
+
 
     @model_validator(mode="after")
     def set_up_llm(self):
