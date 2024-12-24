@@ -8,51 +8,51 @@ from versionhq._utils.usage_metrics import UsageMetrics
 
 MODEL_NAME = os.environ.get("LITELLM_MODEL_NAME", "gpt-3.5-turbo")
 
-agent_a = Agent(
-    role="Demo Agent A",
-    goal="My amazing goals",
-    backstory="My amazing backstory",
-    verbose=True,
-    llm=MODEL_NAME,
-    max_tokens=3000,
-)
 
-agent_b = Agent(
-    role="Demo Agent B-1",
-    goal="My amazing goals",
-    verbose=True,
-    llm=MODEL_NAME,
-    max_tokens=3000,
-)
+def test_form_team():
+    agent_a = Agent(
+        role="Demo Agent A",
+        goal="My amazing goals",
+        backstory="My amazing backstory",
+        verbose=True,
+        llm=MODEL_NAME,
+        max_tokens=3000,
+    )
 
-task_1 = Task(
-        description="Analyze the client's business model, target audience, and customer information and define the optimal cohort timeframe based on customer lifecycle and product usage patterns.",
+    agent_b = Agent(
+        role="Demo Agent B-1",
+        goal="My amazing goals",
+        verbose=True,
+        llm=MODEL_NAME,
+        max_tokens=3000,
+    )
+
+    task_1 = Task(
+            description="Analyze the client's business model, target audience, and customer information and define the optimal cohort timeframe based on customer lifecycle and product usage patterns.",
+            expected_output_json=True,
+            output_field_list=[
+                ResponseField(title="test1", type=str, required=True),
+                ResponseField(title="test2", type=list, required=True),
+            ],
+            expected_output_pydantic=True,
+            context=[],
+            tools=[],
+            callback=None,
+        )
+
+    task_2 = Task(
+        description="Amazing task description",
         expected_output_json=True,
+        expected_output_pydantic=True,
         output_field_list=[
-            ResponseField(title="test1", type=str, required=True),
+            ResponseField(title="test1", type=int, required=True),
             ResponseField(title="test2", type=list, required=True),
         ],
-        expected_output_pydantic=True,
         context=[],
         tools=[],
         callback=None,
     )
 
-task_2 = Task(
-    description="Amazing task description",
-    expected_output_json=True,
-    expected_output_pydantic=True,
-    output_field_list=[
-        ResponseField(title="test1", type=int, required=True),
-        ResponseField(title="test2", type=list, required=True),
-    ],
-    context=[],
-    tools=[],
-    callback=None,
-)
-
-
-def test_form_team():
     team = Team(
         members=[
             TeamMember(agent=agent_a, is_manager=True, task=task_1),
@@ -71,12 +71,56 @@ def test_form_team():
 
 
 def test_form_team_without_leader():
+    agent_a = Agent(
+        role="Demo Agent A",
+        goal="My amazing goals",
+        backstory="My amazing backstory",
+        verbose=True,
+        llm=MODEL_NAME,
+        max_tokens=3000,
+    )
+
+    agent_b = Agent(
+        role="Demo Agent B-1",
+        goal="My amazing goals",
+        verbose=True,
+        llm=MODEL_NAME,
+        max_tokens=3000,
+    )
+
+    task_1 = Task(
+            description="Analyze the client's business model, target audience, and customer information and define the optimal cohort timeframe based on customer lifecycle and product usage patterns.",
+            expected_output_json=True,
+            output_field_list=[
+                ResponseField(title="test1", type=str, required=True),
+                ResponseField(title="test2", type=list, required=True),
+            ],
+            expected_output_pydantic=True,
+            context=[],
+            tools=[],
+            callback=None,
+        )
+
+    task_2 = Task(
+        description="Amazing task description",
+        expected_output_json=True,
+        expected_output_pydantic=True,
+        output_field_list=[
+            ResponseField(title="test1", type=int, required=True),
+            ResponseField(title="test2", type=list, required=True),
+        ],
+        context=[],
+        tools=[],
+        callback=None,
+    )
+
     team = Team(
         members=[
             TeamMember(agent=agent_a, is_manager=False, task=task_1),
             TeamMember(agent=agent_b, is_manager=False, task=task_2),
         ],
     )
+
     assert team.id is not None
     assert team.key is not None
     assert isinstance(team.key, str)
@@ -88,6 +132,49 @@ def test_form_team_without_leader():
 
 
 def test_kickoff_team_without_leader():
+    agent_a = Agent(
+        role="Demo Agent A",
+        goal="My amazing goals",
+        backstory="My amazing backstory",
+        verbose=True,
+        llm=MODEL_NAME,
+        max_tokens=3000,
+    )
+
+    agent_b = Agent(
+        role="Demo Agent B-1",
+        goal="My amazing goals",
+        verbose=True,
+        llm=MODEL_NAME,
+        max_tokens=3000,
+    )
+
+    task_1 = Task(
+            description="Analyze the client's business model, target audience, and customer information and define the optimal cohort timeframe based on customer lifecycle and product usage patterns.",
+            expected_output_json=True,
+            output_field_list=[
+                ResponseField(title="test1", type=str, required=True),
+                ResponseField(title="test2", type=list, required=True),
+            ],
+            expected_output_pydantic=True,
+            context=[],
+            tools=[],
+            callback=None,
+        )
+
+    task_2 = Task(
+        description="Amazing task description",
+        expected_output_json=True,
+        expected_output_pydantic=True,
+        output_field_list=[
+            ResponseField(title="test1", type=int, required=True),
+            ResponseField(title="test2", type=list, required=True),
+        ],
+        context=[],
+        tools=[],
+        callback=None,
+    )
+
     team = Team(
         members=[
             TeamMember(agent=agent_a, is_manager=False, task=task_1),
