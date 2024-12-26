@@ -1,7 +1,6 @@
 # Overview
 
-![MIT license](https://img.shields.io/badge/License-MIT-green) ![PyPi](https://img.shields.io/badge/pypi-v1.1.6.3-blue)
-![python ver](https://img.shields.io/badge/Python-3.12/3.13-purple) ![pyenv ver](https://img.shields.io/badge/pyenv-2.4.23-orange)
+![MIT license](https://img.shields.io/badge/License-MIT-green) [![Publisher](https://github.com/versionHQ/multi-agent-system/actions/workflows/publish.yml/badge.svg)](https://github.com/versionHQ/multi-agent-system/actions/workflows/publish.yml) ![PyPi](https://img.shields.io/badge/pypi-v1.1.7.0-blue) ![python ver](https://img.shields.io/badge/Python-3.12/3.13-purple) ![pyenv ver](https://img.shields.io/badge/pyenv-2.4.23-orange)
 
 
 An LLM orchestration frameworks for multi-agent systems with RAG to autopilot outbound workflows.
@@ -18,6 +17,7 @@ Messaging workflows are created at individual level, and will be deployed on thi
 - [Orchestration frameworks](https://github.com/versionHQ/multi-agent-system)
 - [Test client app](https://github.com/versionHQ/test-client-app)
 
+<hr />
 
 ## Mindmap
 
@@ -34,10 +34,10 @@ LLM-powered `agent`s and `team`s use `tool`s and their own knowledge to complete
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
 - [Key Features](#key-features)
+- [Usage](#usage)
 - [Technologies Used](#technologies-used)
 - [Project Structure](#project-structure)
 - [Setup](#setup)
-- [Usage](#usage)
 - [Contributing](#contributing)
   - [Customizing AI Agents](#customizing-ai-agents)
   - [Modifying RAG Functionality](#modifying-rag-functionality)
@@ -69,6 +69,52 @@ Multiple `agents` can form a `team` to complete complex tasks together.
 **3. Autopiloting**
 - Responsible `agents` or `teams` autopilot executing and refining the messaging workflow.
 
+<hr />
+
+## Usage
+
+1. Install `versionhq` package:
+   ```
+   uv pip install versionhq
+   ```
+
+2. You can use the `versionhq` module in your Python app.
+
+   - **i.e.,** Make LLM-based agent execute the task and return JSON dict.
+
+   ```
+   from versionhq.agent.model import Agent
+   from versionhq.task.model import Task, ResponseField
+
+   agent = Agent(
+      role="demo",
+      goal="amazing project goal",
+      skillsets=["skill_1", "skill_2", ],
+      llm="llm-of-choice"
+   )
+
+   task = Task(
+      description="Amazing task",
+      expected_output_json=True,
+      expected_output_pydantic=False,
+      output_field_list=[
+         ResponseField(title="test1", type=str, required=True),
+         ResponseField(title="test2", type=list, required=True),
+      ],
+      context=["amazing context",],
+      tools=["amazing tool"],
+      callback=None,
+   )
+
+   res = task.execute_sync(agent=agent)
+
+   return res.to_dict()
+
+   ```
+
+For more details:
+
+[PyPi package](https://pypi.org/project/versionhq/)
 
 <hr />
 
@@ -93,6 +139,7 @@ Multiple `agents` can form a `team` to complete complex tasks together.
    - [pre-commit](https://pre-commit.com/): Manage and maintain pre-commit hooks
    - [setuptools](https://pypi.org/project/setuptools/): Build python modules
 
+<hr />
 
 ## Project Structure
 
@@ -155,25 +202,6 @@ src/
    COMPOSIO_API_KEY=your-composio-api-key
    COMPOSIO_CLI_KEY=your-composio-cli-key
    ```
-
-<hr />
-
-## Usage
-
-1. Install `versionhq` package:
-```
-uv pip install versionhq
-```
-
-2. You can use the `versionhq` module in your Python app.
-```
-from versionhq.agent.model import Agent
-agent = Agent(llm="your-llm", ...)
-```
-
-For more details:
-
-[PyPi package](https://pypi.org/project/versionhq/)
 
 <hr />
 

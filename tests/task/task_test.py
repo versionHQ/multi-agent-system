@@ -1,35 +1,34 @@
 import os
-from typing import Type
-from pydantic import BaseModel
+import pytest
 from versionhq.agent.model import Agent
 from versionhq.task.model import Task, ResponseField, TaskOutput, AgentOutput
 
-MODEL_NAME = os.environ.get("LITELLM_MODEL_NAME", "gpt-3.5-turbo")
+DEFAULT_MODEL_NAME = os.environ.get("LITELLM_MODEL_NAME", "gpt-3.5-turbo")
+LITELLM_API_KEY = os.environ.get("LITELLM_API_KEY")
 
 
 def test_sync_execute_task():
-    agent_a = Agent(
-        role="Demo Agent A",
+    agent = Agent(
+        role="demo agent 000",
         goal="My amazing goals",
         backstory="My amazing backstory",
         verbose=True,
-        llm=MODEL_NAME,
+        llm=DEFAULT_MODEL_NAME,
         max_tokens=3000,
     )
 
     task = Task(
-        description="Analyze the client's business model, target audience, and customer information and define the optimal cohort timeframe based on customer lifecycle and product usage patterns.",
+        description="Analyze the client's business model and define the optimal cohort timeframe.",
         expected_output_json=True,
+        expected_output_pydantic=True,
         output_field_list=[
             ResponseField(title="test1", type=str, required=True),
             ResponseField(title="test2", type=list, required=True),
         ],
-        expected_output_pydantic=True,
-        context=[],
-        tools=[],
+        context=None,
         callback=None,
     )
-    res = task.execute_sync(agent=agent_a)
+    res = task.execute_sync(agent=agent)
 
     assert isinstance(res, TaskOutput)
     assert res.task_id is task.id
@@ -43,4 +42,56 @@ def test_sync_execute_task():
     assert hasattr(res.pydantic, "test2")
     assert type(res.pydantic.test2) == list
 
-# CALLBACKS, TASK HANDLED BY AGENTS WITH TOOLS, FUTURE, ASYNC, CONDITIONAL, token usage
+
+def test_sync_execute_task_with_context():
+    """
+    Use case = One agent handling multiple tasks sequentially using context set in the main task.
+    """
+
+    agent = Agent(
+        role="demo agent 001",
+        goal="My amazing goals",
+        backstory="My amazing backstory",
+        verbose=True,
+        llm=DEFAULT_MODEL_NAME,
+        max_tokens=3000,
+    )
+
+    sub_task = Task(
+        description="analyze the client's business model",
+        expected_output_json=True,
+        expected_output_pydantic=False,
+        output_field_list=[
+            ResponseField(title="result", type=str, required=True),
+        ]
+    )
+    main_task = Task(
+        description="Define the optimal cohort timeframe in days and target audience.",
+        expected_output_json=True,
+        expected_output_pydantic=True,
+        output_field_list=[
+            ResponseField(title="cohort_timeframe", type=int, required=True),
+            ResponseField(title="target_audience", type=str, required=True),
+        ],
+        context=[sub_task]
+    )
+    res = main_task.execute_sync(agent=agent)
+
+    assert isinstance(res, TaskOutput)
+    assert res.task_id is main_task.id
+    assert res.raw is not None
+    assert isinstance(res.raw, str)
+    assert res.json_dict is not None
+    assert isinstance(res.json_dict, dict)
+    assert res.pydantic is not None
+    assert hasattr(res.pydantic, "cohort_timeframe")
+    assert type(res.pydantic.cohort_timeframe) == int or type(res.pydantic.cohort_timeframe) == str
+    assert hasattr(res.pydantic, "target_audience")
+    assert type(res.pydantic.target_audience) == str
+
+    assert sub_task.output is not None
+    assert sub_task.output.json_dict is not None
+    assert "result" in main_task.prompt()
+
+
+# CALLBACKS, tools, FUTURE, ASYNC, CONDITIONAL, token usage

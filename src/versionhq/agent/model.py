@@ -367,8 +367,8 @@ class Agent(ABC, BaseModel):
         """
 
         task_prompt = task.prompt()
-        # if context:
-        #     task_prompt = self.i18n.slice("task_with_context").format(task=task_prompt, context=context)
+        if context:
+            task_prompt += context
 
         tool_results = []
         if task.tools_called:

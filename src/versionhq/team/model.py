@@ -100,16 +100,19 @@ class TeamOutput(BaseModel):
 
     def to_dict(self) -> Dict[str, Any]:
         """
-        Convert json_output and pydantic_output to a dictionary.
+        Convert pydantic / raw output into dict and return the dict.
+        When we only have `raw` output, return `{ output: raw }` to avoid an error
         """
+
         output_dict = {}
         if self.json_dict:
             output_dict.update(self.json_dict)
         elif self.pydantic:
             output_dict.update(self.pydantic.model_dump())
         else:
-            output_dict.update({"output", self.raw})
+            output_dict.upate({ "output": self.raw })
         return output_dict
+
 
     def return_all_task_outputs(self) -> List[Dict[str, Any]]:
         res = [output.json_dict for output in self.task_output_list]
@@ -117,9 +120,7 @@ class TeamOutput(BaseModel):
 
 
 class TeamMember(ABC, BaseModel):
-    agent: Agent | None = Field(
-        default=None, description="store the agent to be a member"
-    )
+    agent: Agent | None = Field(default=None, description="store the agent to be a member")
     is_manager: bool = Field(default=False)
     task: Task | None = Field(default=None)
 
@@ -164,8 +165,10 @@ class Team(BaseModel):
     execution_logs: List[Dict[str, Any]] = Field(default=[], description="list of execution logs for tasks")
     usage_metrics: Optional[UsageMetrics] = Field(default=None, description="usage metrics for all the llm executions")
 
+
     def __name__(self) -> str:
         return self.name if self.name is not None else self.id.__str__
+
 
     @property
     def key(self) -> str:
@@ -175,9 +178,7 @@ class Team(BaseModel):
 
     @property
     def manager_agent(self) -> Agent:
-        manager_agent = [
-            member.agent for member in self.members if member.is_manager == True
-        ]
+        manager_agent = [member.agent for member in self.members if member.is_manager == True]
         return manager_agent[0] if len(manager_agent) > 0 else None
 
 
@@ -251,7 +252,6 @@ class Team(BaseModel):
         """
         Every team member should have a task to handle.
         """
-
         if self.process == TaskHandlingProcess.sequential:
             for member in self.members:
                 if member.task is None:

@@ -18,9 +18,11 @@ class ResponseField(BaseModel):
     """
     Field class to use in the response schema for the JSON response.
     """
+
     title: str = Field(default=None)
     type: Type = Field(default=str)
     required: bool = Field(default=True)
+
 
     def _annotate(self, value: Any) -> Annotated:
         """
@@ -28,11 +30,32 @@ class ResponseField(BaseModel):
         """
         return Annotated[self.type, value] if isinstance(value, self.type) else Annotated[str, str(value)]
 
+
+    def _convert(self, value: Any) -> Any:
+        try:
+            if self.type is Any:
+                pass
+            elif self.type is int:
+                return int(value)
+            elif self.type is float:
+                return float(value)
+            elif self.type is list or self.type is dict:
+                return json.loads(value)
+            else:
+                return value
+        except:
+            return value
+
+
     def create_pydantic_model(self, result: Dict, base_model: Union[BaseModel | Any]) -> Any:
         for k, v in result.items():
-            if k is not self.title or type(v) is not self.type:
+            if k is not self.title:
                 pass
-            setattr(base_model, k, v)
+            elif type(v) is not self.type:
+                v = self._convert(v)
+                setattr(base_model, k, v)
+            else:
+                setattr(base_model, k, v)
         return base_model
 
 
@@ -43,10 +66,12 @@ class AgentOutput(BaseModel):
     """
     customer_id: str = Field(default=None, max_length=126, description="customer uuid")
     customer_analysis: str = Field(default=None, max_length=256, description="analysis of the customer")
-    business_overview: str = Field(default=None,max_length=256,description="analysis of the client's business")
-    cohort_timeframe: int = Field(default=None,max_length=256,description="Suitable cohort timeframe in days")
+    product_overview: str = Field(default=None, max_length=256, description="analysis of the client's business")
+    usp: str = Field()
+    cohort_timeframe: int = Field(default=None, max_length=256, description="suitable cohort timeframe in days")
     kpi_metrics: List[str] = Field(default=list, description="Ideal KPIs to be tracked")
     assumptions: List[Dict[str, Any]] = Field(default=list, description="assumptions to test")
+
 
 
 class TaskOutput(BaseModel):
@@ -57,8 +82,8 @@ class TaskOutput(BaseModel):
 
     task_id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True, description="store Task ID")
     raw: str = Field(default="", description="Raw output of the task")
-    pydantic: Optional[Any] = Field(default=None, description="`raw` converted to the abs. pydantic model")
     json_dict: Union[Dict[str, Any]] = Field(default=None, description="`raw` converted to dictionary")
+    pydantic: Optional[Any] = Field(default=None, description="`raw` converted to the abs. pydantic model")
 
     def __str__(self) -> str:
         return str(self.pydantic) if self.pydantic else str(self.json_dict) if self.json_dict else self.raw
@@ -75,14 +100,29 @@ class TaskOutput(BaseModel):
             )
         return json.dumps(self.json_dict)
 
+
     def to_dict(self) -> Dict[str, Any]:
-        """Convert json_output and pydantic_output to a dictionary."""
+        """
+        Convert pydantic / raw output into dict and return the dict.
+        When we only have `raw` output, return `{ output: raw }` to avoid an error
+        """
+
         output_dict = {}
         if self.json_dict:
             output_dict.update(self.json_dict)
         elif self.pydantic:
             output_dict.update(self.pydantic.model_dump())
+        else:
+            output_dict.upate({ "output": self.raw })
         return output_dict
+
+
+    def context_prompting(self) -> str:
+        """
+        When the task is called as context, return its output in concise string to add it to the prompt
+        """
+        return json.dumps(self.json_dict) if self.json_dict else self.raw[0: 127]
+
 
 
 class Task(BaseModel):
@@ -102,7 +142,10 @@ class Task(BaseModel):
     # output
     expected_output_json: bool = Field(default=True)
     expected_output_pydantic: bool = Field(default=False)
-    output_field_list: Optional[List[ResponseField]] = Field(default=[ResponseField(title="output")])
+    output_field_list: List[ResponseField] = Field(
+        default=[ResponseField(title="output", type=str, required=False)],
+        description="provide output key and data type. this will be cascaded to the agent via task.prompt()"
+    )
     output: Optional[TaskOutput] = Field(default=None, description="store the final task output in TaskOutput class")
 
     # task setup
@@ -123,18 +166,18 @@ class Task(BaseModel):
 
 
     @property
-    def output_prompt(self):
+    def output_prompt(self) -> str:
         """
         Draft prompts on the output format by converting `output_field_list` to dictionary.
         """
 
-        output_prompt, output_dict = "", dict()
+        output_prompt, output_formats_to_follow = "", dict()
         for item in self.output_field_list:
-            output_dict[item.title] = f"<Return your answer in {item.type.__name__}>"
+            output_formats_to_follow[item.title] = f"<Return your answer in {item.type.__name__}>"
 
         output_prompt = f"""
-        Your outputs STRICTLY follow the following format and should NOT contain any other irrevant elements that not specified in the following format:
-        {output_dict}
+Your outputs MUST adhere to the following format and should NOT include any irrelevant elements:
+{output_formats_to_follow}
         """
         return output_prompt
 
@@ -228,16 +271,25 @@ class Task(BaseModel):
         return self
 
 
-    def prompt(self, customer=str | None, product_overview=str | None) -> str:
+    def prompt(self, customer: str = None, product_overview: str = None) -> str:
         """
-        Format the task prompt.
+        Format the task prompt and cascade it to the agent.
+        When the task has context, add context prompting of all the tasks in the context.
+        When we have cusotmer/product info, add them to the prompt.
         """
-        task_slices = [
-            self.description,
-            f"Customer overview: {customer}",
-            f"Product overview: {product_overview}",
-            f"{self.output_prompt}",
-        ]
+
+        task_slices = [self.description, f"{self.output_prompt}"]
+
+        if self.context:
+            context_outputs = "\n".join([task.output.context_prompting() if hasattr(task, "output") else "" for task in self.context])
+            task_slices.insert(1,  f"Take the following context into consideration: {context_outputs}")
+
+        if customer:
+            task_slices.insert(1,  f"customer overview: {customer}")
+
+        if product_overview:
+            task_slices.insert(1, f"Product overview: {product_overview}")
+
         return "\n".join(task_slices)
 
 
@@ -273,10 +325,10 @@ class Task(BaseModel):
 
     def create_pydantic_output(self, output_json_dict: Dict[str, Any], raw_result: Any = None) -> Optional[Any]:
         """
-        Create pydantic output from the raw result.
+        Create pydantic output from the `raw` result.
         """
 
-        output_pydantic = None #! REFINEME
+        output_pydantic = None
         if isinstance(raw_result, BaseModel):
             output_pydantic = raw_result
 
@@ -307,11 +359,19 @@ class Task(BaseModel):
             self.description = self._original_description.format(**inputs)
             # self.expected_output = self._original_expected_output.format(**inputs)
 
+
     # task execution
     def execute_sync(self, agent, context: Optional[str] = None) -> TaskOutput:
         """
         Execute the task synchronously.
+        When the task has context, make sure we have executed all the tasks in the context first.
         """
+
+        if self.context:
+            for task in self.context:
+                if task.output is None:
+                    task._execute_core(agent, context)
+
         return self._execute_core(agent, context)
 
 
@@ -341,12 +401,12 @@ class Task(BaseModel):
         """
 
         self.prompt_context = context
-        raw_result = agent.execute_task(task=self, context=context)
-        output_json_dict = self.create_json_output(raw_result=raw_result)
+        output_raw = agent.execute_task(task=self, context=context)
+        output_json_dict = self.create_json_output(raw_result=output_raw)
         output_pydantic = self.create_pydantic_output(output_json_dict=output_json_dict)
         task_output = TaskOutput(
             task_id=self.id,
-            raw=raw_result,
+            raw=output_raw,
             pydantic=output_pydantic,
             json_dict=output_json_dict
         )

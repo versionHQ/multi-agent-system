@@ -31,4 +31,4 @@ jobs:
           uv pip install -r requirements.txt
 
       - name: Run tests
-        run: uv run pytest tests -vv  --cache-clear
+        run: uv run pytest tests -vv --cache-clear

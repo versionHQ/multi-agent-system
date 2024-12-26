@@ -11,7 +11,7 @@ MODEL_NAME = os.environ.get("LITELLM_MODEL_NAME", "gpt-3.5-turbo")
 
 def test_form_team():
     agent_a = Agent(
-        role="Demo Agent A",
+        role="agent a",
         goal="My amazing goals",
         backstory="My amazing backstory",
         verbose=True,
@@ -20,7 +20,7 @@ def test_form_team():
     )
 
     agent_b = Agent(
-        role="Demo Agent B-1",
+        role="agent b",
         goal="My amazing goals",
         verbose=True,
         llm=MODEL_NAME,
@@ -28,7 +28,7 @@ def test_form_team():
     )
 
     task_1 = Task(
-            description="Analyze the client's business model, target audience, and customer information and define the optimal cohort timeframe based on customer lifecycle and product usage patterns.",
+            description="Analyze the client's business model.",
             expected_output_json=True,
             output_field_list=[
                 ResponseField(title="test1", type=str, required=True),
@@ -41,7 +41,7 @@ def test_form_team():
         )
 
     task_2 = Task(
-        description="Amazing task description",
+        description="Define the cohort.",
         expected_output_json=True,
         expected_output_pydantic=True,
         output_field_list=[
@@ -72,7 +72,7 @@ def test_form_team():
 
 def test_form_team_without_leader():
     agent_a = Agent(
-        role="Demo Agent A",
+        role="agent a",
         goal="My amazing goals",
         backstory="My amazing backstory",
         verbose=True,
@@ -81,7 +81,7 @@ def test_form_team_without_leader():
     )
 
     agent_b = Agent(
-        role="Demo Agent B-1",
+        role="agent b",
         goal="My amazing goals",
         verbose=True,
         llm=MODEL_NAME,
@@ -89,7 +89,7 @@ def test_form_team_without_leader():
     )
 
     task_1 = Task(
-            description="Analyze the client's business model, target audience, and customer information and define the optimal cohort timeframe based on customer lifecycle and product usage patterns.",
+            description="Analyze the client's business model.",
             expected_output_json=True,
             output_field_list=[
                 ResponseField(title="test1", type=str, required=True),
@@ -102,7 +102,7 @@ def test_form_team_without_leader():
         )
 
     task_2 = Task(
-        description="Amazing task description",
+        description="Define the cohort.",
         expected_output_json=True,
         expected_output_pydantic=True,
         output_field_list=[
@@ -150,7 +150,7 @@ def test_kickoff_team_without_leader():
     )
 
     task_1 = Task(
-            description="Analyze the client's business model, target audience, and customer information and define the optimal cohort timeframe based on customer lifecycle and product usage patterns.",
+            description="Analyze the client's business model.",
             expected_output_json=True,
             output_field_list=[
                 ResponseField(title="test1", type=str, required=True),
@@ -163,7 +163,7 @@ def test_kickoff_team_without_leader():
         )
 
     task_2 = Task(
-        description="Amazing task description",
+        description="Define the cohort.",
         expected_output_json=True,
         expected_output_pydantic=True,
         output_field_list=[
@@ -198,8 +198,11 @@ def test_kickoff_team_without_leader():
     assert len(res_all) == 2
     for item in res_all:
         assert isinstance(item, dict)
-        assert "test1" in item
-        assert "test2" in item
+        if not hasattr(item, "output") or not hasattr(res_all, "output"):
+            assert "test1" in item
+            assert "test2" in item
+        else:
+            assert "output" in item
 
     assert isinstance(res.token_usage, UsageMetrics)
     assert res.token_usage.total_tokens == 0 # as we dont set token usage on agent
