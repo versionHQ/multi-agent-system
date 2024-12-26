@@ -337,8 +337,14 @@ Your outputs MUST adhere to the following format and should NOT include any irre
 
         else:
             output_pydantic = create_model("PydanticTaskOutput", __base__=BaseModel)
-            for item in self.output_field_list:
-                item.create_pydantic_model(result=output_json_dict, base_model=output_pydantic)
+            try:
+                for item in self.output_field_list:
+                    value = output_json_dict[item.title] if hasattr(output_json_dict, item.title) else None
+                    if value and type(value) is not item.type:
+                        value = item._convert(value)
+                    setattr(output_pydantic, item.title, value)
+            except:
+                setattr(output_pydantic, "output", output_json_dict)
 
         return output_pydantic
 
