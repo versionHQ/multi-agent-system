@@ -367,7 +367,7 @@ class Agent(ABC, BaseModel):
         """
 
         task_prompt = task.prompt()
-        if context:
+        if context is not task.prompt_context:  # as `task.prompt()` includes adding `task.prompt_context` to the prompt.
             task_prompt += context
 
         tool_results = []

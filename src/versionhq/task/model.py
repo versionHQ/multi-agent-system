@@ -153,7 +153,7 @@ class Task(BaseModel):
     tools_called: Optional[List[ToolCalled]] = Field(default_factory=list, description="tools that the agent can use for this task")
     take_tool_res_as_final: bool = Field(default=False,description="when set True, tools res will be stored in the `TaskOutput`")
 
-    prompt_context: Optional[str] = None
+    prompt_context: Optional[str] = Field(default=None)
     async_execution: bool = Field(default=False,description="whether the task should be executed asynchronously or not")
     config: Optional[Dict[str, Any]] = Field(default=None, description="configuration for the agent")
     callback: Optional[Any] = Field(default=None, description="callback to be executed after the task is completed.")
@@ -278,17 +278,20 @@ Your outputs MUST adhere to the following format and should NOT include any irre
         When we have cusotmer/product info, add them to the prompt.
         """
 
-        task_slices = [self.description, f"{self.output_prompt}"]
+        task_slices = [self.description, f"{self.output_prompt}", f"Take the following context into consideration: "]
 
         if self.context:
             context_outputs = "\n".join([task.output.context_prompting() if hasattr(task, "output") else "" for task in self.context])
-            task_slices.insert(1,  f"Take the following context into consideration: {context_outputs}")
+            task_slices.insert(len(task_slices),  context_outputs)
 
         if customer:
-            task_slices.insert(1,  f"customer overview: {customer}")
+            task_slices.insert(len(task_slices),  f"Customer overview: {customer}")
 
         if product_overview:
-            task_slices.insert(1, f"Product overview: {product_overview}")
+            task_slices.insert(len(task_slices), f"Product overview: {product_overview}")
+
+        if self.prompt_context:
+            task_slices.insert(len(task_slices), self.prompt_context)
 
         return "\n".join(task_slices)
 
