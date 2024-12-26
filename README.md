@@ -108,12 +108,15 @@ Multiple `agents` can form a `team` to complete complex tasks together.
 
    res = task.execute_sync(agent=agent)
    return res.to_dict()
-
    ```
 
 This will return a dictionary with keys defined in the ResponseField.
 
-Ref. [PyPi package](https://pypi.org/project/versionhq/)
+   ```
+   { test1: "answer1", "test2": ["answer2-1", "answer2-2", "answer2-3",] }
+   ```
+
+For more info: [PyPI package](https://pypi.org/project/versionhq/)
 
 <hr />
 
