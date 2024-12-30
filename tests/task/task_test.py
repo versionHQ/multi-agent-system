@@ -217,11 +217,12 @@ def test_callback():
         output_field_list=[
             ResponseField(title="test1", type=str, required=True),
         ],
-        callback=callback_func
+        callback=callback_func,
+        callback_kwargs={"item": "demo for pytest"}
     )
 
     with patch.object(Agent, "execute_task", return_value="ok") as execute:
-        execution = task.execute_async(agent=agent, callback_kwargs={"item": "demo for pytest"})
+        execution = task.execute_async(agent=agent)
         result = execution.result()
         assert result.raw == "ok"
         execute.assert_called_once_with(task=task, context=None)

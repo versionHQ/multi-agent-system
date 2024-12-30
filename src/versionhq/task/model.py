@@ -158,6 +158,7 @@ class Task(BaseModel):
     async_execution: bool = Field(default=False,description="whether the task should be executed asynchronously or not")
     config: Optional[Dict[str, Any]] = Field(default=None, description="configuration for the agent")
     callback: Optional[Any] = Field(default=None, description="callback to be executed after the task is completed.")
+    callback_kwargs: Optional[Dict[str, Any]] = Field(default_factory=dict, description="kwargs for the callback when the callback is callable")
 
     # recording
     processed_by_agents: Set[str] = Field(default_factory=set)
@@ -371,7 +372,7 @@ Your outputs MUST adhere to the following format and should NOT include any irre
 
 
     # task execution
-    def execute_sync(self, agent, context: Optional[str] = None, callback_kwargs: Dict[str, Any] = None) -> TaskOutput:
+    def execute_sync(self, agent, context: Optional[str] = None) -> TaskOutput:
         """
         Execute the task synchronously.
         When the task has context, make sure we have executed all the tasks in the context first.
@@ -380,12 +381,12 @@ Your outputs MUST adhere to the following format and should NOT include any irre
         if self.context:
             for task in self.context:
                 if task.output is None:
-                    task._execute_core(agent, context, callback_kwargs)
+                    task._execute_core(agent, context)
 
         return self._execute_core(agent, context)
 
 
-    def execute_async(self, agent, context: Optional[str] = None, callback_kwargs: Dict[str, Any] = None) -> Future[TaskOutput]:
+    def execute_async(self, agent, context: Optional[str] = None) -> Future[TaskOutput]:
         """
         Execute the task asynchronously.
         """
@@ -394,31 +395,45 @@ Your outputs MUST adhere to the following format and should NOT include any irre
         threading.Thread(
             daemon=True,
             target=self._execute_task_async,
-            args=(agent, context, callback_kwargs, future),
+            args=(agent, context, future),
         ).start()
         return future
 
 
-    def _execute_task_async(self, agent, context: Optional[str], callback_kwargs: Dict[str, Any], future: Future[TaskOutput]) -> None:
+    def _execute_task_async(self, agent, context: Optional[str], future: Future[TaskOutput]) -> None:
         """
         Execute the task asynchronously with context handling.
         """
 
-        result = self._execute_core(agent, context, callback_kwargs)
+        result = self._execute_core(agent, context)
         future.set_result(result)
 
 
-    def _execute_core(self, agent, context: Optional[str], callback_kwargs: Optional[Dict[str, Any]] = None) -> TaskOutput:
+    def _execute_core(self, agent, context: Optional[str]) -> TaskOutput:
         """
         Run the core execution logic of the task.
         To speed up the process, when the format is not expected to return, we will skip the conversion process.
+        When the task is allowed to delegate to another agent, we will select a responsible one in order of manager_agent > peer_agent > anoymous agent.
         """
         from versionhq.agent.model import Agent
+        from versionhq.team.model import Team
 
         self.prompt_context = context
 
         if self.allow_delegation:
-            agent = Agent(role="delegated_agent", goal=agent.goal, llm=agent.llm) #! REFINEME - logic to pick up the high performer
+            agent_to_delegate = None
+
+            if hasattr(agent, "team") and isinstance(agent.team, Team):
+                if agent.team.manager_agent:
+                    agent_to_delegate = agent.team.manager_agent
+                else:
+                    peers = [member.agent for member in agent.team.members if member.is_manager == False and member.agent.id is not agent.id]
+                    if len(peers) > 0:
+                        agent_to_delegate = peers[0]
+            else:
+                agent_to_delegate = Agent(role="delegated_agent", goal=agent.goal, llm=agent.llm)
+
+            agent = agent_to_delegate
             self.delegations += 1
 
         output_raw = agent.execute_task(task=self, context=context)
@@ -437,7 +452,7 @@ Your outputs MUST adhere to the following format and should NOT include any irre
 
         if self.callback:
             if isinstance(self.callback, Callable):
-                self.callback(**callback_kwargs)
+                self.callback(**self.callback_kwargs)
             else:
                 self.callback(self.output)
 

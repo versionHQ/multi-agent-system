@@ -192,14 +192,102 @@ def test_kickoff_team_without_leader():
     assert len(res_all) == 2
     for item in res_all:
         assert isinstance(item, dict)
-        # if not hasattr(item, "output") and not hasattr(res_all, "output"):
-        #     assert "test1" in item
-        #     assert "test2" in item
-        # else:
-        #     assert "output" in item
-
     assert isinstance(res.token_usage, UsageMetrics)
     assert res.token_usage.total_tokens == 0 # as we dont set token usage on agent
+
+
+
+def team_kickoff_with_task_callback():
+    """
+    Each task has callback with callback kwargs.
+    """
+    demo_list = []
+    def demo_callback(item: str) -> None:
+        demo_list.append(item)
+
+    agent_a = Agent(
+        role="agent a",
+        goal="My amazing goals",
+        llm=MODEL_NAME
+    )
+
+    agent_b = Agent(
+        role="agent b",
+        goal="My amazing goals",
+        llm=MODEL_NAME
+    )
+
+    task_1 = Task(
+        description="Analyze the client's business model.",
+        output_field_list=[ResponseField(title="test1", type=str, required=True),],
+        callback=demo_callback,
+        callback_kwargs=dict(item="pytest demo 1")
+    )
+
+    task_2 = Task(
+        description="Define the cohort.",
+        output_field_list=[ResponseField(title="test1", type=int, required=True),],
+        callback=demo_callback,
+        callback_kwargs=dict(item="pytest demo 2")
+    )
+
+    team = Team(
+        members=[
+            TeamMember(agent=agent_a, is_manager=False, task=task_1),
+            TeamMember(agent=agent_b, is_manager=False, task=task_2),
+        ],
+    )
+    res = team.kickoff()
+
+    assert res.raw is not None
+    assert res.json_dict is not None
+    assert len(res.return_all_task_outputs()) == 2
+    assert len(demo_list) == 2
+    assert "pytest" in demo_list[0]
+    assert "pytest" in demo_list[1]
+
+
+
+def test_delegate_in_team():
+    """
+    When the agent belongs to the team, the team manager or peers are prioritized to delegete the task.
+    """
+
+    agent_a = Agent(
+        role="agent a",
+        goal="My amazing goals",
+        llm=MODEL_NAME
+    )
+
+    agent_b = Agent(
+        role="agent b",
+        goal="My amazing goals",
+        llm=MODEL_NAME
+    )
+
+    task_1 = Task(
+        description="Analyze the client's business model.",
+        output_field_list=[ResponseField(title="test1", type=str, required=True),],
+        allow_delegation=True
+    )
+
+    task_2 = Task(
+        description="Define the cohort.",
+        output_field_list=[ResponseField(title="test1", type=int, required=True),],
+        allow_delegation=False
+    )
+
+    team = Team(
+        members=[
+            TeamMember(agent=agent_a, is_manager=False, task=task_1),
+            TeamMember(agent=agent_b, is_manager=False, task=task_2),
+        ],
+    )
+    res = team.kickoff()
+
+    assert res.raw is not None
+    assert res.json_dict is not None
+    assert "agent b" in task_1.processed_by_agents
 
 
 

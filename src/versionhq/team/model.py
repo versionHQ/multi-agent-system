@@ -111,7 +111,7 @@ class TeamOutput(BaseModel):
 class TeamMember(ABC, BaseModel):
     agent: Agent | None = Field(default=None, description="store the agent to be a member")
     is_manager: bool = Field(default=False)
-    task: Task | None = Field(default=None)
+    task: Optional[Task] = Field(default=None)
 
 
 class Team(BaseModel):
@@ -145,7 +145,6 @@ class Team(BaseModel):
         default_factory=list,
         description="list of callback functions to be executed after the team kickoff. i.e., store the result in repo"
     )
-    task_callback: Optional[Any] = Field(default=None, description="callback to be executed after each task for all agents execution")
     step_callback: Optional[Any] = Field(default=None, description="callback to be executed after each step for all agents execution")
 
     verbose: bool = Field(default=True)
@@ -379,7 +378,7 @@ class Team(BaseModel):
         """
         Executes tasks sequentially and returns the final output in TeamOutput class.
         When we have a manager agent, we will start from executing manager agent's tasks.
-        Priority
+        Priority:
         1. Team tasks > 2. Manager task > 3. Member tasks (in order of index)
         """
 
@@ -412,7 +411,7 @@ class Team(BaseModel):
 
             if task.async_execution:
                 context = create_raw_outputs(tasks=[task, ],task_outputs=([last_sync_output,] if last_sync_output else []))
-                future = task.execute_async(agent=responsible_agent, context=context,
+                future = task.execute_async(agent=responsible_agent, context=context
                                             # tools=responsible_agent.tools
                                             )
                 futures.append((task, future, task_index))
@@ -422,7 +421,7 @@ class Team(BaseModel):
                     futures.clear()
 
                 context = create_raw_outputs(tasks=[task,], task_outputs=([ last_sync_output,] if last_sync_output else [] ))
-                task_output = task.execute_sync(agent=responsible_agent, context=context,
+                task_output = task.execute_sync(agent=responsible_agent, context=context
                                                 # tools=responsible_agent.tools
                                                 )
                 if responsible_agent is self.manager_agent:
@@ -463,9 +462,6 @@ class Team(BaseModel):
         #     self._inputs = inputs
         # self._interpolate_inputs(inputs)
 
-        for task in self.tasks:
-            if not task.callback:
-                task.callback = self.task_callback
 
         # i18n = I18N(prompt_file=self.prompt_file)
 
