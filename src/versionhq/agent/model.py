@@ -95,7 +95,7 @@ class Agent(ABC, BaseModel):
     role: str = Field(description="role of the agent - used in summary and logs")
     goal: str = Field(description="concise goal of the agent (details are set in the Task instance)")
     backstory: Optional[str] = Field(default=None, description="system context passed to the LLM")
-    knowledge: Optional[str] = Field(default=None)
+    knowledge: Optional[str] = Field(default=None, description="external knowledge fed to the agent")
     skillsets: Optional[List[str]] = Field(default_factory=list)
 
     # tools
@@ -358,7 +358,7 @@ class Agent(ABC, BaseModel):
         return {"output": response.output if hasattr(response, "output") else response}
 
 
-    def execute_task(self, task, context: Optional[str] = None) -> str:
+    def execute_task(self, task, context: Optional[str] = None, tools: Optional[str] = None) -> str:
         """
         Execute the task and return the output in string.
         To simplify, the tools are cascaded from the `tools_called` under the `task` Task instance if any.

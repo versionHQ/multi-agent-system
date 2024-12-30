@@ -151,7 +151,8 @@ class Task(BaseModel):
     # task setup
     context: Optional[List["Task"]] = Field(default=None, description="other tasks whose outputs should be used as context")
     tools_called: Optional[List[ToolCalled]] = Field(default_factory=list, description="tools that the agent can use for this task")
-    take_tool_res_as_final: bool = Field(default=False,description="when set True, tools res will be stored in the `TaskOutput`")
+    take_tool_res_as_final: bool = Field(default=False, description="when set True, tools res will be stored in the `TaskOutput`")
+    allow_delegation: bool = Field(default=False, description="ask other agents for help and run the task instead")
 
     prompt_context: Optional[str] = Field(default=None)
     async_execution: bool = Field(default=False,description="whether the task should be executed asynchronously or not")
@@ -370,7 +371,7 @@ Your outputs MUST adhere to the following format and should NOT include any irre
 
 
     # task execution
-    def execute_sync(self, agent, context: Optional[str] = None) -> TaskOutput:
+    def execute_sync(self, agent, context: Optional[str] = None, callback_kwargs: Dict[str, Any] = None) -> TaskOutput:
         """
         Execute the task synchronously.
         When the task has context, make sure we have executed all the tasks in the context first.
@@ -379,12 +380,12 @@ Your outputs MUST adhere to the following format and should NOT include any irre
         if self.context:
             for task in self.context:
                 if task.output is None:
-                    task._execute_core(agent, context)
+                    task._execute_core(agent, context, callback_kwargs)
 
         return self._execute_core(agent, context)
 
 
-    def execute_async(self, agent, context: Optional[str] = None) -> Future[TaskOutput]:
+    def execute_async(self, agent, context: Optional[str] = None, callback_kwargs: Dict[str, Any] = None) -> Future[TaskOutput]:
         """
         Execute the task asynchronously.
         """
@@ -393,26 +394,36 @@ Your outputs MUST adhere to the following format and should NOT include any irre
         threading.Thread(
             daemon=True,
             target=self._execute_task_async,
-            args=(agent, context, future),
+            args=(agent, context, callback_kwargs, future),
         ).start()
         return future
 
 
-    def _execute_task_async(self, agent, context: Optional[str], future: Future[TaskOutput]) -> None:
-        """Execute the task asynchronously with context handling."""
-        result = self._execute_core(agent, context)
+    def _execute_task_async(self, agent, context: Optional[str], callback_kwargs: Dict[str, Any], future: Future[TaskOutput]) -> None:
+        """
+        Execute the task asynchronously with context handling.
+        """
+
+        result = self._execute_core(agent, context, callback_kwargs)
         future.set_result(result)
 
 
-    def _execute_core(self, agent, context: Optional[str]) -> TaskOutput:
+    def _execute_core(self, agent, context: Optional[str], callback_kwargs: Optional[Dict[str, Any]] = None) -> TaskOutput:
         """
         Run the core execution logic of the task.
+        To speed up the process, when the format is not expected to return, we will skip the conversion process.
         """
+        from versionhq.agent.model import Agent
 
         self.prompt_context = context
+
+        if self.allow_delegation:
+            agent = Agent(role="delegated_agent", goal=agent.goal, llm=agent.llm) #! REFINEME - logic to pick up the high performer
+            self.delegations += 1
+
         output_raw = agent.execute_task(task=self, context=context)
-        output_json_dict = self.create_json_output(raw_result=output_raw)
-        output_pydantic = self.create_pydantic_output(output_json_dict=output_json_dict)
+        output_json_dict = self.create_json_output(raw_result=output_raw) if self.expected_output_json is True else None
+        output_pydantic = self.create_pydantic_output(output_json_dict=output_json_dict) if self.expected_output_pydantic else None
         task_output = TaskOutput(
             task_id=self.id,
             raw=output_raw,
@@ -425,7 +436,10 @@ Your outputs MUST adhere to the following format and should NOT include any irre
         # self._set_end_execution_time(start_time)
 
         if self.callback:
-            self.callback(self.output)
+            if isinstance(self.callback, Callable):
+                self.callback(**callback_kwargs)
+            else:
+                self.callback(self.output)
 
         # if self._execution_span:
         #     # self._telemetry.task_ended(self._execution_span, self, agent.team)

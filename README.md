@@ -90,7 +90,7 @@ Multiple `agents` can form a `team` to complete complex tasks together.
       role="demo",
       goal="amazing project goal",
       skillsets=["skill_1", "skill_2", ],
-      llm="llm-of-choice"
+      llm="llm-of-your-choice"
    )
 
    task = Task(
@@ -101,16 +101,13 @@ Multiple `agents` can form a `team` to complete complex tasks together.
          ResponseField(title="test1", type=str, required=True),
          ResponseField(title="test2", type=list, required=True),
       ],
-      context=["amazing context",],
-      tools=["amazing tool"],
       callback=None,
    )
-
-   res = task.execute_sync(agent=agent)
+   res = task.execute_sync(agent=agent, context="amazing context to consider.")
    return res.to_dict()
    ```
 
-This will return a dictionary with keys defined in the ResponseField.
+This will return a dictionary with keys defined in the `ResponseField`.
 
    ```
    { test1: "answer1", "test2": ["answer2-1", "answer2-2", "answer2-3",] }

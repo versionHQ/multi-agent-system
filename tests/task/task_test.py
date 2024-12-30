@@ -1,5 +1,6 @@
 import os
 import pytest
+from unittest.mock import patch
 from typing import Union
 from versionhq.agent.model import Agent
 from versionhq.task.model import Task, ResponseField, TaskOutput, AgentOutput
@@ -10,7 +11,7 @@ LITELLM_API_KEY = os.environ.get("LITELLM_API_KEY")
 
 def test_sync_execute_task():
     agent = Agent(
-        role="demo agent 000",
+        role="demo agent 1",
         goal="My amazing goals",
         backstory="My amazing backstory",
         verbose=True,
@@ -51,13 +52,36 @@ def test_sync_execute_task():
             assert type(res.pydantic.test2) == list
 
 
+def test_async_execute_task():
+    agent = Agent(
+        role="demo agent 2",
+        goal="My amazing goals",
+    )
+
+    task = Task(
+        description="Analyze the client's business model and define the optimal cohort timeframe.",
+        expected_output_json=True,
+        expected_output_pydantic=False,
+        output_field_list=[
+            ResponseField(title="test1", type=str, required=True),
+            ResponseField(title="test2", type=list, required=True),
+        ],
+    )
+
+    with patch.object(Agent, "execute_task", return_value="ok") as execute:
+        execution = task.execute_async(agent=agent)
+        result = execution.result()
+        assert result.raw == "ok"
+        execute.assert_called_once_with(task=task, context=None)
+
+
 def test_sync_execute_task_with_task_context():
     """
     Use case = One agent handling multiple tasks sequentially using context set in the main task.
     """
 
     agent = Agent(
-        role="demo agent 001",
+        role="demo agent 3",
         goal="My amazing goals",
         backstory="My amazing backstory",
         verbose=True,
@@ -110,8 +134,14 @@ def test_sync_execute_task_with_task_context():
 
 
 def test_sync_execute_task_with_prompt_context():
+    """
+    Use case:
+    - One agent handling multiple tasks sequentially using context set in the main task.
+    - On top of that, the agent receives context when they execute the task.
+    """
+
     agent = Agent(
-        role="demo agent 001",
+        role="demo agent 4",
         goal="My amazing goals",
         backstory="My amazing backstory",
         verbose=True,
@@ -137,7 +167,7 @@ def test_sync_execute_task_with_prompt_context():
         ],
         context=[sub_task]
     )
-    res = main_task.execute_sync(agent=agent, context="consider building black friday marketing campaign.")
+    res = main_task.execute_sync(agent=agent, context="plan a Black Friday campaign.")
 
     assert isinstance(res, TaskOutput)
     assert res.task_id is main_task.id
@@ -160,9 +190,69 @@ def test_sync_execute_task_with_prompt_context():
 
     assert sub_task.output is not None
     assert sub_task.output.json_dict is not None
+    assert sub_task.output.pydantic is None
+
     assert "result" in main_task.prompt()
-    assert main_task.prompt_context == "consider building black friday marketing campaign."
-    assert "consider building black friday marketing campaign." in main_task.prompt()
+    assert main_task.prompt_context == "plan a Black Friday campaign."
+    assert "plan a Black Friday campaign." in main_task.prompt()
 
 
-# CALLBACKS, tools, FUTURE, ASYNC, CONDITIONAL, token usage
+def test_callback():
+    """
+    See if the callback function is executed well with kwargs.
+    """
+
+    def callback_func(item: str = None):
+        return f"I am callback with {item}."
+
+    agent = Agent(
+        role="demo agent 5",
+        goal="My amazing goals",
+    )
+
+    task = Task(
+        description="Analyze the client's business model and define the optimal cohort timeframe.",
+        expected_output_json=True,
+        expected_output_pydantic=False,
+        output_field_list=[
+            ResponseField(title="test1", type=str, required=True),
+        ],
+        callback=callback_func
+    )
+
+    with patch.object(Agent, "execute_task", return_value="ok") as execute:
+        execution = task.execute_async(agent=agent, callback_kwargs={"item": "demo for pytest"})
+        result = execution.result()
+        assert result.raw == "ok"
+        execute.assert_called_once_with(task=task, context=None)
+
+
+
+def test_delegate():
+    agent = Agent(
+        role="demo agent 6",
+        goal="My amazing goals",
+    )
+
+    task = Task(
+        description="Analyze the client's business model and define the optimal cohort timeframe.",
+        expected_output_json=True,
+        expected_output_pydantic=False,
+        output_field_list=[
+            ResponseField(title="test1", type=str, required=True),
+        ],
+        allow_delegation=True
+    )
+
+    task.execute_sync(agent=agent)
+
+    assert task.output is not None
+    assert "delegated_agent" in task.processed_by_agents
+    assert task.delegations != 0
+
+
+# def test_conditional_task():
+
+
+
+# tools, CONDITIONAL, token usage

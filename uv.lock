@@ -529,11 +529,11 @@ wheels = [
 
 [[package]]
 name = "identify"
-version = "2.6.3"
+version = "2.6.4"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/1a/5f/05f0d167be94585d502b4adf8c7af31f1dc0b1c7e14f9938a88fdbbcf4a7/identify-2.6.3.tar.gz", hash = "sha256:62f5dae9b5fef52c84cc188514e9ea4f3f636b1d8799ab5ebc475471f9e47a02", size = 99179 }
+sdist = { url = "https://files.pythonhosted.org/packages/49/a5/7de3053524ee006b91099968d7ecb2e0b420f7ae728094394c33e8a2a2b9/identify-2.6.4.tar.gz", hash = "sha256:285a7d27e397652e8cafe537a6cc97dd470a970f48fb2e9d979aa38eae5513ac", size = 99209 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/c9/f5/09644a3ad803fae9eca8efa17e1f2aef380c7f0b02f7ec4e8d446e51d64a/identify-2.6.3-py2.py3-none-any.whl", hash = "sha256:9edba65473324c2ea9684b1f944fe3191db3345e50b6d04571d10ed164f8d7bd", size = 99049 },
+    { url = "https://files.pythonhosted.org/packages/a2/9d/52f036403ae86474804f699c0d084b4b071e333a390b20269bb8accc65e0/identify-2.6.4-py2.py3-none-any.whl", hash = "sha256:993b0f01b97e0568c179bb9196391ff391bfb88a99099dbf5ce392b68f42d0af", size = 99072 },
 ]
 
 [[package]]
@@ -666,11 +666,11 @@ wheels = [
 
 [[package]]
 name = "json-repair"
-version = "0.33.0"
+version = "0.34.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/d3/7d/1462a9815a1fe320dc6395e0e632a438b670b5f0699085c437812f6116c1/json_repair-0.33.0.tar.gz", hash = "sha256:1796062b8acf3b081141cb0293c80cad5f5ad29be1cd141de601361ee3e533ac", size = 28447 }
+sdist = { url = "https://files.pythonhosted.org/packages/2b/2b/82a1f1430b723cb5585679f66338e5e5fdfe4a7dade1fe934929e9531d6c/json_repair-0.34.0.tar.gz", hash = "sha256:401d454e039e24425659cfb41e1a7a3800123abfb0d81653282585dc289862cb", size = 28872 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/70/42/0cec26df976de2a355dd7d908e3c2a1b6ef6c16a51d38e2621f9c60d83d0/json_repair-0.33.0-py3-none-any.whl", hash = "sha256:6285148ef06d059a3ae5de2c665c441ac20999d1248f8795faaa864fa88b796d", size = 19301 },
+    { url = "https://files.pythonhosted.org/packages/20/8b/dd78678b6135956c3f73c4e8de8e20348c3c702d8906b11420a7c7f96ad2/json_repair-0.34.0-py3-none-any.whl", hash = "sha256:a0bb0d3993838b320adf6c82c11c92419d3df794901689bffb3abed208472adf", size = 19739 },
 ]
 
 [[package]]
@@ -711,7 +711,7 @@ wheels = [
 
 [[package]]
 name = "keyring"
-version = "25.5.0"
+version = "25.6.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "jaraco-classes" },
@@ -721,14 +721,14 @@ dependencies = [
     { name = "pywin32-ctypes", marker = "sys_platform == 'win32'" },
     { name = "secretstorage", marker = "sys_platform == 'linux'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/f6/24/64447b13df6a0e2797b586dad715766d756c932ce8ace7f67bd384d76ae0/keyring-25.5.0.tar.gz", hash = "sha256:4c753b3ec91717fe713c4edd522d625889d8973a349b0e582622f49766de58e6", size = 62675 }
+sdist = { url = "https://files.pythonhosted.org/packages/70/09/d904a6e96f76ff214be59e7aa6ef7190008f52a0ab6689760a98de0bf37d/keyring-25.6.0.tar.gz", hash = "sha256:0b39998aa941431eb3d9b0d4b2460bc773b9df6fed7621c2dfb291a7e0187a66", size = 62750 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/32/c9/353c156fa2f057e669106e5d6bcdecf85ef8d3536ce68ca96f18dc7b6d6f/keyring-25.5.0-py3-none-any.whl", hash = "sha256:e67f8ac32b04be4714b42fe84ce7dad9c40985b9ca827c592cc303e7c26d9741", size = 39096 },
+    { url = "https://files.pythonhosted.org/packages/d3/32/da7f44bcb1105d3e88a0b74ebdca50c59121d2ddf71c9e34ba47df7f3a56/keyring-25.6.0-py3-none-any.whl", hash = "sha256:552a3f7af126ece7ed5c89753650eec89c7eaae8617d0aa4d9ad2b75111266bd", size = 39085 },
 ]
 
 [[package]]
 name = "litellm"
-version = "1.55.10"
+version = "1.56.4"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiohttp" },
@@ -743,9 +743,9 @@ dependencies = [
     { name = "tiktoken" },
     { name = "tokenizers" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/37/9e/73038697461aa0c5b4933ddc3e5240121c0ba72fab2b772bb59133c66d2a/litellm-1.55.10.tar.gz", hash = "sha256:e346f89244d4c9dd79524ab4b6e5fff3ada8488a25382a299aeb9dc6d535fa15", size = 6205322 }
+sdist = { url = "https://files.pythonhosted.org/packages/83/ea/2c51d16c244a64dd3f0bdb1757aef798cf943b92e5695da04e3e42ba09e0/litellm-1.56.4.tar.gz", hash = "sha256:2808ca21878d200f7676a3d11e5bf2b5e3349ae504628f279cd7297c7dbd2038", size = 6284983 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/82/72/8fe6fc098d78c2738cf2256cac73eafd6bd9fa519bc15a27360c9fff1640/litellm-1.55.10-py3-none-any.whl", hash = "sha256:ed5c940105c1953dccb42d376f62de0a417b670f57752e76d6138bba1fba769a", size = 6481250 },
+    { url = "https://files.pythonhosted.org/packages/8f/25/2fd7b28a270b2963e8fa0ecf6aab4db47c54d932cc5aac8bc87e7ebc3755/litellm-1.56.4-py3-none-any.whl", hash = "sha256:699a8db46f7de045069a77c435e13244b5fdaf5df1c8cb5e6ad675ef7e104ccd", size = 6564370 },
 ]
 
 [[package]]
@@ -1647,7 +1647,7 @@ wheels = [
 
 [[package]]
 name = "versionhq"
-version = "1.1.7.1"
+version = "1.1.7.3"
 source = { editable = "." }
 dependencies = [
     { name = "composio" },

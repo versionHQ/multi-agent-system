@@ -7,17 +7,9 @@ from dotenv import load_dotenv
 from concurrent.futures import Future
 from hashlib import md5
 from typing import Any, Dict, List, TYPE_CHECKING, Callable, Optional, Tuple, Union
-from pydantic import (
-    UUID4,
-    InstanceOf,
-    Json,
-    BaseModel,
-    Field,
-    PrivateAttr,
-    field_validator,
-    model_validator,
-)
-from pydantic_core import PydanticCustomError
+from pydantic import UUID4, InstanceOf, Json, BaseModel, Field, PrivateAttr, field_validator, model_validator
+from pydantic._internal._generate_schema import GenerateSchema
+from pydantic_core import PydanticCustomError, core_schema
 
 from versionhq.agent.model import Agent
 from versionhq.task.model import Task, TaskOutput, ConditionalTask, TaskOutputFormat
@@ -26,9 +18,6 @@ from versionhq.team.team_planner import TeamPlanner
 from versionhq._utils.logger import Logger
 from versionhq._utils.usage_metrics import UsageMetrics
 
-
-from pydantic._internal._generate_schema import GenerateSchema
-from pydantic_core import core_schema
 
 initial_match_type = GenerateSchema.match_type
 
@@ -301,10 +290,8 @@ class Team(BaseModel):
 
     # task execution
     def _process_async_tasks(
-        self,
-        futures: List[Tuple[Task, Future[TaskOutput], int]],
-        was_replayed: bool = False,
-    ) -> List[TaskOutput]:
+            self, futures: List[Tuple[Task, Future[TaskOutput], int]], was_replayed: bool = False
+        ) -> List[TaskOutput]:
         task_outputs: List[TaskOutput] = []
         for future_task, future, task_index in futures:
             task_output = future.result()
@@ -315,6 +302,7 @@ class Team(BaseModel):
             )
         return task_outputs
 
+
     def _handle_conditional_task(
         self,
         task: ConditionalTask,
@@ -323,6 +311,7 @@ class Team(BaseModel):
         task_index: int,
         was_replayed: bool,
     ) -> Optional[TaskOutput]:
+
         if futures:
             task_outputs = self._process_async_tasks(futures, was_replayed)
             futures.clear()
@@ -347,6 +336,7 @@ class Team(BaseModel):
         Take the output of the first task or the lead task output as the team output `raw` value.
         Note that `tasks` are already sorted by the importance.
         """
+
         if len(task_outputs) < 1:
             raise ValueError("Something went wrong. Kickoff should return only one task output.")
 
