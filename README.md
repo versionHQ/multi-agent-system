@@ -1,6 +1,6 @@
 # Overview
 
-![MIT license](https://img.shields.io/badge/License-MIT-green) [![Publisher](https://github.com/versionHQ/multi-agent-system/actions/workflows/publish.yml/badge.svg)](https://github.com/versionHQ/multi-agent-system/actions/workflows/publish.yml) ![PyPi](https://img.shields.io/badge/pypi-v1.1.7.0-blue) ![python ver](https://img.shields.io/badge/Python-3.12/3.13-purple) ![pyenv ver](https://img.shields.io/badge/pyenv-2.4.23-orange)
+![MIT license](https://img.shields.io/badge/License-MIT-green) [![Publisher](https://github.com/versionHQ/multi-agent-system/actions/workflows/publish.yml/badge.svg)](https://github.com/versionHQ/multi-agent-system/actions/workflows/publish.yml) ![PyPI](https://img.shields.io/badge/PyPI-v1.1.7.3-blue) ![python ver](https://img.shields.io/badge/Python-3.12/3.13-purple) ![pyenv ver](https://img.shields.io/badge/pyenv-2.4.23-orange)
 
 
 An LLM orchestration frameworks for multi-agent systems with RAG to autopilot outbound workflows.
