@@ -15,7 +15,7 @@ def test_store_scores():
 
     messaging_component = MessagingComponent(message="demo")
     score_raw = 15
-    messaging_component.store_scoring_result("demo", score=score_raw)
+    messaging_component.store_scoring_result("demo", score_raw=score_raw)
 
     assert messaging_component.score is not None
     assert messaging_component.score.result() is not None

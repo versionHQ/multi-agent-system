@@ -12,10 +12,11 @@ Messaging workflows are created at individual level, and will be deployed on thi
 
 **Visit:**
 
-- [Landing page](https://home.versi0n.io)
-- [Client app](https://versi0n.io/)
-- [Orchestration frameworks](https://github.com/versionHQ/multi-agent-system)
-- [Test client app](https://github.com/versionHQ/test-client-app)
+- [PyPI](https://pypi.org/project/versionhq/)
+- [Github (LLM orchestration)](https://github.com/versionHQ/multi-agent-system)
+- [Github (Test client app)](https://github.com/versionHQ/test-client-app)
+- [Use case](https://versi0n.io/) - client app (alpha)
+
 
 <hr />
 
@@ -35,6 +36,8 @@ LLM-powered `agent`s and `team`s use `tool`s and their own knowledge to complete
 
 - [Key Features](#key-features)
 - [Usage](#usage)
+  - [Case 1. Build an AI agent on LLM of your choice and execute a task:](#case-1-build-an-ai-agent-on-llm-of-your-choice-and-execute-a-task)
+  - [Case 2. Form a team to handle multiple tasks:](#case-2-form-a-team-to-handle-multiple-tasks)
 - [Technologies Used](#technologies-used)
 - [Project Structure](#project-structure)
 - [Setup](#setup)
@@ -80,7 +83,8 @@ Multiple `agents` can form a `team` to complete complex tasks together.
 
 2. You can use the `versionhq` module in your Python app.
 
-   - **i.e.,** Make LLM-based agent execute the task and return JSON dict.
+
+### Case 1. Build an AI agent on LLM of your choice and execute a task:
 
    ```
    from versionhq.agent.model import Agent
@@ -90,6 +94,7 @@ Multiple `agents` can form a `team` to complete complex tasks together.
       role="demo",
       goal="amazing project goal",
       skillsets=["skill_1", "skill_2", ],
+      tools=["amazing RAG tool",]
       llm="llm-of-your-choice"
    )
 
@@ -113,7 +118,41 @@ This will return a dictionary with keys defined in the `ResponseField`.
    { test1: "answer1", "test2": ["answer2-1", "answer2-2", "answer2-3",] }
    ```
 
-For more info: [PyPI package](https://pypi.org/project/versionhq/)
+### Case 2. Form a team to handle multiple tasks:
+
+   ```
+   from versionhq.agent.model import Agent
+   from versionhq.task.model import Task, ResponseField
+   from versionhq.team.model import Team, TeamMember
+
+   agent_a = Agent(role="agent a", goal="My amazing goals", llm="llm-of-your-choice")
+   agent_b = Agent(role="agent b", goal="My amazing goals", llm="llm-of-your-choice")
+
+   task_1 = Task(
+      description="Analyze the client's business model.",
+      output_field_list=[ResponseField(title="test1", type=str, required=True),],
+      allow_delegation=True
+   )
+
+    task_2 = Task(
+      description="Define the cohort.",
+      output_field_list=[ResponseField(title="test1", type=int, required=True),],
+      allow_delegation=False
+   )
+
+   team = Team(
+      members=[
+         TeamMember(agent=agent_a, is_manager=False, task=task_1),
+         TeamMember(agent=agent_b, is_manager=True, task=task_2),
+      ],
+   )
+   res = team.kickoff()
+   ```
+
+This will return a list with dictionaries with keys defined in the `ResponseField` of each task.
+
+Tasks can be delegated to a team manager, peers in the team, or completely new agent.
+
 
 <hr />
 

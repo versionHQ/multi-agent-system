@@ -61,21 +61,21 @@ class MessagingComponent(ABC, BaseModel):
     score: Union[float, InstanceOf[Score]] = Field(default=None)
 
 
-    def store_scoring_result(self, scoring_subject: str, score: Union[int, Score, ScoreFormat] = None):
+    def store_scoring_result(self, scoring_subject: str, score_raw: Union[int, Score, ScoreFormat] = None):
         """
         Set up the `score` field
         """
 
-        if isinstance(score, Score):
-            setattr(self, "score", score)
+        if isinstance(score_raw, Score):
+            setattr(self, "score", score_raw)
 
-        elif isinstance(score, ScoreFormat):
+        elif isinstance(score_raw, ScoreFormat):
             score_instance = Score()
-            setattr(score_instance, scoring_subject, score)
+            setattr(score_instance, scoring_subject, score_raw)
             setattr(self, "score", score_instance)
 
-        elif isinstance(score, int) or isinstance(score, float):
-            score_instance, score_format_instance = Score(), ScoreFormat(rate=score, weight=1)
+        elif isinstance(score_raw, int) or isinstance(score_raw, float):
+            score_instance, score_format_instance = Score(), ScoreFormat(rate=score_raw, weight=1)
             setattr(score_instance, "kwargs", { scoring_subject: score_format_instance })
             setattr(self, "score", score_instance)
 
