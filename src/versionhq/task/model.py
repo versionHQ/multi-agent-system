@@ -436,9 +436,14 @@ Your outputs MUST adhere to the following format and should NOT include any irre
             agent = agent_to_delegate
             self.delegations += 1
 
-        output_raw = agent.execute_task(task=self, context=context)
-        output_json_dict = self.create_json_output(raw_result=output_raw) if self.expected_output_json is True else None
-        output_pydantic = self.create_pydantic_output(output_json_dict=output_json_dict) if self.expected_output_pydantic else None
+        output_raw, output_json_dict, output_pydantic = agent.execute_task(task=self, context=context), None, None
+
+        if self.expected_output_json:
+            output_json_dict = self.create_json_output(raw_result=output_raw)
+
+        if self.expected_output_pydantic:
+            output_pydantic = self.create_pydantic_output(output_json_dict=output_json_dict)
+
         task_output = TaskOutput(
             task_id=self.id,
             raw=output_raw,
@@ -451,10 +456,7 @@ Your outputs MUST adhere to the following format and should NOT include any irre
         # self._set_end_execution_time(start_time)
 
         if self.callback:
-            if isinstance(self.callback, Callable):
-                self.callback(**self.callback_kwargs)
-            else:
-                self.callback(self.output)
+            self.callback({ **self.callback_kwargs, **self.output.__dict__ })
 
         # if self._execution_span:
         #     # self._telemetry.task_ended(self._execution_span, self, agent.team)

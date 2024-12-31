@@ -1,7 +1,7 @@
 import os
 import pytest
 from unittest.mock import patch
-from typing import Union
+from typing import Union, Dict, Any
 from versionhq.agent.model import Agent
 from versionhq.task.model import Task, ResponseField, TaskOutput, AgentOutput
 
@@ -27,8 +27,6 @@ def test_sync_execute_task():
             ResponseField(title="test1", type=str, required=True),
             ResponseField(title="test2", type=list, required=True),
         ],
-        context=None,
-        callback=None,
     )
     res = task.execute_sync(agent=agent)
 
@@ -202,14 +200,14 @@ def test_callback():
     See if the callback function is executed well with kwargs.
     """
 
-    def callback_func(item: str = None):
-        return f"I am callback with {item}."
+    def callback_func(kwargs: Dict[str, Any]):
+        task_id = kwargs.get("task_id", None)
+        added_condition = kwargs.get("added_condition", None)
+        assert task_id is not None
+        assert added_condition is not None
+        return f"Result: {task_id}, condition added: {added_condition}"
 
-    agent = Agent(
-        role="demo agent 5",
-        goal="My amazing goals",
-    )
-
+    agent = Agent(role="demo agent 5", goal="My amazing goals")
     task = Task(
         description="Analyze the client's business model and define the optimal cohort timeframe.",
         expected_output_json=True,
@@ -218,23 +216,26 @@ def test_callback():
             ResponseField(title="test1", type=str, required=True),
         ],
         callback=callback_func,
-        callback_kwargs={"item": "demo for pytest"}
+        callback_kwargs=dict(added_condition="demo for pytest")
     )
 
-    with patch.object(Agent, "execute_task", return_value="ok") as execute:
-        execution = task.execute_async(agent=agent)
-        result = execution.result()
-        assert result.raw == "ok"
-        execute.assert_called_once_with(task=task, context=None)
+    res = task.execute_sync(agent=agent)
+
+    assert res is not None
+    assert isinstance(res, TaskOutput)
+    assert res.task_id is task.id
+    assert res.raw is not None
+
+    # with patch.object(Agent, "execute_task", return_value="ok") as execute:
+    #     execution = task.execute_async(agent=agent)
+    #     result = execution.result()
+    #     assert result.raw == "ok"
+    #     execute.assert_called_once_with(task=task, context=None)
 
 
 
 def test_delegate():
-    agent = Agent(
-        role="demo agent 6",
-        goal="My amazing goals",
-    )
-
+    agent = Agent(role="demo agent 6", goal="My amazing goals")
     task = Task(
         description="Analyze the client's business model and define the optimal cohort timeframe.",
         expected_output_json=True,
@@ -253,7 +254,6 @@ def test_delegate():
 
 
 # def test_conditional_task():
-
 
 
 # tools, CONDITIONAL, token usage
