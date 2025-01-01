@@ -60,6 +60,7 @@ class MessagingComponent(ABC, BaseModel):
         default=None, description="interval to move on to the next layer. if this is the last layer, set as `None`"
     )
     score: float | InstanceOf[Score] = Field(default=None)
+    condition: str = Field(default=None, max_length=128, description="condition to execute the next messaging component")
 
 
     def store_scoring_result(self, scoring_subject: str, score_raw: int | Score | ScoreFormat = None):
@@ -106,7 +107,7 @@ class MessagingWorkflow(ABC, BaseModel):
         default=None, description="store `Agent` instances responsible for autopiloting this workflow. if the team exsits, this field remains as `None`")
 
     # metrics
-    destination: Optional[str] = Field( default=None, description="destination service to launch this workflow")
+    destination: Optional[str | None] = Field(default=None, description="destination service to launch this workflow")
     product: InstanceOf[Product] = Field(default=None)
     customer: InstanceOf[Customer] = Field(default=None)
 
@@ -142,10 +143,9 @@ class MessagingWorkflow(ABC, BaseModel):
             if self.customer is not None:
                 self.destination = self.customer.on
 
-            else:
-                destination_list = self.product.provider.destinations
-                if destination_list:
-                    self.destination = destination_list[0]
+            elif self.product.provider is not None and self.product.provider.destinations:
+                self.destination = self.product.provider.destinations[0]
+
         return self
 
 

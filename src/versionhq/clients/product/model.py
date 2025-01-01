@@ -34,7 +34,10 @@ class Product(BaseModel):
     id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True)
     name: Optional[str] = Field(default=None, description="product name")
     description: Optional[str] = Field(
-        default=None,max_length=256,description="product description scraped from landing url or client input. cascade to the agent")
+        default=None,
+        max_length=256,
+        description="product description scraped from landing url or client input. cascade to the agent"
+    )
     provider: Optional[ProductProvider] = Field(default=None)
     audience: Optional[str] = Field(default=None, description="target audience")
     usp: Optional[str] = Field(default=None)
