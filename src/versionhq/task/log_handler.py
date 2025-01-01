@@ -25,21 +25,15 @@ class TaskOutputStorageHandler:
         self.storage = TaskOutputSQLiteStorage()
 
 
-    def update(self, task_index: int, log: Dict[str, Any]):
+    def update(self, task, task_index: int, was_replayed: bool = False, inputs: Dict[str, Any] = {}) -> None:
         """
-        log = dict(
-            description=<task description>,
-            raw=<raw task output>
-            json_dict=<json_dict task output>,
-            responsible_agent=<str(task.processed_by_agents)>,
-        )
+        task: task instance
         """
-
         saved_outputs = self.load()
         if saved_outputs is None:
             raise ValueError("Logs cannot be None")
 
-        self.storage.add(**log)
+        self.add(task, task_index, was_replayed, inputs)
 
 
     def add(self, task, task_index: int, was_replayed: bool = False, inputs: Dict[str, Any] = {}) -> None:
@@ -49,9 +43,9 @@ class TaskOutputStorageHandler:
 
         if isinstance(task, Task):
             output_to_store = dict(
-                description=self.description,
-                raw=self.output.raw,
-                json_dict=self.output.json_dict,
+                description=str(task.description),
+                raw=str(task.output.raw),
+                json_dict=task.output.json_dict,
                 responsible_agent=str(task.processed_by_agents),
             )
 
