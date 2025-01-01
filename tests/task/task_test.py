@@ -1,7 +1,7 @@
 import os
 import pytest
 from unittest.mock import patch
-from typing import Union, Dict, Any
+from typing import Dict, Any
 from versionhq.agent.model import Agent
 from versionhq.task.model import Task, ResponseField, TaskOutput, ConditionalTask
 
@@ -119,11 +119,11 @@ def test_sync_execute_task_with_task_context():
     else:
         assert hasattr(res.pydantic, "test1")
         if res.pydantic.test1:
-            assert type(res.pydantic.test1) == Union[int, str]
+            assert type(res.pydantic.test1) == int | str
 
         assert hasattr(res.pydantic, "test2")
         if res.pydantic.test2:
-            assert type(res.pydantic.test2) == Union[list, str]
+            assert type(res.pydantic.test2) == list | str
 
     assert sub_task.output is not None
     assert sub_task.output.json_dict is not None
@@ -179,11 +179,11 @@ def test_sync_execute_task_with_prompt_context():
     else:
         assert hasattr(res.pydantic, "test1")
         if res.pydantic.test1:
-            assert type(res.pydantic.test1) == Union[int, str]
+            assert type(res.pydantic.test1) == int | str
 
         assert hasattr(res.pydantic, "test2")
         if res.pydantic.test2:
-            assert type(res.pydantic.test2) == Union[list, str]
+            assert type(res.pydantic.test2) == list | str
 
     assert sub_task.output is not None
     assert sub_task.output.json_dict is not None

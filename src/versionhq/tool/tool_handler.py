@@ -1,4 +1,5 @@
-from typing import Any, Optional, Union
+from typing import Any, Optional
+from pydantic import InstanceOf
 from versionhq.tool.model import ToolCalled, InstructorToolCalled, CacheTool
 from versionhq._utils.cache_handler import CacheHandler
 
@@ -23,7 +24,7 @@ class ToolHandler:
 
     def record_last_tool_used(
         self,
-        last_used_tool: Union[ToolCalled, InstructorToolCalled],
+        last_used_tool: InstanceOf[ToolCalled] | InstanceOf[InstructorToolCalled],
         output: str,
         should_cache: bool = True,
     ) -> Any:

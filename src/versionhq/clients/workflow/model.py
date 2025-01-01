@@ -1,8 +1,8 @@
 import uuid
 from abc import ABC
 from datetime import date, datetime, time, timedelta
-from typing import Any, Dict, List, Union, Callable, Type, Optional, get_args, get_origin
-from pydantic import UUID4, InstanceOf, BaseModel, ConfigDict, Field, create_model, field_validator, model_validator
+from typing import Any, Dict, List, Callable, Type, Optional, get_args, get_origin
+from pydantic import UUID4, InstanceOf, BaseModel, ConfigDict, Field, field_validator, model_validator
 from pydantic_core import PydanticCustomError
 
 from versionhq.clients.product.model import Product
@@ -12,7 +12,7 @@ from versionhq.team.model import Team
 
 
 class ScoreFormat:
-    def __init__(self, rate: Union[float, int] = 0, weight: int = 1):
+    def __init__(self, rate: float | int = 0, weight: int = 1):
         self.rate = rate
         self.weight = weight
         self.aggregate = rate * weight
@@ -39,7 +39,7 @@ class Score:
 
 
     def result(self) -> int:
-        aggregate_score = self.brand_tone.aggregate + self.audience.aggregate + self.track_record.aggregate
+        aggregate_score = int(self.brand_tone.aggregate) + int(self.audience.aggregate) + int(self.track_record.aggregate)
         denominator = self.brand_tone.weight + self.audience.weight + self.track_record.weight
 
         for k, v in self.kwargs.items():
@@ -57,11 +57,12 @@ class MessagingComponent(ABC, BaseModel):
     layer_id: int = Field(default=0, description="add id of the layer: 0, 1, 2")
     message: str = Field(default=None, max_length=1024, description="text message content to be sent")
     interval: Optional[str] = Field(
-        default=None,description="interval to move on to the next layer. if this is the last layer, set as `None`")
-    score: Union[float, InstanceOf[Score]] = Field(default=None)
+        default=None, description="interval to move on to the next layer. if this is the last layer, set as `None`"
+    )
+    score: float | InstanceOf[Score] = Field(default=None)
 
 
-    def store_scoring_result(self, scoring_subject: str, score_raw: Union[int, Score, ScoreFormat] = None):
+    def store_scoring_result(self, scoring_subject: str, score_raw: int | Score | ScoreFormat = None):
         """
         Set up the `score` field
         """
@@ -109,8 +110,11 @@ class MessagingWorkflow(ABC, BaseModel):
     product: InstanceOf[Product] = Field(default=None)
     customer: InstanceOf[Customer] = Field(default=None)
 
-    metrics: Union[List[Dict[str, Any]], List[str]] = Field(
-        default=None, max_length=256, description="store metrics that used to predict and track the performance of this workflow.")
+    metrics: List[Dict[str, Any]] | List[str] = Field(
+        default=None,
+        max_length=256,
+        description="store metrics that used to predict and track the performance of this workflow."
+    )
 
 
     @property

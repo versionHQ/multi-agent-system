@@ -7,7 +7,7 @@ import litellm
 from dotenv import load_dotenv
 from litellm import get_supported_openai_params
 from contextlib import contextmanager
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 from versionhq.llm.llm_vars import LLM_CONTEXT_WINDOW_SIZES
 from versionhq.task import TaskOutputFormat
@@ -103,7 +103,7 @@ class LLM:
     def __init__(
         self,
         model: str,
-        timeout: Optional[Union[float, int]] = None,
+        timeout: Optional[float | int] = None,
         max_tokens: Optional[int] = None,
         max_completion_tokens: Optional[int] = None,
         context_window_size: Optional[int] = DEFAULT_CONTEXT_WINDOW,
@@ -111,7 +111,7 @@ class LLM:
         temperature: Optional[float] = None,
         top_p: Optional[float] = None,
         n: Optional[int] = None,
-        stop: Optional[Union[str, List[str]]] = None,
+        stop: Optional[str | List[str]] = None,
         presence_penalty: Optional[float] = None,
         frequency_penalty: Optional[float] = None,
         logit_bias: Optional[Dict[int, float]] = None,

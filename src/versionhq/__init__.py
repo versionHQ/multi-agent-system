@@ -17,7 +17,7 @@ from versionhq.team.model import Team, TeamOutput
 from versionhq.tool.model import Tool
 
 
-__version__ = "1.1.7.7"
+__version__ = "1.1.7.8"
 __all__ = [
     "Agent",
     "Customer",

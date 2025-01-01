@@ -1,15 +1,7 @@
 from abc import ABC
 from inspect import signature
 from typing import Any, Dict, Callable, Type, Optional, get_args, get_origin
-from pydantic import (
-    InstanceOf,
-    BaseModel,
-    ConfigDict,
-    Field,
-    create_model,
-    field_validator,
-    model_validator,
-)
+from pydantic import InstanceOf, BaseModel, ConfigDict, Field, create_model, field_validator, model_validator
 
 from versionhq._utils.cache_handler import CacheHandler
 
@@ -134,6 +126,7 @@ class Tool(ABC, BaseModel):
         )
 
         return cls(name=tool_name, func=func, args_schema=args_schema)
+
 
     def run(self, *args, **kwargs) -> Any:
         """

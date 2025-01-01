@@ -1,5 +1,5 @@
 import re
-from typing import Any, Union
+from typing import Any
 from json_repair import repair_json
 
 from versionhq._utils.i18n import I18N
@@ -70,7 +70,7 @@ class AgentParser:
     def __init__(self, agent: Any):
         self.agent = agent
 
-    def parse(self, text: str) -> Union[AgentAction, AgentFinish]:
+    def parse(self, text: str) -> AgentAction | AgentFinish:
         thought = self._extract_thought(text)
         includes_answer = FINAL_ANSWER_ACTION in text
         regex = (

@@ -3,10 +3,10 @@ import threading
 import uuid
 from concurrent.futures import Future
 from hashlib import md5
-from typing import Any, Dict, List, Set, Optional, Tuple, Callable, Union, Type
+from typing import Any, Dict, List, Set, Optional, Tuple, Callable, Type
 from typing_extensions import Annotated
 
-from pydantic import UUID4, BaseModel, Field, PrivateAttr, field_validator, model_validator, create_model
+from pydantic import UUID4, BaseModel, Field, PrivateAttr, field_validator, model_validator, create_model, InstanceOf
 from pydantic_core import PydanticCustomError
 
 from versionhq._utils.process_config import process_config
@@ -49,7 +49,7 @@ class ResponseField(BaseModel):
             return value
 
 
-    def create_pydantic_model(self, result: Dict, base_model: Union[BaseModel | Any]) -> Any:
+    def create_pydantic_model(self, result: Dict, base_model: InstanceOf[BaseModel] | Any) -> Any:
         for k, v in result.items():
             if k is not self.title:
                 pass
@@ -70,7 +70,7 @@ class TaskOutput(BaseModel):
 
     task_id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True, description="store Task ID")
     raw: str = Field(default="", description="Raw output of the task")
-    json_dict: Union[Dict[str, Any]] = Field(default=None, description="`raw` converted to dictionary")
+    json_dict: Dict[str, Any] = Field(default=None, description="`raw` converted to dictionary")
     pydantic: Optional[Any] = Field(default=None, description="`raw` converted to the abs. pydantic model")
 
     def __str__(self) -> str:

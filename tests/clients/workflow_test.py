@@ -19,3 +19,14 @@ def test_store_scores():
 
     assert messaging_component.score is not None
     assert messaging_component.score.result() is not None
+
+
+def test_score_result():
+    messaging_component = MessagingComponent(message="demo")
+    score_raw = 15
+    messaging_component.store_scoring_result("demo", score_raw=score_raw)
+
+    result = messaging_component.score.result()
+
+    assert result is not None
+    assert result != 0

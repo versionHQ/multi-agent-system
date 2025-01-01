@@ -1,7 +1,7 @@
 import os
 import uuid
 from abc import ABC
-from typing import Any, Dict, List, Optional, TypeVar, Union
+from typing import Any, Dict, List, Optional, TypeVar
 from dotenv import load_dotenv
 from pydantic import UUID4, BaseModel, Field, InstanceOf, PrivateAttr, model_validator, field_validator
 from pydantic_core import PydanticCustomError
@@ -22,7 +22,7 @@ load_dotenv(override=True)
 T = TypeVar("T", bound="Agent")
 
 
-# def _format_answer(agent, answer: str) -> Union[AgentAction, AgentFinish]:
+# def _format_answer(agent, answer: str) -> AgentAction | AgentFinish:
 #     return AgentParser(agent=agent).parse(answer)
 
 # def mock_agent_ops_provider():
@@ -111,8 +111,8 @@ class Agent(ABC, BaseModel):
     step_callback: Optional[Any] = Field(default=None,description="Callback to be executed after each step of the agent execution")
 
     # llm settings cascaded to the LLM model
-    llm: Union[str, InstanceOf[LLM], Any] = Field(default=None)
-    function_calling_llm: Union[str, InstanceOf[LLM], Any] = Field(default=None)
+    llm: str | InstanceOf[LLM] | Any = Field(default=None)
+    function_calling_llm: str | InstanceOf[LLM] | Any = Field(default=None)
     respect_context_window: bool = Field(default=True,description="Keep messages under the context window size by summarizing content")
     max_tokens: Optional[int] = Field(default=None, description="max. number of tokens for the agent's execution")
     max_execution_time: Optional[int] = Field(default=None, description="max. execution time for an agent to execute a task")

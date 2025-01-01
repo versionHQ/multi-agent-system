@@ -6,7 +6,7 @@ from enum import Enum
 from dotenv import load_dotenv
 from concurrent.futures import Future
 from hashlib import md5
-from typing import Any, Dict, List, TYPE_CHECKING, Callable, Optional, Tuple, Union
+from typing import Any, Dict, List, TYPE_CHECKING, Callable, Optional, Tuple
 from pydantic import UUID4, InstanceOf, Json, BaseModel, Field, PrivateAttr, field_validator, model_validator
 from pydantic._internal._generate_schema import GenerateSchema
 from pydantic_core import PydanticCustomError, core_schema
@@ -61,7 +61,7 @@ class TeamOutput(BaseModel):
     team_id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True, description="store the team ID that generate the TeamOutput")
     raw: str = Field(default="", description="raw output of the team lead task handled by the team leader")
     pydantic: Optional[Any] = Field(default=None, description="`raw` converted to the abs. pydantic model")
-    json_dict: Union[Dict[str, Any]] = Field(default=None, description="`raw` converted to dictionary")
+    json_dict: Dict[str, Any] = Field(default=None, description="`raw` converted to dictionary")
     task_output_list: list[TaskOutput] = Field(default=list, description="store output of all the tasks that the team has executed")
     token_usage: UsageMetrics = Field(default=dict, description="processed token summary")
 
@@ -200,10 +200,6 @@ class Team(BaseModel):
         if v:
             raise PydanticCustomError("may_not_set_field", "The 'id' field cannot be set by the user.", {})
 
-    # @field_validator("config", mode="before")
-    # @classmethod
-    # def check_config_type(cls, v: Union[Json, Dict[str, Any]]) -> Union[Json, Dict[str, Any]]:
-    #     return json.loads(v) if isinstance(v, Json) else v
 
     @model_validator(mode="after")
     def check_manager_llm(self):
