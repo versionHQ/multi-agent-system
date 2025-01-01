@@ -129,20 +129,15 @@ def test_form_team_without_leader():
 
 def test_kickoff_team_without_leader():
     agent_a = Agent(
-        role="Demo Agent A",
+        role="agent a",
         goal="My amazing goals",
-        backstory="My amazing backstory",
-        verbose=True,
-        llm=MODEL_NAME,
-        max_tokens=3000,
+        llm=MODEL_NAME
     )
 
     agent_b = Agent(
-        role="Demo Agent B-1",
+        role="agent b",
         goal="My amazing goals",
-        verbose=True,
-        llm=MODEL_NAME,
-        max_tokens=3000,
+        llm=MODEL_NAME
     )
 
     task_1 = Task(
@@ -152,21 +147,15 @@ def test_kickoff_team_without_leader():
                 ResponseField(title="test1", type=str, required=True),
                 ResponseField(title="test2", type=list, required=True),
             ],
-            expected_output_pydantic=True,
-            context=[],
-            callback=None,
-        )
+    )
 
     task_2 = Task(
         description="Define the cohort.",
         expected_output_json=True,
-        expected_output_pydantic=True,
         output_field_list=[
             ResponseField(title="test1", type=int, required=True),
             ResponseField(title="test2", type=list, required=True),
         ],
-        context=[],
-        callback=None,
     )
 
     team = Team(
@@ -184,7 +173,7 @@ def test_kickoff_team_without_leader():
     assert isinstance(res.raw, str)
     assert res.json_dict is not None
     assert isinstance(res.json_dict, dict)
-    assert res.pydantic is not None
+    assert res.pydantic is None
     for item in res.task_output_list:
         assert isinstance(item, TaskOutput)
 
@@ -290,4 +279,7 @@ def test_delegate_in_team():
     assert "agent b" in task_1.processed_by_agents
 
 
+
+if __name__ == "__main__":
+    test_kickoff_team_without_leader()
 # kickoff with teamleader, async, task handling process

@@ -20,6 +20,7 @@ def fetch_db_storage_path():
     return data_dir
 
 storage_path = fetch_db_storage_path()
+default_db_name = "task_outputs"
 
 
 class TaskOutputSQLiteStorage:
@@ -27,7 +28,7 @@ class TaskOutputSQLiteStorage:
     An SQLite storage class to handle storing task outputs.
     """
 
-    def __init__(self, db_path: str = f"{storage_path}/task_outputs.db") -> None:
+    def __init__(self, db_path: str = f"{storage_path}/{default_db_name}.db") -> None:
         self.db_path = db_path
         self._logger = Logger(verbose=True)
         self._initialize_db()
@@ -43,7 +44,7 @@ class TaskOutputSQLiteStorage:
                 cursor = conn.cursor()
                 cursor.execute(
                     """
-                    CREATE TABLE IF NOT EXISTS latest_kickoff_task_outputs (
+                    CREATE TABLE IF NOT EXISTS task_outputs (
                         task_id TEXT PRIMARY KEY,
                         output JSON,
                         task_index INTEGER,
@@ -54,6 +55,7 @@ class TaskOutputSQLiteStorage:
                 """
                 )
                 conn.commit()
+
         except sqlite3.Error as e:
             self._logger.log(level="error", message=f"DATABASE INITIALIZATION ERROR: {e}", color="red")
 
@@ -63,7 +65,7 @@ class TaskOutputSQLiteStorage:
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
                 cursor.execute(
-                        """INSERT OR REPLACE INTO latest_kickoff_task_outputs
+                        """INSERT OR REPLACE INTO task_outputs
                             (task_id, output, task_index, inputs, was_replayed, timestamp)
                             VALUES (?, ?, ?, ?, ?, ?)
                         """,
@@ -105,7 +107,7 @@ class TaskOutputSQLiteStorage:
                 cursor = conn.cursor()
                 cursor.execute("""
                 SELECT *
-                FROM latest_kickoff_task_outputs
+                FROM task_outputs
                 ORDER BY task_index
                 """)
 
@@ -114,12 +116,11 @@ class TaskOutputSQLiteStorage:
                 for row in rows:
                     result = {
                         "task_id": row[0],
-                        "description": row[1],
-                        "output": json.loads(row[2]),
-                        "task_index": row[3],
-                        "inputs": json.loads(row[4]),
-                        "was_replayed": row[5],
-                        "timestamp": row[6],
+                        "output": json.loads(row[1]),
+                        "task_index": row[2],
+                        "inputs": json.loads(row[3]),
+                        "was_replayed": row[4],
+                        "timestamp": row[5],
                     }
                     results.append(result)
                 return results
@@ -133,7 +134,7 @@ class TaskOutputSQLiteStorage:
         try:
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
-                cursor.execute("DELETE FROM latest_kickoff_task_outputs")
+                cursor.execute("DELETE FROM task_outputs")
                 conn.commit()
 
         except sqlite3.Error as e:

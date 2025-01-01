@@ -45,7 +45,6 @@ class TaskOutputStorageHandler:
             output_to_store = dict(
                 description=str(task.description),
                 raw=str(task.output.raw),
-                json_dict=task.output.json_dict,
                 responsible_agent=str(task.processed_by_agents),
             )
 

@@ -467,20 +467,6 @@ Your outputs MUST adhere to the following format and should NOT include any irre
         Store the task execution log.
         """
 
-        # task_output = self.output
-        # agent = str(self.processed_by_agents) if self.processed_by_agents else None
-        # log = {
-        #     "task": self,
-        #     "output": dict(
-        #         description = str(self.description),
-        #         raw = str(task_output.raw),
-        #         json_dict = task_output.json_dict,
-        #         responsible_agent = agent,
-        #     ),
-        #     "task_index": task_index,
-        #     "inputs": inputs,
-        #     "was_replayed": was_replayed,
-        # }
         self._task_output_handler.update(task=self, task_index=task_index, was_replayed=was_replayed, inputs=inputs)
 
 
