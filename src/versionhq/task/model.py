@@ -11,7 +11,9 @@ from pydantic_core import PydanticCustomError
 
 from versionhq._utils.process_config import process_config
 from versionhq.task import TaskOutputFormat
+from versionhq.task.log_handler import TaskOutputStorageHandler
 from versionhq.tool.model import Tool, ToolCalled
+from versionhq._utils.logger import Logger
 
 
 class ResponseField(BaseModel):
@@ -57,20 +59,6 @@ class ResponseField(BaseModel):
             else:
                 setattr(base_model, k, v)
         return base_model
-
-
-class AgentOutput(BaseModel):
-    """
-    Keep adding agents' learning and recommendation and store it in `pydantic` field of `TaskOutput` class.
-    Since the TaskOutput class has `agent` field, we don't add any info on the agent that handled the task.
-    """
-    customer_id: str = Field(default=None, max_length=126, description="customer uuid")
-    customer_analysis: str = Field(default=None, max_length=256, description="analysis of the customer")
-    product_overview: str = Field(default=None, max_length=256, description="analysis of the client's business")
-    usp: str = Field()
-    cohort_timeframe: int = Field(default=None, max_length=256, description="suitable cohort timeframe in days")
-    kpi_metrics: List[str] = Field(default=list, description="Ideal KPIs to be tracked")
-    assumptions: List[Dict[str, Any]] = Field(default=list, description="assumptions to test")
 
 
 
@@ -133,11 +121,13 @@ class Task(BaseModel):
     """
 
     __hash__ = object.__hash__
+    _original_description: str = PrivateAttr(default=None)
+    _logger: Logger = PrivateAttr()
+    _task_output_handler = TaskOutputStorageHandler()
 
     id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True, description="unique identifier for the object, not set by user")
     name: Optional[str] = Field(default=None)
     description: str = Field(description="Description of the actual task")
-    _original_description: str = PrivateAttr(default=None)
 
     # output
     expected_output_json: bool = Field(default=True)
@@ -161,7 +151,7 @@ class Task(BaseModel):
     callback_kwargs: Optional[Dict[str, Any]] = Field(default_factory=dict, description="kwargs for the callback when the callback is callable")
 
     # recording
-    processed_by_agents: Set[str] = Field(default_factory=set)
+    processed_by_agents: Set[str] = Field(default_factory=set, description="store responsible agents' roles")
     used_tools: int = 0
     tools_errors: int = 0
     delegations: int = 0
@@ -372,7 +362,7 @@ Your outputs MUST adhere to the following format and should NOT include any irre
 
 
     # task execution
-    def execute_sync(self, agent, context: Optional[str] = None) -> TaskOutput:
+    def execute_sync(self, agent, context: Optional[str] = None, tools: Optional[List[Any]] = None) -> TaskOutput:
         """
         Execute the task synchronously.
         When the task has context, make sure we have executed all the tasks in the context first.
@@ -386,7 +376,7 @@ Your outputs MUST adhere to the following format and should NOT include any irre
         return self._execute_core(agent, context)
 
 
-    def execute_async(self, agent, context: Optional[str] = None) -> Future[TaskOutput]:
+    def execute_async(self, agent, context: Optional[str] = None, tools: Optional[List[Any]] = None) -> Future[TaskOutput]:
         """
         Execute the task asynchronously.
         """
@@ -395,21 +385,21 @@ Your outputs MUST adhere to the following format and should NOT include any irre
         threading.Thread(
             daemon=True,
             target=self._execute_task_async,
-            args=(agent, context, future),
+            args=(agent, context, tools, future),
         ).start()
         return future
 
 
-    def _execute_task_async(self, agent, context: Optional[str], future: Future[TaskOutput]) -> None:
+    def _execute_task_async(self, agent, context: Optional[str], tools: Optional[List[Any]], future: Future[TaskOutput]) -> None:
         """
         Execute the task asynchronously with context handling.
         """
 
-        result = self._execute_core(agent, context)
+        result = self._execute_core(agent, context, tools)
         future.set_result(result)
 
 
-    def _execute_core(self, agent, context: Optional[str]) -> TaskOutput:
+    def _execute_core(self, agent, context: Optional[str], tools: Optional[List[Any]] = []) -> TaskOutput:
         """
         Run the core execution logic of the task.
         To speed up the process, when the format is not expected to return, we will skip the conversion process.
@@ -436,7 +426,7 @@ Your outputs MUST adhere to the following format and should NOT include any irre
             agent = agent_to_delegate
             self.delegations += 1
 
-        output_raw, output_json_dict, output_pydantic = agent.execute_task(task=self, context=context), None, None
+        output_raw, output_json_dict, output_pydantic = agent.execute_task(task=self, context=context, tools=tools), None, None
 
         if self.expected_output_json:
             output_json_dict = self.create_json_output(raw_result=output_raw)
@@ -472,24 +462,46 @@ Your outputs MUST adhere to the following format and should NOT include any irre
         return task_output
 
 
+    def _store_execution_log(self, task_index: int, was_replayed: bool = False, inputs: Optional[Dict[str, Any]] = {}) -> None:
+        """
+        Store the task execution log.
+        """
+
+        task_output = self.output
+        agent = str(self.processed_by_agents) if self.processed_by_agents else None
+        log = {
+            "task": self,
+            "output": {
+                "description": str(self.description),
+                "raw": task_output.raw,
+                "json_dict": task_output.json_dict,
+                "responsible_agent": agent,
+            },
+            "task_index": task_index,
+            "inputs": inputs,
+            "was_replayed": was_replayed,
+        }
+        self._task_output_handler.update(task_index, log)
+
+
+
 class ConditionalTask(Task):
     """
     A task that can be conditionally executed based on the output of another task.
-    Use this with `Team`.
+    When the `condition` return True, execute the task, else skipped with `skipped task output`.
     """
 
     condition: Callable[[TaskOutput], bool] = Field(
         default=None,
-        description="max. number of retries for an agent to execute a task when an error occurs.",
+        description="max. number of retries for an agent to execute a task when an error occurs",
     )
 
-    def __init__(
-        self,
-        condition: Callable[[Any], bool],
-        **kwargs,
-    ):
+
+    def __init__(self, condition: Callable[[Any], bool], **kwargs):
         super().__init__(**kwargs)
         self.condition = condition
+        self._logger = Logger(verbose=True)
+
 
     def should_execute(self, context: TaskOutput) -> bool:
         """
@@ -498,5 +510,25 @@ class ConditionalTask(Task):
         """
         return self.condition(context)
 
+
     def get_skipped_task_output(self):
-        return TaskOutput(task_id=self.id, raw="", pydantic=None, json_dict=None)
+        return TaskOutput(task_id=self.id, raw="", pydantic=None, json_dict={})
+
+
+    def _handle_conditional_task(self, task_outputs: List[TaskOutput], task_index: int, was_replayed: bool) -> Optional[TaskOutput]:
+        """
+        When the conditional task should be skipped, return `skipped_task_output` as task_output else return None
+        """
+
+        previous_output = task_outputs[task_index - 1] if task_outputs and len(task_outputs) > 1  else None
+
+        if previous_output and not self.should_execute(previous_output):
+            self._logger.log(level="debug", message=f"Skipping conditional task: {self.description}", color="yellow")
+            skipped_task_output = self.get_skipped_task_output()
+            self.output = skipped_task_output
+
+            if not was_replayed:
+                self._store_execution_log(self, task_index=task_index, was_replayed=was_replayed, inputs={})
+            return skipped_task_output
+
+        return None

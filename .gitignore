@@ -1,4 +1,5 @@
 knowledge/
+memory/
 
 composio.py
 memo.txt
@@ -8,6 +9,7 @@ build/
 .pypirc
 uploads/
 sample_dataset/
+chroma.sqlite3
 *egg-info/
 
 __pycache__/

@@ -188,14 +188,9 @@ class Team(BaseModel):
         2. manager_task,
         3. members' tasks
         """
-        sorted_member_tasks = [
-            member.task for member in self.members if member.is_manager == True
-        ] + [member.task for member in self.members if member.is_manager == False]
-        return (
-            self.team_tasks + sorted_member_tasks
-            if len(self.team_tasks) > 0
-            else sorted_member_tasks
-        )
+        sorted_member_tasks = [member.task for member in self.members if member.is_manager == True] + [member.task for member in self.members if member.is_manager == False]
+        return self.team_tasks + sorted_member_tasks if len(self.team_tasks) > 0 else sorted_member_tasks
+
 
     # validators
     @field_validator("id", mode="before")
@@ -261,7 +256,7 @@ class Team(BaseModel):
             if task.async_execution:
                 async_task_count += 1
             else:
-                break  # stop traversing when a non-async task is found
+                break
 
         if async_task_count > 1:
             raise PydanticCustomError(
@@ -287,47 +282,23 @@ class Team(BaseModel):
                     result[task_id] if hasattr(result, str(task_id)) else result
                 )
 
+
     # task execution
     def _process_async_tasks(
-            self, futures: List[Tuple[Task, Future[TaskOutput], int]], was_replayed: bool = False
-        ) -> List[TaskOutput]:
+        self, futures: List[Tuple[Task, Future[TaskOutput], int]], was_replayed: bool = False
+    ) -> List[TaskOutput]:
+        """
+        When we have `Future` tasks, updated task outputs and task execution logs accordingly.
+        """
+
         task_outputs: List[TaskOutput] = []
+
         for future_task, future, task_index in futures:
             task_output = future.result()
             task_outputs.append(task_output)
-            self._process_task_result(future_task, task_output)
-            self._store_execution_log(
-                future_task, task_output, task_index, was_replayed
-            )
+            future_task._store_execution_log(task_index, was_replayed)
+
         return task_outputs
-
-
-    def _handle_conditional_task(
-        self,
-        task: ConditionalTask,
-        task_outputs: List[TaskOutput],
-        futures: List[Tuple[Task, Future[TaskOutput], int]],
-        task_index: int,
-        was_replayed: bool,
-    ) -> Optional[TaskOutput]:
-
-        if futures:
-            task_outputs = self._process_async_tasks(futures, was_replayed)
-            futures.clear()
-
-        previous_output = task_outputs[task_index - 1] if task_outputs else None
-        if previous_output is not None and not task.should_execute(previous_output):
-            self._logger.log(
-                "debug",
-                f"Skipping conditional task: {task.description}",
-                color="yellow",
-            )
-            skipped_task_output = task.get_skipped_task_output()
-
-            if not was_replayed:
-                self._store_execution_log(task, skipped_task_output, task_index)
-            return skipped_task_output
-        return None
 
 
     def _create_team_output(self, task_outputs: List[TaskOutput], lead_task_output: TaskOutput = None) -> TeamOutput:
@@ -401,38 +372,33 @@ class Team(BaseModel):
             if responsible_agent is None:
                 responsible_agent = self.manager_agent if self.manager_agent else self.members[0].agent
 
-            # self._prepare_agent_tools(task)
-            # self._log_task_start(task, responsible_agent)
-
             if isinstance(task, ConditionalTask):
-                skipped_task_output = self._handle_conditional_task(task, task_outputs, futures, task_index, was_replayed)
+                skipped_task_output = task._handle_conditional_task(task_outputs, futures, task_index, was_replayed)
                 if skipped_task_output:
                     continue
 
+            # self._prepare_agent_tools(task)
+            # self._log_task_start(task, responsible_agent)
+
             if task.async_execution:
                 context = create_raw_outputs(tasks=[task, ],task_outputs=([last_sync_output,] if last_sync_output else []))
-                future = task.execute_async(agent=responsible_agent, context=context
-                                            # tools=responsible_agent.tools
-                                            )
+                future = task.execute_async(agent=responsible_agent, context=context, tools=responsible_agent.tools)
                 futures.append((task, future, task_index))
             else:
-                if futures:
-                    task_outputs = self._process_async_tasks(futures, was_replayed)
-                    futures.clear()
-
-                context = create_raw_outputs(tasks=[task,], task_outputs=([ last_sync_output,] if last_sync_output else [] ))
-                task_output = task.execute_sync(agent=responsible_agent, context=context
-                                                # tools=responsible_agent.tools
+                context = create_raw_outputs(tasks=[task,], task_outputs=([last_sync_output,] if last_sync_output else [] ))
+                task_output = task.execute_sync(agent=responsible_agent, context=context, tools=responsible_agent.tools
                                                 )
                 if responsible_agent is self.manager_agent:
                     lead_task_output = task_output
 
                 task_outputs.append(task_output)
                 # self._process_task_result(task, task_output)
-                # self._store_execution_log(task, task_output, task_index, was_replayed)
+                task._store_execution_log(task_index, was_replayed)
 
-        # if futures:
-        # task_outputs = self._process_async_tasks(futures, was_replayed)
+
+        if futures:
+            task_outputs = self._process_async_tasks(futures, was_replayed)
+
         return self._create_team_output(task_outputs, lead_task_output)
 
 
@@ -458,10 +424,6 @@ class Team(BaseModel):
         # self._task_output_handler.reset()
         # self._logging_color = "bold_purple"
 
-        # if inputs is not None:
-        #     self._inputs = inputs
-        # self._interpolate_inputs(inputs)
-
 
         # i18n = I18N(prompt_file=self.prompt_file)
 
@@ -469,14 +431,13 @@ class Team(BaseModel):
             agent = member.agent
             agent.team = self
 
-            # add the team's common callbacks to each agent.
-            if not agent.function_calling_llm:
+            if not agent.function_calling_llm and self.function_calling_llm:
                 agent.function_calling_llm = self.function_calling_llm
 
             # if agent.allow_code_execution:
             #     agent.tools += agent.get_code_execution_tools()
 
-            if not agent.step_callback:
+            if not agent.step_callback and self.step_callback:
                 agent.step_callback = self.step_callback
 
         if self.process is None:

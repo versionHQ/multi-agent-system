@@ -85,7 +85,7 @@ class Agent(ABC, BaseModel):
     """
 
     __hash__ = object.__hash__
-    _logger: Logger = PrivateAttr(default_factory=lambda: Logger(verbose=False))
+    _logger: Logger = PrivateAttr(default_factory=lambda: Logger(verbose=True))
     _rpm_controller: Optional[RPMController] = PrivateAttr(default=None)
     _request_within_rpm_limit: Any = PrivateAttr(default=None)
     _token_process: TokenProcess = PrivateAttr(default_factory=TokenProcess)
@@ -327,7 +327,7 @@ class Agent(ABC, BaseModel):
         messages = []
         messages.append({"role": "user", "content": prompts})  #! REFINEME
         messages.append({"role": "assistant", "content": self.backstory})
-        print("Messages sent to the model:", messages)
+        self._logger.log(level="info", message=f"Messages sent to the model: {messages}", color="blue")
 
         callbacks = kwargs.get("callbacks", None)
 
@@ -338,7 +338,7 @@ class Agent(ABC, BaseModel):
             callbacks=callbacks,
         )
         task_execution_counter += 1
-        print("Agent's #1 res: ", response)
+        self._logger.log(level="info", message=f"Agent's first response: {response}", color="blue")
 
         if (response is None or response == "") and task_execution_counter < self.max_retry_limit:
             while task_execution_counter <= self.max_retry_limit:
@@ -349,10 +349,10 @@ class Agent(ABC, BaseModel):
                     callbacks=callbacks,
                 )
                 task_execution_counter += 1
-                print(f"Agent's #{task_execution_counter} res: ", response)
+                self._logger.log(level="info", message=f"Agent's next response: {response}", color="blue")
 
         elif response is None or response == "":
-            print("Received None or empty response from LLM call.")
+            self._logger.log(level="error", message="Received None or empty response from the model", color="red")
             raise ValueError("Invalid response from LLM call - None or empty.")
 
         return {"output": response.output if hasattr(response, "output") else response}

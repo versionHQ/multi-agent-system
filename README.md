@@ -4,7 +4,7 @@
 [![Publisher](https://github.com/versionHQ/multi-agent-system/actions/workflows/publish.yml/badge.svg)](https://github.com/versionHQ/multi-agent-system/actions/workflows/publish.yml)
 ![PyPI](https://img.shields.io/badge/PyPI-v1.1.7.5-blue)
 ![python ver](https://img.shields.io/badge/Python-3.12/3.13-purple)
-![pyenv ver](https://img.shields.io/badge/pyenv-2.4.23-orange)
+![pyenv ver](https://img.shields.io/badge/pyenv-2.5.0-orange)
 
 
 An LLM orchestration frameworks for multi-agent systems with RAG to autopilot outbound workflows.
@@ -224,8 +224,7 @@ src/
    ```
    uv venv
    source .venv/bin/activate
-
-   uv pip install -r requirements.txt -v
+   uv pip sync
    ```
 
 * In case of AssertionError/module mismatch, run Python version control using `.pyenv`

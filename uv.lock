@@ -97,6 +97,15 @@ wheels = [
 ]
 
 [[package]]
+name = "appdirs"
+version = "1.4.4"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/d7/d8/05696357e0311f5b5c316d7b95f46c669dd9c15aaeecbb48c7d0aeb88c40/appdirs-1.4.4.tar.gz", hash = "sha256:7d5d0167b2b1ba821647616af46a749d1c653740dd0d2415100fe26e27afdf41", size = 13470 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/3b/00/2344469e2084fb287c2e0b57b72910309874c3245463acd6cf5e3db69324/appdirs-1.4.4-py2.py3-none-any.whl", hash = "sha256:a841dacd6b99318a741b166adb07e19ee71a274450e68237b4650ca1055ab128", size = 9566 },
+]
+
+[[package]]
 name = "attrs"
 version = "24.3.0"
 source = { registry = "https://pypi.org/simple" }
@@ -319,15 +328,15 @@ wheels = [
 
 [[package]]
 name = "composio-openai"
-version = "0.6.7"
+version = "0.6.9"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "composio-core" },
     { name = "openai" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/18/a9/2cb2a30963a89d1940e43c115b2c24f3ad488fff9d8e3999c1f8ced34400/composio_openai-0.6.7.tar.gz", hash = "sha256:9171e1b127ffc02862c5ef573eba38ed93cbd8dd853891b699cf02d295b59f78", size = 4420 }
+sdist = { url = "https://files.pythonhosted.org/packages/de/c7/39fe3ba4f63b49d708f9957afd78a0e13991d4006b1899e9db196ae326e2/composio_openai-0.6.9.tar.gz", hash = "sha256:8d07b246ef5915ad53735c5a0ae4fd5e37803ddefed8770ba98f667a619faf4f", size = 4445 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/7c/24/485f56d056cdbbd1d828205e3487ed209847de2c2174943afcc0fbce51a8/composio_openai-0.6.7-py3-none-any.whl", hash = "sha256:d75f4656c325aa4fb76e6e1e18c0820622c24c9665500e02efc38fa6d08a989a", size = 4884 },
+    { url = "https://files.pythonhosted.org/packages/2b/60/6113f96824c94ded29a203155f545f22ccf75ce5468d379a2d5ffc296d3b/composio_openai-0.6.9-py3-none-any.whl", hash = "sha256:8a954111558d9ffc8c7d04afd54a34e06f911795e4e34147e1693edd277d221c", size = 4912 },
 ]
 
 [[package]]
@@ -457,18 +466,6 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/ee/11/de70dee31455c546fbc88301971ec03c328f3d1138cfba14263f651e9551/fsspec-2024.12.0.tar.gz", hash = "sha256:670700c977ed2fb51e0d9f9253177ed20cbde4a3e5c0283cc5385b5870c8533f", size = 291600 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/de/86/5486b0188d08aa643e127774a99bac51ffa6cf343e3deb0583956dca5b22/fsspec-2024.12.0-py3-none-any.whl", hash = "sha256:b520aed47ad9804237ff878b504267a3b0b441e97508bd6d2d8774e3db85cee2", size = 183862 },
-]
-
-[[package]]
-name = "gunicorn"
-version = "23.0.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "packaging" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/34/72/9614c465dc206155d93eff0ca20d42e1e35afc533971379482de953521a4/gunicorn-23.0.0.tar.gz", hash = "sha256:f014447a0101dc57e294f6c18ca6b40227a4c90e9bdb586042628030cba004ec", size = 375031 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/cb/7d/6dac2a6e1eba33ee43f318edbed4ff29151a49b5d37f080aad1e6469bca4/gunicorn-23.0.0-py3-none-any.whl", hash = "sha256:ec400d38950de4dfd418cff8328b2c8faed0edb0d517d3394e457c317908ca4d", size = 85029 },
 ]
 
 [[package]]
@@ -1647,17 +1644,17 @@ wheels = [
 
 [[package]]
 name = "versionhq"
-version = "1.1.7.5"
+version = "1.1.7.6"
 source = { editable = "." }
 dependencies = [
+    { name = "appdirs" },
     { name = "composio" },
     { name = "composio-openai" },
-    { name = "gunicorn" },
     { name = "json-repair" },
     { name = "litellm" },
     { name = "openai" },
-    { name = "pre-commit" },
     { name = "pydantic" },
+    { name = "python-dotenv" },
     { name = "regex" },
     { name = "requests" },
     { name = "setuptools" },
@@ -1674,20 +1671,19 @@ dev = [
     { name = "pre-commit" },
     { name = "pytest" },
     { name = "pytest-vcr" },
-    { name = "python-dotenv" },
     { name = "twine" },
 ]
 
 [package.metadata]
 requires-dist = [
+    { name = "appdirs", specifier = ">=1.4.4" },
     { name = "composio", specifier = ">=0.1.0" },
-    { name = "composio-openai", specifier = ">=0.6.0" },
-    { name = "gunicorn", specifier = ">=23.0.0" },
+    { name = "composio-openai", specifier = ">=0.6.9" },
     { name = "json-repair", specifier = ">=0.31.0" },
     { name = "litellm", specifier = ">=1.55.8" },
     { name = "openai", specifier = ">=1.57.0" },
-    { name = "pre-commit", specifier = ">=4.0.1" },
     { name = "pydantic" },
+    { name = "python-dotenv", specifier = ">=1.0.0" },
     { name = "regex" },
     { name = "requests", specifier = ">=2.32.3" },
     { name = "setuptools", specifier = ">=75.6.0" },
@@ -1701,11 +1697,10 @@ dev = [
     { name = "bandit" },
     { name = "black" },
     { name = "mypy", specifier = ">=1.10.0" },
-    { name = "pre-commit", specifier = ">=3.6.0" },
+    { name = "pre-commit", specifier = ">=4.0.1" },
     { name = "pytest", specifier = ">=8.0.0" },
     { name = "pytest", specifier = ">=8.3.4" },
     { name = "pytest-vcr", specifier = ">=1.0.2" },
-    { name = "python-dotenv", specifier = ">=1.0.0" },
     { name = "twine" },
 ]
 

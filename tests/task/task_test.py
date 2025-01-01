@@ -3,7 +3,7 @@ import pytest
 from unittest.mock import patch
 from typing import Union, Dict, Any
 from versionhq.agent.model import Agent
-from versionhq.task.model import Task, ResponseField, TaskOutput, AgentOutput
+from versionhq.task.model import Task, ResponseField, TaskOutput, ConditionalTask
 
 DEFAULT_MODEL_NAME = os.environ.get("LITELLM_MODEL_NAME", "gpt-3.5-turbo")
 LITELLM_API_KEY = os.environ.get("LITELLM_API_KEY")
@@ -55,7 +55,6 @@ def test_async_execute_task():
         role="demo agent 2",
         goal="My amazing goals",
     )
-
     task = Task(
         description="Analyze the client's business model and define the optimal cohort timeframe.",
         expected_output_json=True,
@@ -70,7 +69,7 @@ def test_async_execute_task():
         execution = task.execute_async(agent=agent)
         result = execution.result()
         assert result.raw == "ok"
-        execute.assert_called_once_with(task=task, context=None)
+        execute.assert_called_once_with(task=task, context=None, tools=None)
 
 
 def test_sync_execute_task_with_task_context():
@@ -253,7 +252,29 @@ def test_delegate():
     assert task.delegations != 0
 
 
-# def test_conditional_task():
+def test_conditional_task():
+    agent = Agent(role="demo agent 6", goal="My amazing goals")
+    task = Task(
+        description="Analyze the client's business model and define the optimal cohort timeframe.",
+        output_field_list=[ResponseField(title="test1", type=str, required=True),],
+    )
+    res = task.execute_sync(agent=agent)
+
+    conditional_task = ConditionalTask(
+        description="Analyze the client's business model.",
+        output_field_list=[ResponseField(title="test1", type=str, required=True),],
+        condition=lambda x: bool("zzz" in task.output.raw)
+    )
+    should_execute = conditional_task.should_execute(context=res)
+
+    assert res.raw is not None
+    assert should_execute is False
+
+    conditional_res = conditional_task._handle_conditional_task(task_outputs=[res,], task_index=1, was_replayed=False)
+    if not should_execute:
+        assert conditional_res is None
+    else:
+        assert conditional_res.task_id is conditional_task.id
 
 
-# tools, CONDITIONAL, token usage
+# tools, token usage

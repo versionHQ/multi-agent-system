@@ -15,7 +15,7 @@ exclude = ["test*", "__pycache__"]
 
 [project]
 name = "versionhq"
-version = "1.1.7.5"
+version = "1.1.7.6"
 authors = [{ name = "Kuriko Iwai", email = "kuriko@versi0n.io" }]
 description = "LLM orchestration frameworks for model-agnostic AI agents that handle complex outbound workflows"
 readme = "README.md"
@@ -31,17 +31,20 @@ dependencies = [
   "json-repair>=0.31.0",
   "litellm>=1.55.8",
   "openai>=1.57.0",
-  "composio-openai>=0.6.0",
-  "pre-commit>=4.0.1",
-  "gunicorn>=23.0.0",
+  "composio-openai>=0.6.9",
   "composio>=0.1.0",
   "setuptools>=75.6.0",
   "wheel>=0.45.1",
+  "python-dotenv>=1.0.0",
+  "appdirs>=1.4.4",
 ]
 classifiers = [
   "Programming Language :: Python",
   "License :: OSI Approved :: MIT License",
   "Operating System :: OS Independent",
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Topic :: Software Development :: Build Tools",
 ]
 
 [project.urls]
@@ -52,10 +55,9 @@ Issues = "https://github.com/versionHQ/multi-agent-system/issues"
 [tool.uv]
 dev-dependencies = [
   "mypy>=1.10.0",
-  "pre-commit>=3.6.0",
+  "pre-commit>=4.0.1",
   "pytest>=8.0.0",
   "pytest-vcr>=1.0.2",
-  "python-dotenv>=1.0.0",
   "black",
   "bandit",
   "twine",
