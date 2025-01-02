@@ -298,4 +298,43 @@ def test_kickoff_with_leader():
     assert team.tasks[0].output.raw == res.raw
 
 
-# async, task handling process
+def test_hierarchial_process():
+    agent_a = Agent(role="agent a", goal="My amazing goals", llm=MODEL_NAME)
+    agent_b = Agent(role="agent b", goal="My amazing goals", llm=MODEL_NAME)
+    agent_c = Agent(role="agent c", goal="My amazing goals", llm=MODEL_NAME)
+    task_1 = Task(
+        description="Analyze the client's business model.",
+        output_field_list=[ResponseField(title="task_1", type=str, required=True),],
+    )
+    task_2 = Task(
+        description="Define the cohort timeframe.",
+        output_field_list=[
+            ResponseField(title="task_2_1", type=int, required=True),
+            ResponseField(title="task_2_2", type=list, required=True),
+        ],
+    )
+    team = Team(
+        members=[
+            TeamMember(agent=agent_a, is_manager=False, task=task_1),
+            TeamMember(agent=agent_b, is_manager=True, task=task_2),
+            TeamMember(agent=agent_c, is_manager=False)
+        ],
+        process=TaskHandlingProcess.hierarchical
+    )
+    res = team.kickoff()
+
+    assert isinstance(res, TeamOutput)
+    assert res.team_id is team.id
+    assert res.raw is not None
+    assert res.json_dict is not None
+    assert team.manager_agent.id is agent_b.id
+    assert len(res.task_output_list) == 2
+    assert [item.raw is not None for item in res.task_output_list]
+    assert len(team.tasks) == 2
+    assert team.tasks[0].output.raw == res.raw
+
+
+# if __name__ == "__main__":
+#     test_member_without_task()
+
+# async, task handling process, team task

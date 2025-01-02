@@ -165,13 +165,13 @@ class Team(BaseModel):
 
 
     @property
-    def manager_agent(self) -> Agent:
+    def manager_agent(self) -> Agent | None:
         manager_agent = [member.agent for member in self.members if member.is_manager == True]
         return manager_agent[0] if len(manager_agent) > 0 else None
 
 
     @property
-    def manager_task(self) -> Task:
+    def manager_task(self) -> Task | None:
         """
         Aside from the team task, return the task that the `manager_agent` needs to handle.
         The task is set as second priority following to the team tasks.
@@ -188,8 +188,9 @@ class Team(BaseModel):
         2. manager_task,
         3. members' tasks
         """
-        sorted_member_tasks = [member.task for member in self.members if member.is_manager == True] + [member.task for member in self.members if member.is_manager == False]
-        return self.team_tasks + sorted_member_tasks if len(self.team_tasks) > 0 else sorted_member_tasks
+
+        sorted_member_tasks = [member.task for member in self.members if member.is_manager == True and member.task] + [member.task for member in self.members if member.is_manager == False and member.task]
+        return self.team_tasks + sorted_member_tasks if self.team_tasks else sorted_member_tasks
 
 
     # validators
@@ -215,14 +216,8 @@ class Team(BaseModel):
                     {},
                 )
 
-            if (self.manager_agent is not None) and (
-                self.members.count(self.manager_agent) > 0
-            ):
-                raise PydanticCustomError(
-                    "manager_agent_in_agents",
-                    "Manager agent should not be included in agents list.",
-                    {},
-                )
+            if self.manager_agent and not self.manager_task and not self.team_tasks:
+                raise PydanticCustomError("missing_manager_task", "manager needs to have at least one manager task or team task.", {})
         return self
 
 
@@ -234,11 +229,7 @@ class Team(BaseModel):
         if self.process == TaskHandlingProcess.sequential:
             for member in self.members:
                 if member.task is None:
-                    raise PydanticCustomError(
-                        "missing_agent_in_task",
-                        f"Sequential process error: Agent is missing in the task with the following description: {member.task.description}",
-                        {},
-                    )
+                    raise PydanticCustomError("missing_agent_in_task", f"Sequential process error: Agent is missing the task", {})
         return self
 
     @model_validator(mode="after")
@@ -249,7 +240,9 @@ class Team(BaseModel):
 
         async_task_count = 0
         for task in reversed(self.tasks):
-            if task.async_execution:
+            if not task:
+                break
+            elif task.async_execution:
                 async_task_count += 1
             else:
                 break
@@ -263,8 +256,11 @@ class Team(BaseModel):
         return self
 
     def _get_responsible_agent(self, task: Task) -> Agent:
-        res = [member.agent for member in self.members if member.task.id == task.id]
-        return None if len(res) == 0 else res[0]
+        if task is None:
+            return None
+        else:
+            res = [member.agent for member in self.members if member.task and member.task.id == task.id]
+            return None if len(res) == 0 else res[0]
 
     # setup team planner
     def _handle_team_planning(self):
