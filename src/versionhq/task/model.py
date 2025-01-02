@@ -206,10 +206,10 @@ Your outputs MUST adhere to the following format and should NOT include any irre
     @property
     def summary(self) -> str:
         return f"""
-        Task: {self.id} - {self.description}
-        "task_description": {self.description}
-        "task_expected_output": {self.output_prompt}
-        "task_tools": {", ".join([tool_called.tool.name for tool_called in self.tools_called])}
+        Task ID: {str(self.id)}
+        "Description": {self.description}
+        "Prompt": {self.output_prompt}
+        "Tools": {", ".join([tool_called.tool.name for tool_called in self.tools_called])}
         """
 
 
@@ -382,11 +382,7 @@ Your outputs MUST adhere to the following format and should NOT include any irre
         """
 
         future: Future[TaskOutput] = Future()
-        threading.Thread(
-            daemon=True,
-            target=self._execute_task_async,
-            args=(agent, context, tools, future),
-        ).start()
+        threading.Thread(daemon=True, target=self._execute_task_async, args=(agent, context, tools, future)).start()
         return future
 
 

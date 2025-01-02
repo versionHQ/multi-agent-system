@@ -11,11 +11,9 @@ from versionhq._utils.logger import Logger
 
 load_dotenv(override=True)
 
-
 def fetch_db_storage_path():
-    project_directory_name = os.environ.get("STORAGE_DIR", Path.cwd().name)
-    app_author = "versionhq"
-    data_dir = Path(appdirs.user_data_dir(project_directory_name, app_author))
+    directory_name = Path.cwd().name
+    data_dir = Path(appdirs.user_data_dir(appname=directory_name, appauthor="Version IO Sdn Bhd.", version=None, roaming=False))
     data_dir.mkdir(parents=True, exist_ok=True)
     return data_dir
 
@@ -39,25 +37,25 @@ class TaskOutputSQLiteStorage:
         Initializes the SQLite database and creates LTM table.
         """
 
-        try:
-            with sqlite3.connect(self.db_path) as conn:
-                cursor = conn.cursor()
-                cursor.execute(
-                    """
-                    CREATE TABLE IF NOT EXISTS task_outputs (
-                        task_id TEXT PRIMARY KEY,
-                        output JSON,
-                        task_index INTEGER,
-                        inputs JSON,
-                        was_replayed BOOLEAN,
-                        timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-                    )
+        # try:
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute(
                 """
+                CREATE TABLE IF NOT EXISTS task_outputs (
+                    task_id TEXT PRIMARY KEY,
+                    output JSON,
+                    task_index INTEGER,
+                    inputs JSON,
+                    was_replayed BOOLEAN,
+                    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
                 )
-                conn.commit()
+            """
+            )
+            conn.commit()
 
-        except sqlite3.Error as e:
-            self._logger.log(level="error", message=f"DATABASE INITIALIZATION ERROR: {e}", color="red")
+        # except sqlite3.Error as e:
+        #     self._logger.log(level="error", message=f"DATABASE INITIALIZATION ERROR: {e}", color="red")
 
 
     def add(self, task, output: Dict[str, Any], task_index: int, was_replayed: bool = False, inputs: Dict[str, Any] = {}):
@@ -81,13 +79,12 @@ class TaskOutputSQLiteStorage:
         try:
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
-
                 fields, values = [], []
                 for k, v in kwargs.items():
                     fields.append(f"{k} = ?")
                     values.append(json.dumps(v) if isinstance(v, dict) else v)
 
-                query = f"UPDATE latest_kickoff_task_outputs SET {', '.join(fields)} WHERE task_index = ?"  # nosec
+                query = f"UPDATE latest_kickoff_task_outputs SET {', '.join(fields)} WHERE task_index = ?"
                 values.append(task_index)
                 cursor.execute(query, tuple(values))
                 conn.commit()

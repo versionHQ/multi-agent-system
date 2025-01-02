@@ -277,4 +277,11 @@ def test_conditional_task():
         assert conditional_res.task_id is conditional_task.id
 
 
+def test_store_task_log():
+    task = Task(
+        description="Analyze the client's business model.",
+        output_field_list=[ResponseField(title="task_1", type=str, required=True),],
+    )
+    assert task._task_output_handler.load() is not None
+
 # tools, token usage

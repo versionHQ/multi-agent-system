@@ -123,7 +123,7 @@ class Team(BaseModel):
     __hash__ = object.__hash__
     _execution_span: Any = PrivateAttr()
     _logger: Logger = PrivateAttr()
-    # _inputs: Optional[Dict[str, Any]] = PrivateAttr(default=None)
+    _inputs: Optional[Dict[str, Any]] = PrivateAttr(default=None)
 
     id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True)
     name: Optional[str] = Field(default=None)
@@ -382,14 +382,13 @@ class Team(BaseModel):
                 futures.append((task, future, task_index))
             else:
                 context = create_raw_outputs(tasks=[task,], task_outputs=([last_sync_output,] if last_sync_output else [] ))
-                task_output = task.execute_sync(agent=responsible_agent, context=context, tools=responsible_agent.tools
-                                                )
+                task_output = task.execute_sync(agent=responsible_agent, context=context, tools=responsible_agent.tools)
                 if responsible_agent is self.manager_agent:
                     lead_task_output = task_output
 
                 task_outputs.append(task_output)
                 # self._process_task_result(task, task_output)
-                task._store_execution_log(task_index, was_replayed)
+                task._store_execution_log(task_index, was_replayed, self._inputs)
 
 
         if futures:

@@ -127,28 +127,17 @@ def test_form_team_without_leader():
         assert item.id is task_1.id or item.id is task_2.id
 
 
-def test_kickoff_team_without_leader():
-    agent_a = Agent(
-        role="agent a",
-        goal="My amazing goals",
-        llm=MODEL_NAME
-    )
-
-    agent_b = Agent(
-        role="agent b",
-        goal="My amazing goals",
-        llm=MODEL_NAME
-    )
-
+def test_kickoff_without_leader():
+    agent_a = Agent(role="agent a", goal="My amazing goals", llm=MODEL_NAME)
+    agent_b = Agent(role="agent b", goal="My amazing goals", llm=MODEL_NAME)
     task_1 = Task(
-            description="Analyze the client's business model.",
-            expected_output_json=True,
-            output_field_list=[
-                ResponseField(title="test1", type=str, required=True),
-                ResponseField(title="test2", type=list, required=True),
-            ],
+        description="Analyze the client's business model.",
+        expected_output_json=True,
+        output_field_list=[
+            ResponseField(title="test1", type=str, required=True),
+            ResponseField(title="test2", type=list, required=True),
+        ],
     )
-
     task_2 = Task(
         description="Define the cohort.",
         expected_output_json=True,
@@ -157,7 +146,6 @@ def test_kickoff_team_without_leader():
             ResponseField(title="test2", type=list, required=True),
         ],
     )
-
     team = Team(
         members=[
             TeamMember(agent=agent_a, is_manager=False, task=task_1),
@@ -183,7 +171,6 @@ def test_kickoff_team_without_leader():
         assert isinstance(item, dict)
     assert isinstance(res.token_usage, UsageMetrics)
     assert res.token_usage.total_tokens == 0 # as we dont set token usage on agent
-
 
 
 def team_kickoff_with_task_callback():
@@ -236,7 +223,6 @@ def team_kickoff_with_task_callback():
     assert "pytest" in demo_list[1]
 
 
-
 def test_delegate_in_team():
     """
     When the agent belongs to the team, the team manager or peers are prioritized to delegete the task.
@@ -279,7 +265,37 @@ def test_delegate_in_team():
     assert "agent b" in task_1.processed_by_agents
 
 
+def test_kickoff_with_leader():
+    agent_a = Agent(role="agent a", goal="My amazing goals", llm=MODEL_NAME)
+    agent_b = Agent(role="agent b", goal="My amazing goals", llm=MODEL_NAME)
+    task_1 = Task(
+        description="Analyze the client's business model.",
+        output_field_list=[ResponseField(title="task_1", type=str, required=True),],
+    )
+    task_2 = Task(
+        description="Define the cohort timeframe.",
+        output_field_list=[
+            ResponseField(title="task_2_1", type=int, required=True),
+            ResponseField(title="task_2_2", type=list, required=True),
+        ],
+    )
+    team = Team(
+        members=[
+            TeamMember(agent=agent_a, is_manager=False, task=task_1),
+            TeamMember(agent=agent_b, is_manager=True, task=task_2),
+        ],
+    )
+    res = team.kickoff()
 
-if __name__ == "__main__":
-    test_kickoff_team_without_leader()
-# kickoff with teamleader, async, task handling process
+    assert isinstance(res, TeamOutput)
+    assert res.team_id is team.id
+    assert res.raw is not None
+    assert res.json_dict is not None
+    assert team.manager_agent.id is agent_b.id
+    assert len(res.task_output_list) == 2
+    assert [item.raw is not None for item in res.task_output_list]
+    assert len(team.tasks) == 2
+    assert team.tasks[0].output.raw == res.raw
+
+
+# async, task handling process
