@@ -113,6 +113,9 @@ class TeamMember(ABC, BaseModel):
     is_manager: bool = Field(default=False)
     task: Optional[Task] = Field(default=None)
 
+    def update(self, task: Task):
+        self.task = task
+
 
 class Team(BaseModel):
     """
@@ -165,35 +168,47 @@ class Team(BaseModel):
 
 
     @property
-    def manager_agent(self) -> Agent | None:
-        manager_agent = [member.agent for member in self.members if member.is_manager == True]
-        return manager_agent[0] if len(manager_agent) > 0 else None
+    def managers(self) -> List[TeamMember] | None:
+        managers = [member for member in self.members if member.is_manager == True]
+        return managers if len(managers) > 0 else None
 
 
     @property
-    def manager_task(self) -> Task | None:
+    def manager_tasks(self) -> List[Task] | None:
         """
-        Aside from the team task, return the task that the `manager_agent` needs to handle.
-        The task is set as second priority following to the team tasks.
+        Tasks (incl. team tasks) handled by managers in the team.
         """
-        task = [member.task for member in self.members if member.is_manager == True]
-        return task[0] if len(task) > 0 else None
+        if self.managers:
+            tasks = [manager.task for manager in self.managers if manager.task is not None]
+            return tasks if len(tasks) > 0 else None
+
+        return None
 
 
     @property
     def tasks(self):
         """
         Return all the tasks that the team needs to handle in order of priority:
-        1. team tasks,
+        1. team tasks, -> assigned to the member
         2. manager_task,
         3. members' tasks
         """
 
-        sorted_member_tasks = [member.task for member in self.members if member.is_manager == True and member.task] + [member.task for member in self.members if member.is_manager == False and member.task]
-        return self.team_tasks + sorted_member_tasks if self.team_tasks else sorted_member_tasks
+        team_tasks = self.team_tasks
+        manager_tasks = [member.task for member in self.members if member.is_manager == True and member.task is not None and member.task not in team_tasks]
+        member_tasks = [member.task for member in self.members if member.is_manager == False and member.task is not None and member.task not in team_tasks]
+
+        return team_tasks + manager_tasks + member_tasks
 
 
-    # validators
+    @property
+    def member_tasks_without_agent(self) -> List[Task] | None:
+        if self.members:
+            return [member.task for member in self.members if member.agent is None]
+
+        return None
+
+
     @field_validator("id", mode="before")
     @classmethod
     def _deny_user_set_id(cls, v: Optional[UUID4]) -> None:
@@ -203,30 +218,47 @@ class Team(BaseModel):
 
 
     @model_validator(mode="after")
+    def validate_tasks(self):
+        """
+        Validates if the model recognize all tasks that the team needs to handle.
+        """
+
+        if self.tasks:
+            if all(task in self.tasks for task in self.team_tasks) == False:
+                raise PydanticCustomError("task_validation_error", "`team_tasks` needs to be recognized in the task.", {})
+
+            if len(self.tasks) != len(self.team_tasks) + len([member for member in self.members if member.task is not None]):
+                raise PydanticCustomError("task_validation_error", "Some tasks are missing.", {})
+        return self
+
+
+    @model_validator(mode="after")
     def check_manager_llm(self):
         """
         Validates that the language model is set when using hierarchical process.
         """
 
         if self.process == TaskHandlingProcess.hierarchical:
-            if self.manager_agent is None:
+            if self.managers is None:
                 raise PydanticCustomError(
-                    "missing_manager_llm_or_manager_agent",
-                    "Attribute `manager_llm` or `manager_agent` is required when using hierarchical process.",
+                    "missing_manager_llm_or_manager",
+                    "Attribute `manager_llm` or `manager` is required when using hierarchical process.",
                     {},
                 )
 
-            if self.manager_agent and not self.manager_task and not self.team_tasks:
+            if self.managers and (self.manager_tasks is None or self.team_tasks is None):
                 raise PydanticCustomError("missing_manager_task", "manager needs to have at least one manager task or team task.", {})
+
         return self
 
 
     @model_validator(mode="after")
     def validate_tasks(self):
         """
-        Every team member should have a task to handle.
+        Sequential task processing without any team tasks require a task-agent pairing.
         """
-        if self.process == TaskHandlingProcess.sequential:
+
+        if self.process == TaskHandlingProcess.sequential and self.team_tasks is None:
             for member in self.members:
                 if member.task is None:
                     raise PydanticCustomError("missing_agent_in_task", f"Sequential process error: Agent is missing the task", {})
@@ -255,6 +287,7 @@ class Team(BaseModel):
             )
         return self
 
+
     def _get_responsible_agent(self, task: Task) -> Agent:
         if task is None:
             return None
@@ -262,17 +295,46 @@ class Team(BaseModel):
             res = [member.agent for member in self.members if member.task and member.task.id == task.id]
             return None if len(res) == 0 else res[0]
 
-    # setup team planner
-    def _handle_team_planning(self):
-        team_planner = TeamPlanner(tasks=self.tasks, planner_llm=self.planning_llm)
-        result = team_planner._handle_task_planning()
 
-        if result is not None:
-            for task in self.tasks:
-                task_id = task.id
-                task.description += (
-                    result[task_id] if hasattr(result, str(task_id)) else result
-                )
+    def _handle_team_planning(self) -> None:
+        """
+        Form a team considering agents and tasks given, and update `self.members` field:
+            1. Idling managers to take the team tasks.
+            2. Idling members to take the remaining tasks starting from the team tasks to member tasks.
+            3. Create agents to handle the rest tasks.
+        """
+
+        team_planner = TeamPlanner(tasks=self.tasks, planner_llm=self.planning_llm)
+        idling_managers: List[TeamMember] = [member for member in self.members if member.task is None and member.is_manager is True]
+        idling_members: List[TeamMember] =  [member for member in self.members if member.task is None and member.is_manager is False]
+        unassigned_tasks: List[Task] = self.member_tasks_without_agent
+        new_team_members: List[TeamMember] = []
+
+
+        if self.team_tasks:
+            candidates = idling_managers + idling_members
+            if candidates:
+                i = 0
+                while i < len(candidates):
+                    if self.team_tasks[i]:
+                        candidates[i].task = self.team_tasks[i]
+                        i += 1
+
+                if len(self.team_tasks) > i:
+                    for item in self.team_tasks[i:]:
+                        if item not in unassigned_tasks:
+                            unassigned_tasks = [item, ] + unassigned_tasks
+
+            else:
+                for item in self.team_tasks:
+                    if item not in unassigned_tasks:
+                        unassigned_tasks = [item, ] + unassigned_tasks
+
+        if unassigned_tasks:
+            new_team_members = team_planner._handle_assign_agents(unassigned_tasks=unassigned_tasks)
+
+        if new_team_members:
+            self.members += new_team_members
 
 
     # task execution
@@ -329,9 +391,11 @@ class Team(BaseModel):
                 token_sum = agent._token_process.get_summary()
                 total_usage_metrics.add_usage_metrics(token_sum)
 
-        if self.manager_agent and hasattr(self.manager_agent, "_token_process"):
-            token_sum = self.manager_agent._token_process.get_summary()
-            total_usage_metrics.add_usage_metrics(token_sum)
+        if self.managers:
+            for manager in self.managers:
+                if hasattr(manager.agent, "_token_process"):
+                    token_sum = manager.agent._token_process.get_summary()
+                    total_usage_metrics.add_usage_metrics(token_sum)
 
         self.usage_metrics = total_usage_metrics
         return total_usage_metrics
@@ -362,7 +426,7 @@ class Team(BaseModel):
 
             responsible_agent = self._get_responsible_agent(task)
             if responsible_agent is None:
-                responsible_agent = self.manager_agent if self.manager_agent else self.members[0].agent
+                self._handle_team_planning()
 
             if isinstance(task, ConditionalTask):
                 skipped_task_output = task._handle_conditional_task(task_outputs, futures, task_index, was_replayed)
@@ -373,13 +437,13 @@ class Team(BaseModel):
             # self._log_task_start(task, responsible_agent)
 
             if task.async_execution:
-                context = create_raw_outputs(tasks=[task, ],task_outputs=([last_sync_output,] if last_sync_output else []))
+                context = create_raw_outputs(tasks=[task, ], task_outputs=([last_sync_output,] if last_sync_output else []))
                 future = task.execute_async(agent=responsible_agent, context=context, tools=responsible_agent.tools)
                 futures.append((task, future, task_index))
             else:
                 context = create_raw_outputs(tasks=[task,], task_outputs=([last_sync_output,] if last_sync_output else [] ))
                 task_output = task.execute_sync(agent=responsible_agent, context=context, tools=responsible_agent.tools)
-                if responsible_agent is self.manager_agent:
+                if self.managers and responsible_agent in [manager.agent for manager in self.managers]:
                     lead_task_output = task_output
 
                 task_outputs.append(task_output)
@@ -396,15 +460,16 @@ class Team(BaseModel):
     def kickoff(self, kwargs_before: Optional[Dict[str, str]] = None, kwargs_after: Optional[Dict[str, Any]] = None) -> TeamOutput:
         """
         Kickoff the team:
-        0. Plan the team action if we have `team_tasks` using `planning_llm`.
+        0. Assign an agent to a task - using conditions (manager prioritizes team_tasks) and planning_llm.
         1. Address `before_kickoff_callbacks` if any.
-        2. Handle team members' tasks in accordance with the `process`.
+        2. Handle team members' tasks in accordance with the process.
         3. Address `after_kickoff_callbacks` if any.
         """
 
         metrics: List[UsageMetrics] = []
 
-        if len(self.team_tasks) > 0 or self.planning_llm is not None:
+
+        if self.team_tasks or self.member_tasks_without_agent:
             self._handle_team_planning()
 
         if kwargs_before is not None:

@@ -1,5 +1,4 @@
 import os
-from pydantic import BaseModel
 
 from versionhq.agent.model import Agent
 from versionhq.task.model import Task, ResponseField, TaskOutput
@@ -61,8 +60,8 @@ def test_form_team():
     assert team.id is not None
     assert team.key is not None
     assert isinstance(team.key, str)
-    assert team.manager_agent is not None
-    assert team.manager_task.id is task_1.id
+    assert team.managers is not None
+    assert task_1 in team.manager_tasks
     assert len(team.tasks) == 2
     for item in team.tasks:
         assert item.id is task_1.id or item.id is task_2.id
@@ -120,8 +119,8 @@ def test_form_team_without_leader():
     assert team.id is not None
     assert team.key is not None
     assert isinstance(team.key, str)
-    assert team.manager_agent is None
-    assert team.manager_task is None
+    assert team.managers is None
+    assert team.manager_tasks is None
     assert len(team.tasks) == 2
     for item in team.tasks:
         assert item.id is task_1.id or item.id is task_2.id
@@ -291,7 +290,7 @@ def test_kickoff_with_leader():
     assert res.team_id is team.id
     assert res.raw is not None
     assert res.json_dict is not None
-    assert team.manager_agent.id is agent_b.id
+    assert team.managers[0].agent.id is agent_b.id
     assert len(res.task_output_list) == 2
     assert [item.raw is not None for item in res.task_output_list]
     assert len(team.tasks) == 2
@@ -299,6 +298,10 @@ def test_kickoff_with_leader():
 
 
 def test_hierarchial_process():
+    """
+    Manager to handle the top priority task first.
+    """
+
     agent_a = Agent(role="agent a", goal="My amazing goals", llm=MODEL_NAME)
     agent_b = Agent(role="agent b", goal="My amazing goals", llm=MODEL_NAME)
     agent_c = Agent(role="agent c", goal="My amazing goals", llm=MODEL_NAME)
@@ -327,14 +330,85 @@ def test_hierarchial_process():
     assert res.team_id is team.id
     assert res.raw is not None
     assert res.json_dict is not None
-    assert team.manager_agent.id is agent_b.id
+    assert team.managers[0].agent.id is agent_b.id
     assert len(res.task_output_list) == 2
     assert [item.raw is not None for item in res.task_output_list]
     assert len(team.tasks) == 2
     assert team.tasks[0].output.raw == res.raw
 
 
-# if __name__ == "__main__":
-#     test_member_without_task()
+def test_handle_team_task():
+    """
+    Make the best team formation with agents and tasks given.
+    """
 
-# async, task handling process, team task
+    agent_a = Agent(role="agent a", goal="My amazing goals", llm=MODEL_NAME)
+    agent_b = Agent(role="agent b", goal="My amazing goals", llm=MODEL_NAME)
+    agent_c = Agent(role="agent c", goal="My amazing goals", llm=MODEL_NAME)
+    team_task = Task(
+        description="Define outbound strategies.",
+        output_field_list=[ResponseField(title="team_task_1", type=str, required=True),],
+    )
+    task_1 = Task(
+        description="Analyze the client's business model.",
+        output_field_list=[ResponseField(title="task_1", type=str, required=True),],
+    )
+    task_2 = Task(
+        description="Define the cohort timeframe.",
+        output_field_list=[
+            ResponseField(title="task_2_1", type=int, required=True),
+            ResponseField(title="task_2_2", type=list, required=True),
+        ],
+    )
+    team_solo = Team(
+        members=[
+            TeamMember(agent=agent_c, is_manager=False)
+        ],
+        team_tasks=[team_task, task_1, task_2, ]
+    )
+    team_flat =  Team(
+        members=[
+            TeamMember(agent=agent_a, is_manager=False, task=task_1),
+            TeamMember(agent=agent_c, is_manager=False)
+        ],
+        team_tasks=[team_task, task_2,]
+    )
+    team_leader =  Team(
+        members=[
+            TeamMember(agent=agent_a, is_manager=False, task=task_1),
+            TeamMember(agent=agent_b, is_manager=True, task=task_2),
+            TeamMember(agent=agent_c, is_manager=False)
+        ],
+        team_tasks=[team_task, ]
+    )
+    team_dual_leaders =  Team(
+        members=[
+            TeamMember(agent=agent_a, is_manager=False, task=task_1),
+            TeamMember(agent=agent_b, is_manager=True, task=task_2),
+            TeamMember(agent=agent_c, is_manager=True)
+        ],
+        team_tasks=[team_task, ]
+    )
+    team_leader_without_task =  Team(
+        members=[
+            TeamMember(agent=agent_a, is_manager=False, task=task_1),
+            TeamMember(agent=agent_b, is_manager=False, task=task_2),
+            TeamMember(agent=agent_c, is_manager=True)
+        ],
+        team_tasks=[team_task,]
+    )
+    teams = [team_solo, team_flat, team_leader, team_dual_leaders, team_leader_without_task]
+
+    for team in teams:
+        res = team.kickoff()
+        assert team._get_responsible_agent(task=team_task) is not None
+        assert isinstance(res, TeamOutput)
+        assert res.team_id is team.id
+        assert team.tasks[0].id is team_task.id
+        assert res.raw is not None
+        assert len(team.members) == 3
+        assert len(team.tasks) == 3
+
+
+if __name__ == "__main__":
+    test_handle_team_task()

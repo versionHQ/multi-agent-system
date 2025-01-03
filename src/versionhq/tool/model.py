@@ -137,7 +137,6 @@ class Tool(ABC, BaseModel):
         The response will be cascaded to the Task and stored in the TaskOutput.
         """
 
-        print(f"Using the tool: {self.name}")
         result = None
 
         if self.func is not None:

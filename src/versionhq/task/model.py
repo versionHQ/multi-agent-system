@@ -399,7 +399,7 @@ Your outputs MUST adhere to the following format and should NOT include any irre
         """
         Run the core execution logic of the task.
         To speed up the process, when the format is not expected to return, we will skip the conversion process.
-        When the task is allowed to delegate to another agent, we will select a responsible one in order of manager_agent > peer_agent > anoymous agent.
+        When the task is allowed to delegate to another agent, we will select a responsible one in order of manager > peer_agent > anoymous agent.
         """
         from versionhq.agent.model import Agent
         from versionhq.team.model import Team
@@ -410,8 +410,9 @@ Your outputs MUST adhere to the following format and should NOT include any irre
             agent_to_delegate = None
 
             if hasattr(agent, "team") and isinstance(agent.team, Team):
-                if agent.team.manager_agent:
-                    agent_to_delegate = agent.team.manager_agent
+                if agent.team.managers:
+                    idling_manager_agents = [manager.agent for manager in agent.team.managers if manager.task is None]
+                    agent_to_delegate = idling_manager_agents[0] if idling_manager_agents else agent.team.managers[0]
                 else:
                     peers = [member.agent for member in agent.team.members if member.is_manager == False and member.agent.id is not agent.id]
                     if len(peers) > 0:
