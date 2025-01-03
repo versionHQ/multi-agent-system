@@ -117,15 +117,6 @@ class MessagingWorkflow(ABC, BaseModel):
         description="store metrics that used to predict and track the performance of this workflow."
     )
 
-
-    @property
-    def name(self):
-        if self.customer.id:
-            return f"Workflow ID: {self.id} - on {self.product.id} for {self.customer.id}"
-        else:
-            return f"Workflow ID: {self.id} - on {self.product.id}"
-
-
     @field_validator("id", mode="before")
     @classmethod
     def _deny_user_set_id(cls, v: Optional[UUID4]) -> None:
@@ -160,3 +151,11 @@ class MessagingWorkflow(ABC, BaseModel):
         self.agents = agents
         self.team = team
         self.updated_at = datetime.datetime.now()
+
+
+    @property
+    def name(self):
+        if self.customer.id:
+            return f"Workflow ID: {self.id} - on {self.product.id} for {self.customer.id}"
+        else:
+            return f"Workflow ID: {self.id} - on {self.product.id}"

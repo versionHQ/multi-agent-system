@@ -12,7 +12,7 @@ from pydantic_core import PydanticCustomError
 from versionhq._utils.process_config import process_config
 from versionhq.task import TaskOutputFormat
 from versionhq.task.log_handler import TaskOutputStorageHandler
-from versionhq.tool.model import Tool, ToolCalled
+from versionhq.tool.model import Tool, ToolSet
 from versionhq._utils.logger import Logger
 
 
@@ -76,18 +76,6 @@ class TaskOutput(BaseModel):
     def __str__(self) -> str:
         return str(self.pydantic) if self.pydantic else str(self.json_dict) if self.json_dict else self.raw
 
-    @property
-    def json(self) -> Optional[str]:
-        if self.output_format != TaskOutputFormat.JSON:
-            raise ValueError(
-                """
-                Invalid output format requested.
-                If you would like to access the JSON output,
-                pleae make sure to set the output_json property for the task
-                """
-            )
-        return json.dumps(self.json_dict)
-
 
     def to_dict(self) -> Dict[str, Any]:
         """
@@ -110,6 +98,19 @@ class TaskOutput(BaseModel):
         When the task is called as context, return its output in concise string to add it to the prompt
         """
         return json.dumps(self.json_dict) if self.json_dict else self.raw[0: 127]
+
+
+    @property
+    def json(self) -> Optional[str]:
+        if self.output_format != TaskOutputFormat.JSON:
+            raise ValueError(
+                """
+                Invalid output format requested.
+                If you would like to access the JSON output,
+                pleae make sure to set the output_json property for the task
+                """
+            )
+        return json.dumps(self.json_dict)
 
 
 
@@ -140,7 +141,7 @@ class Task(BaseModel):
 
     # task setup
     context: Optional[List["Task"]] = Field(default=None, description="other tasks whose outputs should be used as context")
-    tools_called: Optional[List[ToolCalled]] = Field(default_factory=list, description="tools that the agent can use for this task")
+    tools_called: Optional[List[ToolSet]] = Field(default_factory=list, description="tools that the agent can use for this task")
     take_tool_res_as_final: bool = Field(default=False, description="when set True, tools res will be stored in the `TaskOutput`")
     allow_delegation: bool = Field(default=False, description="ask other agents for help and run the task instead")
 
@@ -157,63 +158,6 @@ class Task(BaseModel):
     delegations: int = 0
 
 
-    @property
-    def output_prompt(self) -> str:
-        """
-        Draft prompts on the output format by converting `output_field_list` to dictionary.
-        """
-
-        output_prompt, output_formats_to_follow = "", dict()
-        for item in self.output_field_list:
-            output_formats_to_follow[item.title] = f"<Return your answer in {item.type.__name__}>"
-
-        output_prompt = f"""
-Your outputs MUST adhere to the following format and should NOT include any irrelevant elements:
-{output_formats_to_follow}
-        """
-        return output_prompt
-
-
-    @property
-    def expected_output_formats(self) -> List[TaskOutputFormat]:
-        """
-        Return output formats in list with the ENUM item.
-        `TaskOutputFormat.RAW` is set as default.
-        """
-        outputs = [TaskOutputFormat.RAW,]
-        if self.expected_output_json:
-            outputs.append(TaskOutputFormat.JSON)
-        if self.expected_output_pydantic:
-            outputs.append(TaskOutputFormat.PYDANTIC)
-        return outputs
-
-
-    @property
-    def key(self) -> str:
-        output_format = (
-            TaskOutputFormat.JSON
-            if self.expected_output_json == True
-            else (
-                TaskOutputFormat.PYDANTIC
-                if self.expected_output_pydantic == True
-                else TaskOutputFormat.RAW
-            )
-        )
-        source = [self.description, output_format]
-        return md5("|".join(source).encode(), usedforsecurity=False).hexdigest()
-
-
-    @property
-    def summary(self) -> str:
-        return f"""
-        Task ID: {str(self.id)}
-        "Description": {self.description}
-        "Prompt": {self.output_prompt}
-        "Tools": {", ".join([tool_called.tool.name for tool_called in self.tools_called])}
-        """
-
-
-    # validators
     @model_validator(mode="before")
     @classmethod
     def process_model_config(cls, values: Dict[str, Any]):
@@ -465,6 +409,63 @@ Your outputs MUST adhere to the following format and should NOT include any irre
         """
 
         self._task_output_handler.update(task=self, task_index=task_index, was_replayed=was_replayed, inputs=inputs)
+
+
+    @property
+    def output_prompt(self) -> str:
+        """
+        Draft prompts on the output format by converting `output_field_list` to dictionary.
+        """
+
+        output_prompt, output_formats_to_follow = "", dict()
+        for item in self.output_field_list:
+            output_formats_to_follow[item.title] = f"<Return your answer in {item.type.__name__}>"
+
+        output_prompt = f"""
+Your outputs MUST adhere to the following format and should NOT include any irrelevant elements:
+{output_formats_to_follow}
+        """
+        return output_prompt
+
+
+    @property
+    def expected_output_formats(self) -> List[TaskOutputFormat]:
+        """
+        Return output formats in list with the ENUM item.
+        `TaskOutputFormat.RAW` is set as default.
+        """
+        outputs = [TaskOutputFormat.RAW,]
+        if self.expected_output_json:
+            outputs.append(TaskOutputFormat.JSON)
+        if self.expected_output_pydantic:
+            outputs.append(TaskOutputFormat.PYDANTIC)
+        return outputs
+
+
+    @property
+    def key(self) -> str:
+        output_format = (
+            TaskOutputFormat.JSON
+            if self.expected_output_json == True
+            else (
+                TaskOutputFormat.PYDANTIC
+                if self.expected_output_pydantic == True
+                else TaskOutputFormat.RAW
+            )
+        )
+        source = [self.description, output_format]
+        return md5("|".join(source).encode(), usedforsecurity=False).hexdigest()
+
+
+    @property
+    def summary(self) -> str:
+        return f"""
+        Task ID: {str(self.id)}
+        "Description": {self.description}
+        "Prompt": {self.output_prompt}
+        "Tools": {", ".join([tool_called.tool.name for tool_called in self.tools_called])}
+        """
+
 
 
 

@@ -161,54 +161,6 @@ class Team(BaseModel):
         return self.name if self.name is not None else self.id.__str__
 
 
-    @property
-    def key(self) -> str:
-        source = [str(member.agent.id.__str__) for member in self.members] + [str(task.id.__str__) for task in self.tasks]
-        return md5("|".join(source).encode(), usedforsecurity=False).hexdigest()
-
-
-    @property
-    def managers(self) -> List[TeamMember] | None:
-        managers = [member for member in self.members if member.is_manager == True]
-        return managers if len(managers) > 0 else None
-
-
-    @property
-    def manager_tasks(self) -> List[Task] | None:
-        """
-        Tasks (incl. team tasks) handled by managers in the team.
-        """
-        if self.managers:
-            tasks = [manager.task for manager in self.managers if manager.task is not None]
-            return tasks if len(tasks) > 0 else None
-
-        return None
-
-
-    @property
-    def tasks(self):
-        """
-        Return all the tasks that the team needs to handle in order of priority:
-        1. team tasks, -> assigned to the member
-        2. manager_task,
-        3. members' tasks
-        """
-
-        team_tasks = self.team_tasks
-        manager_tasks = [member.task for member in self.members if member.is_manager == True and member.task is not None and member.task not in team_tasks]
-        member_tasks = [member.task for member in self.members if member.is_manager == False and member.task is not None and member.task not in team_tasks]
-
-        return team_tasks + manager_tasks + member_tasks
-
-
-    @property
-    def member_tasks_without_agent(self) -> List[Task] | None:
-        if self.members:
-            return [member.task for member in self.members if member.agent is None]
-
-        return None
-
-
     @field_validator("id", mode="before")
     @classmethod
     def _deny_user_set_id(cls, v: Optional[UUID4]) -> None:
@@ -218,7 +170,7 @@ class Team(BaseModel):
 
 
     @model_validator(mode="after")
-    def validate_tasks(self):
+    def assess_tasks(self):
         """
         Validates if the model recognize all tasks that the team needs to handle.
         """
@@ -261,7 +213,7 @@ class Team(BaseModel):
         if self.process == TaskHandlingProcess.sequential and self.team_tasks is None:
             for member in self.members:
                 if member.task is None:
-                    raise PydanticCustomError("missing_agent_in_task", f"Sequential process error: Agent is missing the task", {})
+                    raise PydanticCustomError("missing_agent_in_task", "Sequential process error: Agent is missing the task", {})
         return self
 
     @model_validator(mode="after")
@@ -280,11 +232,7 @@ class Team(BaseModel):
                 break
 
         if async_task_count > 1:
-            raise PydanticCustomError(
-                "async_task_count",
-                "The team must end with max. one asynchronous task.",
-                {},
-            )
+            raise PydanticCustomError("async_task_count", "The team must end with max. one asynchronous task.", {})
         return self
 
 
@@ -309,7 +257,6 @@ class Team(BaseModel):
         idling_members: List[TeamMember] =  [member for member in self.members if member.task is None and member.is_manager is False]
         unassigned_tasks: List[Task] = self.member_tasks_without_agent
         new_team_members: List[TeamMember] = []
-
 
         if self.team_tasks:
             candidates = idling_managers + idling_members
@@ -468,7 +415,6 @@ class Team(BaseModel):
 
         metrics: List[UsageMetrics] = []
 
-
         if self.team_tasks or self.member_tasks_without_agent:
             self._handle_team_planning()
 
@@ -511,3 +457,51 @@ class Team(BaseModel):
             self.usage_metrics.add_usage_metrics(metric)
 
         return result
+
+
+    @property
+    def key(self) -> str:
+        source = [str(member.agent.id.__str__) for member in self.members] + [str(task.id.__str__) for task in self.tasks]
+        return md5("|".join(source).encode(), usedforsecurity=False).hexdigest()
+
+
+    @property
+    def managers(self) -> List[TeamMember] | None:
+        managers = [member for member in self.members if member.is_manager == True]
+        return managers if len(managers) > 0 else None
+
+
+    @property
+    def manager_tasks(self) -> List[Task] | None:
+        """
+        Tasks (incl. team tasks) handled by managers in the team.
+        """
+        if self.managers:
+            tasks = [manager.task for manager in self.managers if manager.task is not None]
+            return tasks if len(tasks) > 0 else None
+
+        return None
+
+
+    @property
+    def tasks(self):
+        """
+        Return all the tasks that the team needs to handle in order of priority:
+        1. team tasks, -> assigned to the member
+        2. manager_task,
+        3. members' tasks
+        """
+
+        team_tasks = self.team_tasks
+        manager_tasks = [member.task for member in self.members if member.is_manager == True and member.task is not None and member.task not in team_tasks]
+        member_tasks = [member.task for member in self.members if member.is_manager == False and member.task is not None and member.task not in team_tasks]
+
+        return team_tasks + manager_tasks + member_tasks
+
+
+    @property
+    def member_tasks_without_agent(self) -> List[Task] | None:
+        if self.members:
+            return [member.task for member in self.members if member.agent is None]
+
+        return None

@@ -1,5 +1,6 @@
 from typing import Callable
 from pydantic import BaseModel
+
 from versionhq.tool.model import Tool
 
 
@@ -13,6 +14,7 @@ def tool(*args):
         def _make_tool(f: Callable) -> Tool:
             if f.__doc__ is None:
                 raise ValueError("Function must have a docstring")
+
             if f.__annotations__ is None:
                 raise ValueError("Function must have type annotations")
 
@@ -26,7 +28,7 @@ def tool(*args):
                     },
                 },
             )
-            return Tool(name=tool_name, func=f, args_schema=args_schema)
+            return Tool(name=tool_name, function=f, args_schema=args_schema)
 
         return _make_tool
 

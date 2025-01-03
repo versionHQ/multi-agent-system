@@ -15,7 +15,7 @@ from versionhq.llm.llm_vars import LLM_VARS
 from versionhq.llm.model import LLM, DEFAULT_CONTEXT_WINDOW
 from versionhq.task import TaskOutputFormat
 from versionhq.task.model import ResponseField
-from versionhq.tool.model import Tool, ToolCalled
+from versionhq.tool.model import Tool, ToolSet
 from versionhq.tool.tool_handler import ToolHandler
 
 load_dotenv(override=True)

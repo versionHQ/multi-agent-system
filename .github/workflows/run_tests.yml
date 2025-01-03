@@ -8,6 +8,9 @@ permissions:
 env:
   LITELLM_API_KEY: ${{ secrets.LITELLM_API_KEY }}
   OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+  DEFAULT_REDIRECT_URL:  ${{ secrets.DEFAULT_REDIRECT_URL }}
+  DEFAULT_USER_ID:  ${{ secrets.DEFAULT_USER_ID }}
+  COMPOSIO_API_KEY: ${{ secrets.COMPOSIO_API_KEY }}
 
 jobs:
   run_test:

@@ -15,9 +15,10 @@ from versionhq.llm.model import LLM
 from versionhq.task.model import Task, TaskOutput
 from versionhq.team.model import Team, TeamOutput
 from versionhq.tool.model import Tool
+from versionhq.tool.composio import Composio
 
 
-__version__ = "1.1.8.1"
+__version__ = "1.1.9.0"
 __all__ = [
     "Agent",
     "Customer",
@@ -33,4 +34,5 @@ __all__ = [
     "Team",
     "TeamOutput",
     "Tool",
+    "Composio"
 ]

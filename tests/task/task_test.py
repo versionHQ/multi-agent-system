@@ -72,37 +72,27 @@ def test_async_execute_task():
         execute.assert_called_once_with(task=task, context=None, tools=None)
 
 
-def test_sync_execute_task_with_task_context():
+def test_sync_execute_with_task_context():
     """
     Use case = One agent handling multiple tasks sequentially using context set in the main task.
     """
 
-    agent = Agent(
-        role="demo agent 3",
-        goal="My amazing goals",
-        backstory="My amazing backstory",
-        verbose=True,
-        llm=DEFAULT_MODEL_NAME,
-        max_tokens=3000,
-    )
-
+    agent = Agent(role="demo 3", goal="My amazing goals", verbose=True, llm=DEFAULT_MODEL_NAME, max_tokens=3000,)
     sub_task = Task(
         description="analyze the client's business model",
         expected_output_json=True,
-        expected_output_pydantic=False,
         output_field_list=[
-            ResponseField(title="result", type=str, required=True),
+            ResponseField(title="subtask_result", type=str, required=True),
         ]
     )
     main_task = Task(
         description="Define the optimal cohort timeframe in days and target audience.",
         expected_output_json=True,
-        expected_output_pydantic=True,
         output_field_list=[
             ResponseField(title="test1", type=int, required=True),
             ResponseField(title="test2", type=str, required=True),
         ],
-        context=[sub_task]
+        context=[sub_task,]
     )
     res = main_task.execute_sync(agent=agent)
 
@@ -112,22 +102,10 @@ def test_sync_execute_task_with_task_context():
     assert isinstance(res.raw, str)
     assert res.json_dict is not None
     assert isinstance(res.json_dict, dict)
-    assert res.pydantic is not None
-
-    if hasattr(res.pydantic, "output"):
-        assert res.pydantic.output is not None
-    else:
-        assert hasattr(res.pydantic, "test1")
-        if res.pydantic.test1:
-            assert type(res.pydantic.test1) == int | str
-
-        assert hasattr(res.pydantic, "test2")
-        if res.pydantic.test2:
-            assert type(res.pydantic.test2) == list | str
-
+    assert res.pydantic is None
     assert sub_task.output is not None
     assert sub_task.output.json_dict is not None
-    assert "result" in main_task.prompt()
+    assert "subtask_result" in main_task.prompt()
 
 
 def test_sync_execute_task_with_prompt_context():
@@ -224,13 +202,6 @@ def test_callback():
     assert isinstance(res, TaskOutput)
     assert res.task_id is task.id
     assert res.raw is not None
-
-    # with patch.object(Agent, "execute_task", return_value="ok") as execute:
-    #     execution = task.execute_async(agent=agent)
-    #     result = execution.result()
-    #     assert result.raw == "ok"
-    #     execute.assert_called_once_with(task=task, context=None)
-
 
 
 def test_delegate():
