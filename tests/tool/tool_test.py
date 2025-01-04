@@ -7,7 +7,7 @@ from versionhq.tool.model import Tool, BaseTool
 from versionhq.tool.decorator import tool
 
 
-def test_create_tool():
+def test_create_custom_tool():
     class CustomTool(Tool):
         name: str = "custom tool"
         goal: str = "test a custom tool class"
@@ -23,8 +23,7 @@ def test_create_tool():
     assert tool.run(sentence="I am a sentence.") == "I am a sentence."
 
 
-
-def test_run_tool_with_function():
+def test_run_tool_with_abstract_function():
     def function_to_test(test_list: List) -> int:
         return len(test_list)
 
@@ -39,6 +38,17 @@ def test_run_tool_with_function():
     result = tool.run(test_list=["demo 0", "demo 1", "demo 2"])
 
     assert tool.name is "custom tool"
+    assert result == 3
+
+
+def test_run_tool_with_function():
+    def function_to_test(test_list: List) -> int:
+        return len(test_list)
+
+    tool = Tool(name="tool", goal="run a function", function=function_to_test)
+    result = tool.run(test_list=["demo 0", "demo 1", "demo 2"])
+
+    assert tool.name is "tool"
     assert result == 3
 
 

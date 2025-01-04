@@ -73,9 +73,7 @@ class AgentParser:
     def parse(self, text: str) -> AgentAction | AgentFinish:
         thought = self._extract_thought(text)
         includes_answer = FINAL_ANSWER_ACTION in text
-        regex = (
-            r"Action\s*\d*\s*:[\s]*(.*?)[\s]*Action\s*\d*\s*Input\s*\d*\s*:[\s]*(.*)"
-        )
+        regex = r"Action\s*\d*\s*:[\s]*(.*?)[\s]*Action\s*\d*\s*Input\s*\d*\s*:[\s]*(.*)"
         action_match = re.search(regex, text, re.DOTALL)
         if action_match:
             if includes_answer:
@@ -127,17 +125,8 @@ class AgentParser:
     def _safe_repair_json(self, tool_input: str) -> str:
         UNABLE_TO_REPAIR_JSON_RESULTS = ['""', "{}"]
 
-        # Skip repair if the input starts and ends with square brackets
-        # Explanation: The JSON parser has issues handling inputs that are enclosed in square brackets ('[]').
-        # These are typically valid JSON arrays or strings that do not require repair. Attempting to repair such inputs
-        # might lead to unintended alterations, such as wrapping the entire input in additional layers or modifying
-        # the structure in a way that changes its meaning. By skipping the repair for inputs that start and end with
-        # square brackets, we preserve the integrity of these valid JSON structures and avoid unnecessary modifications.
         if tool_input.startswith("[") and tool_input.endswith("]"):
             return tool_input
-
-        # Before repair, handle common LLM issues:
-        # 1. Replace """ with " to avoid JSON parser errors
 
         tool_input = tool_input.replace('"""', '"')
 

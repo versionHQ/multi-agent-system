@@ -4,7 +4,7 @@ import uuid
 from concurrent.futures import Future
 from hashlib import md5
 from typing import Any, Dict, List, Set, Optional, Tuple, Callable, Type
-from typing_extensions import Annotated
+from typing_extensions import Annotated, Self
 
 from pydantic import UUID4, BaseModel, Field, PrivateAttr, field_validator, model_validator, create_model, InstanceOf
 from pydantic_core import PydanticCustomError
@@ -72,6 +72,7 @@ class TaskOutput(BaseModel):
     raw: str = Field(default="", description="Raw output of the task")
     json_dict: Dict[str, Any] = Field(default=None, description="`raw` converted to dictionary")
     pydantic: Optional[Any] = Field(default=None, description="`raw` converted to the abs. pydantic model")
+    tool_output: Optional[Any] = Field(default=None, description="store tool result when the task takes tool output as its final output")
 
     def __str__(self) -> str:
         return str(self.pydantic) if self.pydantic else str(self.json_dict) if self.json_dict else self.raw
@@ -125,6 +126,7 @@ class Task(BaseModel):
     _original_description: str = PrivateAttr(default=None)
     _logger: Logger = PrivateAttr()
     _task_output_handler = TaskOutputStorageHandler()
+    config: Optional[Dict[str, Any]] = Field(default=None, description="configuration for the agent")
 
     id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True, description="unique identifier for the object, not set by user")
     name: Optional[str] = Field(default=None)
@@ -134,33 +136,35 @@ class Task(BaseModel):
     expected_output_json: bool = Field(default=True)
     expected_output_pydantic: bool = Field(default=False)
     output_field_list: List[ResponseField] = Field(
-        default=[ResponseField(title="output", type=str, required=False)],
+        default_factory=list,
         description="provide output key and data type. this will be cascaded to the agent via task.prompt()"
     )
     output: Optional[TaskOutput] = Field(default=None, description="store the final task output in TaskOutput class")
 
     # task setup
     context: Optional[List["Task"]] = Field(default=None, description="other tasks whose outputs should be used as context")
-    tools_called: Optional[List[ToolSet]] = Field(default_factory=list, description="tools that the agent can use for this task")
-    take_tool_res_as_final: bool = Field(default=False, description="when set True, tools res will be stored in the `TaskOutput`")
-    allow_delegation: bool = Field(default=False, description="ask other agents for help and run the task instead")
-
     prompt_context: Optional[str] = Field(default=None)
+
+    # tool usage
+    tools: Optional[List[ToolSet | Tool | Any]] = Field(default_factory=list, description="tools that the agent can use aside from their tools")
+    can_use_agent_tools: bool = Field(default=False, description="whether the agent can use their own tools when executing the task")
+    take_tool_res_as_final: bool = Field(default=False, description="when set True, tools res will be stored in the `TaskOutput`")
+
+    # execution rules
+    allow_delegation: bool = Field(default=False, description="ask other agents for help and run the task instead")
     async_execution: bool = Field(default=False,description="whether the task should be executed asynchronously or not")
-    config: Optional[Dict[str, Any]] = Field(default=None, description="configuration for the agent")
     callback: Optional[Any] = Field(default=None, description="callback to be executed after the task is completed.")
     callback_kwargs: Optional[Dict[str, Any]] = Field(default_factory=dict, description="kwargs for the callback when the callback is callable")
 
     # recording
     processed_by_agents: Set[str] = Field(default_factory=set, description="store responsible agents' roles")
-    used_tools: int = 0
     tools_errors: int = 0
     delegations: int = 0
 
 
     @model_validator(mode="before")
     @classmethod
-    def process_model_config(cls, values: Dict[str, Any]):
+    def process_model_config(cls, values: Dict[str, Any]) -> None:
         return process_config(values_to_update=values, model_class=cls)
 
 
@@ -172,7 +176,7 @@ class Task(BaseModel):
 
 
     @model_validator(mode="after")
-    def validate_required_fields(self):
+    def validate_required_fields(self) -> Self:
         required_fields = ["description",]
         for field in required_fields:
             if getattr(self, field) is None:
@@ -181,7 +185,7 @@ class Task(BaseModel):
 
 
     @model_validator(mode="after")
-    def set_attributes_based_on_config(self) -> "Task":
+    def set_attributes_based_on_config(self) -> Self:
         """
         Set attributes based on the agent configuration.
         """
@@ -192,12 +196,21 @@ class Task(BaseModel):
         return self
 
 
-    ## comment out as we set raw as the default TaskOutputFormat
-    # @model_validator(mode="after")
-    # def validate_output_format(self):
-    #     if self.expected_output_json == False  and self.expected_output_pydantic == False:
-    #         raise PydanticCustomError("Need to choose at least one output format.")
-    #     return self
+    @model_validator(mode="after")
+    def set_up_tools(self) -> Self:
+        if not self.tools:
+            pass
+        else:
+            tool_list = []
+            for item in self.tools:
+                if isinstance(item, Tool) or isinstance(item, ToolSet):
+                    tool_list.append(item)
+                elif (isinstance(item, dict) and "function" not in item) or isinstance(item, str):
+                    pass
+                else:
+                    tool_list.append(item) # address custom tool
+            self.tools = tool_list
+        return self
 
 
     @model_validator(mode="after")
@@ -261,7 +274,6 @@ class Task(BaseModel):
         return output_json_dict
 
 
-
     def create_pydantic_output(self, output_json_dict: Dict[str, Any], raw_result: Any = None) -> Optional[Any]:
         """
         Create pydantic output from the `raw` result.
@@ -302,11 +314,10 @@ class Task(BaseModel):
         """
         if inputs:
             self.description = self._original_description.format(**inputs)
-            # self.expected_output = self._original_expected_output.format(**inputs)
 
 
     # task execution
-    def execute_sync(self, agent, context: Optional[str] = None, tools: Optional[List[Any]] = None) -> TaskOutput:
+    def execute_sync(self, agent, context: Optional[str] = None) -> TaskOutput:
         """
         Execute the task synchronously.
         When the task has context, make sure we have executed all the tasks in the context first.
@@ -320,26 +331,26 @@ class Task(BaseModel):
         return self._execute_core(agent, context)
 
 
-    def execute_async(self, agent, context: Optional[str] = None, tools: Optional[List[Any]] = None) -> Future[TaskOutput]:
+    def execute_async(self, agent, context: Optional[str] = None) -> Future[TaskOutput]:
         """
         Execute the task asynchronously.
         """
 
         future: Future[TaskOutput] = Future()
-        threading.Thread(daemon=True, target=self._execute_task_async, args=(agent, context, tools, future)).start()
+        threading.Thread(daemon=True, target=self._execute_task_async, args=(agent, context, future)).start()
         return future
 
 
-    def _execute_task_async(self, agent, context: Optional[str], tools: Optional[List[Any]], future: Future[TaskOutput]) -> None:
+    def _execute_task_async(self, agent, context: Optional[str], future: Future[TaskOutput]) -> None:
         """
         Execute the task asynchronously with context handling.
         """
 
-        result = self._execute_core(agent, context, tools)
+        result = self._execute_core(agent, context)
         future.set_result(result)
 
 
-    def _execute_core(self, agent, context: Optional[str], tools: Optional[List[Any]] = []) -> TaskOutput:
+    def _execute_core(self, agent, context: Optional[str]) -> TaskOutput:
         """
         Run the core execution logic of the task.
         To speed up the process, when the format is not expected to return, we will skip the conversion process.
@@ -349,13 +360,14 @@ class Task(BaseModel):
         from versionhq.team.model import Team
 
         self.prompt_context = context
+        task_output: InstanceOf[TaskOutput] = None
 
         if self.allow_delegation:
             agent_to_delegate = None
 
             if hasattr(agent, "team") and isinstance(agent.team, Team):
                 if agent.team.managers:
-                    idling_manager_agents = [manager.agent for manager in agent.team.managers if manager.task is None]
+                    idling_manager_agents = [manager.agent for manager in agent.team.managers if manager.is_idling]
                     agent_to_delegate = idling_manager_agents[0] if idling_manager_agents else agent.team.managers[0]
                 else:
                     peers = [member.agent for member in agent.team.members if member.is_manager == False and member.agent.id is not agent.id]
@@ -367,20 +379,26 @@ class Task(BaseModel):
             agent = agent_to_delegate
             self.delegations += 1
 
-        output_raw, output_json_dict, output_pydantic = agent.execute_task(task=self, context=context, tools=tools), None, None
+        if self.take_tool_res_as_final is True:
+            output = agent.execute_task(task=self, context=context)
+            task_output = TaskOutput(task_id=self.id, tool_output=output)
 
-        if self.expected_output_json:
-            output_json_dict = self.create_json_output(raw_result=output_raw)
+        else:
+            output_raw, output_json_dict, output_pydantic = agent.execute_task(task=self, context=context), None, None
 
-        if self.expected_output_pydantic:
-            output_pydantic = self.create_pydantic_output(output_json_dict=output_json_dict)
+            if self.expected_output_json:
+                output_json_dict = self.create_json_output(raw_result=output_raw)
 
-        task_output = TaskOutput(
-            task_id=self.id,
-            raw=output_raw,
-            pydantic=output_pydantic,
-            json_dict=output_json_dict
-        )
+            if self.expected_output_pydantic:
+                output_pydantic = self.create_pydantic_output(output_json_dict=output_json_dict)
+
+            task_output = TaskOutput(
+                task_id=self.id,
+                raw=output_raw,
+                pydantic=output_pydantic,
+                json_dict=output_json_dict
+            )
+
         self.output = task_output
         self.processed_by_agents.add(agent.role)
 
@@ -400,6 +418,7 @@ class Task(BaseModel):
         #         else pydantic_output.model_dump_json() if pydantic_output else result
         #     )
         #     self._save_file(content)
+
         return task_output
 
 
@@ -463,7 +482,7 @@ Your outputs MUST adhere to the following format and should NOT include any irre
         Task ID: {str(self.id)}
         "Description": {self.description}
         "Prompt": {self.output_prompt}
-        "Tools": {", ".join([tool_called.tool.name for tool_called in self.tools_called])}
+        "Tools": {", ".join([tool.name for tool in self.tools])}
         """
 
 

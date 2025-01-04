@@ -4,6 +4,7 @@ from unittest.mock import patch
 from typing import Dict, Any
 from versionhq.agent.model import Agent
 from versionhq.task.model import Task, ResponseField, TaskOutput, ConditionalTask
+from versionhq.tool.model import Tool, ToolSet
 
 DEFAULT_MODEL_NAME = os.environ.get("LITELLM_MODEL_NAME", "gpt-3.5-turbo")
 LITELLM_API_KEY = os.environ.get("LITELLM_API_KEY")
@@ -51,14 +52,9 @@ def test_sync_execute_task():
 
 
 def test_async_execute_task():
-    agent = Agent(
-        role="demo agent 2",
-        goal="My amazing goals",
-    )
+    agent = Agent(role="demo agent 2", goal="My amazing goals")
     task = Task(
         description="Analyze the client's business model and define the optimal cohort timeframe.",
-        expected_output_json=True,
-        expected_output_pydantic=False,
         output_field_list=[
             ResponseField(title="test1", type=str, required=True),
             ResponseField(title="test2", type=list, required=True),
@@ -69,7 +65,7 @@ def test_async_execute_task():
         execution = task.execute_async(agent=agent)
         result = execution.result()
         assert result.raw == "ok"
-        execute.assert_called_once_with(task=task, context=None, tools=None)
+        execute.assert_called_once_with(task=task, context=None)
 
 
 def test_sync_execute_with_task_context():
@@ -80,14 +76,12 @@ def test_sync_execute_with_task_context():
     agent = Agent(role="demo 3", goal="My amazing goals", verbose=True, llm=DEFAULT_MODEL_NAME, max_tokens=3000,)
     sub_task = Task(
         description="analyze the client's business model",
-        expected_output_json=True,
         output_field_list=[
             ResponseField(title="subtask_result", type=str, required=True),
         ]
     )
     main_task = Task(
         description="Define the optimal cohort timeframe in days and target audience.",
-        expected_output_json=True,
         output_field_list=[
             ResponseField(title="test1", type=int, required=True),
             ResponseField(title="test2", type=str, required=True),
@@ -255,4 +249,56 @@ def test_store_task_log():
     )
     assert task._task_output_handler.load() is not None
 
-# tools, token usage
+
+def test_task_with_agent_tools():
+    def empty_func():
+        return "empty function"
+
+    class CustomTool(Tool):
+        name: str = "custom tool"
+
+        def _run(self) -> str:
+            return "empty function"
+
+    custom_tool = CustomTool()
+
+    agent_str_tool = Agent(role="demo 1", goal="test a tool", tools=["random tool 1", "random tool 2",])
+    agent_dict_tool = Agent(role="demo 2", goal="test a tool", tools=[dict(name="tool 1", function=empty_func)])
+    agent_custom_tool = Agent(role="demo 3", goal="test a tool", tools=[custom_tool, custom_tool])
+    agents = [agent_str_tool, agent_dict_tool, agent_custom_tool]
+
+    task = Task(description="execute the function", can_use_agent_tools=True, take_tool_res_as_final=True)
+
+    for agent in agents:
+        res = task.execute_sync(agent=agent)
+        assert "empty function" in res.tool_output
+        assert len(res.tool_output) == len(agent.tools)
+
+
+def test_task_with_tools():
+
+    def random_func(str: str = None) -> str:
+        return str
+
+    class CustomTool(Tool):
+        name: str = "custom tool"
+
+        def _run(self) -> str:
+            return "custom function"
+
+    tool = Tool(name="tool", function=random_func)
+    custom_tool = CustomTool()
+    tool_set = ToolSet(tool=tool, kwargs=dict(str="empty function"))
+    task = Task(description="execute the function", tools=[custom_tool, tool, tool_set], take_tool_res_as_final=True)
+    agent = Agent(role="demo", goal="demo")
+    res = task.execute_sync(agent=agent)
+
+    assert res.tool_output is not None
+    assert isinstance(res.tool_output, list)
+    assert len(res.tool_output) == len(task.tools)
+    assert res.tool_output[0] == "custom function"
+    assert res.tool_output[1] is None
+    assert res.tool_output[2] == "empty function"
+
+
+# token usage logic

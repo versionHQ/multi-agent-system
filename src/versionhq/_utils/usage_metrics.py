@@ -12,7 +12,7 @@ class UsageMetrics(BaseModel):
     completion_tokens: int = Field(default=0, description="Number of tokens used in completions")
     successful_requests: int = Field(default=0, description="Number of successful requests made")
 
-    def add_usage_metrics(self, usage_metrics: "UsageMetrics"):
+    def add_usage_metrics(self, usage_metrics: "UsageMetrics") -> None:
         """
         Add the usage metrics from another UsageMetrics object.
         """

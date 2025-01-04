@@ -1,7 +1,7 @@
 import os
 import uuid
-from abc import ABC
 from typing import Any, Dict, List, Optional, TypeVar
+from typing_extensions import Self
 from dotenv import load_dotenv
 from pydantic import UUID4, BaseModel, Field, InstanceOf, PrivateAttr, model_validator, field_validator
 from pydantic_core import PydanticCustomError
@@ -16,7 +16,6 @@ from versionhq.llm.model import LLM, DEFAULT_CONTEXT_WINDOW
 from versionhq.task import TaskOutputFormat
 from versionhq.task.model import ResponseField
 from versionhq.tool.model import Tool, ToolSet
-from versionhq.tool.tool_handler import ToolHandler
 
 load_dotenv(override=True)
 T = TypeVar("T", bound="Agent")
@@ -51,18 +50,18 @@ class TokenProcess:
     completion_tokens: int = 0
     successful_requests: int = 0
 
-    def sum_prompt_tokens(self, tokens: int):
+    def sum_prompt_tokens(self, tokens: int) -> None:
         self.prompt_tokens = self.prompt_tokens + tokens
         self.total_tokens = self.total_tokens + tokens
 
-    def sum_completion_tokens(self, tokens: int):
+    def sum_completion_tokens(self, tokens: int) -> None:
         self.completion_tokens = self.completion_tokens + tokens
         self.total_tokens = self.total_tokens + tokens
 
-    def sum_cached_prompt_tokens(self, tokens: int):
+    def sum_cached_prompt_tokens(self, tokens: int) -> None:
         self.cached_prompt_tokens = self.cached_prompt_tokens + tokens
 
-    def sum_successful_requests(self, requests: int):
+    def sum_successful_requests(self, requests: int) -> None:
         self.successful_requests = self.successful_requests + requests
 
     def get_summary(self) -> UsageMetrics:
@@ -76,7 +75,7 @@ class TokenProcess:
 
 
 # @track_agent()
-class Agent(ABC, BaseModel):
+class Agent(BaseModel):
     """
     Agent class that run on LLM.
     Agents execute tasks alone or in the team, using RAG tools and knowledge base if any.
@@ -97,10 +96,7 @@ class Agent(ABC, BaseModel):
     backstory: Optional[str] = Field(default=None, description="system context passed to the LLM")
     knowledge: Optional[str] = Field(default=None, description="external knowledge fed to the agent")
     skillsets: Optional[List[str]] = Field(default_factory=list)
-
-    # tools
-    tools: Optional[List[Any]] = Field(default_factory=list)
-    tool_handler: InstanceOf[ToolHandler] = Field(default=None, description="handle tool cache and last used tool")
+    tools: Optional[List[Tool | Any]] = Field(default_factory=list)
 
     # team, task execution rules
     team: Optional[List[Any]] = Field(default=None, description="Team to which the agent belongs")
@@ -146,7 +142,7 @@ class Agent(ABC, BaseModel):
 
 
     @model_validator(mode="after")
-    def validate_required_fields(self):
+    def validate_required_fields(self) -> Self:
         required_fields = ["role", "goal"]
         for field in required_fields:
             if getattr(self, field) is None:
@@ -155,7 +151,7 @@ class Agent(ABC, BaseModel):
 
 
     @model_validator(mode="after")
-    def set_up_llm(self):
+    def set_up_llm(self) -> Self:
         """
         Set up the base model and function calling model (if any) using the LLM class.
         Pass the model config params: `llm`, `max_tokens`, `max_execution_time`, `step_callback`,`respect_context_window` to the LLM class.
@@ -270,31 +266,42 @@ class Agent(ABC, BaseModel):
 
 
     @model_validator(mode="after")
-    def set_up_tools(self):
+    def set_up_tools(self) -> Self:
         """
         Similar to the LLM set up, when the agent has tools, we will declare them using the Tool class.
         """
-
         if not self.tools:
             pass
 
         else:
-            tools_in_class_format = []
-            for tool in self.tools:
-                if isinstance(tool, Tool):
-                    tools_in_class_format.append(tool)
-                elif isinstance(tool, str):
-                    tool_to_add = Tool(name=tool)
-                    tools_in_class_format.append(tool_to_add)
+            tool_list = []
+            def empty_func():
+                return "empty function"
+
+            for item in self.tools:
+                if isinstance(item, Tool):
+                    tool_list.append(item)
+
+                elif isinstance(item, dict):
+                    if "function" not in item:
+                       setattr(item, "function", empty_func)
+                    tool = Tool(**item)
+                    tool_list.append(tool)
+
+                elif isinstance(item, str):
+                    tool = Tool(name=item, function=empty_func)
+                    tool_list.append(tool)
+
                 else:
-                    pass
-            self.tools = tools_in_class_format
+                    tool_list.append(item) # address custom tool
+
+            self.tools = tool_list
 
         return self
 
 
     @model_validator(mode="after")
-    def set_up_backstory(self):
+    def set_up_backstory(self) -> Self:
         """
         Set up the backstory using a templated BACKSTORY when the backstory is None
         """
@@ -305,7 +312,7 @@ class Agent(ABC, BaseModel):
                 role=self.role,
                 knowledge=self.knowledge if isinstance(self.knowledge, str) else None,
                 skillsets=", ".join([item for item in self.skillsets]),
-                rag_tool_overview=", ".join([item.name for item in self.tools]),
+                rag_tool_overview=", ".join([item.name for item in self.tools if hasattr(item, "name")]) if self.tools else "",
                 goal=self.goal,
             )
             self.backstory = backstory
@@ -313,9 +320,7 @@ class Agent(ABC, BaseModel):
         return self
 
 
-    def invoke(
-            self, prompts: str, output_formats: List[TaskOutputFormat], response_fields: List[ResponseField], **kwargs
-            ) -> Dict[str, Any]:
+    def invoke(self, prompts: str, output_formats: List[TaskOutputFormat], response_fields: List[ResponseField], **kwargs) -> Dict[str, Any]:
         """
         Receive the system prompt in string and create formatted prompts using the system prompt and the agent's backstory.
         Then call the base model.
@@ -358,11 +363,10 @@ class Agent(ABC, BaseModel):
         return {"output": response.output if hasattr(response, "output") else response}
 
 
-    def execute_task(self, task, context: Optional[str] = None, tools: Optional[str] = None) -> str:
+    def execute_task(self, task, context: Optional[str] = None) -> str:
         """
-        Execute the task and return the output in string.
-        To simplify, the tools are cascaded from the `tools_called` under the `task` Task instance if any.
-        When the tools are given, the agent must use them.
+        Execute the task and return the response in string.
+        The agent utilizes the tools in task or their own tools if the task.can_use_agent_tools is True.
         The agent must consider the context to excute the task as well when it is given.
         """
 
@@ -371,13 +375,29 @@ class Agent(ABC, BaseModel):
             task_prompt += context
 
         tool_results = []
-        if task.tools_called:
-            for tool_called in task.tools_called:
-                tool_result = tool_called.tool.run()
+        if task.tools:
+            for item in task.tools:
+                if isinstance(item, ToolSet):
+                    tool_result = item.tool.run(**item.kwargs)
+                    tool_results.append(tool_result)
+                elif isinstance(item, Tool):
+                    tool_result = item.run()
+                    tool_results.append(tool_result)
+                else:
+                    try:
+                        item.run()
+                    except:
+                        pass
+
+        if task.can_use_agent_tools is True and self.tools:
+            for tool in self.tools:
+                tool_result = tool.run()
                 tool_results.append(tool_result)
 
-            if task.take_tool_res_as_final:
-                return tool_results
+        if task.take_tool_res_as_final:
+            return tool_results
+
+
 
         # if self.team and self.team._train:
         #     task_prompt = self._training_handler(task_prompt=task_prompt)
@@ -395,9 +415,7 @@ class Agent(ABC, BaseModel):
             self._times_executed += 1
             if self._times_executed > self.max_retry_limit:
                 raise e
-            result = self.execute_task(
-                task, context, [tool_called.tool for tool_called in task.tools_called]
-            )
+            result = self.execute_task(task, context)
 
         if self.max_rpm and self._rpm_controller:
             self._rpm_controller.stop_rpm_counter()

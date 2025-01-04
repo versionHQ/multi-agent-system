@@ -2,6 +2,7 @@ import uuid
 from abc import ABC
 from datetime import date, datetime, time, timedelta
 from typing import Any, Dict, List, Callable, Type, Optional, get_args, get_origin
+from typing_extensions import Self
 from pydantic import UUID4, InstanceOf, BaseModel, ConfigDict, Field, field_validator, model_validator
 from pydantic_core import PydanticCustomError
 
@@ -63,7 +64,7 @@ class MessagingComponent(ABC, BaseModel):
     condition: str = Field(default=None, max_length=128, description="condition to execute the next messaging component")
 
 
-    def store_scoring_result(self, scoring_subject: str, score_raw: int | Score | ScoreFormat = None):
+    def store_scoring_result(self, scoring_subject: str, score_raw: int | Score | ScoreFormat = None) -> Self:
         """
         Set up the `score` field
         """
@@ -154,7 +155,7 @@ class MessagingWorkflow(ABC, BaseModel):
 
 
     @property
-    def name(self):
+    def name(self) -> str:
         if self.customer.id:
             return f"Workflow ID: {self.id} - on {self.product.id} for {self.customer.id}"
         else:

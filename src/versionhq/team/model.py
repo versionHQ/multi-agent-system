@@ -1,7 +1,6 @@
 import uuid
 import warnings
 import json
-from abc import ABC
 from enum import Enum
 from dotenv import load_dotenv
 from concurrent.futures import Future
@@ -108,13 +107,14 @@ class TeamOutput(BaseModel):
         return res
 
 
-class TeamMember(ABC, BaseModel):
+class TeamMember(BaseModel):
     agent: Agent | None = Field(default=None, description="store the agent to be a member")
     is_manager: bool = Field(default=False)
     task: Optional[Task] = Field(default=None)
 
-    def update(self, task: Task):
-        self.task = task
+    @property
+    def is_idling(self):
+        return bool(self.task is None)
 
 
 class Team(BaseModel):
@@ -253,8 +253,8 @@ class Team(BaseModel):
         """
 
         team_planner = TeamPlanner(tasks=self.tasks, planner_llm=self.planning_llm)
-        idling_managers: List[TeamMember] = [member for member in self.members if member.task is None and member.is_manager is True]
-        idling_members: List[TeamMember] =  [member for member in self.members if member.task is None and member.is_manager is False]
+        idling_managers: List[TeamMember] = [member for member in self.members if member.is_idling and member.is_manager is True]
+        idling_members: List[TeamMember] =  [member for member in self.members if member.is_idling and member.is_manager is False]
         unassigned_tasks: List[Task] = self.member_tasks_without_agent
         new_team_members: List[TeamMember] = []
 
@@ -380,16 +380,15 @@ class Team(BaseModel):
                 if skipped_task_output:
                     continue
 
-            # self._prepare_agent_tools(task)
             # self._log_task_start(task, responsible_agent)
 
             if task.async_execution:
                 context = create_raw_outputs(tasks=[task, ], task_outputs=([last_sync_output,] if last_sync_output else []))
-                future = task.execute_async(agent=responsible_agent, context=context, tools=responsible_agent.tools)
+                future = task.execute_async(agent=responsible_agent, context=context)
                 futures.append((task, future, task_index))
             else:
                 context = create_raw_outputs(tasks=[task,], task_outputs=([last_sync_output,] if last_sync_output else [] ))
-                task_output = task.execute_sync(agent=responsible_agent, context=context, tools=responsible_agent.tools)
+                task_output = task.execute_sync(agent=responsible_agent, context=context)
                 if self.managers and responsible_agent in [manager.agent for manager in self.managers]:
                     lead_task_output = task_output
 
