@@ -6,11 +6,9 @@ from dotenv import load_dotenv
 from pydantic import UUID4, BaseModel, Field, InstanceOf, PrivateAttr, model_validator, field_validator
 from pydantic_core import PydanticCustomError
 
-from versionhq._utils.cache_handler import CacheHandler
 from versionhq._utils.logger import Logger
 from versionhq._utils.rpm_controller import RPMController
 from versionhq._utils.usage_metrics import UsageMetrics
-from versionhq.agent.parser import AgentAction
 from versionhq.llm.llm_vars import LLM_VARS
 from versionhq.llm.model import LLM, DEFAULT_CONTEXT_WINDOW
 from versionhq.task import TaskOutputFormat
@@ -122,10 +120,7 @@ class Agent(BaseModel):
 
     # config, cache, error handling
     config: Optional[Dict[str, Any]] = Field(default=None, exclude=True, description="Configuration for the agent")
-    cache: bool = Field(default=True, description="Whether the agent should use a cache for tool usage.")
-    cache_handler: InstanceOf[CacheHandler] = Field(default=None, description="An instance of the CacheHandler class.")
     formatting_errors: int = Field(default=0, description="Number of formatting errors.")
-    verbose: bool = Field(default=True, description="Verbose mode for the Agent Execution")
     agent_ops_agent_name: str = None
     agent_ops_agent_id: str = None
 

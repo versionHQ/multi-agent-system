@@ -1,22 +1,23 @@
 import uuid
+from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Callable, Type, Optional, get_args, get_origin
+
 from pydantic import UUID4, InstanceOf, BaseModel, ConfigDict, Field, create_model, field_validator, model_validator
 from pydantic_core import PydanticCustomError
 
+from versionhq.tool import ComposioAppName
 
-class ProductProvider(BaseModel):
+
+class ProductProvider(ABC, BaseModel):
     """
-    Store the minimal client information.
-    `data_pipeline` and `destinations` are for composio plug-in.
-    (!REFINEME) Create an Enum list for the options.
-    (!REFINEME) Create an Enum list for regions.
+    Abstract class for the product provider entity.
     """
 
     id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True)
-    name: Optional[str] = Field(default=None, description="client name")
+    name: Optional[str] = Field(default=None)
     region: Optional[str] = Field(default=None, description="region of client's main business operation")
-    data_pipeline: Optional[List[str]] = Field(default=None, description="store the data pipelines that the client is using")
-    destinations: Optional[List[str]] = Field(default=None,description="store the destination services that the client is using")
+    data_pipelines: Optional[List[ComposioAppName | str]] = Field(default_factory=list)
+    destination_services: Optional[List[ComposioAppName | str]] = Field(default=None)
 
     @field_validator("id", mode="before")
     @classmethod

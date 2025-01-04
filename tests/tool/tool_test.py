@@ -3,7 +3,8 @@ import pytest
 from unittest.mock import patch
 from typing import Dict, Any, Callable, List
 
-from versionhq.tool.model import Tool, BaseTool
+from versionhq.tool.model import Tool, ToolSet
+from versionhq.tool.tool_handler import ToolHandler
 from versionhq.tool.decorator import tool
 
 
@@ -89,5 +90,29 @@ def test_tool_annotation():
     assert my_tool.function("testing") == "testing"
 
 
+def test_tool_handler_turning_off_cache():
+    def empty_func():
+        return "empty function"
+
+    tool = Tool(name="demo", function=empty_func, should_cache=False)
+    tool.run()
+
+    assert isinstance(tool.tool_handler, ToolHandler)
+    assert tool.tool_handler.should_cache == False
+    assert tool.tool_handler.last_used_tool is None
+
+
+def test_tool_handler_with_cache():
+    def empty_func():
+        return "empty function"
+
+    tool = Tool(name="demo", function=empty_func, should_cache=True)
+    tool.run()
+
+    assert isinstance(tool.tool_handler, ToolHandler)
+    assert tool.tool_handler.should_cache == True
+    assert tool.tool_handler.last_used_tool == ToolSet(tool=tool, kwargs={})
+
+
 if __name__ == "__main__":
-    test_create_tool()
+    test_tool_handler_with_cache()

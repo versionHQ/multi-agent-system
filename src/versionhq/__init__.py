@@ -18,7 +18,7 @@ from versionhq.tool.model import Tool
 from versionhq.tool.composio import Composio
 
 
-__version__ = "1.1.9.1"
+__version__ = "1.1.9.2"
 __all__ = [
     "Agent",
     "Customer",

@@ -1,14 +1,17 @@
 import os
 import uuid
+from abc import ABC
 from dotenv import load_dotenv
 from typing import Any, Callable, Type, get_args, get_origin, Optional, Tuple
 
-from pydantic import BaseModel, Field, model_validator, field_validator, UUID4
+from pydantic import BaseModel, Field, model_validator, field_validator, UUID4, PrivateAttr
 from pydantic_core import PydanticCustomError
 
 from composio import ComposioToolSet, Action, App, action
 
 from versionhq.tool import ComposioAppName, ComposioAuthScheme, composio_app_set, COMPOSIO_STATUS
+from versionhq._utils.logger import Logger
+from versionhq._utils.cache_handler import CacheHandler
 
 load_dotenv(override=True)
 
@@ -16,10 +19,13 @@ DEFAULT_REDIRECT_URL = os.environ.get("DEFAULT_REDIRECT_URL", None)
 DEFAULT_USER_ID = os.environ.get("DEFAULT_USER_ID", None)
 
 
-class Composio(BaseModel):
+class Composio(ABC, BaseModel):
     """
     Class to handle composio tools.
     """
+
+    _logger: Logger = PrivateAttr(default_factory=lambda: Logger(verbose=True))
+    _cache: CacheHandler
 
     id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True)
     app_name: str = Field(default=ComposioAppName.HUBSPOT)
@@ -124,6 +130,12 @@ class Composio(BaseModel):
 
             if connected_account.status is not COMPOSIO_STATUS.FAILED:
                 setattr(self.toolset, "entity_id", self.user_id)
+
+            else:
+                self._logger.log(level="error", message="The account is not valid.", color="red")
+
+        else:
+            self._logger.log(level="error", message="Connection to composio failed.", color="red")
 
         return connected_account, connected_account.status if connected_account else connection_request.connectionStatus
 

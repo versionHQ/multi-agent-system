@@ -10,6 +10,7 @@ from versionhq.clients.product.model import Product
 from versionhq.clients.customer.model import Customer
 from versionhq.agent.model import Agent
 from versionhq.team.model import Team
+from versionhq.tool import ComposioAppName
 
 
 class ScoreFormat:
@@ -57,14 +58,12 @@ class Score:
 class MessagingComponent(ABC, BaseModel):
     layer_id: int = Field(default=0, description="add id of the layer: 0, 1, 2")
     message: str = Field(default=None, max_length=1024, description="text message content to be sent")
-    interval: Optional[str] = Field(
-        default=None, description="interval to move on to the next layer. if this is the last layer, set as `None`"
-    )
-    score: float | InstanceOf[Score] = Field(default=None)
-    condition: str = Field(default=None, max_length=128, description="condition to execute the next messaging component")
+    score: InstanceOf[Score] = Field(default=None)
+    condition: str = Field(default=None, max_length=128, description="condition to execute the next component")
+    interval: Optional[str] = Field(default=None, description="ideal interval to set to assess the condition")
 
 
-    def store_scoring_result(self, scoring_subject: str, score_raw: int | Score | ScoreFormat = None) -> Self:
+    def store_scoring_result(self, subject: str, score_raw: int | Score | ScoreFormat = None) -> Self:
         """
         Set up the `score` field
         """
@@ -74,12 +73,12 @@ class MessagingComponent(ABC, BaseModel):
 
         elif isinstance(score_raw, ScoreFormat):
             score_instance = Score()
-            setattr(score_instance, scoring_subject, score_raw)
+            setattr(score_instance, subject, score_raw)
             setattr(self, "score", score_instance)
 
         elif isinstance(score_raw, int) or isinstance(score_raw, float):
             score_instance, score_format_instance = Score(), ScoreFormat(rate=score_raw, weight=1)
-            setattr(score_instance, "kwargs", { scoring_subject: score_format_instance })
+            setattr(score_instance, "kwargs", { subject: score_format_instance })
             setattr(self, "score", score_instance)
 
         else:
@@ -100,23 +99,17 @@ class MessagingWorkflow(ABC, BaseModel):
     model_config = ConfigDict()
 
     id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True)
-    components: List[MessagingComponent] = Field(default_factory=list, description="store messaging components in the workflow")
+    messaging_components: List[MessagingComponent] = Field(default_factory=list, description="store messaging components in the workflow")
 
     # responsible tean or agents
-    team: Optional[Team] = Field(default=None, description="store `Team` instance responsibile for autopiloting this workflow")
-    agents: Optional[List[Agent]] = Field(
-        default=None, description="store `Agent` instances responsible for autopiloting this workflow. if the team exsits, this field remains as `None`")
+    team: Optional[Team] = Field(default=None, description="store a responsibile team to autopilot the workflow")
+    agents: Optional[List[Agent]] = Field(default=None, description="store responsible agents. None when the team exists")
 
     # metrics
-    destination: Optional[str | None] = Field(default=None, description="destination service to launch this workflow")
+    destination: Optional[ComposioAppName | str] = Field(default=None, description="destination service to launch the workflow")
     product: InstanceOf[Product] = Field(default=None)
     customer: InstanceOf[Customer] = Field(default=None)
-
-    metrics: List[Dict[str, Any]] | List[str] = Field(
-        default=None,
-        max_length=256,
-        description="store metrics that used to predict and track the performance of this workflow."
-    )
+    performance_metrics: List[Dict[str, Any]] | List[str] = Field(default=None, max_length=256, description="performance metrics to track")
 
     @field_validator("id", mode="before")
     @classmethod
@@ -132,11 +125,11 @@ class MessagingWorkflow(ABC, BaseModel):
         Prioritize customer's destination to the product provider's destination list.
         """
         if self.destination is None:
-            if self.customer is not None:
-                self.destination = self.customer.on
+            # if self.customer is not None:
+            #     self.destination = self.customer.on
 
-            elif self.product.provider is not None and self.product.provider.destinations:
-                self.destination = self.product.provider.destinations[0]
+            if self.product.provider is not None and self.product.provider.destination_services:
+                self.destination = self.product.provider.destination_services[0]
 
         return self
 

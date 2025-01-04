@@ -41,18 +41,22 @@ class Tool(BaseTool):
     name: str = Field(default=None)
     goal: str = Field(default=None)
     function: Callable = Field(default=None)
+    tool_handler: Optional[Dict[str, Any] | Any] = Field(default=None, description="store tool_handler to record the usage of this tool")
+    should_cache: bool = Field(default=True, description="whether the tool usage should be cached")
     cache_function: Callable = lambda _args=None, _result=None: True
-    tool_handler: Optional[Dict[str, Any]] = Field(
-        default=None,
-        description="store tool_handler to record the usage of this tool. to avoid circular import, set as Dict format",
-    )
+    cache_handler: Optional[InstanceOf[CacheHandler]] = Field(default=None)
+
 
     @model_validator(mode="after")
     def set_up_tool_handler(self) -> Self:
         from versionhq.tool.tool_handler import ToolHandler
 
-        if self.tool_handler:
+        if self.tool_handler and not isinstance(self.tool_handler, ToolHandler):
             ToolHandler(**self.tool_handler)
+
+        else:
+            self.tool_handler = ToolHandler(cache_handler=self.cache_handler, should_cache=self.should_cache)
+
         return self
 
 
@@ -119,33 +123,40 @@ class Tool(BaseTool):
 
     def run(self, *args, **kwargs) -> Any:
         """
-        Use tool
+        Use tool and record its usage if should_cache is True.
         """
         from versionhq.tool.tool_handler import ToolHandler
 
-        if self.function:
-            return self.function(*args, **kwargs)
-
         result = None
-        acceptable_args = self.args_schema.model_json_schema()["properties"].keys()
-        acceptable_kwargs = { k: v for k, v in kwargs.items() if k in acceptable_args }
-        tool_called = ToolSet(tool=self, kwargs=acceptable_kwargs)
+        tool_set = ToolSet(tool=self, kwargs={})
 
-        if self.tool_handler:
-            if self.tool_handler.has_called_before(tool_called):
-                self.tool_handler.error = "Agent execution error"
-
-            elif self.tool_handler.cache:
-                result = self.tools_handler.cache.read(tool=tool_called.tool.name, input=tool_called.kwargs)
-                if result is None:
-                    parsed_kwargs = self._parse_args(raw_args=acceptable_kwargs)
-                    result = self.function(**parsed_kwargs) if self.function else None
+        if self.function:
+            result = self.function(*args, **kwargs)
 
         else:
-            tool_handler = ToolHandler(last_used_tool=tool_called, cache_handler=CacheHandler())
-            self.tool_handler = tool_handler
-            parsed_kwargs = self._parse_args(raw_args=acceptable_kwargs)
-            result = self.function(**parsed_kwargs) if self.function else None
+            acceptable_args = self.args_schema.model_json_schema()["properties"].keys()
+            acceptable_kwargs = { k: v for k, v in kwargs.items() if k in acceptable_args }
+            tool_set = ToolSet(tool=self, kwargs=acceptable_kwargs)
+
+            if self.tool_handler:
+                if self.tool_handler.has_called_before(tool_set):
+                    self.tool_handler.error = "Agent execution error"
+
+                elif self.tool_handler.cache:
+                    result = self.tools_handler.cache.read(tool=tool_set.tool.name, input=tool_set.kwargs)
+                    if result is None:
+                        parsed_kwargs = self._parse_args(raw_args=acceptable_kwargs)
+                        result = self.function(**parsed_kwargs) if self.function else None
+
+            else:
+                tool_handler = ToolHandler(last_used_tool=tool_set, cache_handler=self.cache_handler, should_cache=self.should_cache)
+                self.tool_handler = tool_handler
+                parsed_kwargs = self._parse_args(raw_args=acceptable_kwargs)
+                result = self.function(**parsed_kwargs) if self.function else None
+
+
+        if self.should_cache is True:
+            self.tool_handler.record_last_tool_used(tool_set, result, self.should_cache)
 
         return result
 
