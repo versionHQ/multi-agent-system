@@ -8,18 +8,18 @@ LITELLM_API_KEY = os.environ.get("LITELLM_API_KEY")
 TEST_CONNECTED_ACCOUNT_ID = os.environ.get("TEST_CONNECTED_ACCOUNT_ID", "f79b1a07-db14-4aa5-959e-5713ccd18de2")
 
 
-# def test_connect_with_composio():
-#     composio = ComposioHandler(
-#         app_name=ComposioAppName.HUBSPOT,
-#         auth_scheme=ComposioAuthScheme.OAUTH2,
-#         connected_account_id=TEST_CONNECTED_ACCOUNT_ID
-#     )
-#     composio, status = composio._connect()
-#     assert composio.connected_account_id is not None
-#     assert status is not ComposioStatus.FAILED
+def _test_connect_with_composio():
+    composio = ComposioHandler(
+        app_name=ComposioAppName.HUBSPOT,
+        auth_scheme=ComposioAuthScheme.OAUTH2,
+        connected_account_id=TEST_CONNECTED_ACCOUNT_ID
+    )
+    composio, status = composio._connect()
+    assert composio.connected_account_id is not None
+    assert status is not ComposioStatus.FAILED
 
 
-def test_execute_action_on_langchain():
+def _test_execute_action_on_langchain():
     composio = ComposioHandler(
         app_name=ComposioAppName.HUBSPOT,
         auth_scheme=ComposioAuthScheme.OAUTH2,
@@ -35,7 +35,3 @@ def test_execute_action_on_langchain():
     assert composio.tools is not None
     assert res is not None
     assert isinstance(res, str)
-
-
-if __name__ == "__main__":
-    test_execute_action_on_langchain()

@@ -48,7 +48,7 @@ composio-core==0.6.11.post1
     # via
     #   composio-langchain
     #   composio-openai
-composio-langchain==0.6.11.post1
+composio-langchain==0.6.12
     # via versionhq (pyproject.toml)
 composio-openai==0.6.9
     # via versionhq (pyproject.toml)

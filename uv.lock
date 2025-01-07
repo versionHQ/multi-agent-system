@@ -2001,7 +2001,7 @@ dev = [
 requires-dist = [
     { name = "appdirs", specifier = ">=1.4.4" },
     { name = "composio", specifier = ">=0.1.0" },
-    { name = "composio-langchain", specifier = ">=0.6.11.post1" },
+    { name = "composio-langchain", specifier = ">=0.6.12" },
     { name = "composio-openai", specifier = ">=0.6.9" },
     { name = "json-repair", specifier = ">=0.31.0" },
     { name = "langchain", specifier = ">=0.3.14" },

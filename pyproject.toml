@@ -39,7 +39,7 @@ dependencies = [
   "appdirs>=1.4.4",
   "langchain>=0.3.14",
   "langchain-openai>=0.2.14",
-  "composio-langchain>=0.6.11.post1",
+  "composio-langchain>=0.6.12"
 ]
 classifiers = [
   "Programming Language :: Python",
