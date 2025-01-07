@@ -5,6 +5,7 @@ aiohappyeyeballs==2.4.4
 aiohttp==3.11.11
     # via
     #   composio-core
+    #   langchain
     #   litellm
 aiosignal==1.3.2
     # via aiohttp
@@ -43,8 +44,12 @@ click==8.1.8
     #   uvicorn
 composio==0.1.0
     # via versionhq (pyproject.toml)
-composio-core==0.6.9
-    # via composio-openai
+composio-core==0.6.11.post1
+    # via
+    #   composio-langchain
+    #   composio-openai
+composio-langchain==0.6.11.post1
+    # via versionhq (pyproject.toml)
 composio-openai==0.6.9
     # via versionhq (pyproject.toml)
 cryptography==44.0.0
@@ -69,6 +74,7 @@ httpcore==1.0.7
     # via httpx
 httpx==0.27.2
     # via
+    #   langsmith
     #   litellm
     #   openai
 huggingface-hub==0.27.0
@@ -91,6 +97,10 @@ jiter==0.8.2
     # via openai
 json-repair==0.35.0
     # via versionhq (pyproject.toml)
+jsonpatch==1.33
+    # via langchain-core
+jsonpointer==3.0.0
+    # via jsonpatch
 jsonref==1.1.0
     # via composio-core
 jsonschema==4.23.0
@@ -99,6 +109,27 @@ jsonschema==4.23.0
     #   litellm
 jsonschema-specifications==2024.10.1
     # via jsonschema
+langchain==0.3.14
+    # via
+    #   versionhq (pyproject.toml)
+    #   composio-langchain
+langchain-core==0.3.29
+    # via
+    #   langchain
+    #   langchain-openai
+    #   langchain-text-splitters
+langchain-openai==0.2.14
+    # via
+    #   versionhq (pyproject.toml)
+    #   composio-langchain
+langchain-text-splitters==0.3.4
+    # via langchain
+langchainhub==0.1.21
+    # via composio-langchain
+langsmith==0.2.10
+    # via
+    #   langchain
+    #   langchain-core
 litellm==1.56.5
     # via versionhq (pyproject.toml)
 markdown-it-py==3.0.0
@@ -113,13 +144,21 @@ multidict==6.1.0
     # via
     #   aiohttp
     #   yarl
+numpy==2.2.1
+    # via langchain
 openai==1.58.1
     # via
     #   versionhq (pyproject.toml)
     #   composio-openai
+    #   langchain-openai
     #   litellm
+orjson==3.10.13
+    # via langsmith
 packaging==24.2
-    # via huggingface-hub
+    # via
+    #   huggingface-hub
+    #   langchain-core
+    #   langchainhub
 paramiko==3.5.0
     # via composio-core
 propcache==0.2.1
@@ -132,7 +171,11 @@ pydantic==2.10.4
     # via
     #   versionhq (pyproject.toml)
     #   composio-core
+    #   composio-langchain
     #   fastapi
+    #   langchain
+    #   langchain-core
+    #   langsmith
     #   litellm
     #   openai
 pydantic-core==2.27.2
@@ -150,7 +193,10 @@ python-dotenv==1.0.1
     #   versionhq (pyproject.toml)
     #   litellm
 pyyaml==6.0.2
-    # via huggingface-hub
+    # via
+    #   huggingface-hub
+    #   langchain
+    #   langchain-core
 referencing==0.35.1
     # via
     #   jsonschema
@@ -164,8 +210,14 @@ requests==2.32.3
     #   versionhq (pyproject.toml)
     #   composio-core
     #   huggingface-hub
+    #   langchain
+    #   langchainhub
+    #   langsmith
     #   pysher
+    #   requests-toolbelt
     #   tiktoken
+requests-toolbelt==1.0.0
+    # via langsmith
 rich==13.9.4
     # via composio-core
 rpds-py==0.22.3
@@ -183,29 +235,42 @@ sniffio==1.3.1
     #   anyio
     #   httpx
     #   openai
+sqlalchemy==2.0.36
+    # via langchain
 starlette==0.41.3
     # via fastapi
+tenacity==9.0.0
+    # via
+    #   langchain
+    #   langchain-core
 tiktoken==0.8.0
-    # via litellm
+    # via
+    #   langchain-openai
+    #   litellm
 tokenizers==0.21.0
     # via litellm
 tqdm==4.67.1
     # via
     #   huggingface-hub
     #   openai
+types-requests==2.32.0.20241016
+    # via langchainhub
 typing==3.10.0.0
     # via versionhq (pyproject.toml)
 typing-extensions==4.12.2
     # via
     #   fastapi
     #   huggingface-hub
+    #   langchain-core
     #   openai
     #   pydantic
     #   pydantic-core
+    #   sqlalchemy
 urllib3==2.3.0
     # via
     #   requests
     #   sentry-sdk
+    #   types-requests
 uvicorn==0.34.0
     # via composio-core
 websocket-client==1.8.0

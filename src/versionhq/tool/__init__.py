@@ -40,10 +40,11 @@ composio_app_set = [
     (ComposioAppName.LINKEDIN, ComposioAuthScheme.OAUTH2),
 ]
 
-class COMPOSIO_STATUS(str, Enum):
-    INITIATED = "initiated"
-    ACTIVE = "active"
-    FAILED = "failed"
+class ComposioStatus(str, Enum):
+    INITIATED = "INITIATED"
+    ACTIVE = "ACTIVE"
+    FAILED = "FAILED"
+
 
 
 
@@ -51,3 +52,5 @@ class ComposioAction(str, Enum):
     """
     Enum to store composio's action that can be called via `Actions.xxx`
     """
+    # HUBSPOT_INITIATE_DATA_IMPORT_PROCESS = "hubspot_initate_date_import_process"
+    HUBSPOT_CREATE_PIPELINE_STAGE = "hubspot_create_pipeline_stage"

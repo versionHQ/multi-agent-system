@@ -1,7 +1,9 @@
+deploy.py
+destinations.py
+
 knowledge/
 memory/
 
-# composio.py
 memo.txt
 
 dist/
