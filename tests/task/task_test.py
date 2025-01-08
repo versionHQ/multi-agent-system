@@ -52,19 +52,13 @@ def test_sync_execute_task():
 
 
 def test_async_execute_task():
-    agent = Agent(role="demo agent 2", goal="My amazing goals")
-    task = Task(
-        description="Analyze the client's business model and define the optimal cohort timeframe.",
-        output_field_list=[
-            ResponseField(title="test1", type=str, required=True),
-            ResponseField(title="test2", type=list, required=True),
-        ],
-    )
+    agent = Agent(role="demo agent", goal="My amazing goals")
+    task = Task(description="Return string: 'test'")
 
-    with patch.object(Agent, "execute_task", return_value="ok") as execute:
+    with patch.object(Agent, "execute_task", return_value="test") as execute:
         execution = task.execute_async(agent=agent)
         result = execution.result()
-        assert result.raw == "ok"
+        assert result.raw == "test"
         execute.assert_called_once_with(task=task, context=None)
 
 
@@ -313,8 +307,6 @@ def test_create_json_dict_output():
     )
 
     res = task.execute_sync(agent=agent)
-    print(res.json_dict)
-    print(type(res.json_dict))
 
     assert isinstance(res, TaskOutput)
     assert isinstance(res.json_dict, dict)

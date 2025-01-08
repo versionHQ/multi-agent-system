@@ -389,8 +389,6 @@ class Agent(BaseModel):
         if task.take_tool_res_as_final:
             return tool_results
 
-
-
         # if self.team and self.team._train:
         #     task_prompt = self._training_handler(task_prompt=task_prompt)
         # else:
@@ -411,9 +409,5 @@ class Agent(BaseModel):
 
         if self.max_rpm and self._rpm_controller:
             self._rpm_controller.stop_rpm_counter()
-
-        # for tool_result in self.tools_results:
-        #     if tool_result.get("result_as_answer", False):
-        #         result = tool_result["result"]
 
         return raw_response

@@ -243,13 +243,10 @@ class Task(BaseModel):
         import ast
 
         output_json_dict: Dict[str, Any] = dict()
-        r = str(raw_result)
 
         try:
+            r = json.dumps(eval(str(raw_result)))
             output_json_dict = json.loads(r)
-
-            if isinstance(output_json_dict, str):
-                output_json_dict = eval(r)
 
             if isinstance(output_json_dict, str):
                 output_json_dict = ast.literal_eval(r)
