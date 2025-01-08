@@ -335,7 +335,7 @@ class Agent(BaseModel):
             messages=messages, output_formats=output_formats, field_list=response_fields, callbacks=callbacks
         )
         task_execution_counter += 1
-        self._logger.log(level="info", message=f"Agent's first response in {type(raw_response)}: {raw_response}", color="blue")
+        self._logger.log(level="info", message=f"Agent's first response in {type(raw_response).__name__}: {raw_response}", color="blue")
 
         if (raw_response is None or raw_response == "") and task_execution_counter < self.max_retry_limit:
             while task_execution_counter <= self.max_retry_limit:
@@ -346,7 +346,7 @@ class Agent(BaseModel):
                     callbacks=callbacks,
                 )
                 task_execution_counter += 1
-                self._logger.log(level="info", message=f"Agent's next response in {type(raw_response)}: {raw_response}", color="blue")
+                self._logger.log(level="info", message=f"Agent's next response in {type(raw_response).__name__}: {raw_response}", color="blue")
 
         elif raw_response is None or raw_response == "":
             self._logger.log(level="error", message="Received None or empty response from the model", color="red")

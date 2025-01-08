@@ -78,20 +78,11 @@ class TaskOutput(BaseModel):
         return str(self.pydantic) if self.pydantic else str(self.json_dict) if self.json_dict else self.raw
 
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any] | None:
         """
         Convert pydantic / raw output into dict and return the dict.
-        When we only have `raw` output, return `{ output: raw }` to avoid an error
         """
-
-        output_dict = {}
-        if self.json_dict:
-            output_dict.update(self.json_dict)
-        elif self.pydantic:
-            output_dict.update(self.pydantic.model_dump())
-        else:
-            output_dict.upate({ "output": self.raw })
-        return output_dict
+        return self.json_dict if self.json_dict is not None else self.pydantic.model_dump() if self.pydantic else None
 
 
     def context_prompting(self) -> str:
@@ -250,31 +241,26 @@ class Task(BaseModel):
         Create json (dict) output from the raw result.
         """
         import ast
-        import re
 
         output_json_dict: Dict[str, Any] = dict()
-
-        if not isinstance(raw_result, str):
-            raw_result = str(raw_result)
+        r = str(raw_result)
 
         try:
-            output_json_dict = ast.literal_eval(raw_result)
+            output_json_dict = json.loads(r)
 
             if isinstance(output_json_dict, str):
-                output_json_dict = eval(raw_result)
+                output_json_dict = eval(r)
 
-                if isinstance(output_json_dict, str):
-                    raw_result = raw_result.replace("': '", '": "').replace("{'", '{"')
-                    p = re.compile('(?<!\\\\)\'')
-                    raw_result = p.sub('\"', raw_result)
-                    output_json_dict = json.loads(raw_result)
+            if isinstance(output_json_dict, str):
+                output_json_dict = ast.literal_eval(r)
+
         except:
             output_json_dict = { "output": raw_result }
 
         return output_json_dict
 
 
-    def create_pydantic_output(self, output_json_dict: Dict[str, Any], raw_result: Any = None) -> Optional[Any]:
+    def _create_pydantic_output(self, output_json_dict: Dict[str, Any], raw_result: Any = None) -> Optional[Any]:
         """
         Create pydantic output from the `raw` result.
         """
@@ -390,7 +376,7 @@ class Task(BaseModel):
                 output_json_dict = self._create_json_output(raw_result=output_raw)
 
             if self.expected_output_pydantic == True:
-                output_pydantic = self.create_pydantic_output(output_json_dict=output_json_dict)
+                output_pydantic = self._create_pydantic_output(output_json_dict=output_json_dict)
 
             task_output = TaskOutput(
                 task_id=self.id,
@@ -441,7 +427,7 @@ class Task(BaseModel):
             output_formats_to_follow[item.title] = f"<Return your answer in {item.type.__name__}>"
 
         output_prompt = f"""
-Your outputs MUST adhere to the following format and should NOT include any irrelevant elements:
+Output only valid JSON conforming to the specified format. Use double quotes for keys and values:
 {output_formats_to_follow}
         """
         return output_prompt

@@ -313,6 +313,8 @@ def test_create_json_dict_output():
     )
 
     res = task.execute_sync(agent=agent)
+    print(res.json_dict)
+    print(type(res.json_dict))
 
     assert isinstance(res, TaskOutput)
     assert isinstance(res.json_dict, dict)
