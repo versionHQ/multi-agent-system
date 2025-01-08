@@ -4,6 +4,7 @@ import datetime
 
 from versionhq.clients.workflow.model import Score, ScoreFormat, MessagingWorkflow, MessagingComponent
 from versionhq.clients.product.model import Product, ProductProvider
+from versionhq.tool import ComposioAppName
 
 
 def test_store_scores():
@@ -44,7 +45,7 @@ def test_setup_messaging_workflow_with_provider():
         name="demo provider",
         region="US",
         data_pipelines=["data"],
-        destination_services=["email", "linkedin",]
+        destination_services=["linkedin", "email",]
     )
     product = Product(
         description="demo p",
@@ -60,3 +61,4 @@ def test_setup_messaging_workflow_with_provider():
     assert messaging_workflow.id is not None
     assert messaging_workflow.destination is not None
     assert messaging_workflow.destination in provider.destination_services
+    assert isinstance(messaging_workflow.destination, ComposioAppName)

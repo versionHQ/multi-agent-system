@@ -121,15 +121,21 @@ class MessagingWorkflow(ABC, BaseModel):
     @model_validator(mode="after")
     def set_up_destination(self):
         """
-        Set up the destination service when self.destination is None.
-        Prioritize customer's destination to the product provider's destination list.
+        Set up the destination service using ComposioAppName class.
         """
-        if self.destination is None:
+        if isinstance(self.destination, ComposioAppName):
+            pass
+
+        elif isinstance(self.destination, str) and self.destination in ComposioAppName:
+            self.destination = ComposioAppName(self.destination)
+
+        elif self.destination is None:
             # if self.customer is not None:
             #     self.destination = self.customer.on
 
             if self.product.provider is not None and self.product.provider.destination_services:
-                self.destination = self.product.provider.destination_services[0]
+                applied_service = self.product.provider.destination_services[0]
+                self.destination = ComposioAppName(applied_service) if applied_service in ComposioAppName else applied_service
 
         return self
 

@@ -10,14 +10,32 @@ from versionhq.clients.customer import Status
 
 class BaseCustomer(ABC, BaseModel):
     """
-    Abstract base class for the base customer
+    Abstract base class for the base customer storing current status on the workflow and deployment method.
+    """
+    status: Status = Field(default=Status.NOT_ASSIGNED)
+
+    @abstractmethod
+    def _deploy(self, *args, **kwargs) -> Any:
+        """Any method to deploy targeting the customer"""
+
+
+    def deploy(self, *args, **kwargs) -> Any:
+        if self.status is Status.READY_TO_DEPLOY:
+            return self._deploy(self, **args, **kwargs)
+
+
+
+class Customer(BaseCustomer):
+    """
+    Customer class to store customer info and handle deployment methods.
     """
 
     id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True)
     name: Optional[str] = Field(default=None, description="customer's name if any")
     products: Optional[List[Product]] = Field(default=list, description="store products that the customer is associated with")
     analysis: str = Field(default=None, description="store the latest analysis results on the customer")
-    status: str = Field(default=Status.ON_WORKFLOW)
+    function: Optional[Callable] = Field(default=None, descripition="store deploy function")
+    config: Optional[Dict[str, Any]] = Field(default=None, description="config to the function")
 
 
     @field_validator("id", mode="before")
@@ -27,11 +45,10 @@ class BaseCustomer(ABC, BaseModel):
             raise PydanticCustomError("may_not_set_field", "This field is not to be set by the user.", {})
 
 
-    def customer_to(self) -> List[ProductProvider]:
+    def fetch_product_providers(self) -> List[ProductProvider] | None:
         """
         Return list of ProductProvider if the customer has `product_list`
         """
-
         res = []
         if self.products:
             for item in self.products:
@@ -39,15 +56,14 @@ class BaseCustomer(ABC, BaseModel):
                     res.appned(item.provider)
         return res
 
-
-    @abstractmethod
-    def _deploy(self, *args, **kwargs) -> Any:
-        """Any method to deploy targeting the customer"""
+    def _deploy(self, *args, **kwargs):
+        return self.deploy(self, *args, **kwargs)
 
 
-class Customer(BaseCustomer):
-    id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True)
-    name: Optional[str] = Field(default=None, description="customer's name if any")
-    products: Optional[List[Product]] = Field(default=list, description="store products that the customer is associated with")
-    analysis: str = Field(default=None, description="store the latest analysis results on the customer")
-    status: str = Field(default=Status.ON_WORKFLOW)
+    def deploy(self, *args, **kwargs):
+        self.status = Status.ACTIVE_ON_WORKFLOW
+
+        if self.function:
+            return self.function(**self.config)
+
+        return super().deploy(*args, **kwargs)

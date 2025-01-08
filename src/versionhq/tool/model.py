@@ -174,40 +174,6 @@ class Tool(BaseTool):
         return f"Tool Name: {self.name}\nTool Arguments: {args_schema}\nGoal: {self.goal}"
 
 
-
-    # @classmethod
-    # def from_composio(
-    #     cls, func: Callable = None, tool_name: str = "Composio tool"
-    # ) -> "Tool":
-    #     """
-    #     Create Tool from the composio tool, ensuring the Tool instance has a func to be executed.
-    #     Refer to the `args_schema` from the func signature if any. Else, create an `args_schema`.
-    #     """
-
-    #     if not func:
-    #         raise ValueError("Params must have a callable 'function' attribute.")
-
-    #     # args_schema = getattr(tool, "args_schema", None)
-    #     args_fields = {}
-    #     func_signature = signature(func)
-    #     annotations = func_signature.parameters
-    #     for name, param in annotations.items():
-    #         if name != "self":
-    #             param_annotation = (
-    #                 param.annotation if param.annotation != param.empty else Any
-    #             )
-    #             field_info = Field(default=..., description="")
-    #             args_fields[name] = (param_annotation, field_info)
-
-    #     args_schema = (
-    #         create_model(f"{tool_name}Input", **args_fields)
-    #         if args_fields
-    #         else create_model(f"{tool_name}Input", __base__=BaseModel)
-    #     )
-
-    #     return cls(name=tool_name, func=func, args_schema=args_schema)
-
-
 class ToolSet(BaseModel):
     """
     Store the tool called and any kwargs used.
