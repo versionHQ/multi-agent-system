@@ -59,7 +59,7 @@ class MessagingComponent(ABC, BaseModel):
     layer_id: int = Field(default=0, description="add id of the layer: 0, 1, 2")
     message: str = Field(default=None, max_length=1024, description="text message content to be sent")
     score: InstanceOf[Score] = Field(default=None)
-    condition: str = Field(default=None, max_length=128, description="condition to execute the next component")
+    condition: str = Field(default=None, description="condition to execute the next component")
     interval: Optional[str] = Field(default=None, description="ideal interval to set to assess the condition")
 
 
