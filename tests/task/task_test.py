@@ -325,3 +325,6 @@ def test_create_json_dict_output():
 
 
 # token usage logic
+
+if __name__ == "__main__":
+    test_create_json_dict_output()

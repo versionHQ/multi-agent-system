@@ -245,32 +245,31 @@ class Task(BaseModel):
         return "\n".join(task_slices)
 
 
-    def _create_json_output(self, raw_result: Any) -> Dict[str, Any]:
+    def _create_json_output(self, raw_result: str) -> Dict[str, Any]:
         """
         Create json (dict) output from the raw result.
         """
+        import ast
+        import re
 
         output_json_dict: Dict[str, Any] = dict()
 
-        if isinstance(raw_result, BaseModel):
-            output_json_dict = raw_result.model_dump()
+        if not isinstance(raw_result, str):
+            raw_result = str(raw_result)
 
-        elif isinstance(raw_result, dict):
-            output_json_dict = raw_result
+        try:
+            output_json_dict = ast.literal_eval(raw_result)
 
-        elif isinstance(raw_result, str):
-            raw_result = raw_result.replace("\'", '\"')
-            try:
-                output_json_dict = json.loads(raw_result)
-            except:
-                try:
-                    output_json_dict = eval(raw_result)
-                except:
-                    try:
-                        import ast
-                        output_json_dict = ast.literal_eval(raw_result)
-                    except:
-                        output_json_dict = { "output": raw_result }
+            if isinstance(output_json_dict, str):
+                output_json_dict = eval(raw_result)
+
+                if isinstance(output_json_dict, str):
+                    raw_result = raw_result.replace("': '", '": "').replace("{'", '{"')
+                    p = re.compile('(?<!\\\\)\'')
+                    raw_result = p.sub('\"', raw_result)
+                    output_json_dict = json.loads(raw_result)
+        except:
+            output_json_dict = { "output": raw_result }
 
         return output_json_dict
 

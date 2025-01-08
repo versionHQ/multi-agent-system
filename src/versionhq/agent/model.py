@@ -332,13 +332,10 @@ class Agent(BaseModel):
         callbacks = kwargs.get("callbacks", None)
 
         raw_response = self.llm.call(
-            messages=messages,
-            output_formats=output_formats,
-            field_list=response_fields,
-            callbacks=callbacks,
+            messages=messages, output_formats=output_formats, field_list=response_fields, callbacks=callbacks
         )
         task_execution_counter += 1
-        self._logger.log(level="info", message=f"Agent's first response: {raw_response}", color="blue")
+        self._logger.log(level="info", message=f"Agent's first response in {type(raw_response)}: {raw_response}", color="blue")
 
         if (raw_response is None or raw_response == "") and task_execution_counter < self.max_retry_limit:
             while task_execution_counter <= self.max_retry_limit:
@@ -349,7 +346,7 @@ class Agent(BaseModel):
                     callbacks=callbacks,
                 )
                 task_execution_counter += 1
-                self._logger.log(level="info", message=f"Agent's next response: {raw_response}", color="blue")
+                self._logger.log(level="info", message=f"Agent's next response in {type(raw_response)}: {raw_response}", color="blue")
 
         elif raw_response is None or raw_response == "":
             self._logger.log(level="error", message="Received None or empty response from the model", color="red")
@@ -410,7 +407,7 @@ class Agent(BaseModel):
             self._times_executed += 1
             if self._times_executed > self.max_retry_limit:
                 raise e
-            raw_reponse = self.execute_task(task, context)
+            raw_response = self.execute_task(task, context)
 
         if self.max_rpm and self._rpm_controller:
             self._rpm_controller.stop_rpm_counter()
