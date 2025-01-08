@@ -322,7 +322,7 @@ class Agent(BaseModel):
         When encountering errors, we try the task execution up to `self.max_retry_limit` times.
         """
 
-        task_execution_counter = 0
+        task_execution_counter, raw_response = 0, None
 
         messages = []
         messages.append({"role": "user", "content": prompts})  #! REFINEME
@@ -331,31 +331,31 @@ class Agent(BaseModel):
 
         callbacks = kwargs.get("callbacks", None)
 
-        response = self.llm.call(
+        raw_response = self.llm.call(
             messages=messages,
             output_formats=output_formats,
             field_list=response_fields,
             callbacks=callbacks,
         )
         task_execution_counter += 1
-        self._logger.log(level="info", message=f"Agent's first response: {response}", color="blue")
+        self._logger.log(level="info", message=f"Agent's first response: {raw_response}", color="blue")
 
-        if (response is None or response == "") and task_execution_counter < self.max_retry_limit:
+        if (raw_response is None or raw_response == "") and task_execution_counter < self.max_retry_limit:
             while task_execution_counter <= self.max_retry_limit:
-                response = self.llm.call(
+                raw_response = self.llm.call(
                     messages=messages,
                     output_formats=output_formats,
                     field_list=response_fields,
                     callbacks=callbacks,
                 )
                 task_execution_counter += 1
-                self._logger.log(level="info", message=f"Agent's next response: {response}", color="blue")
+                self._logger.log(level="info", message=f"Agent's next response: {raw_response}", color="blue")
 
-        elif response is None or response == "":
+        elif raw_response is None or raw_response == "":
             self._logger.log(level="error", message="Received None or empty response from the model", color="red")
             raise ValueError("Invalid response from LLM call - None or empty.")
 
-        return {"output": response.output if hasattr(response, "output") else response}
+        return raw_response
 
 
     def execute_task(self, task, context: Optional[str] = None) -> str:
@@ -400,17 +400,17 @@ class Agent(BaseModel):
         #     task_prompt = self._use_trained_data(task_prompt=task_prompt)
 
         try:
-            result = self.invoke(
+            raw_response = self.invoke(
                 prompts=task_prompt,
                 output_formats=task.expected_output_formats,
                 response_fields=task.output_field_list,
-            )["output"]
+            )
 
         except Exception as e:
             self._times_executed += 1
             if self._times_executed > self.max_retry_limit:
                 raise e
-            result = self.execute_task(task, context)
+            raw_reponse = self.execute_task(task, context)
 
         if self.max_rpm and self._rpm_controller:
             self._rpm_controller.stop_rpm_counter()
@@ -419,4 +419,4 @@ class Agent(BaseModel):
         #     if tool_result.get("result_as_answer", False):
         #         result = tool_result["result"]
 
-        return result
+        return raw_response

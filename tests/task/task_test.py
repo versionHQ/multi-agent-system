@@ -301,4 +301,27 @@ def test_task_with_tools():
     assert res.tool_output[2] == "empty function"
 
 
+def test_create_json_dict_output():
+    agent = Agent(role="demo agent 6", goal="My amazing goals")
+    task = Task(
+        description="Analyze the client's business model.",
+        output_field_list=[
+            ResponseField(title="str", type=str, required=True),
+            ResponseField(title="list", type=list),
+            ResponseField(title="dict", type=dict)
+        ],
+    )
+
+    res = task.execute_sync(agent=agent)
+
+    assert isinstance(res, TaskOutput)
+    assert isinstance(res.json_dict, dict)
+    assert [k == "str" for k, v in res.json_dict.items()]
+    assert [k == "list" for k, v in res.json_dict.items()]
+    assert [k == "dict" for k, v in res.json_dict.items()]
+    assert isinstance(res.json_dict["str"], str)
+    assert isinstance(res.json_dict["list"], list)
+    assert isinstance(res.json_dict["dict"], dict)
+
+
 # token usage logic

@@ -245,12 +245,12 @@ class Task(BaseModel):
         return "\n".join(task_slices)
 
 
-    def create_json_output(self, raw_result: Any) -> Optional[Dict[str, Any]]:
+    def _create_json_output(self, raw_result: Any) -> Dict[str, Any]:
         """
         Create json (dict) output from the raw result.
         """
 
-        output_json_dict: Optional[Dict[str, Any]] = None
+        output_json_dict: Dict[str, Any] = dict()
 
         if isinstance(raw_result, BaseModel):
             output_json_dict = raw_result.model_dump()
@@ -259,9 +259,10 @@ class Task(BaseModel):
             output_json_dict = raw_result
 
         elif isinstance(raw_result, str):
+            raw_result = raw_result.replace("\'", '\"')
             try:
                 output_json_dict = json.loads(raw_result)
-            except json.JSONDecodeError:
+            except:
                 try:
                     output_json_dict = eval(raw_result)
                 except:
@@ -379,17 +380,17 @@ class Task(BaseModel):
             agent = agent_to_delegate
             self.delegations += 1
 
-        if self.take_tool_res_as_final is True:
+        if self.take_tool_res_as_final == True:
             output = agent.execute_task(task=self, context=context)
             task_output = TaskOutput(task_id=self.id, tool_output=output)
 
         else:
             output_raw, output_json_dict, output_pydantic = agent.execute_task(task=self, context=context), None, None
 
-            if self.expected_output_json:
-                output_json_dict = self.create_json_output(raw_result=output_raw)
+            if self.expected_output_json == True:
+                output_json_dict = self._create_json_output(raw_result=output_raw)
 
-            if self.expected_output_pydantic:
+            if self.expected_output_pydantic == True:
                 output_pydantic = self.create_pydantic_output(output_json_dict=output_json_dict)
 
             task_output = TaskOutput(
