@@ -245,7 +245,7 @@ class Task(BaseModel):
         output_json_dict: Dict[str, Any] = dict()
 
         try:
-            raw_result = raw_result.replace("{'", '{"').replace("{ '", '{"').replace("': '", '": "').replace("'}", '"}').replace("' }", '"}').replace("', '", '", "').replace("['", '["').replace("[ '", '[ "').replace("']", '"]').replace("' ]", '" ]')
+            raw_result = raw_result.replace("{'", '{"').replace("{ '", '{"').replace("': '", '": "').replace("'}", '"}').replace("' }", '"}').replace("', '", '", "').replace("['", '["').replace("[ '", '[ "').replace("']", '"]').replace("' ]", '" ]').replace("{\n'", '{"').replace("{\'", '{"')
             r = json.dumps(eval(str(raw_result)))
             output_json_dict = json.loads(r)
 
@@ -425,8 +425,8 @@ class Task(BaseModel):
             output_formats_to_follow[item.title] = f"<Return your answer in {item.type.__name__}>"
 
         output_prompt = f"""
-Output only valid JSON conforming to the specified format. Use double quotes for keys and values:
-{output_formats_to_follow}
+Output only valid JSON conforming to the specified format. Use double quotes for all keys and string values. Do not use single quotes, trailing commas, or other non-standard JSON syntax.
+Specified format: {output_formats_to_follow}
         """
         return output_prompt
 
