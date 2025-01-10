@@ -245,7 +245,7 @@ class Task(BaseModel):
         output_json_dict: Dict[str, Any] = dict()
 
         try:
-            raw_result = raw_result.replace("{'", '{"').replace("{ '", '{ "').replace("': '", '": "').replace("'}", '"}').replace("' }", '" }').replace("', '", '", "').replace("['", '["').replace("[ '", '[ "').replace("']", '"]').replace("' ]", '" ]')
+            raw_result = raw_result.replace("{'", '{"').replace("{ '", '{"').replace("': '", '": "').replace("'}", '"}').replace("' }", '"}').replace("', '", '", "').replace("['", '["').replace("[ '", '[ "').replace("']", '"]').replace("' ]", '" ]')
             r = json.dumps(eval(str(raw_result)))
             output_json_dict = json.loads(r)
 
