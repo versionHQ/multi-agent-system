@@ -96,7 +96,7 @@ class MessagingWorkflow(ABC, BaseModel):
     _created_at: Optional[datetime]
     _updated_at: Optional[datetime]
 
-    model_config = ConfigDict()
+    model_config = ConfigDict(extra="allow")
 
     id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True)
     messaging_components: List[MessagingComponent] = Field(default_factory=list, description="store messaging components in the workflow")
