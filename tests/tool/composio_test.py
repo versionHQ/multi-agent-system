@@ -3,7 +3,7 @@ import os
 from versionhq.tool.composio_tool import ComposioHandler
 from versionhq.tool import ComposioAppName, ComposioAuthScheme, ComposioStatus, ComposioAction
 
-DEFAULT_MODEL_NAME = os.environ.get("LITELLM_MODEL_NAME", "gpt-3.5-turbo")
+DEFAULT_MODEL_NAME = os.environ.get("DEFAULT_MODEL_NAME", "gpt-3.5-turbo")
 LITELLM_API_KEY = os.environ.get("LITELLM_API_KEY")
 TEST_CONNECTED_ACCOUNT_ID = os.environ.get("TEST_CONNECTED_ACCOUNT_ID", "f79b1a07-db14-4aa5-959e-5713ccd18de2")
 

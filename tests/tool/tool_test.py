@@ -112,7 +112,3 @@ def test_tool_handler_with_cache():
     assert isinstance(tool.tool_handler, ToolHandler)
     assert tool.tool_handler.should_cache == True
     assert tool.tool_handler.last_used_tool == ToolSet(tool=tool, kwargs={})
-
-
-if __name__ == "__main__":
-    test_tool_handler_with_cache()

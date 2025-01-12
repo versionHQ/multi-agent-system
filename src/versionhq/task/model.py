@@ -117,7 +117,7 @@ class Task(BaseModel):
     _original_description: str = PrivateAttr(default=None)
     _logger: Logger = PrivateAttr()
     _task_output_handler = TaskOutputStorageHandler()
-    config: Optional[Dict[str, Any]] = Field(default=None, description="configuration for the agent")
+    config: Optional[Dict[str, Any]] = Field(default=None, description="values to set on Task class")
 
     id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True, description="unique identifier for the object, not set by user")
     name: Optional[str] = Field(default=None)
@@ -432,16 +432,16 @@ Specified format: {output_formats_to_follow}
 
 
     @property
-    def expected_output_formats(self) -> List[TaskOutputFormat]:
+    def expected_output_formats(self) -> List[str | TaskOutputFormat]:
         """
         Return output formats in list with the ENUM item.
         `TaskOutputFormat.RAW` is set as default.
         """
-        outputs = [TaskOutputFormat.RAW,]
+        outputs = [TaskOutputFormat.RAW.value,]
         if self.expected_output_json:
-            outputs.append(TaskOutputFormat.JSON)
+            outputs.append(TaskOutputFormat.JSON.value)
         if self.expected_output_pydantic:
-            outputs.append(TaskOutputFormat.PYDANTIC)
+            outputs.append(TaskOutputFormat.PYDANTIC.value)
         return outputs
 
 

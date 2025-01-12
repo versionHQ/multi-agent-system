@@ -5,5 +5,5 @@ class TaskOutputFormat(str, Enum):
     """Enum that represents the output format of a task."""
 
     JSON = "json"
-    PYDANTIC = "pydantic"
+    PYDANTIC = "pydantic model"
     RAW = "raw"

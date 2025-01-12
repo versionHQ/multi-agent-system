@@ -5,7 +5,7 @@ from versionhq.task.model import Task, ResponseField, TaskOutput
 from versionhq.team.model import Team, TeamMember, TaskHandlingProcess, TeamOutput
 from versionhq._utils.usage_metrics import UsageMetrics
 
-MODEL_NAME = os.environ.get("LITELLM_MODEL_NAME", "gpt-3.5-turbo")
+MODEL_NAME = os.environ.get("DEFAULT_MODEL_NAME", "gpt-3.5-turbo")
 
 
 def test_form_team():
@@ -408,7 +408,3 @@ def test_handle_team_task():
         assert res.raw is not None
         assert len(team.members) == 3
         assert len(team.tasks) == 3
-
-
-if __name__ == "__main__":
-    test_handle_team_task()

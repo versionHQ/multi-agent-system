@@ -1,6 +1,6 @@
 import os
 import uuid
-from typing import Any, Dict, List, Optional, TypeVar
+from typing import Any, Dict, List, Optional, TypeVar, Callable
 from typing_extensions import Self
 from dotenv import load_dotenv
 from pydantic import UUID4, BaseModel, Field, InstanceOf, PrivateAttr, model_validator, field_validator
@@ -9,8 +9,8 @@ from pydantic_core import PydanticCustomError
 from versionhq._utils.logger import Logger
 from versionhq._utils.rpm_controller import RPMController
 from versionhq._utils.usage_metrics import UsageMetrics
-from versionhq.llm.llm_vars import LLM_VARS
-from versionhq.llm.model import LLM, DEFAULT_CONTEXT_WINDOW
+from versionhq.llm.llm_variables import LLM_VARS
+from versionhq.llm.model import LLM, DEFAULT_CONTEXT_WINDOW_SIZE, DEFAULT_MODEL_NAME
 from versionhq.task import TaskOutputFormat
 from versionhq.task.model import ResponseField
 from versionhq.tool.model import Tool, ToolSet
@@ -87,6 +87,7 @@ class Agent(BaseModel):
     _request_within_rpm_limit: Any = PrivateAttr(default=None)
     _token_process: TokenProcess = PrivateAttr(default_factory=TokenProcess)
     _times_executed: int = PrivateAttr(default=0)
+    config: Optional[Dict[str, Any]] = Field(default=None, exclude=True, description="values to add to the Agent class")
 
     id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True)
     role: str = Field(description="role of the agent - used in summary and logs")
@@ -102,11 +103,11 @@ class Agent(BaseModel):
     allow_code_execution: Optional[bool] = Field(default=False, description="Enable code execution for the agent.")
     max_retry_limit: int = Field(default=2,description="max. number of retries for the task execution when an error occurs. cascaed to the `invoke` function")
     max_iter: Optional[int] = Field(default=25,description="max. number of iterations for an agent to execute a task")
-    step_callback: Optional[Any] = Field(default=None,description="Callback to be executed after each step of the agent execution")
+    step_callback: Optional[Callable | Any] = Field(default=None, description="callback to be executed after each step of the agent execution")
 
     # llm settings cascaded to the LLM model
-    llm: str | InstanceOf[LLM] | Any = Field(default=None)
-    function_calling_llm: str | InstanceOf[LLM] | Any = Field(default=None)
+    llm: str | InstanceOf[LLM] | Dict[str, Any] = Field(default=None)
+    function_calling_llm: str | InstanceOf[LLM] | Dict[str, Any] = Field(default=None)
     respect_context_window: bool = Field(default=True,description="Keep messages under the context window size by summarizing content")
     max_tokens: Optional[int] = Field(default=None, description="max. number of tokens for the agent's execution")
     max_execution_time: Optional[int] = Field(default=None, description="max. execution time for an agent to execute a task")
@@ -119,14 +120,9 @@ class Agent(BaseModel):
     response_template: Optional[str] = Field(default=None, description="Response format for the agent.")
 
     # config, cache, error handling
-    config: Optional[Dict[str, Any]] = Field(default=None, exclude=True, description="Configuration for the agent")
     formatting_errors: int = Field(default=0, description="Number of formatting errors.")
     agent_ops_agent_name: str = None
     agent_ops_agent_id: str = None
-
-
-    def __repr__(self):
-        return f"Agent(role={self.role}, goal={self.goal}, backstory={self.backstory})"
 
 
     @field_validator("id", mode="before")
@@ -141,7 +137,7 @@ class Agent(BaseModel):
         required_fields = ["role", "goal"]
         for field in required_fields:
             if getattr(self, field) is None:
-                raise ValueError( f"{field} must be provided either directly or through config")
+                raise ValueError(f"{field} must be provided either directly or through config")
         return self
 
 
@@ -154,109 +150,84 @@ class Agent(BaseModel):
         """
 
         self.agent_ops_agent_name = self.role
-        unaccepted_attributes = ["AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_REGION_NAME"]
-        callbacks = ([self.step_callback,]if self.step_callback is not None else [])
+        # unaccepted_attributes = ["AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_REGION_NAME"]
 
         if isinstance(self.llm, LLM):
-            self.llm.timeout = self.max_execution_time
-            self.llm.max_tokens = self.max_tokens
-            self.llm.context_window_size = (self.llm.get_context_window_size() if self.respect_context_window == True else DEFAULT_CONTEXT_WINDOW)
-            self.llm.callbacks = callbacks
+            llm = self._set_llm_params(self.llm)
+            self.llm = llm
 
         elif isinstance(self.llm, str) or self.llm is None:
-            model_name = os.environ.get("LITELLM_MODEL_NAME", os.environ.get("MODEL", "gpt-3.5-turbo"))
-            llm_params = {
-                "model": model_name if self.llm is None else self.llm,
-                "timeout": self.max_execution_time,
-                "max_tokens": self.max_tokens,
-                "callbacks": callbacks,
-                "api_key": os.environ.get("LITELLM_API_KEY", None),
-                "base_url": os.environ.get("OPENAI_API_BASE", os.environ.get("OPENAI_BASE_URL", None))
-            }
-
-            set_provider = model_name.split("/")[0] if "/" in model_name else "openai" #! REFINEME
-            for provider, env_vars in LLM_VARS.items():
-                if provider == set_provider:
-                    for env_var in env_vars:
-                        key_name = env_var.get("key_name")
-
-                        if key_name and key_name not in unaccepted_attributes:
-                            env_value = os.environ.get(key_name)
-                            if env_value:
-                                key_name = ("api_key" if "API_KEY" in key_name else key_name)
-                                key_name = ("api_base" if "API_BASE" in key_name else key_name)
-                                key_name = ("api_version" if "API_VERSION" in key_name else key_name)
-                                llm_params[key_name] = env_value
-                        elif env_var.get("default", False):
-                            for key, value in env_var.items():
-                                if key not in ["prompt", "key_name", "default"]:
-                                    if key in os.environ:
-                                        llm_params[key] = value
-            self.llm = LLM(**llm_params)
-            context_window_size = (self.llm.get_context_window_size() if self.respect_context_window == True else DEFAULT_CONTEXT_WINDOW)
-            self.llm.context_window_size = context_window_size
+            model_name = self.llm if self.llm is not None else DEFAULT_MODEL_NAME
+            llm = LLM(model=model_name)
+            updated_llm = self._set_llm_params(llm)
+            self.llm = updated_llm
 
         else:
-            llm_params = {
-                "model": (getattr(self.llm, "model_name") or getattr(self.llm, "deployment_name") or str(self.llm)),
-                "max_tokens": (getattr(self.llm, "max_tokens") or self.max_tokens or 3000),
-                "timeout": getattr(self.llm, "timeout", self.max_execution_time),
-                "callbacks": getattr(self.llm, "callbacks") or callbacks,
-                "temperature": getattr(self.llm, "temperature", None),
-                "logprobs": getattr(self.llm, "logprobs", None),
-                "api_key": getattr(self.llm, "api_key", os.environ.get("LITELLM_API_KEY", None)),
-                "base_url": getattr(self.llm, "base_url", None),
-                "organization": getattr(self.llm, "organization", None),
-            }
-            llm_params = {  k: v for k, v in llm_params.items() if v is not None }
-            self.llm = LLM(**llm_params)
+            if isinstance(self.llm, dict):
+                model_name = self.llm.pop("model_name", self.llm.pop("deployment_name", str(self.llm)))
+                llm = LLM(model=model_name if model_name is not None else DEFAULT_MODEL_NAME)
+                updated_llm = self._set_llm_params(llm, { k: v for k, v in self.llm.items() if v is not None })
+                self.llm = updated_llm
+
+            else:
+                model_name = (getattr(self.llm, "model_name") or getattr(self.llm, "deployment_name") or str(self.llm))
+                llm = LLM(model=model_name)
+                llm_params = {
+                    "max_tokens": (getattr(self.llm, "max_tokens") or self.max_tokens or 3000),
+                    "timeout": getattr(self.llm, "timeout", self.max_execution_time),
+                    "callbacks": getattr(self.llm, "callbacks", None),
+                    "temperature": getattr(self.llm, "temperature", None),
+                    "logprobs": getattr(self.llm, "logprobs", None),
+                    "api_key": getattr(self.llm, "api_key", os.environ.get("LITELLM_API_KEY", None)),
+                    "base_url": getattr(self.llm, "base_url", None),
+                }
+                updated_llm = self._set_llm_params(llm, llm_params)
+                self.llm = updated_llm
+
 
         """
-        Set up funcion_calling LLM as well. For the sake of convenience, use the same metrics as the base LLM settings.
+        Set up funcion_calling LLM as well.
+        Check if the model supports function calling, setup LLM instance accordingly, using the same params with the LLM.
         """
         if self.function_calling_llm:
             if isinstance(self.function_calling_llm, LLM):
-                self.function_calling_llm.timeout = self.max_execution_time
-                self.function_calling_llm.max_tokens = self.max_tokens
-                self.function_calling_llm.callbacks = callbacks
-                context_window_size = (
-                    self.function_calling_llm.get_context_window_size()
-                    if self.respect_context_window == True
-                    else DEFAULT_CONTEXT_WINDOW
-                )
-                self.function_calling_llm.context_window_size = context_window_size
+                if self.function_calling_llm._supports_function_calling() == False:
+                    self.function_calling_llm = LLM(model=DEFAULT_MODEL_NAME)
+
+                updated_llm = self._set_llm_params(self.function_calling_llm)
+                self.function_calling_llm = updated_llm
 
             elif isinstance(self.function_calling_llm, str):
-                self.function_calling_llm = LLM(
-                    model=self.function_calling_llm,
-                    timeout=self.max_execution_time,
-                    max_tokens=self.max_tokens,
-                    callbacks=callbacks,
-                )
-                context_window_size = (
-                    self.function_calling_llm.get_context_window_size()
-                    if self.respect_context_window == True
-                    else DEFAULT_CONTEXT_WINDOW
-                )
-                self.function_calling_llm.context_window_size = context_window_size
+                llm = LLM(model=self.function_calling_llm)
+
+                if llm._supports_function_calling() == False:
+                    llm = LLM(model=DEFAULT_MODEL_NAME)
+
+                updated_llm = self._set_llm_params(llm)
+                self.function_calling_llm = updated_llm
 
             else:
-                model_name = getattr(
-                    self.function_calling_llm,
-                    "model_name",
-                    getattr(
-                        self.function_calling_llm,
-                        "deployment_name",
-                        str(self.function_calling_llm),
-                    ),
-                )
-                if model_name is not None or model_name != "":
-                    self.function_calling_llm = LLM(
-                        model=model_name,
-                        timeout=self.max_execution_time,
-                        max_tokens=self.max_tokens,
-                        callbacks=callbacks,
-                    )
+                if isinstance(self.function_calling_llm, dict):
+                    model_name = self.function_calling_llm.pop("model_name", self.function_calling_llm.pop("deployment_name", str(self.function_calling_llm)))
+                    llm = LLM(model=model_name)
+                    updated_llm = self._set_llm_params(llm, { k: v for k, v in self.function_calling_llm.items() if v is not None })
+                    self.function_calling_llm = updated_llm
+
+                else:
+                    model_name = (getattr(self.function_calling_llm, "model_name") or getattr(self.function_calling_llm, "deployment_name") or str(self.function_calling_llm))
+                    llm = LLM(model=model_name)
+                    llm_params = {
+                        "max_tokens": (getattr(self.function_calling_llm, "max_tokens") or self.max_tokens or 3000),
+                        "timeout": getattr(self.function_calling_llm, "timeout", self.max_execution_time),
+                        "callbacks": getattr(self.function_calling_llm, "callbacks", None),
+                        "temperature": getattr(self.function_calling_llm, "temperature", None),
+                        "logprobs": getattr(self.function_calling_llm, "logprobs", None),
+                        "api_key": getattr(self.function_calling_llm, "api_key", os.environ.get("LITELLM_API_KEY", None)),
+                        "base_url": getattr(self.function_calling_llm, "base_url", None),
+                    }
+                    updated_llm = self._set_llm_params(llm, llm_params)
+                    self.function_calling_llm = updated_llm
+
         return self
 
 
@@ -315,7 +286,32 @@ class Agent(BaseModel):
         return self
 
 
-    def invoke(self, prompts: str, output_formats: List[TaskOutputFormat], response_fields: List[ResponseField], **kwargs) -> Dict[str, Any]:
+    def _set_llm_params(self, llm: LLM, kwargs: Dict[str, Any] = None) -> LLM:
+        """
+        After setting up an LLM instance, add params to the instance.
+        Prioritize the agent's settings over the model's base setups.
+        """
+
+        llm.timeout = self.max_execution_time if llm.timeout is None else llm.timeout
+        llm.max_tokens = self.max_tokens if self.max_tokens else llm.max_tokens
+
+        if self.step_callback is not None:
+            llm.callbacks = [self.step_callback, ]
+            llm._set_callbacks(llm.callbacks)
+
+        if self.respect_context_window == False:
+            llm.context_window_size = DEFAULT_CONTEXT_WINDOW_SIZE
+
+        if kwargs:
+            for k, v in kwargs.items():
+                try:
+                    setattr(llm, k, v)
+                except:
+                    pass
+        return llm
+
+
+    def invoke(self, prompts: str, output_formats: List[str | TaskOutputFormat], response_fields: List[ResponseField]) -> Dict[str, Any]:
         """
         Receive the system prompt in string and create formatted prompts using the system prompt and the agent's backstory.
         Then call the base model.
@@ -329,22 +325,13 @@ class Agent(BaseModel):
         messages.append({"role": "assistant", "content": self.backstory})
         self._logger.log(level="info", message=f"Messages sent to the model: {messages}", color="blue")
 
-        callbacks = kwargs.get("callbacks", None)
-
-        raw_response = self.llm.call(
-            messages=messages, output_formats=output_formats, field_list=response_fields, callbacks=callbacks
-        )
+        raw_response = self.llm.call(messages=messages, output_formats=output_formats, field_list=response_fields)
         task_execution_counter += 1
         self._logger.log(level="info", message=f"Agent's first response in {type(raw_response).__name__}: {raw_response}", color="blue")
 
         if (raw_response is None or raw_response == "") and task_execution_counter < self.max_retry_limit:
             while task_execution_counter <= self.max_retry_limit:
-                raw_response = self.llm.call(
-                    messages=messages,
-                    output_formats=output_formats,
-                    field_list=response_fields,
-                    callbacks=callbacks,
-                )
+                raw_response = self.llm.call(messages=messages, output_formats=output_formats, field_list=response_fields)
                 task_execution_counter += 1
                 self._logger.log(level="info", message=f"Agent's next response in {type(raw_response).__name__}: {raw_response}", color="blue")
 
@@ -411,3 +398,7 @@ class Agent(BaseModel):
             self._rpm_controller.stop_rpm_counter()
 
         return raw_response
+
+
+    def __repr__(self):
+        return f"Agent(role={self.role}, goal={self.goal}, backstory={self.backstory})"

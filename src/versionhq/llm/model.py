@@ -4,20 +4,26 @@ import sys
 import threading
 import warnings
 import litellm
+from abc import ABC
 from dotenv import load_dotenv
 from litellm import get_supported_openai_params
 from contextlib import contextmanager
 from typing import Any, Dict, List, Optional
+from typing_extensions import Self
 
-from versionhq.llm.llm_vars import LLM_CONTEXT_WINDOW_SIZES
+from pydantic import UUID4, BaseModel, Field, PrivateAttr, field_validator, model_validator, create_model, InstanceOf, ConfigDict
+from pydantic_core import PydanticCustomError
+
+from versionhq.llm.llm_variables import LLM_CONTEXT_WINDOW_SIZES, LLM_API_KEY_NAMES, LLM_BASE_URL_KEY_NAMES, MODELS, LITELLM_COMPLETION_KEYS
 from versionhq.task import TaskOutputFormat
 from versionhq.task.model import ResponseField
+from versionhq._utils.logger import Logger
+
 
 load_dotenv(override=True)
 API_KEY_LITELLM = os.environ.get("API_KEY_LITELLM")
-DEFAULT_CONTEXT_WINDOW = int(8192 * 0.75)
-os.environ["LITELLM_LOG"] = "DEBUG"
-
+DEFAULT_CONTEXT_WINDOW_SIZE = int(8192 * 0.75)
+DEFAULT_MODEL_NAME = os.environ.get("DEFAULT_MODEL_NAME")
 
 class FilteredStream:
     def __init__(self, original_stream):
@@ -94,146 +100,175 @@ class LLMResponseSchema:
         return response_schema
 
 
-class LLM:
+class LLM(BaseModel):
     """
+    An LLM class to store params except for response formats which will be given in the task handling process.
     Use LiteLLM to connect with the model of choice.
-    (Memo) Response formats will be given at the Task handling.
+    Some optional params are passed by the agent, else follow the default settings of the model provider.
     """
 
-    def __init__(
-        self,
-        model: str,
-        timeout: Optional[float | int] = None,
-        max_tokens: Optional[int] = None,
-        max_completion_tokens: Optional[int] = None,
-        context_window_size: Optional[int] = DEFAULT_CONTEXT_WINDOW,
-        callbacks: List[Any] = [],
-        temperature: Optional[float] = None,
-        top_p: Optional[float] = None,
-        n: Optional[int] = None,
-        stop: Optional[str | List[str]] = None,
-        presence_penalty: Optional[float] = None,
-        frequency_penalty: Optional[float] = None,
-        logit_bias: Optional[Dict[int, float]] = None,
-        # response_format: Optional[Dict[str, Any]] = None,
-        seed: Optional[int] = None,
-        logprobs: Optional[bool] = None,
-        top_logprobs: Optional[int] = None,
-        base_url: Optional[str] = None,
-        api_version: Optional[str] = None,
-        api_key: Optional[str] = None,
-        **kwargs,
-    ):
-        self.model = model
-        self.timeout = timeout
-        self.max_tokens = max_tokens
-        self.max_completion_tokens = max_completion_tokens
-        self.context_window_size = context_window_size
-        self.callbacks = callbacks
+    _logger: Logger = PrivateAttr(default_factory=lambda: Logger(verbose=True))
+    _init_model_name: str = PrivateAttr(default=None)
+    model_config = ConfigDict(extra="allow")
 
-        self.temperature = temperature
-        self.top_p = top_p
-        self.n = n
-        self.stop = stop
-        self.presence_penalty = presence_penalty
-        self.frequency_penalty = frequency_penalty
-        self.logit_bias = logit_bias
-        # self.response_format = response_format
-        self.seed = seed
-        self.logprobs = logprobs
-        self.top_logprobs = top_logprobs
+    model: str = Field(default=DEFAULT_MODEL_NAME)
+    provider: Optional[str] = Field(default=None, description="model provider or custom model provider")
+    base_url: Optional[str] = Field(default=None, description="litellm's api base")
+    api_key: Optional[str] = Field(default=None)
+    api_version: Optional[str] = Field(default=None)
 
-        self.base_url = base_url
-        self.api_version = api_version
-        self.api_key = api_key if api_key else API_KEY_LITELLM
+    # optional params
+    timeout: Optional[float | int] = Field(default=None)
+    max_tokens: Optional[int] = Field(default=None)
+    max_completion_tokens: Optional[int] = Field(default=None)
+    context_window_size: Optional[int] = Field(default=DEFAULT_CONTEXT_WINDOW_SIZE)
+    callbacks: List[Any] = Field(default_factory=list)
+    temperature: Optional[float] = Field(default=None)
+    top_p: Optional[float] = Field(default=None)
+    n: Optional[int] = Field(default=None)
+    stop: Optional[str | List[str]] = Field(default=None)
+    presence_penalty: Optional[float] = Field(default=None)
+    frequency_penalty: Optional[float] = Field(default=None)
+    logit_bias: Optional[Dict[int, float]] = Field(default=None)
+    seed: Optional[int] = Field(default=None)
+    logprobs: Optional[bool] = Field(default=None)
+    top_logprobs: Optional[int] = Field(default=None)
 
-        self.kwargs = kwargs
+    litellm.drop_params = True
+    litellm.set_verbose = True
+    os.environ['LITELLM_LOG'] = 'DEBUG'
 
-        litellm.drop_params = True
-        litellm.set_verbose=True
-        self.set_callbacks(callbacks)
+
+    @model_validator(mode="after")
+    def validate_base_params(self) -> Self:
+        """
+        1. Model name and provider
+        Check the provided model name in the list and update it with the valid model key name.
+        Then add the model provider if it is not provided.
+        Assign a default model and provider when we cannot find a model key.
+
+        2.  Set up other base parameters for the model and LiteLLM as below:
+        1. LiteLLM - drop_params, set_verbose, callbacks
+        2. Model setup - context_window_size, api_key, base_url
+        """
+
+        if self.model is None:
+            self._logger.log(level="error", message="Model name is missing.", color="red")
+            raise PydanticCustomError("model_missing", "The model name must be provided.", {})
+
+
+        self._init_model_name = self.model
+        self.model = None
+
+        if self.provider and MODELS.get(self.provider) is not None:
+            provider_model_list = MODELS.get(self.provider)
+            for item in provider_model_list:
+                if self.model is None:
+                    if item == self._init_model_name:
+                        self.model = item
+                    elif self._init_model_name in item and self.model is None:
+                        self.model = item
+                    else:
+                        temp_model = provider_model_list[0]
+                        self._logger.log(level="info", message=f"The provided model: {self._init_model_name} is not in the list. We'll assign a model: {temp_model} from the selected model provider: {self.provider}.", color="yellow")
+                        self.model = temp_model
+                    # raise PydanticCustomError("invalid_model", "The provided model is not in the list.", {})
+
+        else:
+            for k, v in MODELS.items():
+                for item in v:
+                    if self.model is None:
+                        if self._init_model_name == item:
+                            self.model = item
+                            self.provider = k
+
+                        elif self.model is None and self._init_model_name in item:
+                            self.model = item
+                            self.provider = k
+
+            if self.model is None:
+                self._logger.log(level="info", message=f"The provided model \'{self.model}\' is not in the list. We'll assign a default model.", color="yellow")
+                self.model = DEFAULT_MODEL_NAME
+                self.provider = "openai"
+                # raise PydanticCustomError("invalid_model", "The provided model is not in the list.", {})
+
+        if self.callbacks is not None:
+            self._set_callbacks(self.callbacks)
+
+        self.context_window_size = self._get_context_window_size()
+
+        api_key_name = LLM_API_KEY_NAMES.get(self.provider, "LITELLM_API_KEY")
+        self.api_key = os.environ.get(api_key_name, None)
+
+        base_url_key_name = LLM_BASE_URL_KEY_NAMES.get(self.provider, "OPENAI_API_BASE")
+        self.base_url = os.environ.get(base_url_key_name, None)
+
+        return self
+
 
     def call(
         self,
-        output_formats: List[TaskOutputFormat],
+        output_formats: List[str | TaskOutputFormat],
         field_list: Optional[List[ResponseField]],
         messages: List[Dict[str, str]],
-        callbacks: List[Any] = [],
+        **kwargs,
+        # callbacks: List[Any] = [],
     ) -> str:
         """
-        Execute LLM based on Agent's controls.
+        Execute LLM based on the agent's params and model params.
         """
 
         with suppress_warnings():
-            if callbacks and len(callbacks) > 0:
-                self.set_callbacks(callbacks)
+            if len(self.callbacks) > 0:
+                self._set_callbacks(self.callbacks)
 
             try:
-                response_format = None
+                # response_format = None
+                # #! REFINEME
+                # if TaskOutputFormat.JSON in output_formats:
+                #     response_format = LLMResponseSchema(
+                #         response_type="json_object", field_list=field_list
+                #     )
 
-                #! REFINEME
-                if TaskOutputFormat.JSON in output_formats:
-                    response_format = LLMResponseSchema(
-                        response_type="json_object", field_list=field_list
-                    )
+                params = {}
+                for item in LITELLM_COMPLETION_KEYS:
+                    if hasattr(self, item) and getattr(self, item) is not None:
+                        params[item] = getattr(self, item)
 
-                params = {
-                    "model": self.model,
-                    "messages": messages,
-                    "timeout": self.timeout,
-                    "temperature": self.temperature,
-                    "top_p": self.top_p,
-                    "n": self.n,
-                    "stop": self.stop,
-                    "max_tokens": self.max_tokens or self.max_completion_tokens,
-                    "presence_penalty": self.presence_penalty,
-                    "frequency_penalty": self.frequency_penalty,
-                    "logit_bias": self.logit_bias,
-                    # "response_format": response_format,
-                    "seed": self.seed,
-                    "logprobs": self.logprobs,
-                    "top_logprobs": self.top_logprobs,
-                    "api_base": self.base_url,
-                    "api_version": self.api_version,
-                    "api_key": self.api_key,
-                    "stream": False,
-                    **self.kwargs,
-                }
-                params = {k: v for k, v in params.items() if v is not None}
-                res = litellm.completion(**params)
+                res = litellm.completion(messages=messages, stream=False, **params)
                 return res["choices"][0]["message"]["content"]
 
             except Exception as e:
-                logging.error(f"LiteLLM call failed: {str(e)}")
+                self._logger.log(level="error", message=f"LiteLLM call failed: {str(e)}", color="red")
                 return None
 
-    def supports_function_calling(self) -> bool:
+
+    def _supports_function_calling(self) -> bool:
         try:
             params = get_supported_openai_params(model=self.model)
             return "response_format" in params
         except Exception as e:
-            logging.error(f"Failed to get supported params: {str(e)}")
+            self._logger.log(level="error", message=f"Failed to get supported params: {str(e)}", color="red")
             return False
 
-    def supports_stop_words(self) -> bool:
+
+    def _supports_stop_words(self) -> bool:
         try:
             params = get_supported_openai_params(model=self.model)
             return "stop" in params
         except Exception as e:
-            logging.error(f"Failed to get supported params: {str(e)}")
+            self._logger.log(level="error", message=f"Failed to get supported params: {str(e)}", color="red")
             return False
 
-    def get_context_window_size(self) -> int:
+
+    def _get_context_window_size(self) -> int:
         """
         Only use 75% of the context window size to avoid cutting the message in the middle.
         """
-        return (
-            int(LLM_CONTEXT_WINDOW_SIZES.get(self.model) * 0.75)
-            if hasattr(LLM_CONTEXT_WINDOW_SIZES, self.model)
-            else DEFAULT_CONTEXT_WINDOW
-        )
+        return int(LLM_CONTEXT_WINDOW_SIZES.get(self.model) * 0.75) if LLM_CONTEXT_WINDOW_SIZES.get(self.model) is not None else DEFAULT_CONTEXT_WINDOW_SIZE
 
-    def set_callbacks(self, callbacks: List[Any]):
+
+    def _set_callbacks(self, callbacks: List[Any]):
         callback_types = [type(callback) for callback in callbacks]
         for callback in litellm.success_callback[:]:
             if type(callback) in callback_types:

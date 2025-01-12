@@ -2,11 +2,12 @@ import os
 import pytest
 from unittest.mock import patch
 from typing import Dict, Any
+
 from versionhq.agent.model import Agent
 from versionhq.task.model import Task, ResponseField, TaskOutput, ConditionalTask
 from versionhq.tool.model import Tool, ToolSet
 
-DEFAULT_MODEL_NAME = os.environ.get("LITELLM_MODEL_NAME", "gpt-3.5-turbo")
+DEFAULT_MODEL_NAME = os.environ.get("DEFAULT_MODEL_NAME", "gpt-3.5-turbo")
 LITELLM_API_KEY = os.environ.get("LITELLM_API_KEY")
 
 
@@ -15,7 +16,6 @@ def test_sync_execute_task():
         role="demo agent 1",
         goal="My amazing goals",
         backstory="My amazing backstory",
-        verbose=True,
         llm=DEFAULT_MODEL_NAME,
         max_tokens=3000,
     )
@@ -67,7 +67,7 @@ def test_sync_execute_with_task_context():
     Use case = One agent handling multiple tasks sequentially using context set in the main task.
     """
 
-    agent = Agent(role="demo 3", goal="My amazing goals", verbose=True, llm=DEFAULT_MODEL_NAME, max_tokens=3000,)
+    agent = Agent(role="demo 3", goal="My amazing goals", llm=DEFAULT_MODEL_NAME, max_tokens=3000,)
     sub_task = Task(
         description="analyze the client's business model",
         output_field_list=[
@@ -107,7 +107,6 @@ def test_sync_execute_task_with_prompt_context():
         role="demo agent 4",
         goal="My amazing goals",
         backstory="My amazing backstory",
-        verbose=True,
         llm=DEFAULT_MODEL_NAME,
         max_tokens=3000,
     )
@@ -319,6 +318,3 @@ def test_create_json_dict_output():
 
 
 # token usage logic
-
-if __name__ == "__main__":
-    test_create_json_dict_output()

@@ -17,7 +17,7 @@ class TeamPlanner:
 
     def __init__(self, tasks: List[Task], planner_llm: Optional[Any] = None):
         self.tasks = tasks
-        self.planner_llm = planner_llm if planner_llm else os.environ.get("LITELLM_MODEL_NAME")
+        self.planner_llm = planner_llm if planner_llm else os.environ.get("DEFAULT_MODEL_NAME")
 
 
     def _handle_assign_agents(self, unassigned_tasks: List[Task]) -> List[Any]:
