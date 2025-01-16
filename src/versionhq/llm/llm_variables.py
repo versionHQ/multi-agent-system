@@ -1,3 +1,6 @@
+from enum import Enum
+from typing import Type
+
 JSON_URL = "https://raw.githubusercontent.com/BerriAI/litellm/main/model_prices_and_context_window.json"
 
 
@@ -21,9 +24,11 @@ MODELS = {
         "gemini/gemini-1.5-flash",
         "gemini/gemini-1.5-pro",
         "gemini/gemini-2.0-flash-exp",
-        "gemini/gemini-gemma-2-9b-it",
-        "gemini/gemini-gemma-2-27b-it",
+        # "gemini/gemini-gemma-2-9b-it",
+        # "gemini/gemini-gemma-2-27b-it",
     ],
+    # "vetrex_ai": [
+    # ],
     "anthropic": [
         "claude-3-5-sonnet-20241022",
         "claude-3-5-sonnet-20240620",
@@ -31,10 +36,10 @@ MODELS = {
         "claude-3-opus-20240229",
         "claude-3-haiku-20240307",
     ],
-    "ollama": [
-      "ollama/llama3.1",
-      "ollama/mixtral",
-    ],
+    # "ollama": [
+    #   "ollama/llama3.1",
+    #   "ollama/mixtral",
+    # ],
     # "watson": [
     #     "watsonx/meta-llama/llama-3-1-70b-instruct",
     #     "watsonx/meta-llama/llama-3-1-8b-instruct",
@@ -135,8 +140,8 @@ LLM_API_KEY_NAMES = {
 
 LLM_BASE_URL_KEY_NAMES = {
     "openai":  "OPENAI_API_BASE",
+     "gemini": "GEMINI_API_BASE",
     "anthropic": "ANTHROPIC_API_BASE",
-    "gemini": "GEMINI_API_BASE",
 }
 
 LLM_VARS = {
@@ -225,37 +230,91 @@ LLM_VARS = {
 
 
 """
-Params for litellm.completion() func
+Params for litellm.completion() func. Address common/unique params to each provider.
 """
 
-LITELLM_COMPLETION_KEYS = [
-    "model",
-    "messages",
-    "timeout",
-    "temperature", "top_p",
-    "n",
-    "stream"
-    "stream_options"
-    "stop",
-    "max_compl,etion_tokens"
-    "max_tokens",
-    "modalities",
-    "prediction",
-    "audio",
-    "presen,ce_penalty"
-    "frequency_penalty,"
-    "logit_bias",
-    "user",
-    "response_format",
-    "seed",
-    "tools,"
-    "tool_choice"
-    "logprobs",
-    "top_logpr,obs"
-    "parallel_tool_calls"
-    "extra_headers",
-    "base_url",
-    "api_versi,on"
-    "api_key",
-    "model_list"
-]
+PARAMS = {
+    "litellm": [
+        "api_base",
+        "api_version,"
+        "num_retries",
+        "context_window_fallback_dict",
+        "fallbacks",
+        "metadata",
+    ],
+    "common": [
+        "model",
+        "messages",
+        "temperature",
+        "top_p",
+        "max_tokens",
+        "stream",
+        "tools",
+        "tool_choice",
+        "response_format",
+        "n",
+        "stop",
+        "base_url",
+        "api_key",
+    ],
+    "openai": [
+        "timeout",
+        # "temperature",
+        # "top_p",
+        # "n",
+        # "stream",
+        "stream_options",
+        # "stop",
+        "max_compl,etion_tokens",
+        # "max_tokens",
+        "modalities",
+        "prediction",
+        "audio",
+        "presence_penalty",
+        "frequency_penalty",
+        "logit_bias",
+        "user",
+        # "response_format",
+        "seed",
+        # "tools",
+        # "tool_choice",
+        "logprobs",
+        "top_logprobs",
+        "parallel_tool_calls",
+        "extra_headers",
+        "model_list"
+    ],
+    "gemini": [
+        "topK",
+    ]
+}
+
+
+class SchemaType:
+    """
+    A class to store/convert a LLM-valid schema type from the Python Type object.
+    https://swagger.io/docs/specification/v3_0/data-models/data-types/
+    https://cloud.google.com/vertex-ai/docs/reference/rest/v1/Schema#Type
+    """
+
+    def __init__(self, type: Type):
+        self.type = type
+
+    def convert(self) -> str:
+        if self.type is None:
+            return "string"
+
+        if self.type is int:
+            return "integer"
+        elif self.type is float:
+            return "number"
+        elif self.type is str:
+            return "string"
+        elif self.type is dict:
+            return "object"
+        elif self.type is list:
+            return "array"
+        elif self.type is bool:
+            return "boolean"
+        else:
+            return "string"

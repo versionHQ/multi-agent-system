@@ -94,6 +94,9 @@ Multiple `agents` can form a `team` to complete complex tasks together.
    from versionhq.agent.model import Agent
    from versionhq.task.model import Task, ResponseField
 
+   def my_callback_func():
+      """callback func"""
+
    agent = Agent(
       role="demo",
       goal="amazing project goal",
@@ -104,13 +107,11 @@ Multiple `agents` can form a `team` to complete complex tasks together.
 
    task = Task(
       description="Amazing task",
-      expected_output_json=True,
-      expected_output_pydantic=False,
-      output_field_list=[
-         ResponseField(title="test1", type=str, required=True),
-         ResponseField(title="test2", type=list, required=True),
+      response_fields=[
+         ResponseField(title="test1", data_type=str, required=True),
+         ResponseField(title="test2", data_type=list, items=str, required=True),
       ],
-      callback=None,
+      callbacks=[my_callback_func]
    )
    res = task.execute_sync(agent=agent, context="amazing context to consider.")
    return res.to_dict()
@@ -134,13 +135,13 @@ This will return a dictionary with keys defined in the `ResponseField`.
 
    task_1 = Task(
       description="Analyze the client's business model.",
-      output_field_list=[ResponseField(title="test1", type=str, required=True),],
+      response_fields=[ResponseField(title="test1", data_type=str, required=True),],
       allow_delegation=True
    )
 
     task_2 = Task(
       description="Define the cohort.",
-      output_field_list=[ResponseField(title="test1", type=int, required=True),],
+      response_fields=[ResponseField(title="test1", data_type=int, required=True),],
       allow_delegation=False
    )
 

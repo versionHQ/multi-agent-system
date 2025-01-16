@@ -4,52 +4,27 @@ from versionhq.agent.model import Agent
 from versionhq.task.model import Task, ResponseField, TaskOutput
 from versionhq.team.model import Team, TeamMember, TaskHandlingProcess, TeamOutput
 from versionhq._utils.usage_metrics import UsageMetrics
-
-MODEL_NAME = os.environ.get("DEFAULT_MODEL_NAME", "gpt-3.5-turbo")
+from versionhq.llm.llm_variables import MODELS
+from versionhq.llm.model import DEFAULT_MODEL_NAME, LLM
 
 
 def test_form_team():
-    agent_a = Agent(
-        role="agent a",
-        goal="My amazing goals",
-        backstory="My amazing backstory",
-        verbose=True,
-        llm=MODEL_NAME,
-        max_tokens=3000,
-    )
-
-    agent_b = Agent(
-        role="agent b",
-        goal="My amazing goals",
-        verbose=True,
-        llm=MODEL_NAME,
-        max_tokens=3000,
-    )
-
+    agent_a = Agent(role="agent a", goal="My amazing goals", backstory="My amazing backstory", llm=DEFAULT_MODEL_NAME, max_tokens=3000)
+    agent_b = Agent(role="agent b", goal="My amazing goals", llm=DEFAULT_MODEL_NAME, max_tokens=3000)
     task_1 = Task(
-            description="Analyze the client's business model.",
-            expected_output_json=True,
-            output_field_list=[
-                ResponseField(title="test1", type=str, required=True),
-                ResponseField(title="test2", type=list, required=True),
-            ],
-            expected_output_pydantic=True,
-            context=[],
-            callback=None,
-        )
-
+        description="Analyze the client's business model.",
+        response_fields=[
+            ResponseField(title="test1", data_type=str, required=True),
+            ResponseField(title="test2", data_type=list, required=True),
+        ],
+    )
     task_2 = Task(
         description="Define the cohort.",
-        expected_output_json=True,
-        expected_output_pydantic=True,
-        output_field_list=[
-            ResponseField(title="test1", type=int, required=True),
-            ResponseField(title="test2", type=list, required=True),
+        response_fields=[
+            ResponseField(title="test1", data_type=int, required=True),
+            ResponseField(title="test2", data_type=list, required=True),
         ],
-        context=[],
-        callback=None,
     )
-
     team = Team(
         members=[
             TeamMember(agent=agent_a, is_manager=True, task=task_1),
@@ -68,47 +43,22 @@ def test_form_team():
 
 
 def test_form_team_without_leader():
-    agent_a = Agent(
-        role="agent a",
-        goal="My amazing goals",
-        backstory="My amazing backstory",
-        verbose=True,
-        llm=MODEL_NAME,
-        max_tokens=3000,
-    )
-
-    agent_b = Agent(
-        role="agent b",
-        goal="My amazing goals",
-        verbose=True,
-        llm=MODEL_NAME,
-        max_tokens=3000,
-    )
-
+    agent_a = Agent(role="agent a", goal="My amazing goals", backstory="My amazing backstory", llm=DEFAULT_MODEL_NAME, max_tokens=3000)
+    agent_b = Agent(role="agent b", goal="My amazing goals", llm=DEFAULT_MODEL_NAME, max_tokens=3000)
     task_1 = Task(
-            description="Analyze the client's business model.",
-            expected_output_json=True,
-            output_field_list=[
-                ResponseField(title="test1", type=str, required=True),
-                ResponseField(title="test2", type=list, required=True),
-            ],
-            expected_output_pydantic=True,
-            context=[],
-            callback=None,
-        )
-
+        description="Analyze the client's business model.",
+        response_fields=[
+            ResponseField(title="test1", data_type=str, required=True),
+            ResponseField(title="test2", data_type=list, required=True),
+        ]
+    )
     task_2 = Task(
         description="Define the cohort.",
-        expected_output_json=True,
-        expected_output_pydantic=True,
-        output_field_list=[
-            ResponseField(title="test1", type=int, required=True),
-            ResponseField(title="test2", type=list, required=True),
+        response_fields=[
+            ResponseField(title="test1", data_type=int, required=True),
+            ResponseField(title="test2", data_type=list, required=True),
         ],
-        context=[],
-        callback=None,
     )
-
     team = Team(
         members=[
             TeamMember(agent=agent_a, is_manager=False, task=task_1),
@@ -127,22 +77,20 @@ def test_form_team_without_leader():
 
 
 def test_kickoff_without_leader():
-    agent_a = Agent(role="agent a", goal="My amazing goals", llm=MODEL_NAME)
-    agent_b = Agent(role="agent b", goal="My amazing goals", llm=MODEL_NAME)
+    agent_a = Agent(role="agent a", goal="My amazing goals", llm=DEFAULT_MODEL_NAME)
+    agent_b = Agent(role="agent b", goal="My amazing goals", llm=DEFAULT_MODEL_NAME)
     task_1 = Task(
         description="Analyze the client's business model.",
-        expected_output_json=True,
-        output_field_list=[
-            ResponseField(title="test1", type=str, required=True),
-            ResponseField(title="test2", type=list, required=True),
+        response_fields=[
+            ResponseField(title="test1", data_type=str, required=True),
+            ResponseField(title="test2", data_type=list, required=True),
         ],
     )
     task_2 = Task(
         description="Define the cohort.",
-        expected_output_json=True,
-        output_field_list=[
-            ResponseField(title="test1", type=int, required=True),
-            ResponseField(title="test2", type=list, required=True),
+        response_fields=[
+            ResponseField(title="test1", data_type=int, required=True),
+            ResponseField(title="test2", data_type=list, required=True),
         ],
     )
     team = Team(
@@ -163,7 +111,6 @@ def test_kickoff_without_leader():
     assert res.pydantic is None
     for item in res.task_output_list:
         assert isinstance(item, TaskOutput)
-
     assert isinstance(res_all, list)
     assert len(res_all) == 2
     for item in res_all:
@@ -183,25 +130,25 @@ def team_kickoff_with_task_callback():
     agent_a = Agent(
         role="agent a",
         goal="My amazing goals",
-        llm=MODEL_NAME
+        llm=DEFAULT_MODEL_NAME
     )
 
     agent_b = Agent(
         role="agent b",
         goal="My amazing goals",
-        llm=MODEL_NAME
+        llm=DEFAULT_MODEL_NAME
     )
 
     task_1 = Task(
         description="Analyze the client's business model.",
-        output_field_list=[ResponseField(title="test1", type=str, required=True),],
+        response_fields=[ResponseField(title="test1", data_type=str, required=True),],
         callback=demo_callback,
         callback_kwargs=dict(item="pytest demo 1")
     )
 
     task_2 = Task(
         description="Define the cohort.",
-        output_field_list=[ResponseField(title="test1", type=int, required=True),],
+        response_fields=[ResponseField(title="test1", data_type=int, required=True),],
         callback=demo_callback,
         callback_kwargs=dict(item="pytest demo 2")
     )
@@ -227,30 +174,18 @@ def test_delegate_in_team():
     When the agent belongs to the team, the team manager or peers are prioritized to delegete the task.
     """
 
-    agent_a = Agent(
-        role="agent a",
-        goal="My amazing goals",
-        llm=MODEL_NAME
-    )
-
-    agent_b = Agent(
-        role="agent b",
-        goal="My amazing goals",
-        llm=MODEL_NAME
-    )
-
+    agent_a = Agent(role="agent a", goal="My amazing goals", llm=DEFAULT_MODEL_NAME)
+    agent_b = Agent(role="agent b", goal="My amazing goals", llm=DEFAULT_MODEL_NAME)
     task_1 = Task(
         description="Analyze the client's business model.",
-        output_field_list=[ResponseField(title="test1", type=str, required=True),],
+        response_fields=[ResponseField(title="test1", data_type=str, required=True),],
         allow_delegation=True
     )
-
     task_2 = Task(
         description="Define the cohort.",
-        output_field_list=[ResponseField(title="test1", type=int, required=True),],
+        response_fields=[ResponseField(title="test1", data_type=int, required=True),],
         allow_delegation=False
     )
-
     team = Team(
         members=[
             TeamMember(agent=agent_a, is_manager=False, task=task_1),
@@ -265,17 +200,17 @@ def test_delegate_in_team():
 
 
 def test_kickoff_with_leader():
-    agent_a = Agent(role="agent a", goal="My amazing goals", llm=MODEL_NAME)
-    agent_b = Agent(role="agent b", goal="My amazing goals", llm=MODEL_NAME)
+    agent_a = Agent(role="agent a", goal="My amazing goals", llm=DEFAULT_MODEL_NAME)
+    agent_b = Agent(role="agent b", goal="My amazing goals", llm=DEFAULT_MODEL_NAME)
     task_1 = Task(
         description="Analyze the client's business model.",
-        output_field_list=[ResponseField(title="task_1", type=str, required=True),],
+        response_fields=[ResponseField(title="task_1", data_type=str, required=True),],
     )
     task_2 = Task(
         description="Define the cohort timeframe.",
-        output_field_list=[
-            ResponseField(title="task_2_1", type=int, required=True),
-            ResponseField(title="task_2_2", type=list, required=True),
+        response_fields=[
+            ResponseField(title="task_2_1", data_type=int, required=True),
+            ResponseField(title="task_2_2", data_type=list, required=True),
         ],
     )
     team = Team(
@@ -302,18 +237,18 @@ def test_hierarchial_process():
     Manager to handle the top priority task first.
     """
 
-    agent_a = Agent(role="agent a", goal="My amazing goals", llm=MODEL_NAME)
-    agent_b = Agent(role="agent b", goal="My amazing goals", llm=MODEL_NAME)
-    agent_c = Agent(role="agent c", goal="My amazing goals", llm=MODEL_NAME)
+    agent_a = Agent(role="agent a", goal="My amazing goals", llm=DEFAULT_MODEL_NAME)
+    agent_b = Agent(role="agent b", goal="My amazing goals", llm=DEFAULT_MODEL_NAME)
+    agent_c = Agent(role="agent c", goal="My amazing goals", llm=DEFAULT_MODEL_NAME)
     task_1 = Task(
         description="Analyze the client's business model.",
-        output_field_list=[ResponseField(title="task_1", type=str, required=True),],
+        response_fields=[ResponseField(title="task_1", data_type=str, required=True),],
     )
     task_2 = Task(
         description="Define the cohort timeframe.",
-        output_field_list=[
-            ResponseField(title="task_2_1", type=int, required=True),
-            ResponseField(title="task_2_2", type=list, required=True),
+        response_fields=[
+            ResponseField(title="task_2_1", data_type=int, required=True),
+            ResponseField(title="task_2_2", data_type=list, required=True),
         ],
     )
     team = Team(
@@ -342,22 +277,22 @@ def test_handle_team_task():
     Make the best team formation with agents and tasks given.
     """
 
-    agent_a = Agent(role="agent a", goal="My amazing goals", llm=MODEL_NAME)
-    agent_b = Agent(role="agent b", goal="My amazing goals", llm=MODEL_NAME)
-    agent_c = Agent(role="agent c", goal="My amazing goals", llm=MODEL_NAME)
+    agent_a = Agent(role="agent a", goal="My amazing goals", llm=DEFAULT_MODEL_NAME)
+    agent_b = Agent(role="agent b", goal="My amazing goals", llm=DEFAULT_MODEL_NAME)
+    agent_c = Agent(role="agent c", goal="My amazing goals", llm=DEFAULT_MODEL_NAME)
     team_task = Task(
         description="Define outbound strategies.",
-        output_field_list=[ResponseField(title="team_task_1", type=str, required=True),],
+        response_fields=[ResponseField(title="team_task_1", data_type=str, required=True),],
     )
     task_1 = Task(
         description="Analyze the client's business model.",
-        output_field_list=[ResponseField(title="task_1", type=str, required=True),],
+        response_fields=[ResponseField(title="task_1", data_type=str, required=True),],
     )
     task_2 = Task(
         description="Define the cohort timeframe.",
-        output_field_list=[
-            ResponseField(title="task_2_1", type=int, required=True),
-            ResponseField(title="task_2_2", type=list, required=True),
+        response_fields=[
+            ResponseField(title="task_2_1", data_type=int, required=True),
+            ResponseField(title="task_2_2", data_type=list, required=True),
         ],
     )
     team_solo = Team(

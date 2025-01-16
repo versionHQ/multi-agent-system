@@ -19,7 +19,7 @@ def test_build_agent_with_minimal_input():
     assert agent.role in agent.backstory
     assert agent.goal in agent.backstory
     assert isinstance(agent.llm, LLM)
-    assert agent.llm.model == "gpt-3.5-turbo"
+    assert agent.llm.model == DEFAULT_MODEL_NAME
     assert agent.llm.api_key == LITELLM_API_KEY
     assert agent.tools == []
 
@@ -34,7 +34,7 @@ def test_build_agent_with_backstory():
     assert agent.role == "analyst"
     assert agent.backstory == "You are competitive analysts who have abundand knowledge in marketing, product management."
     assert isinstance(agent.llm, LLM)
-    assert agent.llm.model == "gpt-3.5-turbo"
+    assert agent.llm.model == DEFAULT_MODEL_NAME
     assert agent.llm.api_key == LITELLM_API_KEY
     assert agent.tools == []
 
@@ -54,7 +54,7 @@ def test_build_agent():
     for item in agent.skillsets:
         assert item in agent.backstory
     assert isinstance(agent.llm, LLM)
-    assert agent.llm.model == "gpt-3.5-turbo"
+    assert agent.llm.model == DEFAULT_MODEL_NAME
     assert agent.llm.api_key == LITELLM_API_KEY
     assert agent.tools == []
 
@@ -90,7 +90,6 @@ def test_build_agent_with_llm_config():
         llm=llm_params,
         step_callback=dummy_func,
     )
-
     assert isinstance(agent.llm, LLM)
     assert agent.llm.model == "gemini/gemini-1.5-flash"
     assert agent.llm.api_key is not None
@@ -111,14 +110,12 @@ def test_build_agent_with_llm_instance():
         max_tokens=3000,
         step_callback=dummy_func,
     )
-
     assert isinstance(agent.llm, LLM)
     assert agent.llm.model == "gemini/gemini-1.5-flash"
     assert agent.llm.api_key is not None
     assert agent.llm.max_tokens == 3000
     assert agent.llm.logprobs == False
     assert agent.llm.callbacks == [dummy_func]
-
 
 
 def test_build_agent_with_llm_and_func_llm_config():
@@ -155,7 +152,6 @@ def test_build_agent_with_llm_and_func_llm_instance():
         max_tokens=3000,
         step_callback=dummy_func,
     )
-
     assert isinstance(agent.llm, LLM) and isinstance(agent.function_calling_llm, LLM)
     assert agent.function_calling_llm.model == "gemini/gemini-1.5-flash" if agent.function_calling_llm._supports_function_calling() else DEFAULT_MODEL_NAME
     assert agent.function_calling_llm.api_key is not None

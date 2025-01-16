@@ -18,22 +18,106 @@ from versionhq._utils.logger import Logger
 
 class ResponseField(BaseModel):
     """
-    Field class to use in the response schema for the JSON response.
+    A class to store the response format and schema that will cascade to the LLM.
+    The `config` field can store additional params:
+    https://community.openai.com/t/official-documentation-for-supported-schemas-for-response-format-parameter-in-calls-to-client-beta-chats-completions-parse/932422/3
     """
 
-    title: str = Field(default=None)
-    type: Type = Field(default=str)
+    title: str = Field(default=None, description="title of the field")
+    data_type: Type = Field(default=None)
+    items: Optional[Type] = Field(default=None, description="store data type of the array items")
+    properties: Optional[List[BaseModel]] = Field(default=None, description="store dict items in ResponseField format")
     required: bool = Field(default=True)
+    nullable: bool = Field(default=False)
+    config: Optional[Dict[str, Any]] = Field(default=None, description="additional rules")
 
 
-    def _annotate(self, value: Any) -> Annotated:
+    @model_validator(mode="after")
+    def validate_instance(self) -> Self:
         """
-        Address `create_model`
+        Validate the model instance based on the given `data_type`. (An array must have `items`, dict must have properties.)
         """
-        return Annotated[self.type, value] if isinstance(value, self.type) else Annotated[str, str(value)]
+
+        if self.data_type is list and self.items is None:
+            self.items = str
+
+        if self.data_type is dict or (self.data_type is list and self.items is dict):
+            if self.properties is None:
+                raise PydanticCustomError("missing_properties", "The dict type has to set the properties.", {})
+
+            else:
+                for item in self.properties:
+                    if not isinstance(item, ResponseField):
+                        raise PydanticCustomError("invalid_properties", "Properties field must input in ResponseField format.", {})
+
+        return self
+
+
+    def _format_props(self) -> Dict[str, Any]:
+        """
+        Structure valid properties. We accept 2 nested objects.
+        """
+        from versionhq.llm.llm_variables import SchemaType
+
+        schema_type = SchemaType(type=self.data_type).convert()
+        props: Dict[str, Any] = {}
+
+        if self.data_type is list and self.items is not dict:
+            props = {
+                "type": schema_type,
+                "items": { "type": SchemaType(type=self.items).convert() },
+            }
+
+        elif self.data_type is list and self.items is dict:
+            nested_p, nested_r = dict(), list()
+
+            if self.properties:
+                for item in self.properties:
+                    nested_p.update(**item._format_props())
+
+                    if item.required:
+                        nested_r.append(item.title)
+
+            props = {
+                "type": schema_type,
+                "items": {
+                    "type": SchemaType(type=self.items).convert(),
+                    "properties": nested_p,
+                    "required": nested_r,
+                    "additionalProperties": False
+                }
+            }
+
+        elif self.data_type is dict:
+            p, r = dict(), list()
+
+            if self.properties:
+                for item in self.properties:
+                    p.update(**item._format_props())
+
+                    if item.required:
+                        r.append(item.title)
+
+            props = {
+                "type": schema_type,
+                "properties": p,
+                "required": r,
+                "additionalProperties": False
+            }
+
+        else:
+            props = {
+                "type": schema_type,
+                "nullable": self.nullable,
+            }
+
+        return { self.title: { **props, **self.config }} if self.config else { self.title: props }
 
 
     def _convert(self, value: Any) -> Any:
+        """
+        Convert the given value to the ideal data type.
+        """
         try:
             if self.type is Any:
                 pass
@@ -42,7 +126,9 @@ class ResponseField(BaseModel):
             elif self.type is float:
                 return float(value)
             elif self.type is list or self.type is dict:
-                return json.loads(value)
+                return json.loads(eval(str(value)))
+            elif self.type is str:
+                return str(value)
             else:
                 return value
         except:
@@ -50,6 +136,9 @@ class ResponseField(BaseModel):
 
 
     def create_pydantic_model(self, result: Dict, base_model: InstanceOf[BaseModel] | Any) -> Any:
+        """
+        Create a Pydantic model from the given result
+        """
         for k, v in result.items():
             if k is not self.title:
                 pass
@@ -59,6 +148,13 @@ class ResponseField(BaseModel):
             else:
                 setattr(base_model, k, v)
         return base_model
+
+
+    def _annotate(self, value: Any) -> Annotated:
+        """
+        Address Pydantic's `create_model`
+        """
+        return Annotated[self.type, value] if isinstance(value, self.type) else Annotated[str, str(value)]
 
 
 
@@ -108,14 +204,15 @@ class TaskOutput(BaseModel):
 
 class Task(BaseModel):
     """
-    Task to be executed by the agent or the team.
-    Each task must have a description and at least one expected output format either Pydantic, Raw, or JSON, with necessary fields in ResponseField.
-    Then output will be stored in TaskOutput class.
+    Task to be executed by agents or teams.
+    Each task must have a description.
+    Default response is JSON string that strictly follows `response_fields` - and will be stored in TaskOuput.raw / json_dict.
+    When `pydantic_output` is provided, we prioritize them and store raw (json string), json_dict, pydantic in the TaskOutput class.
     """
 
     __hash__ = object.__hash__
+    _logger: Logger = PrivateAttr(default_factory=lambda: Logger(verbose=True))
     _original_description: str = PrivateAttr(default=None)
-    _logger: Logger = PrivateAttr()
     _task_output_handler = TaskOutputStorageHandler()
     config: Optional[Dict[str, Any]] = Field(default=None, description="values to set on Task class")
 
@@ -124,11 +221,13 @@ class Task(BaseModel):
     description: str = Field(description="Description of the actual task")
 
     # output
-    expected_output_json: bool = Field(default=True)
-    expected_output_pydantic: bool = Field(default=False)
-    output_field_list: List[ResponseField] = Field(
+    pydantic_custom_output: Optional[Any] = Field(
+        default=None,
+        description="store a custom Pydantic class that will be passed to the model as a response format."
+    )
+    response_fields: List[ResponseField] = Field(
         default_factory=list,
-        description="provide output key and data type. this will be cascaded to the agent via task.prompt()"
+        description="store the list of ResponseFields to create the response format"
     )
     output: Optional[TaskOutput] = Field(default=None, description="store the final task output in TaskOutput class")
 
@@ -178,7 +277,7 @@ class Task(BaseModel):
     @model_validator(mode="after")
     def set_attributes_based_on_config(self) -> Self:
         """
-        Set attributes based on the agent configuration.
+        Set attributes based on the task configuration.
         """
 
         if self.config:
@@ -211,77 +310,62 @@ class Task(BaseModel):
         return self
 
 
-    def prompt(self, customer: str = None, product_overview: str = None) -> str:
+    def _draft_output_prompt(self, model_provider: str) -> str:
+        """
+        Draft prompts on the output format by converting `
+        """
+
+        output_prompt = ""
+
+        if self.pydantic_custom_output:
+            output_prompt = f"""
+Your response MUST STRICTLY follow the given repsonse format:
+JSON schema: {str({k: v for k, v in self.pydantic_custom_output.__fields__.items()})}
+"""
+
+        elif self.response_fields:
+            output_prompt, output_formats_to_follow = "", dict()
+            response_format = str(self._structure_response_format(model_provider=model_provider))
+            for item in self.response_fields:
+                if item:
+                    output_formats_to_follow[item.title] = f"<Return your answer in {item.data_type.__name__}>"
+
+            output_prompt = f"""
+Your response MUST be a valid JSON string that strictly follows the response format. Use double quotes for all keys and string values. Do not use single quotes, trailing commas, or any other non-standard JSON syntax.
+Response format: {response_format}
+Ref. Output image: {output_formats_to_follow}
+"""
+
+        else:
+            output_prompt = "Return your response as a valid JSON string, enclosed in double quotes. Do not use single quotes, trailing commas, or other non-standard JSON syntax."
+
+        return output_prompt
+
+
+    def prompt(self, model_provider: str = None, customer: str = None, product_overview: str = None) -> str:
         """
         Format the task prompt and cascade it to the agent.
         When the task has context, add context prompting of all the tasks in the context.
         When we have cusotmer/product info, add them to the prompt.
         """
 
-        task_slices = [self.description, f"{self.output_prompt}", f"Take the following context into consideration: "]
+        output_prompt = self._draft_output_prompt(model_provider=model_provider)
+        task_slices = [self.description, output_prompt,]
 
         if self.context:
             context_outputs = "\n".join([task.output.context_prompting() if hasattr(task, "output") else "" for task in self.context])
-            task_slices.insert(len(task_slices),  context_outputs)
+            task_slices.insert(len(task_slices), f"Take the following contexts from other tasks into consideration: {context_outputs}")
 
         if customer:
-            task_slices.insert(len(task_slices),  f"Customer overview: {customer}")
+            task_slices.insert(len(task_slices), f"Customer to address: {customer}")
 
         if product_overview:
-            task_slices.insert(len(task_slices), f"Product overview: {product_overview}")
+            task_slices.insert(len(task_slices), f"Product to promote: {product_overview}")
 
         if self.prompt_context:
-            task_slices.insert(len(task_slices), self.prompt_context)
+            task_slices.insert(len(task_slices), f"Take the following input into consideration: {self.prompt_context}")
 
         return "\n".join(task_slices)
-
-
-    def _create_json_output(self, raw_result: str) -> Dict[str, Any]:
-        """
-        Create json (dict) output from the raw result.
-        """
-        import ast
-
-        output_json_dict: Dict[str, Any] = dict()
-
-        try:
-            raw_result = raw_result.replace("{'", '{"').replace("{ '", '{"').replace("': '", '": "').replace("'}", '"}').replace("' }", '"}').replace("', '", '", "').replace("['", '["').replace("[ '", '[ "').replace("']", '"]').replace("' ]", '" ]').replace("{\n'", '{"').replace("{\'", '{"')
-            r = json.dumps(eval(str(raw_result)))
-            output_json_dict = json.loads(r)
-
-            if isinstance(output_json_dict, str):
-                output_json_dict = ast.literal_eval(r)
-
-        except:
-            output_json_dict = { "output": raw_result }
-
-        return output_json_dict
-
-
-    def _create_pydantic_output(self, output_json_dict: Dict[str, Any], raw_result: Any = None) -> Optional[Any]:
-        """
-        Create pydantic output from the `raw` result.
-        """
-
-        output_pydantic = None
-        if isinstance(raw_result, BaseModel):
-            output_pydantic = raw_result
-
-        elif hasattr(output_json_dict, "output"):
-            output_pydantic = create_model("PydanticTaskOutput", output=output_json_dict["output"], __base__=BaseModel)
-
-        else:
-            output_pydantic = create_model("PydanticTaskOutput", __base__=BaseModel)
-            try:
-                for item in self.output_field_list:
-                    value = output_json_dict[item.title] if hasattr(output_json_dict, item.title) else None
-                    if value and type(value) is not item.type:
-                        value = item._convert(value)
-                    setattr(output_pydantic, item.title, value)
-            except:
-                setattr(output_pydantic, "output", output_json_dict)
-
-        return output_pydantic
 
 
     def _get_output_format(self) -> TaskOutputFormat:
@@ -290,6 +374,124 @@ class Task(BaseModel):
         if self.output_pydantic == True:
             return TaskOutputFormat.PYDANTIC
         return TaskOutputFormat.RAW
+
+
+    def _structure_response_format(self, data_type: str = "object", model_provider: str = "gemini") -> Dict[str, Any] | None:
+        """
+        Create and return a valid response format using
+            - mannual response schema from `self.response_fields`, or
+            - SDK objects from `pydantic_custom_output`.
+        OpenAI:
+        https://platform.openai.com/docs/guides/structured-outputs?context=ex1#function-calling-vs-response-format
+        https://platform.openai.com/docs/guides/structured-outputs?context=with_parse#some-type-specific-keywords-are-not-yet-supported
+        Gemini:
+        """
+
+        response_schema = None
+
+        if self.response_fields:
+            properties, required_fields = {}, []
+            for i, item in enumerate(self.response_fields):
+                if item:
+                    if item.data_type is dict:
+                        properties.update(item._format_props())
+                    else:
+                        properties.update(item._format_props())
+
+                    #if item.required:
+                    required_fields.append(item.title)
+
+            response_schema = {
+                "type": "object",
+                "properties": properties,
+                "required": required_fields,
+                "additionalProperties": False, # for openai
+            }
+
+
+        elif self.pydantic_custom_output:
+            response_schema = {
+                **self.pydantic_custom_output.model_json_schema(),
+                "additionalProperties": False,
+                "required": [k for k, v in self.pydantic_custom_output.__fields__.items()],
+                "strict": True,
+            }
+
+
+        if response_schema:
+            if model_provider == "gemini":
+                return {
+                    "type": data_type,
+                    "response_schema": response_schema,
+                    "enforce_validation": True
+                }
+
+            if model_provider == "openai":
+                if self.pydantic_custom_output:
+                    return self.pydantic_custom_output
+                else:
+                    return {
+                        "type": "json_schema",
+                        "json_schema": { "name": "outcome", "strict": True, "schema": response_schema },
+                    }
+        else:
+            return None
+
+
+    def _create_json_output(self, raw: str) -> Dict[str, Any]:
+        """
+        Create json (dict) output from the raw output and `response_fields` information.
+        """
+
+        if raw is None or raw == "":
+            self._logger.log(level="error", message="The model returned an empty response. Returning an empty dict.", color="yellow")
+            output = { "output": "n.a." }
+            return output
+
+        try:
+            r = str(raw).replace("true", "True").replace("false", "False")
+            j = json.dumps(eval(r))
+            output = json.loads(j)
+            if isinstance(output, dict):
+                return output
+
+            else:
+                r = str(raw).replace("{'", '{"').replace("{ '", '{"').replace("': '", '": "').replace("'}", '"}').replace("' }", '"}').replace("', '", '", "').replace("['", '["').replace("[ '", '[ "').replace("']", '"]').replace("' ]", '" ]').replace("{\n'", '{"').replace("{\'", '{"').replace("true", "True").replace("false", "False")
+                j = json.dumps(eval(r))
+                output = json.loads(j)
+
+                if isinstance(output, dict):
+                    return output
+
+                else:
+                    import ast
+                    output = ast.literal_eval(r)
+                    return output if isinstance(output, dict) else { "output": str(r) }
+
+        except:
+            output = { "output": str(raw) }
+            return output
+
+
+
+    def _create_pydantic_output(self, raw: str = None, json_dict: Dict[str, Any] = None) -> InstanceOf[BaseModel]:
+        """
+        Create pydantic output from the `raw` result.
+        """
+
+        output_pydantic = None
+        json_dict = json_dict
+
+        try:
+            if not json_dict:
+                json_dict = self._create_json_output(raw=raw)
+
+            output_pydantic = self.pydantic_custom_output(**json_dict)
+
+        except:
+            pass
+
+        return output_pydantic
 
 
     def interpolate_inputs(self, inputs: Dict[str, Any]) -> None:
@@ -345,6 +547,14 @@ class Task(BaseModel):
 
         self.prompt_context = context
         task_output: InstanceOf[TaskOutput] = None
+        task_tools: List[InstanceOf[Tool]] = None
+
+        for item in self.tools:
+            if isinstance(item, ToolSet) and item.tool.call_llm:
+                task_tools.append(item.tool)
+            elif isinstance(item, Tool) and item.call_llm:
+                task_tools.append(item)
+
 
         if self.allow_delegation:
             agent_to_delegate = None
@@ -364,23 +574,22 @@ class Task(BaseModel):
             self.delegations += 1
 
         if self.take_tool_res_as_final == True:
-            output = agent.execute_task(task=self, context=context)
+            output = agent.execute_task(task=self, context=context, task_tools=task_tools)
             task_output = TaskOutput(task_id=self.id, tool_output=output)
 
         else:
-            output_raw, output_json_dict, output_pydantic = agent.execute_task(task=self, context=context), None, None
+            raw_output = agent.execute_task(task=self, context=context, task_tools=task_tools)
+            json_dict_output = self._create_json_output(raw=raw_output)
+            if "outcome" in json_dict_output:
+                json_dict_output = self._create_json_output(raw=str(json_dict_output["outcome"]))
 
-            if self.expected_output_json == True:
-                output_json_dict = self._create_json_output(raw_result=output_raw)
-
-            if self.expected_output_pydantic == True:
-                output_pydantic = self._create_pydantic_output(output_json_dict=output_json_dict)
+            pydantic_output = self._create_pydantic_output(raw=raw_output, json_dict=json_dict_output) if self.pydantic_custom_output else None
 
             task_output = TaskOutput(
                 task_id=self.id,
-                raw=output_raw,
-                pydantic=output_pydantic,
-                json_dict=output_json_dict
+                raw=raw_output,
+                pydantic=pydantic_output,
+                json_dict=json_dict_output
             )
 
         self.output = task_output
@@ -415,47 +624,8 @@ class Task(BaseModel):
 
 
     @property
-    def output_prompt(self) -> str:
-        """
-        Draft prompts on the output format by converting `output_field_list` to dictionary.
-        """
-
-        output_prompt, output_formats_to_follow = "", dict()
-        for item in self.output_field_list:
-            output_formats_to_follow[item.title] = f"<Return your answer in {item.type.__name__}>"
-
-        output_prompt = f"""
-Output only valid JSON conforming to the specified format. Use double quotes for all keys and string values. Do not use single quotes, trailing commas, or other non-standard JSON syntax.
-Specified format: {output_formats_to_follow}
-        """
-        return output_prompt
-
-
-    @property
-    def expected_output_formats(self) -> List[str | TaskOutputFormat]:
-        """
-        Return output formats in list with the ENUM item.
-        `TaskOutputFormat.RAW` is set as default.
-        """
-        outputs = [TaskOutputFormat.RAW.value,]
-        if self.expected_output_json:
-            outputs.append(TaskOutputFormat.JSON.value)
-        if self.expected_output_pydantic:
-            outputs.append(TaskOutputFormat.PYDANTIC.value)
-        return outputs
-
-
-    @property
     def key(self) -> str:
-        output_format = (
-            TaskOutputFormat.JSON
-            if self.expected_output_json == True
-            else (
-                TaskOutputFormat.PYDANTIC
-                if self.expected_output_pydantic == True
-                else TaskOutputFormat.RAW
-            )
-        )
+        output_format = TaskOutputFormat.JSON if self.response_fields else TaskOutputFormat.PYDANTIC if self.pydantic_custom_output is not None else TaskOutputFormat.RAW
         source = [self.description, output_format]
         return md5("|".join(source).encode(), usedforsecurity=False).hexdigest()
 
@@ -463,12 +633,10 @@ Specified format: {output_formats_to_follow}
     @property
     def summary(self) -> str:
         return f"""
-        Task ID: {str(self.id)}
-        "Description": {self.description}
-        "Prompt": {self.output_prompt}
-        "Tools": {", ".join([tool.name for tool in self.tools])}
+Task ID: {str(self.id)}
+"Description": {self.description}
+"Tools": {", ".join([tool.name for tool in self.tools])}
         """
-
 
 
 

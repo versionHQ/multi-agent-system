@@ -4,26 +4,35 @@ import sys
 import threading
 import warnings
 import litellm
+from litellm import JSONSchemaValidationError
 from abc import ABC
 from dotenv import load_dotenv
 from litellm import get_supported_openai_params
 from contextlib import contextmanager
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Type
 from typing_extensions import Self
 
 from pydantic import UUID4, BaseModel, Field, PrivateAttr, field_validator, model_validator, create_model, InstanceOf, ConfigDict
 from pydantic_core import PydanticCustomError
 
-from versionhq.llm.llm_variables import LLM_CONTEXT_WINDOW_SIZES, LLM_API_KEY_NAMES, LLM_BASE_URL_KEY_NAMES, MODELS, LITELLM_COMPLETION_KEYS
+from openai import OpenAI
+
+from versionhq.llm.llm_variables import LLM_CONTEXT_WINDOW_SIZES, LLM_API_KEY_NAMES, LLM_BASE_URL_KEY_NAMES, MODELS, PARAMS, SchemaType
 from versionhq.task import TaskOutputFormat
-from versionhq.task.model import ResponseField
+from versionhq.task.model import ResponseField, Task
+from versionhq.tool.model import Tool, ToolSet
 from versionhq._utils.logger import Logger
 
 
 load_dotenv(override=True)
-API_KEY_LITELLM = os.environ.get("API_KEY_LITELLM")
+LITELLM_API_KEY = os.environ.get("LITELLM_API_KEY")
+LITELLM_API_BASE = os.environ.get("LITELLM_API_BASE")
 DEFAULT_CONTEXT_WINDOW_SIZE = int(8192 * 0.75)
 DEFAULT_MODEL_NAME = os.environ.get("DEFAULT_MODEL_NAME")
+
+proxy_openai_client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"), organization="versionhq", base_url=LITELLM_API_BASE)
+openai_client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+
 
 class FilteredStream:
     def __init__(self, original_stream):
@@ -62,49 +71,12 @@ def suppress_warnings():
             sys.stderr = old_stderr
 
 
-class LLMResponseSchema:
-    """
-    Use the response schema for LLM response.
-    `field_list` contains the title, value type, bool if required of each field that needs to be returned.
-    field_list: [{ title, type, required } ]
-
-    i.e., reponse_schema
-    response_type: "array"  *options: "array", "dict"
-    propeties: { "recipe_name": { "type": "string" }, },
-    required:  ["recipe_name"]
-    """
-
-    def __init__(self, response_type: str, field_list: List[ResponseField]):
-        self.type = response_type
-        self.field_list = field_list
-
-    @property
-    def schema(self):
-        if len(self.field_list) == 0:
-            return
-
-        properties = [
-            {
-                field.title: {
-                    "type": field.type,
-                }
-            }
-            for field in self.field_list
-        ]
-        required = [field.title for field in self.field_list if field.required == True]
-        response_schema = {
-            "type": self.type,
-            "items": {"type": "object", "properties": {*properties}},
-            "required": required,
-        }
-        return response_schema
-
-
 class LLM(BaseModel):
     """
     An LLM class to store params except for response formats which will be given in the task handling process.
     Use LiteLLM to connect with the model of choice.
     Some optional params are passed by the agent, else follow the default settings of the model provider.
+    Ref. https://docs.litellm.ai/docs/completion/input
     """
 
     _logger: Logger = PrivateAttr(default_factory=lambda: Logger(verbose=True))
@@ -113,9 +85,8 @@ class LLM(BaseModel):
 
     model: str = Field(default=DEFAULT_MODEL_NAME)
     provider: Optional[str] = Field(default=None, description="model provider or custom model provider")
-    base_url: Optional[str] = Field(default=None, description="litellm's api base")
-    api_key: Optional[str] = Field(default=None)
-    api_version: Optional[str] = Field(default=None)
+    base_url: Optional[str] = Field(default=None, description="api base of the model provider")
+    api_key: Optional[str] = Field(default=None, description="api key of the model provider")
 
     # optional params
     timeout: Optional[float | int] = Field(default=None)
@@ -133,23 +104,28 @@ class LLM(BaseModel):
     seed: Optional[int] = Field(default=None)
     logprobs: Optional[bool] = Field(default=None)
     top_logprobs: Optional[int] = Field(default=None)
+    response_format: Optional[Any] = Field(default=None)
+    tools: Optional[List[Dict[str, Any]]] = Field(default=None, description="store tool params")
+
+    # LiteLLM specific fields
+    api_base: Optional[str] = Field(default=None, description="litellm specific field - api base of the model provider")
+    api_version: Optional[str] = Field(default=None)
+    num_retries: Optional[int] = Field(default=2)
+    context_window_fallback_dict: Optional[Dict[str, Any]] = Field(default=None, description="A mapping of model to use if call fails due to context window error")
+    fallbacks: Optional[List[Any]]= Field(default=None, description="A list of model names + params to be used, in case the initial call fails")
+    metadata: Optional[Dict[str, Any]] = Field(default=None)
 
     litellm.drop_params = True
     litellm.set_verbose = True
     os.environ['LITELLM_LOG'] = 'DEBUG'
 
-
     @model_validator(mode="after")
     def validate_base_params(self) -> Self:
         """
-        1. Model name and provider
-        Check the provided model name in the list and update it with the valid model key name.
-        Then add the model provider if it is not provided.
-        Assign a default model and provider when we cannot find a model key.
+        1) Set up a valid model name with the provider name using the MODEL list.
+        * Assign a default model and provider based on the given information when no model key is found in the MODEL list.
 
-        2.  Set up other base parameters for the model and LiteLLM as below:
-        1. LiteLLM - drop_params, set_verbose, callbacks
-        2. Model setup - context_window_size, api_key, base_url
+        2) Set up other base parameters for the model and LiteLLM.
         """
 
         if self.model is None:
@@ -160,7 +136,7 @@ class LLM(BaseModel):
         self._init_model_name = self.model
         self.model = None
 
-        if self.provider and MODELS.get(self.provider) is not None:
+        if self.provider and MODELS.get(self.provider):
             provider_model_list = MODELS.get(self.provider)
             for item in provider_model_list:
                 if self.model is None:
@@ -172,7 +148,6 @@ class LLM(BaseModel):
                         temp_model = provider_model_list[0]
                         self._logger.log(level="info", message=f"The provided model: {self._init_model_name} is not in the list. We'll assign a model: {temp_model} from the selected model provider: {self.provider}.", color="yellow")
                         self.model = temp_model
-                    # raise PydanticCustomError("invalid_model", "The provided model is not in the list.", {})
 
         else:
             for k, v in MODELS.items():
@@ -190,29 +165,31 @@ class LLM(BaseModel):
                 self._logger.log(level="info", message=f"The provided model \'{self.model}\' is not in the list. We'll assign a default model.", color="yellow")
                 self.model = DEFAULT_MODEL_NAME
                 self.provider = "openai"
-                # raise PydanticCustomError("invalid_model", "The provided model is not in the list.", {})
 
-        if self.callbacks is not None:
+
+        if self.callbacks:
             self._set_callbacks(self.callbacks)
 
         self.context_window_size = self._get_context_window_size()
 
-        api_key_name = LLM_API_KEY_NAMES.get(self.provider, "LITELLM_API_KEY")
-        self.api_key = os.environ.get(api_key_name, None)
+        api_key_name = self.provider.upper() + "_API_KEY" if self.provider else None
+        if api_key_name:
+            self.api_key = os.environ.get(api_key_name, None)
 
-        base_url_key_name = LLM_BASE_URL_KEY_NAMES.get(self.provider, "OPENAI_API_BASE")
-        self.base_url = os.environ.get(base_url_key_name, None)
+        base_url_key_name = self.provider.upper() + "_API_BASE" if self.provider else None
+        if base_url_key_name:
+            self.base_url = os.environ.get(base_url_key_name)
+            self.api_base = self.base_url
 
         return self
 
 
     def call(
         self,
-        output_formats: List[str | TaskOutputFormat],
-        field_list: Optional[List[ResponseField]],
         messages: List[Dict[str, str]],
-        **kwargs,
-        # callbacks: List[Any] = [],
+        response_format: Optional[Dict[str, Any]],
+        tools: Optional[List[Any]] = None,
+        config: Optional[Dict[str, Any]] = {} # any other conditions to pass on to the model.
     ) -> str:
         """
         Execute LLM based on the agent's params and model params.
@@ -223,23 +200,41 @@ class LLM(BaseModel):
                 self._set_callbacks(self.callbacks)
 
             try:
-                # response_format = None
-                # #! REFINEME
-                # if TaskOutputFormat.JSON in output_formats:
-                #     response_format = LLMResponseSchema(
-                #         response_type="json_object", field_list=field_list
-                #     )
+                if tools:
+                    self.tools = [item.properties for item in tools]
+
+                if response_format:
+                    self.response_format = { "type": "json_object" } if self.model == "gpt-3.5-turbo" else response_format
+
+                provider = self.provider if self.provider else "openai"
 
                 params = {}
-                for item in LITELLM_COMPLETION_KEYS:
-                    if hasattr(self, item) and getattr(self, item) is not None:
-                        params[item] = getattr(self, item)
+                valid_params = PARAMS.get("litellm") + PARAMS.get("common") + PARAMS.get(provider) if PARAMS.get(provider) else  PARAMS.get("litellm") + PARAMS.get("common")
+
+                for item in valid_params:
+                    if item:
+                        if hasattr(self, item) and getattr(self, item):
+                            params[item] = getattr(self, item)
+                        elif item in config:
+                            params[item] = config[item]
+                        else:
+                            pass
+                    else:
+                        pass
 
                 res = litellm.completion(messages=messages, stream=False, **params)
                 return res["choices"][0]["message"]["content"]
 
+
+            except JSONSchemaValidationError as e:
+                self._logger.log(level="error", message="Raw Response: {}".format(e.raw_response), color="red")
+                return None
+
             except Exception as e:
-                self._logger.log(level="error", message=f"LiteLLM call failed: {str(e)}", color="red")
+                self._logger.log(level="error", message=f"{self.model} failed to execute: {str(e)}", color="red")
+                if "litellm.RateLimitError" in str(e):
+                    raise e
+
                 return None
 
 

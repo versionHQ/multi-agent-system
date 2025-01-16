@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Dict
 from pydantic import BaseModel, Field
 
 load_dotenv(override=True)
@@ -42,10 +42,9 @@ class TeamPlanner:
                     Based on the following task summary, draft a AI agent's role and goal in concise manner.
                     Task summary: {unassgined_task.summary}
                 """,
-                expected_output_json=True,
-                output_field_list=[
-                    ResponseField(title="goal", type=str, required=True),
-                    ResponseField(title="role", type=str, required=True),
+                response_fields=[
+                    ResponseField(title="goal", data_type=str, required=True),
+                    ResponseField(title="role", data_type=str, required=True),
                 ],
             )
             res = task.execute_sync(agent=agent_creator)
@@ -67,7 +66,7 @@ class TeamPlanner:
         """
 
         from versionhq.agent.model import Agent
-        from versionhq.task.model import Task, ResponseField
+        from versionhq.task.model import Task
 
         team_planner = Agent(
             role="team planner",
@@ -76,18 +75,18 @@ class TeamPlanner:
         )
 
         task_summary_list = [task.summary for task in self.tasks]
+
+        class TeamPlanIdea(BaseModel):
+            plan: str | Dict[str, Any] = Field(default=None, description="a decriptive plan to be executed by the team")
+
+
         task = Task(
             description=f"""
                 Based on the following task summaries, create the most descriptive plan that the team can execute most efficiently. Take all the task summaries - task's description and tools available - into consideration. Your answer only contains a dictionary.
 
                 Task summaries: {" ".join(task_summary_list)}
-             """,
-            expected_output_json=False,
-            expected_output_pydantic=True,
-            output_field_list=[
-                ResponseField(title="task", type=str, required=True)
-                for task in self.tasks
-            ],
+            """,
+            pydantic_custom_output=TeamPlanIdea
         )
         output = task.execute_sync(agent=team_planner, context=context, tools=tools)
         return output

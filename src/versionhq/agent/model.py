@@ -101,7 +101,7 @@ class Agent(BaseModel):
     team: Optional[List[Any]] = Field(default=None, description="Team to which the agent belongs")
     allow_delegation: bool = Field(default=False,description="Enable agent to delegate and ask questions among each other")
     allow_code_execution: Optional[bool] = Field(default=False, description="Enable code execution for the agent.")
-    max_retry_limit: int = Field(default=2,description="max. number of retries for the task execution when an error occurs. cascaed to the `invoke` function")
+    max_retry_limit: int = Field(default=2 ,description="max. number of retries for the task execution when an error occurs. cascaed to the `invoke` function")
     max_iter: Optional[int] = Field(default=25,description="max. number of iterations for an agent to execute a task")
     step_callback: Optional[Callable | Any] = Field(default=None, description="callback to be executed after each step of the agent execution")
 
@@ -286,7 +286,7 @@ class Agent(BaseModel):
         return self
 
 
-    def _set_llm_params(self, llm: LLM, kwargs: Dict[str, Any] = None) -> LLM:
+    def _set_llm_params(self, llm: LLM, config: Dict[str, Any] = None) -> LLM:
         """
         After setting up an LLM instance, add params to the instance.
         Prioritize the agent's settings over the model's base setups.
@@ -302,8 +302,8 @@ class Agent(BaseModel):
         if self.respect_context_window == False:
             llm.context_window_size = DEFAULT_CONTEXT_WINDOW_SIZE
 
-        if kwargs:
-            for k, v in kwargs.items():
+        if config:
+            for k, v in config.items():
                 try:
                     setattr(llm, k, v)
                 except:
@@ -311,29 +311,30 @@ class Agent(BaseModel):
         return llm
 
 
-    def invoke(self, prompts: str, output_formats: List[str | TaskOutputFormat], response_fields: List[ResponseField]) -> Dict[str, Any]:
+    def invoke(self, prompts: str, response_format: Optional[Dict[str, Any]] = None, tools: Optional[List[Tool]] = None) -> Dict[str, Any]:
         """
-        Receive the system prompt in string and create formatted prompts using the system prompt and the agent's backstory.
-        Then call the base model.
-        When encountering errors, we try the task execution up to `self.max_retry_limit` times.
+        Create formatted prompts using the system prompt and the agent's backstory, then call the base model.
+        - Execute the task up to `self.max_retry_limit` times in case of receiving an error or empty response.
+        - Pass the task_tools to the model to let them execute.
         """
 
         task_execution_counter, raw_response = 0, None
 
         messages = []
-        messages.append({"role": "user", "content": prompts})  #! REFINEME
-        messages.append({"role": "assistant", "content": self.backstory})
+        messages.append({"role": "user", "content": prompts})
+        if self.use_system_prompt:
+            messages.append({"role": "system", "content": self.backstory})
         self._logger.log(level="info", message=f"Messages sent to the model: {messages}", color="blue")
 
-        raw_response = self.llm.call(messages=messages, output_formats=output_formats, field_list=response_fields)
+        raw_response = self.llm.call(messages=messages, response_format=response_format, tools=tools)
         task_execution_counter += 1
-        self._logger.log(level="info", message=f"Agent's first response in {type(raw_response).__name__}: {raw_response}", color="blue")
+        self._logger.log(level="info", message=f"Agent response: {raw_response}", color="blue")
 
         if (raw_response is None or raw_response == "") and task_execution_counter < self.max_retry_limit:
-            while task_execution_counter <= self.max_retry_limit:
-                raw_response = self.llm.call(messages=messages, output_formats=output_formats, field_list=response_fields)
+            while task_execution_counter < self.max_retry_limit:
+                raw_response = self.llm.call(messages=messages, response_format=response_format, tools=tools)
                 task_execution_counter += 1
-                self._logger.log(level="info", message=f"Agent's next response in {type(raw_response).__name__}: {raw_response}", color="blue")
+                self._logger.log(level="info", message=f"Agent #{task_execution_counter} response: {raw_response}", color="blue")
 
         elif raw_response is None or raw_response == "":
             self._logger.log(level="error", message="Received None or empty response from the model", color="red")
@@ -342,38 +343,41 @@ class Agent(BaseModel):
         return raw_response
 
 
-    def execute_task(self, task, context: Optional[str] = None) -> str:
+    def execute_task(self, task, context: Optional[str] = None, task_tools: Optional[List[Tool]] = None) -> str:
         """
         Execute the task and return the response in string.
         The agent utilizes the tools in task or their own tools if the task.can_use_agent_tools is True.
         The agent must consider the context to excute the task as well when it is given.
         """
+        from versionhq.task.model import Task
 
-        task_prompt = task.prompt()
-        if context is not task.prompt_context:  # as `task.prompt()` includes adding `task.prompt_context` to the prompt.
+        task: InstanceOf[Task] = task
+        task_prompt = task.prompt(model_provider=self.llm.provider)
+        if context is not task.prompt_context:
             task_prompt += context
 
         tool_results = []
         if task.tools:
             for item in task.tools:
-                if isinstance(item, ToolSet):
-                    tool_result = item.tool.run(**item.kwargs)
-                    tool_results.append(tool_result)
-                elif isinstance(item, Tool):
-                    tool_result = item.run()
-                    tool_results.append(tool_result)
-                else:
-                    try:
-                        item.run()
-                    except:
-                        pass
+                if task_tools is None or (task_tools and item not in task_tools):
+                    if isinstance(item, ToolSet):
+                        tool_result = item.tool.run(**item.kwargs)
+                        tool_results.append(tool_result)
+                    elif isinstance(item, Tool):
+                        tool_result = item.run()
+                        tool_results.append(tool_result)
+                    else:
+                        try:
+                            item.run()
+                        except:
+                            pass
 
         if task.can_use_agent_tools is True and self.tools:
             for tool in self.tools:
                 tool_result = tool.run()
                 tool_results.append(tool_result)
 
-        if task.take_tool_res_as_final:
+        if task.take_tool_res_as_final and task_tools is None:
             return tool_results
 
         # if self.team and self.team._train:
@@ -382,17 +386,21 @@ class Agent(BaseModel):
         #     task_prompt = self._use_trained_data(task_prompt=task_prompt)
 
         try:
+            self._times_executed += 1
             raw_response = self.invoke(
                 prompts=task_prompt,
-                output_formats=task.expected_output_formats,
-                response_fields=task.output_field_list,
+                response_format=task._structure_response_format(model_provider=self.llm.provider),
+                tools=task_tools
             )
 
         except Exception as e:
             self._times_executed += 1
+            self._logger.log(level="error", message=f"The agent failed to execute the task. Error: {str(e)}", color="red")
+            raw_response = self.execute_task(task, context, task_tools)
+
             if self._times_executed > self.max_retry_limit:
+                self._logger.log(level="error", message=f"Max retry limit has exceeded.", color="red")
                 raise e
-            raw_response = self.execute_task(task, context)
 
         if self.max_rpm and self._rpm_controller:
             self._rpm_controller.stop_rpm_counter()

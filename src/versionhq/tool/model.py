@@ -16,6 +16,8 @@ class BaseTool(ABC, BaseModel):
         pass
 
     args_schema: Type[BaseModel] = Field(default_factory=_ArgsSchemaPlaceholder)
+    properties: Dict[str, Any] = Field(default_factory=dict)
+    type: str = Field(default="function")
 
 
     @field_validator("args_schema", mode="before")
@@ -45,6 +47,7 @@ class Tool(BaseTool):
     should_cache: bool = Field(default=True, description="whether the tool usage should be cached")
     cache_function: Callable = lambda _args=None, _result=None: True
     cache_handler: Optional[InstanceOf[CacheHandler]] = Field(default=None)
+    call_llm: Optional[bool] = Field(default=False)
 
 
     @model_validator(mode="after")
@@ -65,6 +68,26 @@ class Tool(BaseTool):
         if self.function is None:
             self.function = self._run
             self._set_args_schema_from_func()
+        return self
+
+
+    @model_validator(mode="after")
+    def set_up_properties(self) -> Self:
+        """
+        Set up properties for tools called by LLM.
+        """
+
+        if self.call_llm is True:
+            params = dict(type="function", function=dict(
+                name=self.name,
+                description=self.description,
+                parameters={
+                    "type": "object",
+                    "properties": { k:{"type": type(v), } for k, v in self._run.__annotations__.items() if k != "return"}
+                }
+            ))
+            self.properties = params
+
         return self
 
 
@@ -121,14 +144,18 @@ class Tool(BaseTool):
         return self.run(*args, **kwargs)
 
 
-    def run(self, *args, **kwargs) -> Any:
+    def run(self, llm: str | Any = None, *args, **kwargs) -> Any:
         """
-        Use tool and record its usage if should_cache is True.
+        Execute tools without using LLM and record its usage if should_cache is True.
         """
+
         from versionhq.tool.tool_handler import ToolHandler
 
         result = None
         tool_set = ToolSet(tool=self, kwargs={})
+
+        if self.call_llm is True:
+            pass
 
         if self.function:
             result = self.function(*args, **kwargs)
