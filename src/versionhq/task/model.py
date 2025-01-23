@@ -400,7 +400,6 @@ Ref. Output image: {output_formats_to_follow}
                     else:
                         properties.update(item._format_props())
 
-                    #if item.required:
                     required_fields.append(item.title)
 
             response_schema = {
@@ -557,32 +556,6 @@ Ref. Output image: {output_formats_to_follow}
             for item in self.tools:
                 if isinstance(item, ToolSet) or isinstance(item, Tool) or type(item) == Tool:
                     task_tools.append(item)
-
-
-            # s_tools = [item for item in self.tools if self.tools and item not in task_tools]
-
-            # if s_tools and self.tool_res_as_final:
-            #     """
-            #     Since the tools dont need to call the LLM, execute them without assigning agents and return the results.
-            #     """
-            #     tool_results = []
-            #     for item in s_tools:
-            #         if isinstance(item, ToolSet):
-            #             tool_result = item.tool.run(params=item.kwargs)
-            #             tool_results.append(tool_result)
-            #         elif isinstance(item, Tool):
-            #             tool_result = item.run()
-            #             tool_results.append(tool_result)
-            #         else:
-            #             try:
-            #                 item.run()
-            #             except:
-            #                 pass
-
-            #     task_output = TaskOutput(task_id=self.id, tool_output=tool_results)
-            #     return task_output
-
-
 
         if self.allow_delegation:
             agent_to_delegate = None
