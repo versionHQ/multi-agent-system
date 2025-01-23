@@ -15,7 +15,7 @@ exclude = ["test*", "__pycache__"]
 
 [project]
 name = "versionhq"
-version = "1.1.10.dev1"
+version = "1.1.10.2"
 authors = [{ name = "Kuriko Iwai", email = "kuriko@versi0n.io" }]
 description = "LLM orchestration frameworks for model-agnostic AI agents that handle complex outbound workflows"
 readme = "README.md"
@@ -52,6 +52,7 @@ classifiers = [
 
 [project.urls]
 Homepage = "https://versi0n.io"
+Documentation = "https://chief-oxygen-8a2.notion.site/Documentation-17e923685cf98001a5fad5c4b2acd79b?pvs=73"
 Repository = "https://github.com/versionHQ/multi-agent-system"
 Issues = "https://github.com/versionHQ/multi-agent-system/issues"
 

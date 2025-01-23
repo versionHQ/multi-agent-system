@@ -12,8 +12,6 @@ class Printer:
             self._print_red(content)
         elif color == "green":
             self._print_green(content)
-        elif color == "purple":
-            self._print_purple(content)
         elif color == "blue":
             self._print_blue(content)
         elif color == "yellow":
@@ -26,9 +24,6 @@ class Printer:
 
     def _print_green(self, content):
         print("\033[1m\033[92m {}\033[00m".format(content))
-
-    def _print_purple(self, content):
-        print("\033[95m {}\033[00m".format(content))
 
     def _print_red(self, content):
         print("\033[91m {}\033[00m".format(content))

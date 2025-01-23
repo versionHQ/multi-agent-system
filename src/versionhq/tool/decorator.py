@@ -10,12 +10,11 @@ def tool(*args):
     """
 
     def create_tool(tool_name: str) -> Callable:
-
-        def _make_tool(f: Callable) -> Tool:
-            if f.__doc__ is None:
+        def _make_tool(func: Callable) -> Tool:
+            if func.__doc__ is None:
                 raise ValueError("Function must have a docstring")
 
-            if f.__annotations__ is None:
+            if func.__annotations__ is None:
                 raise ValueError("Function must have type annotations")
 
             class_name = "".join(tool_name.split()).title()
@@ -24,11 +23,11 @@ def tool(*args):
                 (BaseModel,),
                 {
                     "__annotations__": {
-                        k: v for k, v in f.__annotations__.items() if k != "return"
+                        k: v for k, v in func.__annotations__.items() if k != "return"
                     },
                 },
             )
-            return Tool(name=tool_name, function=f, args_schema=args_schema)
+            return Tool(name=tool_name, func=func, args_schema=args_schema)
 
         return _make_tool
 

@@ -4,7 +4,7 @@ from versionhq.agent.model import Agent
 from versionhq.task.model import Task, ResponseField, TaskOutput
 from versionhq.team.model import Team, TeamMember, TaskHandlingProcess, TeamOutput
 from versionhq._utils.usage_metrics import UsageMetrics
-from versionhq.llm.llm_variables import MODELS
+from versionhq.llm.llm_vars import MODELS
 from versionhq.llm.model import DEFAULT_MODEL_NAME, LLM
 
 

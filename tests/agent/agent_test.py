@@ -1,7 +1,9 @@
 import os
 import pytest
+from typing import Callable, Any
 
 from versionhq.agent.model import Agent
+from versionhq.agent.TEMPLATES.Backstory import BACKSTORY_SHORT, BACKSTORY_FULL
 from versionhq.llm.model import LLM, DEFAULT_MODEL_NAME
 from versionhq.tool.model import Tool
 
@@ -12,12 +14,22 @@ LITELLM_API_KEY = os.environ.get("LITELLM_API_KEY")
 def test_build_agent_with_minimal_input():
     agent = Agent(
         role="analyst",
-        goal="analyze the company's website and retrieve the product overview",
+        goal="analyze the company's website and retrieve the product overview"
     )
 
     assert agent.role == "analyst"
-    assert agent.role in agent.backstory
-    assert agent.goal in agent.backstory
+    assert agent.backstory == BACKSTORY_SHORT.format(role=agent.role, goal=agent.goal)
+    assert isinstance(agent.llm, LLM)
+    assert agent.llm.model == DEFAULT_MODEL_NAME
+    assert agent.llm.api_key == LITELLM_API_KEY
+    assert agent.tools == []
+
+
+def test_build_agent_from_config():
+    agent = Agent(config=dict(role="analyst", goal="analyze the company's website and retrieve the product overview"))
+
+    assert agent.role == "analyst"
+    assert agent.backstory == BACKSTORY_SHORT.format(role=agent.role, goal=agent.goal)
     assert isinstance(agent.llm, LLM)
     assert agent.llm.model == DEFAULT_MODEL_NAME
     assert agent.llm.api_key == LITELLM_API_KEY
@@ -32,6 +44,7 @@ def test_build_agent_with_backstory():
     )
 
     assert agent.role == "analyst"
+    assert agent.goal == "analyze the company's website and retrieve the product overview"
     assert agent.backstory == "You are competitive analysts who have abundand knowledge in marketing, product management."
     assert isinstance(agent.llm, LLM)
     assert agent.llm.model == DEFAULT_MODEL_NAME
@@ -48,11 +61,8 @@ def test_build_agent():
     )
 
     assert agent.role == "analyst"
-    assert agent.role in agent.backstory
-    assert agent.goal in agent.backstory
-    assert agent.knowledge in agent.backstory
-    for item in agent.skillsets:
-        assert item in agent.backstory
+    assert agent.backstory == BACKSTORY_FULL.format(
+        role=agent.role, goal=agent.goal, knowledge=agent.knowledge, skillsets=", ".join([item for item in agent.skillsets]), rag_tool_overview="")
     assert isinstance(agent.llm, LLM)
     assert agent.llm.model == DEFAULT_MODEL_NAME
     assert agent.llm.api_key == LITELLM_API_KEY
@@ -67,6 +77,7 @@ def test_build_agent_with_llm():
         skillsets=["financial analysis", "product management", ],
         llm="gpt-4o"
     )
+
     assert agent.role == "analyst"
     assert agent.role in agent.backstory
     assert agent.goal in agent.backstory
@@ -84,18 +95,31 @@ def test_build_agent_with_llm_config():
         return "dummy"
 
     llm_params = dict(deployment_name="gemini-1.5", max_tokens=4000, logprobs=False, abc="dummy key")
+    llm_config = dict(
+        temperature=1,
+        top_p=0.1,
+        n=1,
+        stream=False,
+        stream_options=None,
+        stop="test",
+        max_completion_tokens=10000,
+        dummy="I am dummy"
+    )
     agent = Agent(
         role="analyst",
-        goal="analyze the company's website and retrieve the product overview",
+        goal="run test on llm instance",
         llm=llm_params,
-        step_callback=dummy_func,
+        callbacks=[dummy_func],
+        llm_config=llm_config
     )
+
     assert isinstance(agent.llm, LLM)
     assert agent.llm.model == "gemini/gemini-1.5-flash"
     assert agent.llm.api_key is not None
     assert agent.llm.max_tokens == 4000
     assert agent.llm.logprobs == False
-    assert agent.llm.callbacks == [dummy_func]
+    assert [hasattr(agent.llm, k) and v for k, v in llm_config.items() if v is not None]
+    assert agent.llm.callbacks == []
 
 
 def test_build_agent_with_llm_instance():
@@ -108,14 +132,14 @@ def test_build_agent_with_llm_instance():
         goal="analyze the company's website and retrieve the product overview",
         llm=llm,
         max_tokens=3000,
-        step_callback=dummy_func,
+        callbacks=[dummy_func],
     )
     assert isinstance(agent.llm, LLM)
     assert agent.llm.model == "gemini/gemini-1.5-flash"
     assert agent.llm.api_key is not None
     assert agent.llm.max_tokens == 3000
     assert agent.llm.logprobs == False
-    assert agent.llm.callbacks == [dummy_func]
+    assert agent.llm.callbacks == []
 
 
 def test_build_agent_with_llm_and_func_llm_config():
@@ -127,7 +151,7 @@ def test_build_agent_with_llm_and_func_llm_config():
         role="analyst",
         goal="analyze the company's website and retrieve the product overview",
         function_calling_llm=llm_params,
-        step_callback=dummy_func,
+        callbacks=[dummy_func]
     )
 
     assert isinstance(agent.llm, LLM) and isinstance(agent.function_calling_llm, LLM)
@@ -136,7 +160,7 @@ def test_build_agent_with_llm_and_func_llm_config():
     assert agent.function_calling_llm.api_key is not None
     assert agent.function_calling_llm.max_tokens == 4000
     assert agent.function_calling_llm.logprobs == False
-    assert agent.function_calling_llm.callbacks == [dummy_func]
+    assert agent.function_calling_llm.callbacks == []
 
 
 def test_build_agent_with_llm_and_func_llm_instance():
@@ -149,47 +173,39 @@ def test_build_agent_with_llm_and_func_llm_instance():
         goal="analyze the company's website and retrieve the product overview",
         llm=llm,
         function_calling_llm=llm,
+        llm_config=dict(),
         max_tokens=3000,
-        step_callback=dummy_func,
+        callbacks=[dummy_func]
     )
     assert isinstance(agent.llm, LLM) and isinstance(agent.function_calling_llm, LLM)
     assert agent.function_calling_llm.model == "gemini/gemini-1.5-flash" if agent.function_calling_llm._supports_function_calling() else DEFAULT_MODEL_NAME
     assert agent.function_calling_llm.api_key is not None
     assert agent.function_calling_llm.max_tokens == 3000
     assert agent.function_calling_llm.logprobs == False
-    assert agent.function_calling_llm.callbacks == [dummy_func]
-
-
-
-def test_agent_with_random_str_tools():
-    agent = Agent(role="demo", goal="test a tool", tools=["random tool 1", "random tool 2",])
-
-    assert [isinstance(tool, Tool) for tool in agent.tools]
-    assert [tool.run() is not None for tool in agent.tools]
-    assert [tool.run() == "empty function" for tool in agent.tools]
-    assert agent.tools[0].name == "random tool 1"
-    assert agent.tools[1].name == "random tool 2"
+    assert agent.function_calling_llm.callbacks == []
 
 
 def test_agent_with_random_dict_tools():
     def empty_func():
         return "empty function"
-    agent = Agent(role="demo", goal="test a tool", tools=[dict(name="tool 1", function=empty_func), ])
 
-    assert [tool.run() == "empty function" for tool in agent.tools]
+    agent = Agent(role="demo", goal="test a tool", tools=[dict(name="tool 1", func=empty_func), ])
+
+    assert [tool._run() == "empty function" for tool in agent.tools]
     assert agent.tools[0].name == "tool 1"
 
 
 def test_agent_with_custom_tools():
+    def send_message(message: str) -> str:
+        return message + "_demo"
+
     class CustomTool(Tool):
         name: str = "custom tool"
+        func: Callable[..., Any]
 
-        def _run(self, agent_role: str) -> str:
-            return agent_role
-
-    tool = CustomTool()
+    tool = CustomTool(func=send_message)
     agent = Agent(role="demo", goal="test a tool", tools=[tool])
 
     assert agent.tools[0] is tool
-    assert agent.tools[0].run(agent_role=agent.role) == "demo"
+    assert agent.tools[0]._run(message="hi") == "hi_demo"
     assert agent.tools[0].name == "custom tool"

@@ -1,5 +1,6 @@
 import json
 import threading
+import datetime
 import uuid
 from concurrent.futures import Future
 from hashlib import md5
@@ -57,7 +58,7 @@ class ResponseField(BaseModel):
         """
         Structure valid properties. We accept 2 nested objects.
         """
-        from versionhq.llm.llm_variables import SchemaType
+        from versionhq.llm.llm_vars import SchemaType
 
         schema_type = SchemaType(type=self.data_type).convert()
         props: Dict[str, Any] = {}
@@ -238,7 +239,7 @@ class Task(BaseModel):
     # tool usage
     tools: Optional[List[ToolSet | Tool | Any]] = Field(default_factory=list, description="tools that the agent can use aside from their tools")
     can_use_agent_tools: bool = Field(default=False, description="whether the agent can use their own tools when executing the task")
-    take_tool_res_as_final: bool = Field(default=False, description="when set True, tools res will be stored in the `TaskOutput`")
+    tool_res_as_final: bool = Field(default=False, description="when set True, tools res will be stored in the `TaskOutput`")
 
     # execution rules
     allow_delegation: bool = Field(default=False, description="ask other agents for help and run the task instead")
@@ -250,6 +251,7 @@ class Task(BaseModel):
     processed_by_agents: Set[str] = Field(default_factory=set, description="store responsible agents' roles")
     tools_errors: int = 0
     delegations: int = 0
+    execution_span_in_sec: int = 0
 
 
     @model_validator(mode="before")
@@ -354,16 +356,16 @@ Ref. Output image: {output_formats_to_follow}
 
         if self.context:
             context_outputs = "\n".join([task.output.context_prompting() if hasattr(task, "output") else "" for task in self.context])
-            task_slices.insert(len(task_slices), f"Take the following contexts from other tasks into consideration: {context_outputs}")
+            task_slices.insert(len(task_slices), f"Consider the following context when responding: {context_outputs}")
+
+        if self.prompt_context:
+            task_slices.insert(len(task_slices), f"Consider the following context when responding: {self.prompt_context}")
 
         if customer:
             task_slices.insert(len(task_slices), f"Customer to address: {customer}")
 
         if product_overview:
             task_slices.insert(len(task_slices), f"Product to promote: {product_overview}")
-
-        if self.prompt_context:
-            task_slices.insert(len(task_slices), f"Take the following input into consideration: {self.prompt_context}")
 
         return "\n".join(task_slices)
 
@@ -538,22 +540,48 @@ Ref. Output image: {output_formats_to_follow}
 
     def _execute_core(self, agent, context: Optional[str]) -> TaskOutput:
         """
-        Run the core execution logic of the task.
-        To speed up the process, when the format is not expected to return, we will skip the conversion process.
-        When the task is allowed to delegate to another agent, we will select a responsible one in order of manager > peer_agent > anoymous agent.
+        Execute the given task with the given agent.
+        Handle 1. agent delegation, 2. tools, 3. context to consider, and 4. callbacks
         """
+
         from versionhq.agent.model import Agent
         from versionhq.team.model import Team
 
         self.prompt_context = context
         task_output: InstanceOf[TaskOutput] = None
-        task_tools: List[InstanceOf[Tool]] = None
+        tool_output: str | list = None
+        task_tools: List[InstanceOf[Tool] | InstanceOf[ToolSet] | Type[Tool]] = []
+        started_at = datetime.datetime.now()
 
-        for item in self.tools:
-            if isinstance(item, ToolSet) and item.tool.call_llm:
-                task_tools.append(item.tool)
-            elif isinstance(item, Tool) and item.call_llm:
-                task_tools.append(item)
+        if self.tools:
+            for item in self.tools:
+                if isinstance(item, ToolSet) or isinstance(item, Tool) or type(item) == Tool:
+                    task_tools.append(item)
+
+
+            # s_tools = [item for item in self.tools if self.tools and item not in task_tools]
+
+            # if s_tools and self.tool_res_as_final:
+            #     """
+            #     Since the tools dont need to call the LLM, execute them without assigning agents and return the results.
+            #     """
+            #     tool_results = []
+            #     for item in s_tools:
+            #         if isinstance(item, ToolSet):
+            #             tool_result = item.tool.run(params=item.kwargs)
+            #             tool_results.append(tool_result)
+            #         elif isinstance(item, Tool):
+            #             tool_result = item.run()
+            #             tool_results.append(tool_result)
+            #         else:
+            #             try:
+            #                 item.run()
+            #             except:
+            #                 pass
+
+            #     task_output = TaskOutput(task_id=self.id, tool_output=tool_results)
+            #     return task_output
+
 
 
         if self.allow_delegation:
@@ -573,9 +601,10 @@ Ref. Output image: {output_formats_to_follow}
             agent = agent_to_delegate
             self.delegations += 1
 
-        if self.take_tool_res_as_final == True:
-            output = agent.execute_task(task=self, context=context, task_tools=task_tools)
-            task_output = TaskOutput(task_id=self.id, tool_output=output)
+
+        if self.tool_res_as_final == True:
+            tool_output = agent.execute_task(task=self, context=context, task_tools=task_tools)
+            task_output = TaskOutput(task_id=self.id, tool_output=tool_output)
 
         else:
             raw_output = agent.execute_task(task=self, context=context, task_tools=task_tools)
@@ -595,14 +624,8 @@ Ref. Output image: {output_formats_to_follow}
         self.output = task_output
         self.processed_by_agents.add(agent.role)
 
-        # self._set_end_execution_time(start_time)
-
         if self.callback:
             self.callback({ **self.callback_kwargs, **self.output.__dict__ })
-
-        # if self._execution_span:
-        #     # self._telemetry.task_ended(self._execution_span, self, agent.team)
-        #     self._execution_span = None
 
         # if self.output_file:
         #     content = (
@@ -611,6 +634,8 @@ Ref. Output image: {output_formats_to_follow}
         #         else pydantic_output.model_dump_json() if pydantic_output else result
         #     )
         #     self._save_file(content)
+        ended_at = datetime.datetime.now()
+        self.execution_span_in_sec = (ended_at - started_at).total_seconds()
 
         return task_output
 

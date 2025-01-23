@@ -1,4 +1,5 @@
 import logging
+import json
 import os
 import sys
 import threading
@@ -17,7 +18,7 @@ from pydantic_core import PydanticCustomError
 
 from openai import OpenAI
 
-from versionhq.llm.llm_variables import LLM_CONTEXT_WINDOW_SIZES, LLM_API_KEY_NAMES, LLM_BASE_URL_KEY_NAMES, MODELS, PARAMS, SchemaType
+from versionhq.llm.llm_vars import LLM_CONTEXT_WINDOW_SIZES, LLM_API_KEY_NAMES, LLM_BASE_URL_KEY_NAMES, MODELS, PARAMS, SchemaType
 from versionhq.task import TaskOutputFormat
 from versionhq.task.model import ResponseField, Task
 from versionhq.tool.model import Tool, ToolSet
@@ -105,7 +106,7 @@ class LLM(BaseModel):
     logprobs: Optional[bool] = Field(default=None)
     top_logprobs: Optional[int] = Field(default=None)
     response_format: Optional[Any] = Field(default=None)
-    tools: Optional[List[Dict[str, Any]]] = Field(default=None, description="store tool params")
+    tools: Optional[List[Dict[str, Any]]] = Field(default_factory=list, description="store a list of tool properties")
 
     # LiteLLM specific fields
     api_base: Optional[str] = Field(default=None, description="litellm specific field - api base of the model provider")
@@ -187,9 +188,10 @@ class LLM(BaseModel):
     def call(
         self,
         messages: List[Dict[str, str]],
-        response_format: Optional[Dict[str, Any]],
-        tools: Optional[List[Any]] = None,
-        config: Optional[Dict[str, Any]] = {} # any other conditions to pass on to the model.
+        response_format: Optional[Dict[str, Any]] = None,
+        tools: Optional[List[Tool | ToolSet | Type[Tool]]] = None,
+        config: Optional[Dict[str, Any]] = {}, # any other conditions to pass on to the model.
+        tool_res_as_final: bool = False
     ) -> str:
         """
         Execute LLM based on the agent's params and model params.
@@ -201,15 +203,15 @@ class LLM(BaseModel):
 
             try:
                 if tools:
-                    self.tools = [item.properties for item in tools]
+                    self.tools = [item.tool.properties if isinstance(item, ToolSet) else item.properties for item in tools]
 
                 if response_format:
-                    self.response_format = { "type": "json_object" } if self.model == "gpt-3.5-turbo" else response_format
+                    self.response_format = { "type": "json_object" } if self.model == "gpt-3.5-turbo" or tool_res_as_final else response_format
 
                 provider = self.provider if self.provider else "openai"
 
                 params = {}
-                valid_params = PARAMS.get("litellm") + PARAMS.get("common") + PARAMS.get(provider) if PARAMS.get(provider) else  PARAMS.get("litellm") + PARAMS.get("common")
+                valid_params = PARAMS.get("litellm") + PARAMS.get("common") + PARAMS.get(self.provider) if self.provider else PARAMS.get("litellm") + PARAMS.get("common")
 
                 for item in valid_params:
                     if item:
@@ -218,11 +220,42 @@ class LLM(BaseModel):
                         elif item in config:
                             params[item] = config[item]
                         else:
-                            pass
+                            continue
                     else:
-                        pass
+                        continue
 
                 res = litellm.completion(messages=messages, stream=False, **params)
+
+                if self.tools:
+                    tool_calls = res["choices"][0]["message"]["tool_calls"]
+                    tool_res = ""
+
+                    for item in tool_calls:
+                        func_name = item.function.name
+                        func_args = item.function.arguments
+
+                        if not isinstance(func_args, dict):
+                            func_args = json.loads(json.dumps(eval(str(func_args))))
+
+                        for tool in tools:
+                            if isinstance(tool, ToolSet) and (tool.tool.name.replace(" ", "_") == func_name or tool.tool.func.__name__ == func_name):
+                                tool_instance = tool.tool
+                                args = tool.kwargs
+                                res = tool_instance.run(params=args)
+                                tool_res += str(res)
+
+                            elif (isinstance(tool, Tool) or type(tool) == Tool) and (tool.name.replace(" ", "_") == func_name or tool.func.__name__ == func_name):
+                                res = tool.run(params=func_args)
+                                tool_res += str(res)
+
+                    if tool_res_as_final == True:
+                        return tool_res
+                        pass
+
+                    else:
+                        messages.append({ "role": "tool", "tool_call_id": tool_calls.id, "content": tool_res })
+                        res = litellm.completion(messages=messages, stream=False, **params)
+
                 return res["choices"][0]["message"]["content"]
 
 

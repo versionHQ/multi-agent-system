@@ -2,7 +2,7 @@
 
 ![MIT license](https://img.shields.io/badge/License-MIT-green)
 [![Publisher](https://github.com/versionHQ/multi-agent-system/actions/workflows/publish.yml/badge.svg)](https://github.com/versionHQ/multi-agent-system/actions/workflows/publish.yml)
-![PyPI](https://img.shields.io/badge/PyPI->=v1.1.9-blue)
+![PyPI](https://img.shields.io/badge/PyPI->=v1.1.10-blue)
 ![python ver](https://img.shields.io/badge/Python-3.12/3.13-purple)
 ![pyenv ver](https://img.shields.io/badge/pyenv-2.5.0-orange)
 
@@ -18,8 +18,9 @@ Messaging workflows are created at individual level, and will be deployed on thi
 
 - [PyPI](https://pypi.org/project/versionhq/)
 - [Github (LLM orchestration)](https://github.com/versionHQ/multi-agent-system)
-- [Github (Test client app)](https://github.com/versionHQ/test-client-app)
-- [Use case](https://versi0n.io/) - client app (alpha)
+- [Doc](https://chief-oxygen-8a2.notion.site/Documentation-17e923685cf98001a5fad5c4b2acd79b?pvs=4)
+<!-- - [Github (Test client app)](https://github.com/versionHQ/test-client-app) -->
+- [Use case](https://versi0n.io/): Client web app for the outbound messaging automation
 
 
 <hr />
@@ -177,7 +178,7 @@ Tasks can be delegated to a team manager, peers in the team, or completely new a
    - [Composio](https://composio.dev/): Conect RAG agents with external tools, Apps, and APIs to perform actions and receive triggers. We use [tools](https://composio.dev/tools) and [RAG tools](https://app.composio.dev/app/ragtool) from Composio toolset.
 
 **Deployment**
-   - Python: Primary programming language. We use 3.12 in this project
+   - Python: Primary programming language. v3.13 is recommended.
    - [uv](https://docs.astral.sh/uv/): Python package installer and resolver
    - [pre-commit](https://pre-commit.com/): Manage and maintain pre-commit hooks
    - [setuptools](https://pypi.org/project/setuptools/): Build python modules
@@ -249,19 +250,17 @@ src/
 
 ## Contributing
 
-1. Fork the repository
+1. Create your feature branch (`git checkout -b feature/your-amazing-feature`)
 
-2. Create your feature branch (`git checkout -b feature/your-amazing-feature`)
+2. Create amazing features
 
-3. Create amazing features
-
-4. Test the features using the `tests` directory.
+3. Test the features using the `tests` directory.
 
    - Add a test function to respective components in the `tests` directory.
-   - Add your `LITELLM_API_KEY`, `OPENAI_API_KEY`, `COMPOSIO_API_KEY`, `DEFAULT_USER_ID` to the Github `repository secrets` @ settings > secrets & variables > Actions.
+   - Add your `LITELLM_API_KEY`, `OPENAI_API_KEY`, `COMPOSIO_API_KEY`, `DEFAULT_USER_ID` to the Github `repository secrets` located at settings > secrets & variables > Actions.
    - Run a test.
       ```
-      uv run pytest tests -vv
+      uv run pytest tests -vv --cache-clear
       ```
 
    **pytest**
@@ -269,10 +268,10 @@ src/
    * When adding a new file to `tests`, name the file ended with `_test.py`.
    * When adding a new feature to the file, name the feature started with `test_`.
 
-5. Pull the latest version of source code from the main branch (`git pull origin main`) *Address conflicts if any.
-6. Commit your changes (`git add .` / `git commit -m 'Add your-amazing-feature'`)
-7. Push to the branch (`git push origin feature/your-amazing-feature`)
-8. Open a pull request
+4. Pull the latest version of source code from the main branch (`git pull origin main`) *Address conflicts if any.
+5. Commit your changes (`git add .` / `git commit -m 'Add your-amazing-feature'`)
+6. Push to the branch (`git push origin feature/your-amazing-feature`)
+7. Open a pull request
 
 
 **Optional**
@@ -285,7 +284,7 @@ src/
    ```
    The frontend will be available at `http://localhost:3000`.
 
-* `production` is available at `https://versi0n.io`. Currently, we are running alpha test.
+* `production` use case is available at `https://versi0n.io`. Currently, we are running alpha test.
 
 
 

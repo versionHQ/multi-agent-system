@@ -1,14 +1,14 @@
 import os
 import pytest
 from unittest.mock import patch
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Callable
 
 from pydantic import BaseModel, Field, InstanceOf
 
 from versionhq.agent.model import Agent
 from versionhq.task.model import Task, ResponseField, TaskOutput, ConditionalTask
 from versionhq.tool.model import Tool, ToolSet
-from versionhq.llm.llm_variables import MODELS
+from versionhq.llm.llm_vars import MODELS
 from versionhq.llm.model import DEFAULT_MODEL_NAME, LLM
 
 
@@ -59,7 +59,6 @@ def create_base_agent(model: str | LLM | Dict[str, Any]) -> Agent:
 agent = create_base_agent(model=DEFAULT_MODEL_NAME)
 
 
-
 def test_sync_execute_task_with_pydantic_outcome():
     task = Task(
         description="Output random values strictly following the given response foramt and prompt.",
@@ -98,7 +97,7 @@ def test_async_execute_task():
         execution = task.execute_async(agent=agent)
         result = execution.result()
         assert result.raw == "test"
-        execute.assert_called_once_with(task=task, context=None, task_tools=None)
+        execute.assert_called_once_with(task=task, context=None, task_tools=list())
 
 
 def test_sync_execute_with_task_context():
@@ -211,7 +210,6 @@ def test_delegate():
         ],
         allow_delegation=True
     )
-
     task.execute_sync(agent=agent)
 
     assert task.output is not None
@@ -251,54 +249,61 @@ def test_store_task_log():
     assert task._task_output_handler.load() is not None
 
 
-def test_task_with_agent_tools(model: str | LLM | Dict[str, Any] = DEFAULT_MODEL_NAME):
+def test_task_with_agent_tools():
+    simple_tool = Tool(name="simple tool", func=lambda x: "simple func")
+    agent = Agent(role="demo", goal="execute tools", tools=[simple_tool,])
+    task = Task(description="execute tool", can_use_agent_tools=True, tool_res_as_final=True)
+    res = task.execute_sync(agent=agent)
+    assert res.tool_output == "simple func"
+
     def empty_func():
-        return "empty function"
+        return "empty func"
+
+    func_tool = Tool(name="func tool", func=empty_func)
+    agent.tools = [func_tool]
+    res = task.execute_sync(agent=agent)
+    assert res.tool_output == "empty func"
+
+
+    def demo_func(message: str) -> str:
+        return message + "_demo"
 
     class CustomTool(Tool):
         name: str = "custom tool"
 
-        def _run(self) -> str:
-            return "empty function"
-
-    custom_tool = CustomTool()
-
-    agent_str_tool = Agent(role="demo 1", goal="test a tool", tools=["random tool 1", "random tool 2",], llm=model)
-    agent_dict_tool = Agent(role="demo 2", goal="test a tool", tools=[dict(name="tool 1", function=empty_func)], llm=model)
-    agent_custom_tool = Agent(role="demo 3", goal="test a tool", tools=[custom_tool, custom_tool], llm=model)
-    agents = [agent_str_tool, agent_dict_tool, agent_custom_tool]
-
-    task = Task(description="execute the function", can_use_agent_tools=True, take_tool_res_as_final=True)
-
-    for agent in agents:
-        res = task.execute_sync(agent=agent)
-        assert "empty function" in res.tool_output
-        assert len(res.tool_output) == len(agent.tools)
+    custom_tool = CustomTool(func=demo_func)
+    custom_tool = CustomTool(func=demo_func)
+    agent.tools = [custom_tool]
+    res = task.execute_sync(agent=agent)
+    assert "_demo" in res.tool_output
 
 
 def test_task_with_tools():
 
-    def random_func(str: str = None) -> str:
-        return str
+    def random_func(message: str) -> str:
+        return message + "_demo"
+
+    tool = Tool(name="tool", func=random_func)
+    tool_set = ToolSet(tool=tool, kwargs=dict(message="empty func"))
+
+    agent = Agent(role="Tool Handler", goal="execute tools")
+    task = Task(description="execute the function", tools=[tool_set,], tool_res_as_final=True)
+    res = task.execute_sync(agent=agent)
+    assert res.tool_output == "empty func_demo"
 
     class CustomTool(Tool):
         name: str = "custom tool"
+        func: Callable = None
 
-        def _run(self) -> str:
-            return "custom function"
-
-    tool = Tool(name="tool", function=random_func)
-    custom_tool = CustomTool()
-    tool_set = ToolSet(tool=tool, kwargs=dict(str="empty function"))
-    task = Task(description="execute the function", tools=[custom_tool, tool, tool_set], take_tool_res_as_final=True)
+    custom_tool = CustomTool(func=random_func)
+    task.tools = [custom_tool]
     res = task.execute_sync(agent=agent)
+    assert "_demo" in res.tool_output
 
+    task.tools = [custom_tool]
+    res = task.execute_sync(agent=agent)
     assert res.tool_output is not None
-    assert isinstance(res.tool_output, list)
-    assert len(res.tool_output) == len(task.tools)
-    assert res.tool_output[0] == "custom function"
-    assert res.tool_output[1] is None
-    assert res.tool_output[2] == "empty function"
+
 
 
 def test_task_without_response_format():
@@ -310,21 +315,27 @@ def test_task_without_response_format():
     assert res.pydantic is None
 
 
-def _test_switch_model():
-    """
-    See if diff models can return their outputs in a correct format.
-    """
-    models = MODELS.get("openai")[0]
+def test_build_agent_without_developer_prompt():
+    agent = Agent(
+        role="analyst",
+        goal="analyze the company's website and retrieve the product overview",
+        backstory="You are competitive analysts who have abundand knowledge in marketing, product management.",
+        use_developer_prompt=False
+    )
+    task = Task(description="return a simple output with any random values.")
+    res = task.execute_sync(agent=agent)
 
-    for model in models:
-        test_create_json_output_from_complex_response_schema(model=model)
-        test_create_class_output_from_complex_response_scheme(model=model)
-        test_task_without_res_field(model=model)
+    assert res and isinstance(res, TaskOutput)
+    assert res.json_dict and isinstance(res.json_dict, dict)
+    assert res.pydantic is None
+
 
 
 
 if __name__ == "__main__":
-    test_task_without_response_format()
+    test_task_with_tools()
 
 
-# tool - use_llm = true
+# tool - use_llm = true -
+# task - agent - maxit
+# agents with multiple callbacks

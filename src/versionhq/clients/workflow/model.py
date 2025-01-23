@@ -10,7 +10,7 @@ from versionhq.clients.product.model import Product
 from versionhq.clients.customer.model import Customer
 from versionhq.agent.model import Agent
 from versionhq.team.model import Team
-from versionhq.tool import ComposioAppName
+from versionhq.tool.composio_tool_vars import ComposioAppName
 
 
 class ScoreFormat:

@@ -25,4 +25,3 @@ jobs:
 
       - name: Run Bandit
         run: uv run bandit -c pyproject.toml -r src/ -ll
-  

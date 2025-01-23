@@ -435,11 +435,8 @@ class Team(BaseModel):
             if not agent.function_calling_llm and self.function_calling_llm:
                 agent.function_calling_llm = self.function_calling_llm
 
-            # if agent.allow_code_execution:
-            #     agent.tools += agent.get_code_execution_tools()
-
-            if not agent.step_callback and self.step_callback:
-                agent.step_callback = self.step_callback
+            if self.step_callback:
+                agent.callbacks.append(self.step_callback)
 
         if self.process is None:
             self.process = TaskHandlingProcess.sequential

@@ -3,7 +3,7 @@ import pytest
 import litellm
 from unittest.mock import patch
 
-from versionhq.llm.llm_variables import MODELS, LLM_CONTEXT_WINDOW_SIZES
+from versionhq.llm.llm_vars import MODELS, LLM_CONTEXT_WINDOW_SIZES
 from versionhq.llm.model import LLM, DEFAULT_CONTEXT_WINDOW_SIZE, DEFAULT_MODEL_NAME
 
 

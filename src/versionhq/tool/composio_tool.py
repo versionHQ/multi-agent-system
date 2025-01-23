@@ -11,9 +11,10 @@ from pydantic_core import PydanticCustomError
 from composio import ComposioToolSet
 from composio_langchain import action
 
-from versionhq.tool import ComposioAppName, ComposioAuthScheme, composio_app_set, ComposioStatus, ComposioAction
+from versionhq.tool.composio_tool_vars import ComposioAppName, ComposioAuthScheme, composio_app_set, ComposioStatus, ComposioAction
+from versionhq.tool.cache_handler import CacheHandler
 from versionhq._utils.logger import Logger
-from versionhq._utils.cache_handler import CacheHandler
+
 
 load_dotenv(override=True)
 

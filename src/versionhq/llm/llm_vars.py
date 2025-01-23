@@ -9,6 +9,9 @@ List of models available on the framework.
 Model names align with the LiteLLM's key names defined in the JSON URL.
 Provider names align with the custom provider or model provider names.
 -> model_key = custom_provider_name/model_name
+
+Option
+litellm.pick_cheapest_chat_models_from_llm_provider(custom_llm_provider: str, n=1)
 """
 
 MODELS = {

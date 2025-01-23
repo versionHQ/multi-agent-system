@@ -1,8 +1,8 @@
 from typing import Optional, Any
 from pydantic import InstanceOf
 
-from versionhq.tool.model import ToolSet, InstructorToolSet
-from versionhq._utils.cache_handler import CacheHandler
+from versionhq.tool.model import ToolSet
+from versionhq.tool.cache_handler import CacheHandler, CacheTool
 
 
 class ToolHandler:
@@ -10,34 +10,26 @@ class ToolHandler:
     Record the tool usage by ToolSet instance with cache and error recording.
     """
 
-    last_used_tool: InstanceOf[ToolSet] | InstanceOf[InstructorToolSet]
-    cache: Optional[CacheHandler]
+    last_used_tool: InstanceOf[ToolSet]
+    cache: InstanceOf[CacheHandler] = CacheHandler()
     error: Optional[str]
     should_cache: bool
 
-    def __init__(
-        self,
-        last_used_tool: InstanceOf[ToolSet] | InstanceOf[InstructorToolSet] = None,
-        cache_handler: Optional[CacheHandler] = None,
-        should_cache: bool = True
-    ):
-        self.cache = cache_handler
+    def __init__(self, last_used_tool: InstanceOf[ToolSet] = None, cache_handler: InstanceOf[CacheHandler] = None, should_cache: bool = True):
         self.last_used_tool = last_used_tool
+        self.cache = cache_handler if cache_handler else CacheHandler()
         self.should_cache = should_cache
 
 
-    def record_last_tool_used(
-        self, last_used_tool: InstanceOf[ToolSet] | InstanceOf[InstructorToolSet], output: str, should_cache: bool = True
-    ) -> Any:
-        from versionhq.tool.model import CacheTool
-
+    def record_last_tool_used(self, last_used_tool: InstanceOf[ToolSet], output: str, should_cache: bool = True) -> None:
         self.last_used_tool = last_used_tool
 
-        if self.cache and should_cache and last_used_tool.tool.name != CacheTool().name:
-            self.cache.add(tool=last_used_tool.tool.name, input=last_used_tool.kwargs, output=output)
+        if should_cache:
+            self.cache = CacheHandler()
+            self.cache.add(tool_name=last_used_tool.tool.name, input=str(last_used_tool.kwargs), output=output)
 
 
-    def has_called_before(self, tool_set: ToolSet = None) -> bool:
+    def has_called_before(self, tool_set: InstanceOf[ToolSet] = None) -> bool:
         if tool_set is None or not self.last_used_tool:
             return False
 

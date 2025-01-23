@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Callable, Type, Optional, get_args, get_orig
 from pydantic import UUID4, InstanceOf, BaseModel, ConfigDict, Field, create_model, field_validator, model_validator
 from pydantic_core import PydanticCustomError
 
-from versionhq.tool import ComposioAppName
+from versionhq.tool.composio_tool_vars import ComposioAppName
 
 
 class ProductProvider(ABC, BaseModel):

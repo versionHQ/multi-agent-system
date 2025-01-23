@@ -4,7 +4,7 @@ import datetime
 
 from versionhq.clients.workflow.model import Score, ScoreFormat, MessagingWorkflow, MessagingComponent
 from versionhq.clients.product.model import Product, ProductProvider
-from versionhq.tool import ComposioAppName
+from versionhq.tool.composio_tool_vars import ComposioAppName
 
 
 def test_create_product_provider():

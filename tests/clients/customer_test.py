@@ -5,7 +5,7 @@ from typing import List, Dict, Any, Optional, Callable
 
 from versionhq.clients.product.model import Product, ProductProvider
 from versionhq.clients.customer.model import Customer, Status
-from versionhq.tool import ComposioAppName
+from versionhq.tool.composio_tool_vars import ComposioAppName
 
 
 def test_create_customer():

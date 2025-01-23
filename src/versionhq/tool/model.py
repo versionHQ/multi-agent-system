@@ -1,10 +1,13 @@
 from abc import ABC, abstractmethod
 from inspect import signature
-from typing import Any, Dict, Callable, Type, Optional, get_args, get_origin
+from typing import Any, Dict, Callable, Type, Optional, get_args, get_origin, get_type_hints
 from typing_extensions import Self
-from pydantic import InstanceOf, BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import InstanceOf, BaseModel, ConfigDict, Field, field_validator, model_validator, PrivateAttr, create_model
+from pydantic_core import PydanticCustomError
 
-from versionhq._utils.cache_handler import CacheHandler
+from versionhq.llm.llm_vars import SchemaType
+from versionhq.tool.cache_handler import CacheHandler
+from versionhq._utils.logger import Logger
 
 
 class BaseTool(ABC, BaseModel):
@@ -12,18 +15,27 @@ class BaseTool(ABC, BaseModel):
     Abstract class for Tool class.
     """
 
-    class _ArgsSchemaPlaceholder(BaseModel):
+    class ArgsSchemaPlaceholder(BaseModel):
         pass
 
-    args_schema: Type[BaseModel] = Field(default_factory=_ArgsSchemaPlaceholder)
-    properties: Dict[str, Any] = Field(default_factory=dict)
-    type: str = Field(default="function")
+    _logger: Logger = PrivateAttr(default_factory=lambda: Logger(verbose=True))
+
+    object_type: str = Field(default="function")
+    name: str = Field(default=None)
+    description: str = Field(default=None)
+    properties: Dict[str, Any] = Field(default_factory=dict, description="for llm func calling")
+    args_schema: Type[BaseModel] = Field(default_factory=ArgsSchemaPlaceholder)
+
+    tool_handler: Optional[Dict[str, Any] | Any] = Field(default=None, description="store tool_handler to record the tool usage")
+    should_cache: bool = Field(default=True, description="whether the tool usage should be cached")
+    cache_function: Callable = lambda _args=None, _result=None: True
+    cache_handler: Optional[InstanceOf[CacheHandler]] = Field(default=None)
 
 
     @field_validator("args_schema", mode="before")
     @classmethod
     def _default_args_schema(cls, v: Type[BaseModel]) -> Type[BaseModel]:
-        if not isinstance(v, cls._ArgsSchemaPlaceholder):
+        if not isinstance(v, cls.ArgsSchemaPlaceholder):
             return v
 
         return type(
@@ -33,22 +45,29 @@ class BaseTool(ABC, BaseModel):
         )
 
 
-    @abstractmethod
-    def _run(self, *args: Any, **kwargs: Any,) -> Any:
-        """any handling"""
+    @field_validator("properties", mode="before")
+    @classmethod
+    def _default_properties(cls, v: Dict[str, Any]) -> Dict[str, Any]:
+        p, r = dict(), list()
+        for k, v in cls._run.__annotations__.items():
+            if k != "return":
+                p.update({ k: { "type": SchemaType(type(v)).convert(), "name": k, }} )
+                r.append(k)
 
-
-
-class Tool(BaseTool):
-    name: str = Field(default=None)
-    goal: str = Field(default=None)
-    function: Callable = Field(default=None)
-    tool_handler: Optional[Dict[str, Any] | Any] = Field(default=None, description="store tool_handler to record the usage of this tool")
-    should_cache: bool = Field(default=True, description="whether the tool usage should be cached")
-    cache_function: Callable = lambda _args=None, _result=None: True
-    cache_handler: Optional[InstanceOf[CacheHandler]] = Field(default=None)
-    call_llm: Optional[bool] = Field(default=False)
-
+        return {
+            "type": cls.object_type,
+            "function": {
+                "name": cls.name.replace(" ", "_"),
+                "description": cls.description,
+                "parameters": {
+                    "type": "object",
+                    "properties": p,
+                    "required": r,
+                    "additionalProperties": False
+                },
+                "strict": True
+            }
+        }
 
     @model_validator(mode="after")
     def set_up_tool_handler(self) -> Self:
@@ -62,33 +81,9 @@ class Tool(BaseTool):
 
         return self
 
-
-    @model_validator(mode="after")
-    def set_up_function(self) -> Self:
-        if self.function is None:
-            self.function = self._run
-            self._set_args_schema_from_func()
-        return self
-
-
-    @model_validator(mode="after")
-    def set_up_properties(self) -> Self:
-        """
-        Set up properties for tools called by LLM.
-        """
-
-        if self.call_llm is True:
-            params = dict(type="function", function=dict(
-                name=self.name,
-                description=self.description,
-                parameters={
-                    "type": "object",
-                    "properties": { k:{"type": type(v), } for k, v in self._run.__annotations__.items() if k != "return"}
-                }
-            ))
-            self.properties = params
-
-        return self
+    @abstractmethod
+    def _run(self, *args: Any, **kwargs: Any,) -> Any:
+        """any handling"""
 
 
     @staticmethod
@@ -118,112 +113,236 @@ class Tool(BaseTool):
                 import json
                 raw_args = json.loads(raw_args)
             except json.JSONDecodeError as e:
-                raise ValueError(f"Failed to parse arguments as JSON: {e}")
+                raise ValueError(f"Failed to parse arguments as JSON: {str(e)}")
 
         try:
             validated_args = self.args_schema.model_validate(raw_args)
             return validated_args.model_dump()
 
         except Exception as e:
-            raise ValueError(f"Arguments validation failed: {e}")
+            raise ValueError(f"Arguments validation failed: {str(e)}")
 
 
-    def _set_args_schema_from_func(self):
-        class_name = f"{self.__class__.__name__}Schema"
-        self.args_schema = type(
-            class_name,
-            (BaseModel,),
-            { "__annotations__": {
-                k: v for k, v in self._run.__annotations__.items() if k != "return"
-            } },
-        )
+    def _create_schema(self) -> type[BaseModel]:
+        """
+        Create a Pydantic schema from a function's signature
+        """
+        import inspect
+
+        sig = inspect.signature(self.func)
+        type_hints = get_type_hints(self.func)
+        fields = {}
+        for param_name, param in sig.parameters.items():
+            if param_name in ("self", "cls"):
+                continue
+
+            annotation = type_hints.get(param_name, Any)
+            default = ... if param.default == param.empty else param.default
+            fields[param_name] = (annotation, Field(default=default))
+
+        schema_name = f"{self.func.__name__.title()}Schema"
+        return create_model(schema_name, **fields)
+
+
+
+class Tool(BaseTool):
+    func: Callable = Field(default=None)
+
+
+    @model_validator(mode="after")
+    def validate_func(self) -> Self:
+        if not self.func and not self._run:
+            self._logger.log(level="error", message=f"Tool must have a function", color="red")
+            raise PydanticCustomError("function_missing", f"Function is missing in the tool.", {})
+
+        elif self.func and not isinstance(self.func, Callable):
+            self._logger.log(level="error", message=f"The tool is missing a valid function", color="red")
+            raise PydanticCustomError("invalid_function", f"The value in the function field must be callable.", {})
+
+        else:
+            try:
+                self.args_schema = self._create_schema_from_function()
+                self._validate_function_signature()
+
+            except Exception as e:
+                self._logger.log(level="error", message=f"The tool is missing a valid function: {str(e)}", color="red")
+                raise PydanticCustomError("invalid_function", f"Invalid function: {str(e)}", {})
+
         return self
 
 
-    def _run(self, *args: Any, **kwargs: Any) -> Any:
-        return self.run(*args, **kwargs)
+    @model_validator(mode="after")
+    def set_up_name(self) -> Self:
+        if not self.name:
+            self.name = self.func.__name__ if self.func else ""
+
+        return self
 
 
-    def run(self, llm: str | Any = None, *args, **kwargs) -> Any:
+    @model_validator(mode="after")
+    def set_up_description(self) -> Self:
+        if not self.description:
+            if not self.args_schema:
+                self.args_schema = self._default_args_schema(self)
+
+            args_schema = {
+                name: {
+                    "description": field.description,
+                    "type": self._get_arg_annotations(field.annotation),
+                }
+                for name, field in self.args_schema.model_fields.items()
+            }
+            self.description = f"Tool: {self.name}\nArgs: {args_schema}"
+
+        return self
+
+
+    @model_validator(mode="after")
+    def set_up_args_schema(self) -> Self:
         """
-        Execute tools without using LLM and record its usage if should_cache is True.
+        Set up args schema based on the given function.
+        """
+        if self.func:
+            self.args_schema = self._create_schema_from_function()
+        return self
+
+
+    @model_validator(mode="after")
+    def set_up_func_calling_properties(self) -> Self:
+        """
+        Format function_calling params from args_schema.
+        """
+
+        p, r = dict(), list()
+        if self.args_schema:
+            for name, field in self.args_schema.model_fields.items():
+                if name != "kwargs" and name != "args":
+                    p.update(
+                        {
+                            name: {
+                                "description": field.description if field.description else "",
+                                "type": SchemaType(self._get_arg_annotations(field.annotation)).convert(),
+                            }
+                        }
+                    )
+                    r.append(name)
+
+            properties = {
+                "type": self.object_type,
+                "function": {
+                    "name": self.name.replace(" ", "_"),
+                    "description": self.description if self.description else "a tool function to execute",
+                    "parameters": {
+                        "type": "object",
+                        "properties": p,
+                        "required": r,
+                        "additionalProperties": False
+                    },
+                    "strict": True,
+                },
+            }
+            self.properties = properties
+        return self
+
+
+    def _create_schema_from_function(self) -> type[BaseModel]:
+        """
+        Create a Pydantic schema from a function's signature
+        """
+        import inspect
+
+        sig = inspect.signature(self.func)
+        type_hints = get_type_hints(self.func)
+        fields = {}
+        for param_name, param in sig.parameters.items():
+            if param_name in ("self", "cls"):
+                continue
+
+            annotation = type_hints.get(param_name, Any)
+            default = ... if param.default == param.empty else param.default
+            fields[param_name] = (annotation, Field(default=default))
+
+        schema_name = f"{self.func.__name__.title()}Schema"
+        return create_model(schema_name, **fields)
+
+
+    def _validate_function_signature(self) -> None:
+        """
+        Validate that the function signature matches the args schema.
+        """
+
+        import inspect
+
+        sig = inspect.signature(self.func)
+        schema_fields = self.args_schema.model_fields
+
+        for param_name, param in sig.parameters.items():
+            if param_name in ("self", "cls"):
+                continue
+
+            if param.kind in (inspect.Parameter.VAR_KEYWORD, inspect.Parameter.VAR_POSITIONAL):
+                continue
+
+            if param.default == inspect.Parameter.empty:
+                if param_name not in schema_fields:
+                    raise ValueError(f"Required function parameter '{param_name}' not found in args_schema")
+
+
+    def _run(self, *args: Any, **kwargs: Any) -> Any:
+        return self.func(*args, **kwargs)
+
+
+    def _handle_toolset(self, params: Dict[str, Any] = None) -> Any:
+        """
+        Read the cache from the ToolHandler instance or execute _run() method.
         """
 
         from versionhq.tool.tool_handler import ToolHandler
 
+        if not self.args_schema:
+            self.args_schema = self._create_schema_from_function()
+
         result = None
-        tool_set = ToolSet(tool=self, kwargs={})
+        acceptable_args = self.args_schema.model_json_schema()["properties"].keys()
+        acceptable_kwargs = { k: v for k, v in params.items() if k in acceptable_args } if params else dict()
+        parsed_kwargs = self._parse_args(raw_args=acceptable_kwargs)
+        tool_set = ToolSet(tool=self, kwargs=acceptable_kwargs)
 
-        if self.call_llm is True:
-            pass
+        if self.tool_handler and isinstance(self.tool_handler, ToolHandler):
+            if self.tool_handler.has_called_before(tool_set):
+                self.tool_handler.error = "Agent execution error"
 
-        if self.function:
-            result = self.function(*args, **kwargs)
-
-        else:
-            acceptable_args = self.args_schema.model_json_schema()["properties"].keys()
-            acceptable_kwargs = { k: v for k, v in kwargs.items() if k in acceptable_args }
-            tool_set = ToolSet(tool=self, kwargs=acceptable_kwargs)
-
-            if self.tool_handler:
-                if self.tool_handler.has_called_before(tool_set):
-                    self.tool_handler.error = "Agent execution error"
-
-                elif self.tool_handler.cache:
-                    result = self.tools_handler.cache.read(tool=tool_set.tool.name, input=tool_set.kwargs)
-                    if result is None:
-                        parsed_kwargs = self._parse_args(raw_args=acceptable_kwargs)
-                        result = self.function(**parsed_kwargs) if self.function else None
+            elif self.tool_handler.cache:
+                result = self.tool_handler.cache.read(tool_name=tool_set.tool.name, input=str(tool_set.kwargs))
+                if not result:
+                    result = self.func(**parsed_kwargs)
 
             else:
-                tool_handler = ToolHandler(last_used_tool=tool_set, cache_handler=self.cache_handler, should_cache=self.should_cache)
-                self.tool_handler = tool_handler
-                parsed_kwargs = self._parse_args(raw_args=acceptable_kwargs)
-                result = self.function(**parsed_kwargs) if self.function else None
+                result = self.func(**parsed_kwargs)
+
+        else:
+            tool_handler = ToolHandler(last_used_tool=tool_set, cache_handler=self.cache_handler, should_cache=self.should_cache)
+            self.tool_handler = tool_handler
+            result = self.func(**parsed_kwargs)
 
 
         if self.should_cache is True:
-            self.tool_handler.record_last_tool_used(tool_set, result, self.should_cache)
+            self.tool_handler.record_last_tool_used(last_used_tool=tool_set, output=result, should_cache=self.should_cache)
 
         return result
 
 
-    @property
-    def description(self) -> str:
-        args_schema = {
-            name: {
-                "description": field.description,
-                "type": self._get_arg_annotations(field.annotation),
-            }
-            for name, field in self.args_schema.model_fields.items()
-        }
-
-        return f"Tool Name: {self.name}\nTool Arguments: {args_schema}\nGoal: {self.goal}"
+    def run(self, params: Dict[str, Any] = None) -> Any:
+        """
+        Execute a tool using a toolset and cached tools
+        """
+        result = self._handle_toolset(params)
+        return result
 
 
 class ToolSet(BaseModel):
     """
-    Store the tool called and any kwargs used.
+    Store the tool called and any kwargs used. (The tool name and kwargs will be stored in the cache.)
     """
-    tool: InstanceOf[Tool] | Any = Field(..., description="store the tool instance to be called.")
+    tool: InstanceOf[Tool] | Type[Tool] = Field(..., description="store the tool instance to be called.")
     kwargs: Optional[Dict[str, Any]] = Field(..., description="kwargs passed to the tool")
-
-
-class InstructorToolSet(BaseModel):
-    tool: InstanceOf[Tool] | Any = Field(..., description="store the tool instance to be called.")
-    kwargs: Optional[Dict[str, Any]] = Field(..., description="kwargs passed to the tool")
-
-
-class CacheTool(BaseModel):
-    """
-    Default tools to hit the cache.
-    """
-
-    name: str = "Hit Cache"
-    cache_handler: CacheHandler = Field(default_factory=CacheHandler)
-
-    def hit_cache(self, key):
-        split = key.split("tool:")
-        tool = split[1].split("|input:")[0].strip()
-        tool_input = split[1].split("|input:")[1].strip()
-        return self.cache_handler.read(tool, tool_input)

@@ -8,19 +8,16 @@ def process_config(values_to_update: Dict[str, Any], model_class: Type[BaseModel
     Refer to the Pydantic model class for field validation.
     """
 
-    if hasattr(values_to_update, "config"):
-        config = values_to_update.pop("config", {})
-    else:
-        return values_to_update
+    config = values_to_update.pop("config", {})
 
+    if config:
+        for k, v in config.items():
+            if k not in model_class.model_fields or values_to_update.get(k) is not None:
+                continue
 
-    for key, value in config.items():
-        if key not in model_class.model_fields or values_to_update.get(key) is not None:
-            continue
-
-        if isinstance(value, dict) and isinstance(values_to_update.get(key), dict):
-            values_to_update[key].update(value)
-        else:
-            values_to_update[key] = value
+            if isinstance(v, dict) and isinstance(values_to_update.get(k), dict):
+                values_to_update[k].update(v)
+            else:
+                values_to_update[k] = v
 
     return values_to_update
