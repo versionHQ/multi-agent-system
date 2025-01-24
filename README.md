@@ -41,7 +41,7 @@ LLM-powered `agent`s and `team`s use `tool`s and their own knowledge to complete
 
 - [Key Features](#key-features)
 - [Usage](#usage)
-  - [Case 1. Build an AI agent on LLM of your choice and execute a task:](#case-1-build-an-ai-agent-on-llm-of-your-choice-and-execute-a-task)
+  - [Case 1. Single agent handling task:](#case-1-single-agent-handling-task)
   - [Case 2. Form a team to handle multiple tasks:](#case-2-form-a-team-to-handle-multiple-tasks)
 - [Technologies Used](#technologies-used)
 - [Project Structure](#project-structure)
@@ -83,45 +83,49 @@ Multiple `agents` can form a `team` to complete complex tasks together.
 
 1. Install `versionhq` package:
    ```
-   uv pip install versionhq
+   pip install versionhq
    ```
 
 2. You can use the `versionhq` module in your Python app.
 
 
-### Case 1. Build an AI agent on LLM of your choice and execute a task:
+### Case 1. Single agent handling task:
 
    ```
+   from pydantic import BaseModel
    from versionhq.agent.model import Agent
-   from versionhq.task.model import Task, ResponseField
+   from versionhq.task.model import Task
 
-   def my_callback_func():
-      """callback func"""
+   class CustomOutput(BaseModel):
+      test1: str
+      test2: list[str]
 
-   agent = Agent(
-      role="demo",
-      goal="amazing project goal",
-      skillsets=["skill_1", "skill_2", ],
-      tools=["amazing RAG tool",]
-      llm="llm-of-your-choice"
-   )
+   def dummy_func(message: str, test1: str, test2: list[str]) -> str:
+      return f"{message}: {test1}, {", ".join(test2)}"
+
+
+   agent = Agent(role="demo", goal="amazing project goal")
 
    task = Task(
       description="Amazing task",
-      response_fields=[
-         ResponseField(title="test1", data_type=str, required=True),
-         ResponseField(title="test2", data_type=list, items=str, required=True),
-      ],
-      callbacks=[my_callback_func]
+      pydantic_custom_output=CustomOutput,
+      callback=dummy_func,
+      callback_kwargs=dict(message="Hi! Here is the result: ")
    )
+
    res = task.execute_sync(agent=agent, context="amazing context to consider.")
-   return res.to_dict()
+   print(res)
    ```
 
-This will return a dictionary with keys defined in the `ResponseField`.
+This will return a `TaskOutput` instance with response in raw, JSON dict, and Pydantic model: `CustomOutput` formats with a callback result.
 
    ```
-   { test1: "answer1", "test2": ["answer2-1", "answer2-2", "answer2-3",] }
+   res == TaskOutput(
+      raw="{\\"test1\\": \\"random str\\", \\"test2\\": [\\"item1\\", \\"item2\\"]}",
+      json_dict={"test1": "random str", "test2": ["item1", "item2"]},
+      pydantic=CustomOutput(test1="random str", test2=["item 1", "item 2"]),
+      callback_output="Hi! Here is the result: random str, item 1, item 2",
+   )
    ```
 
 ### Case 2. Form a team to handle multiple tasks:
