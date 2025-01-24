@@ -64,4 +64,3 @@ def test_create_llm_from_provider():
 
 if __name__ == "__main__":
     test_create_llm_from_valid_name()
-    test_create_llm_from_provider

@@ -196,6 +196,7 @@ class LLM(BaseModel):
         """
         Execute LLM based on the agent's params and model params.
         """
+        litellm.drop_params = True
 
         with suppress_warnings():
             if len(self.callbacks) > 0:
@@ -206,7 +207,7 @@ class LLM(BaseModel):
                     self.tools = [item.tool.properties if isinstance(item, ToolSet) else item.properties for item in tools]
 
                 if response_format:
-                    self.response_format = { "type": "json_object" } if self.model == "gpt-3.5-turbo" or tool_res_as_final else response_format
+                    self.response_format = { "type": "json_object" } if tool_res_as_final else response_format
 
                 provider = self.provider if self.provider else "openai"
 

@@ -405,24 +405,6 @@ class Agent(BaseModel):
         if context is not task.prompt_context:
             task_prompt += context
 
-            # if agent_tools_to_run_without_llm:
-            #     tool_results = []
-            #     for item in agent_tools_to_run_without_llm:
-            #         if isinstance(item, ToolSet):
-            #             tool_result = item.tool.run(**item.kwargs)
-            #             tool_results.append(tool_result)
-            #         elif isinstance(item, Tool):
-            #             tool_result = item.run()
-            #             tool_results.append(tool_result)
-            #         else:
-            #             try:
-            #                 item.run()
-            #             except:
-            #                 pass
-
-            #     if task.tool_res_as_final is True:
-            #         return tool_results
-
         # if self.team and self.team._train:
         #     task_prompt = self._training_handler(task_prompt=task_prompt)
         # else:

@@ -16,7 +16,7 @@ litellm.pick_cheapest_chat_models_from_llm_provider(custom_llm_provider: str, n=
 
 MODELS = {
     "openai": [
-        "gpt-3.5-turbo",
+        # "gpt-3.5-turbo",
         "gpt-4",
         "gpt-4o",
         "gpt-4o-mini",

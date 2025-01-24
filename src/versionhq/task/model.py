@@ -4,10 +4,10 @@ import datetime
 import uuid
 from concurrent.futures import Future
 from hashlib import md5
-from typing import Any, Dict, List, Set, Optional, Tuple, Callable, Type
+from typing import Any, Dict, List, Set, Optional, Tuple, Callable, Type, TypeVar
 from typing_extensions import Annotated, Self
 
-from pydantic import UUID4, BaseModel, Field, PrivateAttr, field_validator, model_validator, create_model, InstanceOf
+from pydantic import UUID4, BaseModel, Field, PrivateAttr, field_validator, model_validator, create_model, InstanceOf, field_validator
 from pydantic_core import PydanticCustomError
 
 from versionhq._utils.process_config import process_config
@@ -96,8 +96,8 @@ class ResponseField(BaseModel):
                 for item in self.properties:
                     p.update(**item._format_props())
 
-                    if item.required:
-                        r.append(item.title)
+                    # if item.required:
+                    r.append(item.title)
 
             props = {
                 "type": schema_type,
@@ -161,14 +161,13 @@ class ResponseField(BaseModel):
 
 class TaskOutput(BaseModel):
     """
-    Store the final output of the task in TaskOutput class.
-    Depending on the task output format, use `raw`, `pydantic`, `json_dict` accordingly.
+    A class to store the final output of the given task in raw (string), json_dict, and pydantic class formats.
     """
 
     task_id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True, description="store Task ID")
     raw: str = Field(default="", description="Raw output of the task")
     json_dict: Dict[str, Any] = Field(default=None, description="`raw` converted to dictionary")
-    pydantic: Optional[Any] = Field(default=None, description="`raw` converted to the abs. pydantic model")
+    pydantic: Optional[Any] = Field(default=None)
     tool_output: Optional[Any] = Field(default=None, description="store tool result when the task takes tool output as its final output")
 
     def __str__(self) -> str:
@@ -256,7 +255,7 @@ class Task(BaseModel):
 
     @model_validator(mode="before")
     @classmethod
-    def process_model_config(cls, values: Dict[str, Any]) -> None:
+    def process_config(cls, values: Dict[str, Any]) -> None:
         return process_config(values_to_update=values, model_class=cls)
 
 
@@ -276,16 +275,16 @@ class Task(BaseModel):
         return self
 
 
-    @model_validator(mode="after")
-    def set_attributes_based_on_config(self) -> Self:
-        """
-        Set attributes based on the task configuration.
-        """
+    # @model_validator(mode="after")
+    # def set_attributes_based_on_config(self) -> Self:
+    #     """
+    #     Set attributes based on the task configuration.
+    #     """
 
-        if self.config:
-            for key, value in self.config.items():
-                setattr(self, key, value)
-        return self
+    #     if self.config:
+    #         for key, value in self.config.items():
+    #             setattr(self, key, value)
+    #     return self
 
 
     @model_validator(mode="after")
@@ -322,7 +321,7 @@ class Task(BaseModel):
         if self.pydantic_custom_output:
             output_prompt = f"""
 Your response MUST STRICTLY follow the given repsonse format:
-JSON schema: {str({k: v for k, v in self.pydantic_custom_output.__fields__.items()})}
+JSON schema: {str(self.pydantic_custom_output)}
 """
 
         elif self.response_fields:
@@ -380,16 +379,13 @@ Ref. Output image: {output_formats_to_follow}
 
     def _structure_response_format(self, data_type: str = "object", model_provider: str = "gemini") -> Dict[str, Any] | None:
         """
-        Create and return a valid response format using
-            - mannual response schema from `self.response_fields`, or
-            - SDK objects from `pydantic_custom_output`.
-        OpenAI:
-        https://platform.openai.com/docs/guides/structured-outputs?context=ex1#function-calling-vs-response-format
-        https://platform.openai.com/docs/guides/structured-outputs?context=with_parse#some-type-specific-keywords-are-not-yet-supported
-        Gemini:
+        Structure a response format either from`response_fields` or `pydantic_custom_output`.
+        1 nested item is accepted.
         """
 
-        response_schema = None
+        from versionhq.task.structured_response import StructuredOutput
+
+        response_format: Dict[str, Any] = None
 
         if self.response_fields:
             properties, required_fields = {}, []
@@ -406,37 +402,19 @@ Ref. Output image: {output_formats_to_follow}
                 "type": "object",
                 "properties": properties,
                 "required": required_fields,
-                "additionalProperties": False, # for openai
+                "additionalProperties": False,
+            }
+
+            response_format = {
+                "type": "json_schema",
+                "json_schema": { "name": "outcome", "schema": response_schema }
             }
 
 
         elif self.pydantic_custom_output:
-            response_schema = {
-                **self.pydantic_custom_output.model_json_schema(),
-                "additionalProperties": False,
-                "required": [k for k, v in self.pydantic_custom_output.__fields__.items()],
-                "strict": True,
-            }
+            response_format = StructuredOutput(response_format=self.pydantic_custom_output)._format()
 
-
-        if response_schema:
-            if model_provider == "gemini":
-                return {
-                    "type": data_type,
-                    "response_schema": response_schema,
-                    "enforce_validation": True
-                }
-
-            if model_provider == "openai":
-                if self.pydantic_custom_output:
-                    return self.pydantic_custom_output
-                else:
-                    return {
-                        "type": "json_schema",
-                        "json_schema": { "name": "outcome", "strict": True, "schema": response_schema },
-                    }
-        else:
-            return None
+        return response_format
 
 
     def _create_json_output(self, raw: str) -> Dict[str, Any]:
@@ -477,17 +455,16 @@ Ref. Output image: {output_formats_to_follow}
 
     def _create_pydantic_output(self, raw: str = None, json_dict: Dict[str, Any] = None) -> InstanceOf[BaseModel]:
         """
-        Create pydantic output from the `raw` result.
+        Create pydantic output from raw or json_dict output.
         """
 
-        output_pydantic = None
-        json_dict = json_dict
+        output_pydantic = self.pydantic_custom_output
 
         try:
-            if not json_dict:
-                json_dict = self._create_json_output(raw=raw)
+            json_dict = json_dict if json_dict else self._create_json_output(raw=raw)
 
-            output_pydantic = self.pydantic_custom_output(**json_dict)
+            for k, v in json_dict.items():
+                setattr(output_pydantic, k, v)
 
         except:
             pass
@@ -600,13 +577,14 @@ Ref. Output image: {output_formats_to_follow}
         if self.callback:
             self.callback({ **self.callback_kwargs, **self.output.__dict__ })
 
-        # if self.output_file:
+        # if self.output_file: ## disabled for now
         #     content = (
         #         json_output
         #         if json_output
         #         else pydantic_output.model_dump_json() if pydantic_output else result
         #     )
         #     self._save_file(content)
+
         ended_at = datetime.datetime.now()
         self.execution_span_in_sec = (ended_at - started_at).total_seconds()
 

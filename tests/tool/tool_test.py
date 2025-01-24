@@ -135,8 +135,3 @@ def test_cache_tool():
 
     assert my_tool.cache_handler.read(tool_name=my_tool.name, input=str({"x": 3})) == 5
     assert my_tool.cache_handler._cache[f"{my_tool.name}-{str({"x": 3})}"] == 5
-
-
-
-if __name__ =="__main__":
-    test_tool_handler_with_cache()
