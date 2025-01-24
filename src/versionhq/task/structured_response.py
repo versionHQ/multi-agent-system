@@ -1,4 +1,3 @@
-#! FIXME
 from typing import Dict, Optional, Type, List, Any, TypeVar
 
 from pydantic import BaseModel, Field, InstanceOf
@@ -92,12 +91,13 @@ class StructuredList:
 
                 elif nested_object_type == list:
                     props.update({
-                        "nest":  {
+                        # "nest":  {
                             "type": "array",
-                            "items": { "item": { "type": "string" } }, #! REFINEME - field title <>`item`
-                        }})
+                            "items": { "type": "string" } , #! REFINEME - field title <>`item`
+                        # }
+                        })
                 else:
-                    props.update({ "nest": { "type": SchemaType(nested_object_type).convert() }})
+                    props.update({ "type": SchemaType(nested_object_type).convert() })
 
             self.items = { **props }
             return {
@@ -107,8 +107,6 @@ class StructuredList:
                     "items": self.items,
                 }
             }
-
-
 
 
 class StructuredOutput(BaseModel):

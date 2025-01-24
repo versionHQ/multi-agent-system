@@ -1,5 +1,7 @@
 import os
 import pytest
+import sys
+import threading
 from unittest.mock import patch
 from typing import Dict, Any, List, Optional, Callable
 
@@ -10,7 +12,8 @@ from versionhq.task.model import Task, ResponseField, TaskOutput, ConditionalTas
 from versionhq.tool.model import Tool, ToolSet
 from tests.task import DemoOutcome, demo_response_fields, base_agent
 
-
+sys.setrecursionlimit(2097152)
+threading.stack_size(134217728)
 
 def test_sync_execute_task_with_pydantic_outcome():
     task = Task(
@@ -144,7 +147,7 @@ def test_callback():
 
 
 def test_delegate():
-    agent = Agent(role="demo agent 6", goal="My amazing goals")
+    agent = Agent(role="demo agent 6", goal="My amazing goals", maxit=1, max_tokens=3000)
     task = Task(
         description="return the output following the given prompt.",
         response_fields=[
@@ -193,7 +196,7 @@ def test_store_task_log():
 
 def test_task_with_agent_tools():
     simple_tool = Tool(name="simple tool", func=lambda x: "simple func")
-    agent = Agent(role="demo", goal="execute tools", tools=[simple_tool,])
+    agent = Agent(role="demo", goal="execute tools", tools=[simple_tool,], maxit=1, max_tokens=3000)
     task = Task(description="execute tool", can_use_agent_tools=True, tool_res_as_final=True)
     res = task.execute_sync(agent=agent)
     assert res.tool_output == "simple func"
@@ -227,7 +230,7 @@ def test_task_with_tools():
     tool = Tool(name="tool", func=random_func)
     tool_set = ToolSet(tool=tool, kwargs=dict(message="empty func"))
 
-    agent = Agent(role="Tool Handler", goal="execute tools")
+    agent = Agent(role="Tool Handler", goal="execute tools", maxit=1, max_tokens=3000)
     task = Task(description="execute the function", tools=[tool_set,], tool_res_as_final=True)
     res = task.execute_sync(agent=agent)
     assert res.tool_output == "empty func_demo"
@@ -272,5 +275,45 @@ def test_build_agent_without_developer_prompt():
 
 
 
+def test_callback():
+    from pydantic import BaseModel
+    from versionhq.agent.model import Agent
+    from versionhq.task.model import Task
+
+    class CustomOutput(BaseModel):
+        test1: str
+        test2: list[str]
+
+    def dummy_func(message: str, test1: str, test2: list[str]) -> str:
+        return f"{message}: {test1}, {", ".join(test2)}"
+
+    agent = Agent(role="demo", goal="amazing project goal", maxit=1, max_tokens=3000)
+
+    task = Task(
+        description="Amazing task",
+        pydantic_custom_output=CustomOutput,
+        callback=dummy_func,
+        callback_kwargs=dict(message="Hi! Here is the result: ")
+    )
+    res = task.execute_sync(agent=agent, context="amazing context to consider.")
+
+    assert res.task_id == task.id
+    assert res.pydantic.test1 and res.pydantic.test2
+    assert "Hi! Here is the result: " in res.callback_output and res.pydantic.test1 in res.callback_output and ", ".join(res.pydantic.test2) in res.callback_output
+
+
+def test_task_with_agent_callback():
+    def dummy_func(*args, **kwargs) -> str:
+        return "Demo func"
+
+    agent = Agent(role="demo", goal="amazing project goal", maxit=1, max_tokens=3000, callbacks=[dummy_func,])
+    task = Task(description="Amazing task")
+    res = task.execute_sync(agent=agent)
+
+    assert res.raw and res.task_id == task.id
 
 # task - maxit, loop, rpm
+
+
+if __name__ == "__main__":
+    test_task_with_agent_callback()

@@ -169,6 +169,7 @@ class TaskOutput(BaseModel):
     json_dict: Dict[str, Any] = Field(default=None, description="`raw` converted to dictionary")
     pydantic: Optional[Any] = Field(default=None)
     tool_output: Optional[Any] = Field(default=None, description="store tool result when the task takes tool output as its final output")
+    gott: Optional[Any] = Field(default=None, description="store task or agent callback outcome")
 
     def __str__(self) -> str:
         return str(self.pydantic) if self.pydantic else str(self.json_dict) if self.json_dict else self.raw
@@ -243,7 +244,7 @@ class Task(BaseModel):
     # execution rules
     allow_delegation: bool = Field(default=False, description="ask other agents for help and run the task instead")
     async_execution: bool = Field(default=False,description="whether the task should be executed asynchronously or not")
-    callback: Optional[Any] = Field(default=None, description="callback to be executed after the task is completed.")
+    callback: Optional[Callable] = Field(default=None, description="callback to be executed after the task is completed.")
     callback_kwargs: Optional[Dict[str, Any]] = Field(default_factory=dict, description="kwargs for the callback when the callback is callable")
 
     # recording
@@ -574,8 +575,9 @@ Ref. Output image: {output_formats_to_follow}
         self.output = task_output
         self.processed_by_agents.add(agent.role)
 
-        if self.callback:
-            self.callback({ **self.callback_kwargs, **self.output.__dict__ })
+        if self.callback and isinstance(self.callback, Callable):
+            callback_res = self.callback(**self.callback_kwargs, **task_output.json_dict)
+            task_output.callback_output = callback_res
 
         # if self.output_file: ## disabled for now
         #     content = (

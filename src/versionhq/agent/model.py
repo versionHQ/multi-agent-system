@@ -255,9 +255,9 @@ class Agent(BaseModel):
         llm.timeout = self.max_execution_time if llm.timeout is None else llm.timeout
         llm.max_tokens = self.max_tokens if self.max_tokens else llm.max_tokens
 
-        # if self.callbacks:
-        #     llm.callbacks = self.callbacks
-        #     llm._set_callbacks(llm.callbacks)
+        if self.callbacks:
+            llm.callbacks = self.callbacks
+            llm._set_callbacks(llm.callbacks)
 
         if self.respect_context_window == False:
             llm.context_window_size = DEFAULT_CONTEXT_WINDOW_SIZE
@@ -364,9 +364,6 @@ class Agent(BaseModel):
             task_execution_counter += 1
             self._logger.log(level="info", message=f"Agent response: {raw_response}", color="blue")
 
-            if raw_response and self.callbacks:
-                for item in self.callbacks:
-                    raw_response = item(raw_response)
 
         except Exception as e:
             self._logger.log(level="error", message=f"An error occured. The agent will retry: {str(e)}", color="red")
@@ -378,10 +375,6 @@ class Agent(BaseModel):
 
                 task_execution_counter += 1
                 self._logger.log(level="info", message=f"Agent #{task_execution_counter} response: {raw_response}", color="blue")
-
-                if raw_response and self.callbacks:
-                    for item in self.callbacks:
-                        raw_response = item(raw_response)
 
             if not raw_response:
                 self._logger.log(level="error", message="Received None or empty response from the model", color="red")

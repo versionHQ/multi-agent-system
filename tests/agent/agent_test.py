@@ -122,7 +122,7 @@ def test_build_agent_with_llm_config():
     assert agent.llm.max_tokens == 4000
     assert agent.llm.logprobs == False
     assert [hasattr(agent.llm, k) and v for k, v in llm_config.items() if v is not None]
-    assert agent.llm.callbacks == []
+    assert agent.llm.callbacks == [dummy_func]
 
 
 def test_build_agent_with_llm_instance():
@@ -142,7 +142,7 @@ def test_build_agent_with_llm_instance():
     assert agent.llm.api_key is not None
     assert agent.llm.max_tokens == 3000
     assert agent.llm.logprobs == False
-    assert agent.llm.callbacks == []
+    assert agent.llm.callbacks == [dummy_func]
 
 
 def test_build_agent_with_llm_and_func_llm_config():
@@ -163,7 +163,7 @@ def test_build_agent_with_llm_and_func_llm_config():
     assert agent.function_calling_llm.api_key is not None
     assert agent.function_calling_llm.max_tokens == 4000
     assert agent.function_calling_llm.logprobs == False
-    assert agent.function_calling_llm.callbacks == []
+    assert agent.function_calling_llm.callbacks == [dummy_func]
 
 
 def test_build_agent_with_llm_and_func_llm_instance():
@@ -185,7 +185,7 @@ def test_build_agent_with_llm_and_func_llm_instance():
     assert agent.function_calling_llm.api_key is not None
     assert agent.function_calling_llm.max_tokens == 3000
     assert agent.function_calling_llm.logprobs == False
-    assert agent.function_calling_llm.callbacks == []
+    assert agent.function_calling_llm.callbacks == [dummy_func]
 
 
 def test_agent_with_random_dict_tools():
@@ -234,7 +234,3 @@ def test_agent_custom_max_iterations():
         )
         agent.execute_task(task=task)
         assert private_mock.call_count == 1
-
-
-if __name__ == "__main__":
-    test_agent_custom_max_iterations()

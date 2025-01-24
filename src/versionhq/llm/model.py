@@ -200,7 +200,7 @@ class LLM(BaseModel):
 
         with suppress_warnings():
             if len(self.callbacks) > 0:
-                self._set_callbacks(self.callbacks)
+                self._set_callbacks(self.callbacks) # passed by agent
 
             try:
                 if tools:
@@ -261,7 +261,6 @@ class LLM(BaseModel):
                         return tool_res
 
                     else:
-                        print(messages)
                         res = litellm.completion(messages=messages, stream=False, **params)
 
                 return res["choices"][0]["message"]["content"]
