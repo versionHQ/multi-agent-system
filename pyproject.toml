@@ -15,7 +15,7 @@ exclude = ["test*", "__pycache__"]
 
 [project]
 name = "versionhq"
-version = "1.1.10.5"
+version = "1.1.10.6"
 authors = [{ name = "Kuriko Iwai", email = "kuriko@versi0n.io" }]
 description = "LLM orchestration frameworks for model-agnostic AI agents that handle complex outbound workflows"
 readme = "README.md"
