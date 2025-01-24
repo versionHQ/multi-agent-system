@@ -390,7 +390,7 @@ class Agent(BaseModel):
         return raw_response
 
 
-    def execute_task(self, task, context: Optional[str] = None, task_tools: Optional[List[Tool | ToolSet]] = None) -> str:
+    def execute_task(self, task, context: Optional[str] = None, task_tools: Optional[List[Tool | ToolSet]] = list()) -> str:
         """
         Execute the task and return the response in string.
         The agent utilizes the tools in task or their own tools if the task.can_use_agent_tools is True.

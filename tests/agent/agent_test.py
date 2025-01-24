@@ -1,4 +1,6 @@
 import os
+from unittest import mock
+from unittest.mock import patch
 import pytest
 from typing import Callable, Any
 
@@ -6,6 +8,7 @@ from versionhq.agent.model import Agent
 from versionhq.agent.TEMPLATES.Backstory import BACKSTORY_SHORT, BACKSTORY_FULL
 from versionhq.llm.model import LLM, DEFAULT_MODEL_NAME
 from versionhq.tool.model import Tool
+from versionhq.tool.decorator import tool
 
 MODEL_NAME = os.environ.get("DEFAULT_MODEL_NAME", "gpt-3.5-turbo")
 LITELLM_API_KEY = os.environ.get("LITELLM_API_KEY")
@@ -209,3 +212,29 @@ def test_agent_with_custom_tools():
     assert agent.tools[0] is tool
     assert agent.tools[0]._run(message="hi") == "hi_demo"
     assert agent.tools[0].name == "custom tool"
+
+
+# @pytest.mark.vcr(filter_headers=["authorization"])
+def test_agent_custom_max_iterations():
+    from versionhq.task.model import Task
+
+    @tool
+    def get_final_answer() -> int:
+        """Get the final answer but don't give it yet, just re-use this tool non-stop."""
+        return 42
+
+    agent = Agent(role="demo", goal="test goal", maxit=1, allow_delegation=False, tools=[get_final_answer])
+
+    with patch.object(
+        LLM, "call", wraps=LLM(model=DEFAULT_MODEL_NAME).call
+    ) as private_mock:
+        task = Task(
+            description="The final answer is 42. But don't give it yet, instead keep using the `get_final_answer` tool.",
+            can_use_agent_tools=True
+        )
+        agent.execute_task(task=task)
+        assert private_mock.call_count == 1
+
+
+if __name__ == "__main__":
+    test_agent_custom_max_iterations()

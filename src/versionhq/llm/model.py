@@ -228,6 +228,7 @@ class LLM(BaseModel):
                 res = litellm.completion(messages=messages, stream=False, **params)
 
                 if self.tools:
+                    messages.append(res["choices"][0]["message"])
                     tool_calls = res["choices"][0]["message"]["tool_calls"]
                     tool_res = ""
 
@@ -243,18 +244,24 @@ class LLM(BaseModel):
                                 tool_instance = tool.tool
                                 args = tool.kwargs
                                 res = tool_instance.run(params=args)
-                                tool_res += str(res)
+
+                                if tool_res_as_final:
+                                    tool_res += str(res)
+                                else:
+                                    messages.append({ "role": "tool", "tool_call_id": item.id, "content": str(res) })
 
                             elif (isinstance(tool, Tool) or type(tool) == Tool) and (tool.name.replace(" ", "_") == func_name or tool.func.__name__ == func_name):
                                 res = tool.run(params=func_args)
-                                tool_res += str(res)
+                                if tool_res_as_final:
+                                    tool_res += str(res)
+                                else:
+                                    messages.append({ "role": "tool", "tool_call_id": item.id, "content": str(res) })
 
-                    if tool_res_as_final == True:
+                    if tool_res_as_final:
                         return tool_res
-                        pass
 
                     else:
-                        messages.append({ "role": "tool", "tool_call_id": tool_calls.id, "content": tool_res })
+                        print(messages)
                         res = litellm.completion(messages=messages, stream=False, **params)
 
                 return res["choices"][0]["message"]["content"]
