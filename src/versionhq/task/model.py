@@ -169,7 +169,7 @@ class TaskOutput(BaseModel):
     json_dict: Dict[str, Any] = Field(default=None, description="`raw` converted to dictionary")
     pydantic: Optional[Any] = Field(default=None)
     tool_output: Optional[Any] = Field(default=None, description="store tool result when the task takes tool output as its final output")
-    gott: Optional[Any] = Field(default=None, description="store task or agent callback outcome")
+    callback_output: Optional[Any] = Field(default=None, description="store task or agent callback outcome")
 
     def __str__(self) -> str:
         return str(self.pydantic) if self.pydantic else str(self.json_dict) if self.json_dict else self.raw
