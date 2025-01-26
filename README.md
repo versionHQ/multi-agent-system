@@ -27,9 +27,9 @@ LLM orchestration frameworks to deploy multi-agent systems focusing on complex o
 - [Key Features](#key-features)
   - [Agent formation](#agent-formation)
 - [Quick Start](#quick-start)
-  - [Case 1. Single agent network:](#case-1-single-agent-network)
+  - [Case 1. Solo Agent:](#case-1-solo-agent)
     - [Return a structured output with a summary in string.](#return-a-structured-output-with-a-summary-in-string)
-  - [Case 2. Form a team to handle multiple tasks:](#case-2-form-a-team-to-handle-multiple-tasks)
+  - [Case 2. Supervising:](#case-2-supervising)
 - [Technologies Used](#technologies-used)
 - [Project Structure](#project-structure)
 - [Setup](#setup)
@@ -77,7 +77,7 @@ You can specify which formation you want them to generate, or let the agent deci
 (Python >= 3.13)
 
 
-### Case 1. Single agent network:
+### Case 1. Solo Agent:
 
 #### Return a structured output with a summary in string.
 
@@ -118,7 +118,7 @@ This will return `TaskOutput` that stores a response in string, JSON dict, and P
    )
    ```
 
-### Case 2. Form a team to handle multiple tasks:
+### Case 2. Supervising:
 
    ```
    from versionhq.agent.model import Agent
@@ -152,7 +152,6 @@ This will return `TaskOutput` that stores a response in string, JSON dict, and P
 This will return a list with dictionaries with keys defined in the `ResponseField` of each task.
 
 Tasks can be delegated to a team manager, peers in the team, or completely new agent.
-
 
 <hr />
 
