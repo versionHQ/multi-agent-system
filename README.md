@@ -7,31 +7,16 @@
 ![pyenv ver](https://img.shields.io/badge/pyenv-2.5.0-orange)
 
 
-An LLM orchestration frameworks for multi-agent systems with RAG to autopilot outbound workflows.
-
-Agents are model agnostic.
-
-Messaging workflows are created at individual level, and will be deployed on third-party services via `Composio`.
-
+LLM orchestration frameworks to deploy multi-agent systems focusing on complex outbound tasks.
 
 **Visit:**
 
 - [PyPI](https://pypi.org/project/versionhq/)
-- [Github (LLM orchestration)](https://github.com/versionHQ/multi-agent-system)
-- [Doc](https://chief-oxygen-8a2.notion.site/Documentation-17e923685cf98001a5fad5c4b2acd79b?pvs=4)
-<!-- - [Github (Test client app)](https://github.com/versionHQ/test-client-app) -->
-- [Use case](https://versi0n.io/): Client web app for the outbound messaging automation
+- [Github (LLM orchestration framework)](https://github.com/versionHQ/multi-agent-system)
+- [Github (Test client app)](https://github.com/versionHQ/test-client-app)
+- [Use case](https://versi0n.io/playground) / [Quick demo](https://res.cloudinary.com/dfeirxlea/video/upload/v1737732977/pj_m_home/pnsyh5mfvmilwgt0eusa.mov)
+- [Documentation](https://chief-oxygen-8a2.notion.site/Documentation-17e923685cf98001a5fad5c4b2acd79b?pvs=4) *Some components are under review.
 
-
-<hr />
-
-## Mindmap
-
-LLM-powered `agent`s and `team`s use `tool`s and their own knowledge to complete the `task` given by the client or the system.
-
-<p align="center">
-   <img src="https://res.cloudinary.com/dfeirxlea/image/upload/v1733556715/pj_m_home/urwte15at3h0dr8mdlyo.png" alt="mindmap" width="400">
-</p>
 
 <hr />
 
@@ -40,8 +25,10 @@ LLM-powered `agent`s and `team`s use `tool`s and their own knowledge to complete
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
 - [Key Features](#key-features)
-- [Usage](#usage)
-  - [Case 1. Single agent handling task:](#case-1-single-agent-handling-task)
+  - [Agent formation](#agent-formation)
+- [Quick Start](#quick-start)
+  - [Case 1. Single agent network:](#case-1-single-agent-network)
+    - [Return a structured output with a summary in string.](#return-a-structured-output-with-a-summary-in-string)
   - [Case 2. Form a team to handle multiple tasks:](#case-2-form-a-team-to-handle-multiple-tasks)
 - [Technologies Used](#technologies-used)
 - [Project Structure](#project-structure)
@@ -60,36 +47,41 @@ LLM-powered `agent`s and `team`s use `tool`s and their own knowledge to complete
 
 ## Key Features
 
-A mulit-agent systems with Rag that tailors messaging workflow, predicts its performance, and deploys it on third-party tools.
+Generate mulit-agent systems depending on the complexity of the task, and execute the task with agents of choice.
 
-The `agent` is model agnostic. The default model is set Chat GTP 4o. We ask the client their preference and switch it accordingly using llm variable stored in the `BaseAgent` class.
+Model-agnostic agents can handle RAG tools, tools, callbacks, and knowledge sharing among other agents.
 
-Multiple `agents` can form a `team` to complete complex tasks together.
 
-**1. Analysis**
-- Professional `agents` handle the analysis `tasks` on each client, customer, and product.
+###  Agent formation
+Depending on the task complexity, agents can form a different formation.
 
-**2. Messaging Workflow Creation**
-- Several `teams` receive the analysis and design initial messaging workflow with several layers.
-- Ask the client for their inputs
-- Deploy the workflow on the third party tools using `composio`.
+You can specify which formation you want to generate, or let the agent decide if you don’t have a clear plan.
 
-**3. Autopiloting**
-- Responsible `agents` or `teams` autopilot executing and refining the messaging workflow.
+
+|  | Solo Agent | Supervising | Network | Random |
+| :--- | :--- | :--- | :--- | :--- |
+| Formation | <img src="https://res.cloudinary.com/dfeirxlea/image/upload/v1737893140/pj_m_agents/tglrxoiuv7kk7nzvpe1z.jpg" alt="solo" width="200"> | <img src="https://res.cloudinary.com/dfeirxlea/image/upload/v1737893141/pj_m_agents/hxngdvnn5b5qdxo0ayl5.jpg" alt="solo" width="200"> | <img src="https://res.cloudinary.com/dfeirxlea/image/upload/v1737893142/pj_m_agents/kyc6neg8m6keyizszcpi.jpg" alt="solo" width="200"> | <img src="https://res.cloudinary.com/dfeirxlea/image/upload/v1737893139/pj_m_agents/hzpchlcpnpwxwaapu1hr.jpg" alt="solo" width="200"> |
+| Usage | <ul><li>A single agent with tools, knowledge, and memory.</li><li>When self-learning mode is on - it will turn into **Random** formation.</li></ul> | <ul><li>Leader agent gives directions, while sharing its knowledge and memory.</li><li>Subordinates can be solo agents or networks.</li></ul> | <ul><li>Share tasks, knowledge, and memory among network members.</li></ul> | <ul><li>A single agent handle a task, asking help from other agents without sharing memory or knowledge.</li></ul> |
+| Use case | An email agent drafts email content for the given audience. | The leader agent strategize an outbound campaign plan and assign components such as media mix or message creation to subordinate agents. | An email agent and social media agent that shares the product knowledge deploy multi-channel outbound campaign.  | 1. An email agent draft an email targeting customer cluster A, asking insights on tones from other email agents which oversee other clusters. 2. An agent calls the external agent to deploy the campaign. |
+
+
 
 <hr />
 
-## Usage
+## Quick Start
 
-1. Install `versionhq` package:
+**Install `versionhq` package:**
+
    ```
    pip install versionhq
    ```
 
-2. You can use the `versionhq` module in your Python app.
+(Python >= 3.13)
 
 
-### Case 1. Single agent handling task:
+### Case 1. Single agent network:
+
+#### Return a structured output with a summary in string.
 
    ```
    from pydantic import BaseModel
@@ -117,7 +109,7 @@ Multiple `agents` can form a `team` to complete complex tasks together.
    print(res)
    ```
 
-This will return a `TaskOutput` instance with response in raw, JSON dict, and Pydantic model: `CustomOutput` formats with a callback result.
+This will return `TaskOutput` that stores a response in string, JSON dict, and Pydantic model: `CustomOutput` formats with a callback result.
 
    ```
    res == TaskOutput(

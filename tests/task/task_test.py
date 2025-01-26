@@ -126,8 +126,6 @@ def test_callback():
     def callback_func(kwargs: Dict[str, Any]):
         task_id = kwargs.get("task_id", None)
         added_condition = kwargs.get("added_condition", None)
-        assert task_id is not None
-        assert added_condition is not None
         return f"Result: {task_id}, condition added: {added_condition}"
 
     task = Task(
@@ -140,10 +138,9 @@ def test_callback():
     )
     res = task.execute_sync(agent=base_agent)
 
-    assert res is not None
-    assert isinstance(res, TaskOutput)
+    assert res and isinstance(res, TaskOutput)
     assert res.task_id is task.id
-    assert res.raw is not None
+    assert "demo for pytest" in res.callback_output
 
 
 def test_delegate():
@@ -303,6 +300,8 @@ def test_callback():
 
 
 def test_task_with_agent_callback():
+    import litellm
+
     def dummy_func(*args, **kwargs) -> str:
         return "Demo func"
 
@@ -311,6 +310,7 @@ def test_task_with_agent_callback():
     res = task.execute_sync(agent=agent)
 
     assert res.raw and res.task_id == task.id
+    assert litellm.callbacks == [dummy_func]
 
 # task - maxit, loop, rpm
 
