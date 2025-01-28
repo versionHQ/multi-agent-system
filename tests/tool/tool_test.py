@@ -18,7 +18,7 @@ def test_create_custom_tool():
     tool = CustomTool()
 
     assert tool.name == "custom tool"
-    assert tool.description == "Tool: custom tool\nArgs: {'x': {'description': None, 'type': 'Any'}}"
+    assert tool.description == "Tool: custom tool\nArgs: {'x': {'description': '', 'type': 'Any'}}"
     assert tool._run(x="I am a sentence") == "I am a sentence-demo"
 
 
@@ -69,14 +69,13 @@ def test_default_cache_function():
 
 
 def test_tool_annotation():
-
     @tool("demo")
     def my_tool(test_words: str) -> str:
         """Test a tool decorator."""
         return test_words
 
     assert my_tool.name == "demo"
-    assert my_tool.description == "Tool: demo\nArgs: {'test_words': {'description': None, 'type': 'str'}}"
+    assert my_tool.description == "Tool: demo\nArgs: {'test_words': {'description': '', 'type': 'str'}}"
     assert my_tool.args_schema.model_json_schema() == {'properties': {'test_words': {'title': 'Test Words', 'type': 'string'}}, 'required': ['test_words'], 'title': 'My_ToolSchema', 'type': 'object'}
     assert my_tool.func("testing") == "testing"
 

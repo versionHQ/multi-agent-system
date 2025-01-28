@@ -1,5 +1,6 @@
 import os
 import uuid
+import datetime
 from typing import Any, Dict, List, Optional, TypeVar, Callable, Type
 from typing_extensions import Self
 from dotenv import load_dotenv
@@ -11,7 +12,7 @@ from pydantic_core import PydanticCustomError
 from versionhq.llm.model import LLM, DEFAULT_CONTEXT_WINDOW_SIZE, DEFAULT_MODEL_NAME
 from versionhq.tool.model import Tool, ToolSet
 from versionhq._utils.logger import Logger
-from versionhq._utils.rpm_controller import RPMController
+from versionhq.agent.rpm_controller import RPMController
 from versionhq._utils.usage_metrics import UsageMetrics
 from versionhq._utils.process_config import process_config
 
@@ -19,9 +20,6 @@ from versionhq._utils.process_config import process_config
 load_dotenv(override=True)
 T = TypeVar("T", bound="Agent")
 
-
-# def _format_answer(agent, answer: str) -> AgentAction | AgentFinish:
-#     return AgentParser(agent=agent).parse(answer)
 
 # def mock_agent_ops_provider():
 #     def track_agent(*args, **kwargs):
@@ -116,7 +114,7 @@ class Agent(BaseModel):
     respect_context_window: bool = Field(default=True,description="Keep messages under the context window size by summarizing content")
     max_tokens: Optional[int] = Field(default=None, description="max. number of tokens for the agent's execution")
     max_execution_time: Optional[int] = Field(default=None, description="max. execution time for an agent to execute a task")
-    max_rpm: Optional[int] = Field(default=None, description="max. number of requests per minute for the agent execution")
+    max_rpm: Optional[int] = Field(default=None, description="max. number of requests per minute")
     llm_config: Optional[Dict[str, Any]] = Field(default=None, description="other llm config cascaded to the model")
 
     # config, cache, error handling
@@ -131,15 +129,6 @@ class Agent(BaseModel):
         if v:
             raise PydanticCustomError("may_not_set_field", "This field is not to be set by the user.", {})
 
-
-    # @field_validator(mode="before")
-    # def set_up_from_config(cls) -> None:
-    #     if cls.config is not None:
-    #         try:
-    #             for k, v in cls.config.items():
-    #                 setattr(cls, k, v)
-    #         except:
-    #             pass
 
     @model_validator(mode="before")
     @classmethod
@@ -165,7 +154,6 @@ class Agent(BaseModel):
         """
 
         self.agent_ops_agent_name = self.role
-        # unaccepted_attributes = ["AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_REGION_NAME"]
 
         if isinstance(self.llm, LLM):
             llm = self._set_llm_params(self.llm)
@@ -331,6 +319,25 @@ class Agent(BaseModel):
         return self
 
 
+    @model_validator(mode="after")
+    def set_up_rpm(self) -> Self:
+        """
+        Set up Request per Minitue controller.
+        """
+        if self.max_rpm:
+            self._rpm_controller = RPMController(max_rpm=self.max_rpm, _current_rpm=0)
+
+        return self
+
+
+    def _train(self) -> Self:
+        """
+        Fine-tuned the base model using OpenAI train framework.
+        """
+        if not isinstance(self.llm, LLM):
+            pass
+
+
     def invoke(
         self,
         prompts: str,
@@ -348,14 +355,17 @@ class Agent(BaseModel):
         iterations = 0
         raw_response = None
         messages = []
-
-        messages.append({"role": "user", "content": prompts})
+        messages.append({ "role": "user", "content": prompts })
         if self.use_developer_prompt:
-            messages.append({"role": "system", "content": self.backstory})
-        self._logger.log(level="info", message=f"Messages sent to the model: {messages}", color="blue")
+            messages.append({ "role": "system", "content": self.backstory })
 
         try:
-            if tool_res_as_final is True:
+            if self._rpm_controller and self.max_rpm:
+                self._rpm_controller.check_or_wait()
+
+            self._logger.log(level="info", message=f"Messages sent to the model: {messages}", color="blue")
+
+            if tool_res_as_final:
                 func_llm = self.function_calling_llm if self.function_calling_llm and self.function_calling_llm._supports_function_calling() else LLM(model=DEFAULT_MODEL_NAME)
                 raw_response = func_llm.call(messages=messages, tools=tools, tool_res_as_final=True)
             else:
@@ -363,24 +373,28 @@ class Agent(BaseModel):
 
             task_execution_counter += 1
             self._logger.log(level="info", message=f"Agent response: {raw_response}", color="blue")
-
+            return raw_response
 
         except Exception as e:
             self._logger.log(level="error", message=f"An error occured. The agent will retry: {str(e)}", color="red")
 
-            while not raw_response and task_execution_counter < self.max_retry_limit:
-                while not raw_response and iterations < self.maxit:
+            while not raw_response and task_execution_counter <= self.max_retry_limit:
+                while (not raw_response or raw_response == "" or raw_response is None) and iterations < self.maxit:
+                    if self.max_rpm and self._rpm_controller:
+                        self._rpm_controller.check_or_wait()
+
                     raw_response = self.llm.call(messages=messages, response_format=response_format, tools=tools)
                     iterations += 1
 
                 task_execution_counter += 1
                 self._logger.log(level="info", message=f"Agent #{task_execution_counter} response: {raw_response}", color="blue")
+                return raw_response
 
             if not raw_response:
                 self._logger.log(level="error", message="Received None or empty response from the model", color="red")
                 raise ValueError("Invalid response from LLM call - None or empty.")
 
-        return raw_response
+
 
 
     def execute_task(self, task, context: Optional[str] = None, task_tools: Optional[List[Tool | ToolSet]] = list()) -> str:
@@ -393,6 +407,9 @@ class Agent(BaseModel):
 
         task: InstanceOf[Task] = task
         tools: Optional[List[Tool | ToolSet | Type[Tool]]] = task_tools + self.tools if task.can_use_agent_tools else task_tools
+
+        if self.max_rpm and self._rpm_controller:
+            self._rpm_controller._reset_request_count()
 
         task_prompt = task.prompt(model_provider=self.llm.provider)
         if context is not task.prompt_context:

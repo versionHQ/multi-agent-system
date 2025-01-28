@@ -2,6 +2,7 @@ import json
 import threading
 import datetime
 import uuid
+import inspect
 from concurrent.futures import Future
 from hashlib import md5
 from typing import Any, Dict, List, Set, Optional, Tuple, Callable, Type, TypeVar
@@ -339,7 +340,7 @@ Ref. Output image: {output_formats_to_follow}
 """
 
         else:
-            output_prompt = "Return your response as a valid JSON string, enclosed in double quotes. Do not use single quotes, trailing commas, or other non-standard JSON syntax."
+            output_prompt = "Return your response as a valid JSON serializable string, enclosed in double quotes. Do not use single quotes, trailing commas, or other non-standard JSON syntax."
 
         return output_prompt
 
@@ -567,7 +568,7 @@ Ref. Output image: {output_formats_to_follow}
 
             task_output = TaskOutput(
                 task_id=self.id,
-                raw=raw_output,
+                raw=raw_output if raw_output is not None else "",
                 pydantic=pydantic_output,
                 json_dict=json_dict_output
             )
@@ -576,7 +577,11 @@ Ref. Output image: {output_formats_to_follow}
         self.processed_by_agents.add(agent.role)
 
         if self.callback and isinstance(self.callback, Callable):
-            callback_res = self.callback(**self.callback_kwargs, **task_output.json_dict)
+            kwargs = { **self.callback_kwargs, **task_output.json_dict }
+            sig = inspect.signature(self.callback)
+            valid_keys = [param.name for param in sig.parameters.values() if param.kind == param.POSITIONAL_OR_KEYWORD]
+            valid_kwargs = { k: kwargs[k] for k in valid_keys }
+            callback_res = self.callback(**valid_kwargs)
             task_output.callback_output = callback_res
 
         # if self.output_file: ## disabled for now

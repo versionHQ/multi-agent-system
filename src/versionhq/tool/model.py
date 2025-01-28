@@ -58,7 +58,7 @@ class BaseTool(ABC, BaseModel):
             "type": cls.object_type,
             "function": {
                 "name": cls.name.replace(" ", "_"),
-                "description": cls.description,
+                "description": cls.description if cls.description else "",
                 "parameters": {
                     "type": "object",
                     "properties": p,
@@ -174,7 +174,7 @@ class Tool(BaseTool):
     @model_validator(mode="after")
     def set_up_name(self) -> Self:
         if not self.name:
-            self.name = self.func.__name__ if self.func else ""
+            self.name = self.func.__name__ if self.func.__name__ != "<lambda>" else "random_func"
 
         return self
 
@@ -187,7 +187,7 @@ class Tool(BaseTool):
 
             args_schema = {
                 name: {
-                    "description": field.description,
+                    "description": field.description if field.description else "",
                     "type": self._get_arg_annotations(field.annotation),
                 }
                 for name, field in self.args_schema.model_fields.items()
@@ -214,34 +214,36 @@ class Tool(BaseTool):
         """
 
         p, r = dict(), list()
-        if self.args_schema:
-            for name, field in self.args_schema.model_fields.items():
-                if name != "kwargs" and name != "args":
-                    p.update(
-                        {
-                            name: {
-                                "description": field.description if field.description else "",
-                                "type": SchemaType(self._get_arg_annotations(field.annotation)).convert(),
-                            }
-                        }
-                    )
-                    r.append(name)
+        if not self.args_schema:
+            self.args_schema = self.set_up_args_schema()
 
-            properties = {
-                "type": self.object_type,
-                "function": {
-                    "name": self.name.replace(" ", "_"),
-                    "description": self.description if self.description else "a tool function to execute",
-                    "parameters": {
-                        "type": "object",
-                        "properties": p,
-                        "required": r,
-                        "additionalProperties": False
-                    },
-                    "strict": True,
+        for name, field in self.args_schema.model_fields.items():
+            if name != "kwargs" and name != "args":
+                p.update(
+                    {
+                        name: {
+                            "description": field.description if field.description else "",
+                            "type": SchemaType(self._get_arg_annotations(field.annotation)).convert(),
+                        }
+                    }
+                )
+                r.append(name)
+
+        properties = {
+            "type": self.object_type,
+            "function": {
+                "name": self.name.replace(" ", "_"),
+                "description": self.description if self.description else "a tool function to execute",
+                "parameters": {
+                    "type": "object",
+                    "properties": p,
+                    "required": r,
+                    "additionalProperties": False
                 },
-            }
-            self.properties = properties
+                "strict": True,
+            },
+        }
+        self.properties = properties
         return self
 
 
@@ -294,7 +296,7 @@ class Tool(BaseTool):
 
     def _handle_toolset(self, params: Dict[str, Any] = None) -> Any:
         """
-        Read the cache from the ToolHandler instance or execute _run() method.
+        Return cached results or run the function and record the results.
         """
 
         from versionhq.tool.tool_handler import ToolHandler
@@ -308,28 +310,24 @@ class Tool(BaseTool):
         parsed_kwargs = self._parse_args(raw_args=acceptable_kwargs)
         tool_set = ToolSet(tool=self, kwargs=acceptable_kwargs)
 
-        if self.tool_handler and isinstance(self.tool_handler, ToolHandler):
-            if self.tool_handler.has_called_before(tool_set):
-                self.tool_handler.error = "Agent execution error"
+        if not self.tool_handler or not isinstance(self.tool_handler, ToolHandler):
+            self.tool_handler = ToolHandler(last_used_tool=tool_set, cache_handler=self.cache_handler, should_cache=self.should_cache)
 
-            elif self.tool_handler.cache:
+        try:
+            if self.tool_handler.has_called_before(tool_set) or self.tool_handler.cache:
                 result = self.tool_handler.cache.read(tool_name=tool_set.tool.name, input=str(tool_set.kwargs))
-                if not result:
-                    result = self.func(**parsed_kwargs)
 
-            else:
+            if not result:
                 result = self.func(**parsed_kwargs)
 
-        else:
-            tool_handler = ToolHandler(last_used_tool=tool_set, cache_handler=self.cache_handler, should_cache=self.should_cache)
-            self.tool_handler = tool_handler
-            result = self.func(**parsed_kwargs)
+            if self.should_cache is True:
+                self.tool_handler.record_last_tool_used(last_used_tool=tool_set, output=result, should_cache=self.should_cache)
 
+            return result
 
-        if self.should_cache is True:
-            self.tool_handler.record_last_tool_used(last_used_tool=tool_set, output=result, should_cache=self.should_cache)
-
-        return result
+        except:
+            self.tool_handler.error = "Agent error"
+            return result
 
 
     def run(self, params: Dict[str, Any] = None) -> Any:

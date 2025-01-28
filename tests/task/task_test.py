@@ -8,8 +8,10 @@ from typing import Dict, Any, List, Optional, Callable
 from pydantic import BaseModel, Field, InstanceOf
 
 from versionhq.agent.model import Agent
+from versionhq.agent.rpm_controller import RPMController
 from versionhq.task.model import Task, ResponseField, TaskOutput, ConditionalTask
 from versionhq.tool.model import Tool, ToolSet
+from versionhq.tool.decorator import tool
 from tests.task import DemoOutcome, demo_response_fields, base_agent
 
 sys.setrecursionlimit(2097152)
@@ -271,7 +273,6 @@ def test_build_agent_without_developer_prompt():
     assert res.pydantic is None
 
 
-
 def test_callback():
     from pydantic import BaseModel
     from versionhq.agent.model import Agent
@@ -312,8 +313,37 @@ def test_task_with_agent_callback():
     assert res.raw and res.task_id == task.id
     assert litellm.callbacks == [dummy_func]
 
-# task - maxit, loop, rpm
+
+def test_rpm():
+    agent = Agent(role="demo", goal="use the given tools", max_tokens=3000, max_rpm=2)
+    assert agent._rpm_controller and agent._rpm_controller.max_rpm == 2
+
+    a = "hello"
+    tool = Tool(func=lambda x: a + x)
+    tool_set = ToolSet(tool=tool, kwargs={ "x": "_demo" })
+    task = Task(description="Summarize overview of the given tool in sentences, then execute the tool.", tools=[tool_set,])
+    res = task.execute_sync(agent=agent)
+
+    assert "hello_demo" in res.raw
+    assert agent._rpm_controller._current_rpm < agent._rpm_controller.max_rpm
 
 
-if __name__ == "__main__":
-    test_task_with_agent_callback()
+def test_maxit():
+    from versionhq.llm.model import LLM
+
+    @tool
+    def demo() -> str:
+        """Get the final answer but don't give it yet, just re-use this
+        tool non-stop."""
+        return "demo"
+
+    agent = Agent(role="demo", goal="amazing demo", maxit=2)
+    task = Task(description="Summarize overview of the given tool in sentences.", tools=[demo,])
+
+
+    with patch.object(LLM, "call", wraps=agent.llm.call) as mock:
+        task.execute_sync(agent=agent)
+        assert mock.call_count <= 2
+
+
+# test_loop():

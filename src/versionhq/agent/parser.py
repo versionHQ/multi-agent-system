@@ -44,26 +44,6 @@ class OutputParserException(Exception):
 
 
 class AgentParser:
-    """
-    Parses ReAct-style LLM calls that have a single tool input.
-
-    Expects output to be in one of two formats.
-
-    If the output signals that an action should be taken,
-    should be in the below format. This will result in an AgentAction
-    being returned.
-
-    Thought: agent thought here
-    Action: search
-    Action Input: what is the temperature in SF?
-
-    If the output signals that a final answer should be given,
-    should be in the below format. This will result in an AgentFinish
-    being returned.
-
-    Thought: agent thought here
-    Final Answer: The temperature is 100 degrees
-    """
 
     agent: Any = None
 
@@ -111,6 +91,7 @@ class AgentParser:
             # self.agent.increment_formatting_errors()
             raise OutputParserException(error)
 
+
     def _extract_thought(self, text: str) -> str:
         regex = r"(.*?)(?:\n\nAction|\n\nFinal Answer)"
         thought_match = re.search(regex, text, re.DOTALL)
@@ -118,9 +99,11 @@ class AgentParser:
             return thought_match.group(1).strip()
         return ""
 
+
     def _clean_action(self, text: str) -> str:
         """Clean action string by removing non-essential formatting characters."""
         return re.sub(r"^\s*\*+\s*|\s*\*+\s*$", "", text).strip()
+
 
     def _safe_repair_json(self, tool_input: str) -> str:
         UNABLE_TO_REPAIR_JSON_RESULTS = ['""', "{}"]

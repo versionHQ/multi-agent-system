@@ -184,18 +184,36 @@ class LLM(BaseModel):
 
         return self
 
+    def _create_valid_params(self, config: Dict[str, Any], provider: str = None) -> Dict[str, Any]:
+        params = dict()
+        valid_keys = list()
+
+        if not provider:
+            valid_keys = PARAMS.get("litellm") + PARAMS.get("common") + PARAMS.get(self.provider) if self.provider else PARAMS.get("litellm") + PARAMS.get("common")
+        else:
+            valid_keys = PARAMS.get("common") + PARAMS.get(self.provider)
+
+        for item in valid_keys:
+            if hasattr(self, item) and getattr(self, item):
+                params[item] = getattr(self, item)
+            elif item in config:
+                params[item] = config[item]
+
+        return params
+
 
     def call(
         self,
         messages: List[Dict[str, str]],
         response_format: Optional[Dict[str, Any]] = None,
-        tools: Optional[List[Tool | ToolSet | Type[Tool]]] = None,
+        tools: Optional[List[Tool | ToolSet | Any ]] = None,
         config: Optional[Dict[str, Any]] = {}, # any other conditions to pass on to the model.
         tool_res_as_final: bool = False
     ) -> str:
         """
         Execute LLM based on the agent's params and model params.
         """
+
         litellm.drop_params = True
 
         with suppress_warnings():
@@ -203,79 +221,71 @@ class LLM(BaseModel):
                 self._set_callbacks(self.callbacks) # passed by agent
 
             try:
-                if tools:
+                provider = self.provider if self.provider else "openai"
+                self.response_format = { "type": "json_object" } if tool_res_as_final == True else response_format
+
+                if not tools:
+                    params = self._create_valid_params(config=config)
+                    res = litellm.completion(messages=messages, stream=False, **params)
+                    return res["choices"][0]["message"]["content"]
+
+                else:
                     self.tools = [item.tool.properties if isinstance(item, ToolSet) else item.properties for item in tools]
 
-                if response_format:
-                    self.response_format = { "type": "json_object" } if tool_res_as_final else response_format
+                    if provider == "openai":
+                        params = self._create_valid_params(config=config, provider=provider)
+                        res = openai_client.chat.completions.create(messages=messages, model=self.model, tools=self.tools)
+                        tool_calls = res.choices[0].message.tool_calls
+                        tool_res = ""
 
-                provider = self.provider if self.provider else "openai"
+                        for item in tool_calls:
+                            func_name = item.function.name
+                            func_args = item.function.arguments
 
-                params = {}
-                valid_params = PARAMS.get("litellm") + PARAMS.get("common") + PARAMS.get(self.provider) if self.provider else PARAMS.get("litellm") + PARAMS.get("common")
+                            if not isinstance(func_args, dict):
+                                try:
+                                    func_args = json.loads(json.dumps(eval(str(func_args))))
+                                except:
+                                    pass
 
-                for item in valid_params:
-                    if item:
-                        if hasattr(self, item) and getattr(self, item):
-                            params[item] = getattr(self, item)
-                        elif item in config:
-                            params[item] = config[item]
+                            for tool in tools:
+                                if isinstance(tool, ToolSet) and (tool.tool.name == func_name or tool.tool.func.__name__ == func_name or func_name == "random_func"):
+                                    tool_instance = tool.tool
+                                    args = tool.kwargs
+                                    tool_res_to_add = tool_instance.run(params=args)
+
+                                    if tool_res_as_final:
+                                        tool_res += str(tool_res_to_add)
+                                    else:
+                                        messages.append(res.choices[0].message)
+                                        messages.append({ "role": "tool", "tool_call_id": item.id, "content": str(tool_res_to_add) })
+
+                                else:
+                                    try:
+                                        tool_res_to_add = tool.run(params=func_args)
+                                        if tool_res_as_final:
+                                            tool_res += str(tool_res_to_add)
+                                        else:
+                                            messages.append(res.choices[0].message)
+                                            messages.append({ "role": "tool", "tool_call_id": item.id, "content": str(tool_res_to_add) })
+                                    except:
+                                        pass
+
+                        if tool_res_as_final:
+                            return tool_res
                         else:
-                            continue
-                    else:
-                        continue
-
-                res = litellm.completion(messages=messages, stream=False, **params)
-
-                if self.tools:
-                    messages.append(res["choices"][0]["message"])
-                    tool_calls = res["choices"][0]["message"]["tool_calls"]
-                    tool_res = ""
-
-                    for item in tool_calls:
-                        func_name = item.function.name
-                        func_args = item.function.arguments
-
-                        if not isinstance(func_args, dict):
-                            func_args = json.loads(json.dumps(eval(str(func_args))))
-
-                        for tool in tools:
-                            if isinstance(tool, ToolSet) and (tool.tool.name.replace(" ", "_") == func_name or tool.tool.func.__name__ == func_name):
-                                tool_instance = tool.tool
-                                args = tool.kwargs
-                                res = tool_instance.run(params=args)
-
-                                if tool_res_as_final:
-                                    tool_res += str(res)
-                                else:
-                                    messages.append({ "role": "tool", "tool_call_id": item.id, "content": str(res) })
-
-                            elif (isinstance(tool, Tool) or type(tool) == Tool) and (tool.name.replace(" ", "_") == func_name or tool.func.__name__ == func_name):
-                                res = tool.run(params=func_args)
-                                if tool_res_as_final:
-                                    tool_res += str(res)
-                                else:
-                                    messages.append({ "role": "tool", "tool_call_id": item.id, "content": str(res) })
-
-                    if tool_res_as_final:
-                        return tool_res
-
-                    else:
-                        res = litellm.completion(messages=messages, stream=False, **params)
-
-                return res["choices"][0]["message"]["content"]
-
+                            res = openai_client.chat.completions.create(messages=messages, model=self.model, tools=self.tools)
+                            return res.choices[0].message.content
 
             except JSONSchemaValidationError as e:
                 self._logger.log(level="error", message="Raw Response: {}".format(e.raw_response), color="red")
-                return None
+                raise e
 
             except Exception as e:
                 self._logger.log(level="error", message=f"{self.model} failed to execute: {str(e)}", color="red")
                 if "litellm.RateLimitError" in str(e):
                     raise e
 
-                return None
 
 
     def _supports_function_calling(self) -> bool:

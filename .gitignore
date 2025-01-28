@@ -4,6 +4,9 @@ destinations.py
 knowledge/
 memory/
 
+default_agent.py
+train.py
+
 memo.txt
 
 dist/
