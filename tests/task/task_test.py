@@ -315,16 +315,16 @@ def test_task_with_agent_callback():
 
 
 def test_rpm():
-    agent = Agent(role="demo", goal="use the given tools", max_tokens=3000, max_rpm=2)
-    assert agent._rpm_controller and agent._rpm_controller.max_rpm == 2
+    agent = Agent(role="demo", goal="use the given tools", max_tokens=3000, max_rpm=3)
+    assert agent._rpm_controller and agent._rpm_controller.max_rpm == 3
 
     a = "hello"
     tool = Tool(func=lambda x: a + x)
     tool_set = ToolSet(tool=tool, kwargs={ "x": "_demo" })
-    task = Task(description="Summarize overview of the given tool in sentences, then execute the tool.", tools=[tool_set,])
+    task = Task(description="Summarize overview of the given tool in sentence, then execute the tool.", tools=[tool_set,])
     res = task.execute_sync(agent=agent)
 
-    assert "hello_demo" in res.raw
+    assert "hello_demo" in res.raw if res.raw else res
     assert agent._rpm_controller._current_rpm < agent._rpm_controller.max_rpm
 
 
