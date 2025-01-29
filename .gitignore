@@ -1,10 +1,10 @@
 deploy.py
 destinations.py
 
-knowledge/
+# knowledge/
 memory/
 
-default_agents.py
+# default_agents.py
 train.py
 
 memo.txt

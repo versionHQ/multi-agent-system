@@ -425,7 +425,7 @@ Ref. Output image: {output_formats_to_follow}
         """
 
         if raw is None or raw == "":
-            self._logger.log(level="error", message="The model returned an empty response. Returning an empty dict.", color="yellow")
+            self._logger.log(level="warning", message="The model returned an empty response. Returning an empty dict.", color="yellow")
             output = { "output": "n.a." }
             return output
 
@@ -661,7 +661,7 @@ class ConditionalTask(Task):
         previous_output = task_outputs[task_index - 1] if task_outputs and len(task_outputs) > 1  else None
 
         if previous_output and not self.should_execute(previous_output):
-            self._logger.log(level="debug", message=f"Skipping conditional task: {self.description}", color="yellow")
+            self._logger.log(level="warning", message=f"Skipping conditional task: {self.description}", color="yellow")
             skipped_task_output = self.get_skipped_task_output()
             self.output = skipped_task_output
 

@@ -234,3 +234,29 @@ def test_agent_custom_max_iterations():
         )
         agent.execute_task(task=task)
         assert private_mock.call_count == 1
+
+
+
+def test_agent_with_knowledge_sources():
+    from versionhq.knowledge.source import StringKnowledgeSource
+    from versionhq.task.model import Task
+
+    content = "Kuriko's favorite color is gold, and she enjoy Japanese food."
+    string_source = StringKnowledgeSource(content=content)
+
+    agent = Agent(role="Information Agent", goal="Provide information based on knowledge sources", knowledge_sources=[string_source])
+    assert agent._knowledge.sources == [string_source] and agent._knowledge.embedder_config == agent.embedder_config
+
+    task = Task(description="Answer the following question: What is Kuriko's favorite color?")
+
+    with patch("versionhq.knowledge.storage.KnowledgeStorage") as MockKnowledge:
+        mock_knowledge_instance = MockKnowledge.return_value
+        mock_knowledge_instance.sources = [string_source, ]
+        mock_knowledge_instance.query.return_value = [{ "content": content }]
+
+        res = task.execute_sync(agent=agent)
+        assert "gold" in res.raw.lower()
+
+
+if __name__ == "__main__":
+    test_agent_with_knowledge_sources()

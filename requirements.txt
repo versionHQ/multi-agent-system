@@ -52,7 +52,9 @@ cffi==1.17.1
     #   cryptography
     #   pynacl
 charset-normalizer==3.4.1
-    # via requests
+    # via
+    #   pdfminer-six
+    #   requests
 chroma-hnswlib==0.7.6
     # via chromadb
 chromadb==0.6.3
@@ -76,7 +78,9 @@ composio-langchain==0.6.12
 composio-openai==0.6.9
     # via versionhq (pyproject.toml)
 cryptography==44.0.0
-    # via paramiko
+    # via
+    #   paramiko
+    #   pdfminer-six
 deepsearch-glm==1.0.0
     # via docling
 deprecated==1.2.18
@@ -357,6 +361,10 @@ pandas==2.2.3
     #   docling-core
 paramiko==3.5.0
     # via composio-core
+pdfminer-six==20231228
+    # via pdfplumber
+pdfplumber==0.11.5
+    # via versionhq (pyproject.toml)
 pillow==10.4.0
     # via
     #   docling
@@ -365,6 +373,7 @@ pillow==10.4.0
     #   docling-parse
     #   easyocr
     #   imageio
+    #   pdfplumber
     #   python-pptx
     #   scikit-image
     #   torchvision
@@ -416,7 +425,9 @@ pygments==2.18.0
 pynacl==1.5.0
     # via paramiko
 pypdfium2==4.30.1
-    # via docling
+    # via
+    #   docling
+    #   pdfplumber
 pyperclip==1.9.0
     # via composio-core
 pypika==0.48.9

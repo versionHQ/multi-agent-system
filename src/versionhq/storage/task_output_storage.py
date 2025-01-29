@@ -80,7 +80,7 @@ class TaskOutputSQLiteStorage:
 
                 if cursor.rowcount == 0:
                     self._logger.log(
-                        level="info", message=f"No row found with task_index {task_index}. No update performed.", color="yellow",
+                        level="warning", message=f"No row found with task_index {task_index}. No update performed.", color="yellow",
                     )
 
         except sqlite3.Error as e:

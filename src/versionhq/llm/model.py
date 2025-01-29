@@ -147,7 +147,7 @@ class LLM(BaseModel):
                         self.model = item
                     else:
                         temp_model = provider_model_list[0]
-                        self._logger.log(level="info", message=f"The provided model: {self._init_model_name} is not in the list. We'll assign a model: {temp_model} from the selected model provider: {self.provider}.", color="yellow")
+                        self._logger.log(level="warning", message=f"The provided model: {self._init_model_name} is not in the list. We'll assign a model: {temp_model} from the selected model provider: {self.provider}.", color="yellow")
                         self.model = temp_model
 
         else:
@@ -163,7 +163,7 @@ class LLM(BaseModel):
                             self.provider = k
 
             if self.model is None:
-                self._logger.log(level="info", message=f"The provided model \'{self.model}\' is not in the list. We'll assign a default model.", color="yellow")
+                self._logger.log(level="warning", message=f"The provided model \'{self.model}\' is not in the list. We'll assign a default model.", color="yellow")
                 self.model = DEFAULT_MODEL_NAME
                 self.provider = "openai"
 

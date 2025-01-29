@@ -11,6 +11,7 @@ from pydantic_core import PydanticCustomError
 
 from versionhq.llm.model import LLM, DEFAULT_CONTEXT_WINDOW_SIZE, DEFAULT_MODEL_NAME
 from versionhq.tool.model import Tool, ToolSet
+from versionhq.knowledge.model import BaseKnowledgeSource, Knowledge
 from versionhq._utils.logger import Logger
 from versionhq.agent.rpm_controller import RPMController
 from versionhq._utils.usage_metrics import UsageMetrics
@@ -95,6 +96,9 @@ class Agent(BaseModel):
     knowledge: Optional[str] = Field(default=None, description="external knowledge fed to the agent")
     skillsets: Optional[List[str]] = Field(default_factory=list)
     tools: Optional[List[Tool | ToolSet | Type[Tool]]] = Field(default_factory=list)
+    knowledge_sources: Optional[List[BaseKnowledgeSource]] = Field(default=None)
+    _knowledge: Optional[Knowledge] = PrivateAttr(default=None)
+    embedder_config: Optional[Dict[str, Any]] = Field(default=None, description="embedder configuration for the agent's knowledge")
 
     # prompting
     use_developer_prompt: Optional[bool] = Field(default=True, description="Use developer prompt when calling the llm")
@@ -117,7 +121,7 @@ class Agent(BaseModel):
     max_rpm: Optional[int] = Field(default=None, description="max. number of requests per minute")
     llm_config: Optional[Dict[str, Any]] = Field(default=None, description="other llm config cascaded to the model")
 
-    # config, cache, error handling
+    # cache, error, ops handling
     formatting_errors: int = Field(default=0, description="number of formatting errors.")
     agent_ops_agent_name: str = None
     agent_ops_agent_id: str = None
@@ -330,6 +334,21 @@ class Agent(BaseModel):
         return self
 
 
+    @model_validator(mode="after")
+    def set_up_knowledge(self) -> Self:
+        if self.knowledge_sources:
+            knowledge_agent_name = f"{self.role.replace(' ', '_')}"
+
+            if isinstance(self.knowledge_sources, list) and all(isinstance(k, BaseKnowledgeSource) for k in self.knowledge_sources):
+                self._knowledge = Knowledge(
+                    sources=self.knowledge_sources,
+                    embedder_config=self.embedder_config,
+                    collection_name=knowledge_agent_name,
+                )
+
+        return self
+
+
     def _train(self) -> Self:
         """
         Fine-tuned the base model using OpenAI train framework.
@@ -404,6 +423,7 @@ class Agent(BaseModel):
         The agent must consider the context to excute the task as well when it is given.
         """
         from versionhq.task.model import Task
+        from versionhq.knowledge._utils import extract_knowledge_context
 
         task: InstanceOf[Task] = task
         tools: Optional[List[Tool | ToolSet | Type[Tool]]] = task_tools + self.tools if task.can_use_agent_tools else task_tools
@@ -414,6 +434,14 @@ class Agent(BaseModel):
         task_prompt = task.prompt(model_provider=self.llm.provider)
         if context is not task.prompt_context:
             task_prompt += context
+
+        if self._knowledge:
+            agent_knowledge = self._knowledge.query(query=[task_prompt,])
+            print(agent_knowledge)
+            if agent_knowledge:
+                agent_knowledge_context = extract_knowledge_context(knowledge_snippets=agent_knowledge)
+                if agent_knowledge_context:
+                    task_prompt += agent_knowledge_context
 
         # if self.team and self.team._train:
         #     task_prompt = self._training_handler(task_prompt=task_prompt)
