@@ -3,11 +3,11 @@
 ![MIT license](https://img.shields.io/badge/License-MIT-green)
 [![Publisher](https://github.com/versionHQ/multi-agent-system/actions/workflows/publish.yml/badge.svg)](https://github.com/versionHQ/multi-agent-system/actions/workflows/publish.yml)
 ![PyPI](https://img.shields.io/badge/PyPI->=v1.1.10-blue)
-![python ver](https://img.shields.io/badge/Python-3.12/3.13-purple)
+![python ver](https://img.shields.io/badge/Python->=3.12-purple)
 ![pyenv ver](https://img.shields.io/badge/pyenv-2.5.0-orange)
 
 
-LLM orchestration frameworks to deploy multi-agent systems focusing on complex outbound tasks.
+LLM orchestration frameworks to deploy multi-agent systems with task-based formation.
 
 **Visit:**
 
@@ -74,7 +74,7 @@ You can specify which formation you want them to generate, or let the agent deci
    pip install versionhq
    ```
 
-(Python >= 3.13)
+(Python >= 3.12)
 
 
 ### Case 1. Solo Agent:
@@ -157,14 +157,14 @@ Tasks can be delegated to a team manager, peers in the team, or completely new a
 
 ## Technologies Used
 **Schema, Database, Data Validation**
-   - [Pydantic](https://docs.pydantic.dev/latest/): Data validation and serialization library for Python
-   - [Pydantic_core](https://pypi.org/project/pydantic-core/): Core func packages for Pydantic
-   - [Chroma DB](https://docs.trychroma.com/): Vector database for storing and querying usage data
-   - [SQLite](https://www.sqlite.org/docs.html): C-language library to implements a small SQL database engine
+   - [Pydantic](https://docs.pydantic.dev/latest/): Data validation and serialization library for Python.
+   - [Pydantic_core](https://pypi.org/project/pydantic-core/): Core func packages for Pydantic.
+   - [Chroma DB](https://docs.trychroma.com/): Vector database for storing and querying usage data.
+   - [SQLite](https://www.sqlite.org/docs.html): C-language library to implements a small SQL database engine.
    - [Upstage](https://console.upstage.ai/docs/getting-started/overview): Document processer for ML tasks. (Use `Document Parser API` to extract data from documents)
+   - [Docling](https://ds4sd.github.io/docling/): Document parsing
 
 **LLM-curation**
-   - OpenAI GPT-4: Advanced language model for analysis and recommendations
    - [LiteLLM](https://docs.litellm.ai/docs/providers): Curation platform to access LLMs
 
 **Tools**
@@ -182,27 +182,29 @@ Tasks can be delegated to a team manager, peers in the team, or completely new a
 
 ```
 .
-src/
-└── versionHQ/                  # Orchestration frameworks on Pydantic
-│      ├── agent/
-│      └── llm/
-│      └── task/
-│      └── team/
-│      └── tool/
-│      └── clients/            # Classes to store the client related information
-│      └── cli/                # CLI commands
-│      └── ...
-│      │
-│      ├── db/                 # Database files
-│      ├── chroma.sqlite3
-│      └── ...
+.github
+└── workflows/                # Github actions
 │
-└──tests/
-      └── cli/
-      └── team/
-      └── ...
-      │
-      └── uploads/    # Uploaded files for the project
+src/
+└── versionhq/                # Orchestration frameworks
+│     ├── agent/              # Components
+│     └── llm/
+│     └── task/
+│     └── team/
+│     └── tool/
+│     └── cli/
+│     └── ...
+│     │
+│     ├── db/                 # Storage
+│     ├── chroma.sqlite3
+│     └── ...
+│
+└──tests/                     # Pytest
+│     └── agent/
+│     └── llm/
+│     └── ...
+│
+└── uploads/                  # Local repo to store the uploaded files
 
 ```
 
@@ -224,9 +226,9 @@ src/
 
 * In case of AssertionError/module mismatch, run Python version control using `.pyenv`
    ```
-   pyenv install 3.13.1
-   pyenv global 3.13.1  (optional: `pyenv global system` to get back to the system default ver.)
-   uv python pin 3.13.1
+   pyenv install 3.12.8
+   pyenv global 3.12.8  (optional: `pyenv global system` to get back to the system default ver.)
+   uv python pin 3.12.8
    ```
 
 3. Set up environment variables:

@@ -34,7 +34,7 @@ jobs:
 
       - name: Set up the project
         run: |
-          uv venv --python 3.13.1
+          uv venv --python 3.12.8
           source .venv/bin/activate
           uv pip install --upgrade pip pytest
           uv pip install -r requirements.txt

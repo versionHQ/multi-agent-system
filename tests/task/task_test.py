@@ -340,7 +340,6 @@ def test_maxit():
     agent = Agent(role="demo", goal="amazing demo", maxit=2)
     task = Task(description="Summarize overview of the given tool in sentences.", tools=[demo,])
 
-
     with patch.object(LLM, "call", wraps=agent.llm.call) as mock:
         task.execute_sync(agent=agent)
         assert mock.call_count <= 2

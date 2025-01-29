@@ -4,7 +4,7 @@ destinations.py
 knowledge/
 memory/
 
-default_agent.py
+default_agents.py
 train.py
 
 memo.txt
