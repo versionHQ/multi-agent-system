@@ -35,7 +35,6 @@ class BaseRAGStorage(ABC):
     """
     Base class for RAG-based Storage implementations.
     """
-    from versionhq.agent.model import Agent
 
     app: Any | None = None
 
@@ -44,7 +43,7 @@ class BaseRAGStorage(ABC):
         type: str,
         allow_reset: bool = True,
         embedder_config: Optional[Any] = None,
-        agents: List[Agent] = None,
+        agents: List[Any] = None,
     ):
         self.type = type
         self.allow_reset = allow_reset
@@ -111,6 +110,7 @@ class RAGStorage(BaseRAGStorage):
         agents = agents
         agents = [self._sanitize_role(agent.role) for agent in agents]
         agents = "_".join(agents)
+
         self.agents = agents
         self.storage_file_name = self._build_storage_file_name(type, agents)
         self.type = type
@@ -124,7 +124,7 @@ class RAGStorage(BaseRAGStorage):
         self.embedder_config = configurator.configure_embedder(self.embedder_config)
 
 
-    def _initialize_app(self):
+    def _initialize_app(self) -> None:
         import chromadb
         from chromadb.config import Settings
 

@@ -251,3 +251,35 @@ def test_agent_with_knowledge_sources():
 
         res = task.execute_sync(agent=agent)
         assert "gold" in res.raw.lower()
+
+
+
+def test_using_contextual_memory():
+    from unittest.mock import patch
+    from versionhq.task.model import Task
+    from versionhq.memory.contextual_memory import ContextualMemory
+
+    agent = Agent(role="Researcher", goal="You research about math.", use_memory=True)
+    task = Task(description="Research a topic to teach a kid aged 6 about math.")
+    with patch.object(ContextualMemory, "build_context_for_task") as contextual_mem:
+        task.execute_sync(agent=agent)
+        assert agent.short_term_memory is not None
+        contextual_mem.assert_called_once()
+
+
+def test_disabled_memory_using_contextual_memory():
+    from unittest.mock import patch
+    from versionhq.task.model import Task
+    from versionhq.memory.contextual_memory import ContextualMemory
+
+    agent = Agent(role="Researcher", goal="You research about math.", use_memory=False)
+    assert agent.short_term_memory is None
+
+    task = Task(description="Research a topic to teach a kid aged 6 about math.")
+
+    with patch.object(ContextualMemory, "build_context_for_task") as contextual_mem:
+        task.execute_sync(agent=agent)
+        contextual_mem.assert_not_called()
+
+
+# embedder_config

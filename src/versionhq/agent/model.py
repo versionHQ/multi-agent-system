@@ -12,6 +12,8 @@ from pydantic_core import PydanticCustomError
 from versionhq.llm.model import LLM, DEFAULT_CONTEXT_WINDOW_SIZE, DEFAULT_MODEL_NAME
 from versionhq.tool.model import Tool, ToolSet
 from versionhq.knowledge.model import BaseKnowledgeSource, Knowledge
+from versionhq.memory.contextual_memory import ContextualMemory
+from versionhq.memory.model import ShortTermMemory, UserMemory
 from versionhq._utils.logger import Logger
 from versionhq.agent.rpm_controller import RPMController
 from versionhq._utils.usage_metrics import UsageMetrics
@@ -95,10 +97,20 @@ class Agent(BaseModel):
     backstory: Optional[str] = Field(default=None, description="developer prompt to the llm")
     skillsets: Optional[List[str]] = Field(default_factory=list)
     tools: Optional[List[Tool | ToolSet | Type[Tool]]] = Field(default_factory=list)
+
+    # knowledge
     knowledge_sources: Optional[List[BaseKnowledgeSource]] = Field(default=None)
     _knowledge: Optional[Knowledge] = PrivateAttr(default=None)
-    embedder_config: Optional[Dict[str, Any]] = Field(default=None, description="embedder configuration for the agent's knowledge")
 
+    # memory
+    use_memory: bool = Field(default=False, description="whether to store/use memory when executing the task")
+    memory_config: Optional[Dict[str, Any]] = Field(default=None, description="configuration for the memory")
+    short_term_memory: Optional[InstanceOf[ShortTermMemory]] = Field(default=None)
+    user_memory: Optional[InstanceOf[UserMemory]] = Field(default=None)
+    # _short_term_memory: Optional[InstanceOf[ShortTermMemory]] = PrivateAttr()
+    # _user_memory: Optional[InstanceOf[UserMemory]] = PrivateAttr()
+
+    embedder_config: Optional[Dict[str, Any]] = Field(default=None, description="embedder configuration for the agent's knowledge")
 
     # prompting
     use_developer_prompt: Optional[bool] = Field(default=True, description="Use developer prompt when calling the llm")
@@ -347,13 +359,29 @@ class Agent(BaseModel):
         return self
 
 
+    @model_validator(mode="after")
+    def set_up_memory(self) -> Self:
+        """
+        Set up memories: stm, um
+        """
+
+        if self.use_memory == True:
+            self.short_term_memory = self.short_term_memory if self.short_term_memory else ShortTermMemory(agent=self, embedder_config=self.embedder_config)
+
+            if hasattr(self, "memory_config") and self.memory_config is not None:
+                self.user_memory = self.user_memory if self.user_memory else UserMemory(agent=self)
+            else:
+                self.user_memory = None
+
+        return self
+
+
     def _train(self) -> Self:
         """
         Fine-tuned the base model using OpenAI train framework.
         """
         if not isinstance(self.llm, LLM):
             pass
-
 
     def invoke(
         self,
@@ -439,6 +467,14 @@ class Agent(BaseModel):
                 agent_knowledge_context = extract_knowledge_context(knowledge_snippets=agent_knowledge)
                 if agent_knowledge_context:
                     task_prompt += agent_knowledge_context
+
+
+        if self.use_memory == True:
+            contextual_memory = ContextualMemory(memory_config=self.memory_config, stm=self.short_term_memory, um=self.user_memory)
+            memory = contextual_memory.build_context_for_task(task, context)
+            if memory.strip() != "":
+                task_prompt += memory.strip()
+
 
         # if self.team and self.team._train:
         #     task_prompt = self._training_handler(task_prompt=task_prompt)

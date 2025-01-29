@@ -454,7 +454,6 @@ Ref. Output image: {output_formats_to_follow}
             return output
 
 
-
     def _create_pydantic_output(self, raw: str = None, json_dict: Dict[str, Any] = None) -> InstanceOf[BaseModel]:
         """
         Create pydantic output from raw or json_dict output.
@@ -480,6 +479,27 @@ Ref. Output image: {output_formats_to_follow}
         """
         if inputs:
             self.description = self._original_description.format(**inputs)
+
+
+    def _create_short_term_memory(self, agent, task_output: TaskOutput) -> None:
+        """
+        After the task execution, create and save short-term memory of the responsible agent.
+        """
+
+        from versionhq.agent.model import Agent
+        from versionhq.memory.model import ShortTermMemory
+
+        try:
+            if isinstance(agent, Agent) and agent.use_memory == True:
+                if hasattr(agent, "short_term_memory"):
+                    agent.short_term_memory.save(value=task_output.raw, metadata={ "observation": self.description, }, agent=agent.role)
+                else:
+                    agent.short_term_memory = ShortTermMemory(agent=agent, embedder_config=agent.embedder_config)
+                    agent.short_term_memory.save(value=task_output.raw, metadata={ "observation": self.description, }, agent=agent.role)
+
+        except Exception as e:
+            self._logger.log(level="error", message=f"Failed to add to short term memory: {str(e)}", color="red")
+            pass
 
 
     # task execution
@@ -575,6 +595,7 @@ Ref. Output image: {output_formats_to_follow}
 
         self.output = task_output
         self.processed_by_agents.add(agent.role)
+        self._create_short_term_memory(agent=agent, task_output=task_output)
 
         if self.callback and isinstance(self.callback, Callable):
             kwargs = { **self.callback_kwargs, **task_output.json_dict }

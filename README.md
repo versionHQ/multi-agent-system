@@ -156,13 +156,16 @@ Tasks can be delegated to a team manager, peers in the team, or completely new a
 <hr />
 
 ## Technologies Used
-**Schema, Database, Data Validation**
+**Schema, Data Validation**
    - [Pydantic](https://docs.pydantic.dev/latest/): Data validation and serialization library for Python.
    - [Pydantic_core](https://pypi.org/project/pydantic-core/): Core func packages for Pydantic.
-   - [Chroma DB](https://docs.trychroma.com/): Vector database for storing and querying usage data.
-   - [SQLite](https://www.sqlite.org/docs.html): C-language library to implements a small SQL database engine.
    - [Upstage](https://console.upstage.ai/docs/getting-started/overview): Document processer for ML tasks. (Use `Document Parser API` to extract data from documents)
    - [Docling](https://ds4sd.github.io/docling/): Document parsing
+
+**Storage**
+   - [mem0ai](https://docs.mem0.ai/quickstart#install-package): Agents' memory storage and management.
+   - [Chroma DB](https://docs.trychroma.com/): Vector database for storing and querying usage data.
+   - [SQLite](https://www.sqlite.org/docs.html): C-language library to implements a small SQL database engine.
 
 **LLM-curation**
    - [LiteLLM](https://docs.litellm.ai/docs/providers): Curation platform to access LLMs

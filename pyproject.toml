@@ -45,6 +45,7 @@ dependencies = [
   "json-repair>=0.35.0",
   "wheel>=0.45.1",
   "pdfplumber>=0.11.5",
+  "mem0ai>=0.1.48",
 ]
 classifiers = [
   "Programming Language :: Python",

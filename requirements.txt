@@ -136,11 +136,19 @@ googleapis-common-protos==1.66.0
 grpcio==1.70.0
     # via
     #   chromadb
+    #   grpcio-tools
     #   opentelemetry-exporter-otlp-proto-grpc
+    #   qdrant-client
+grpcio-tools==1.70.0
+    # via qdrant-client
 h11==0.14.0
     # via
     #   httpcore
     #   uvicorn
+h2==4.1.0
+    # via httpx
+hpack==4.1.0
+    # via h2
 httpcore==1.0.7
     # via httpx
 httptools==0.6.4
@@ -151,6 +159,7 @@ httpx==0.27.2
     #   langsmith
     #   litellm
     #   openai
+    #   qdrant-client
 huggingface-hub==0.27.0
     # via
     #   docling
@@ -159,6 +168,8 @@ huggingface-hub==0.27.0
     #   transformers
 humanfriendly==10.0
     # via coloredlogs
+hyperframe==6.1.0
+    # via h2
 idna==3.10
     # via
     #   anyio
@@ -243,6 +254,8 @@ markupsafe==3.0.2
     #   werkzeug
 mdurl==0.1.2
     # via markdown-it-py
+mem0ai==0.1.48
+    # via versionhq (pyproject.toml)
 mmh3==5.1.0
     # via chromadb
 monotonic==1.6
@@ -274,6 +287,7 @@ numpy==2.2.1
     #   onnxruntime
     #   opencv-python-headless
     #   pandas
+    #   qdrant-client
     #   safetensors
     #   scikit-image
     #   scipy
@@ -293,6 +307,7 @@ openai==1.58.1
     #   composio-openai
     #   langchain-openai
     #   litellm
+    #   mem0ai
 opencv-python-headless==4.11.0.86
     # via
     #   docling-ibm-models
@@ -377,8 +392,12 @@ pillow==10.4.0
     #   python-pptx
     #   scikit-image
     #   torchvision
+portalocker==2.10.1
+    # via qdrant-client
 posthog==3.11.0
-    # via chromadb
+    # via
+    #   chromadb
+    #   mem0ai
 propcache==0.2.1
     # via
     #   aiohttp
@@ -386,6 +405,7 @@ propcache==0.2.1
 protobuf==5.29.3
     # via
     #   googleapis-common-protos
+    #   grpcio-tools
     #   onnxruntime
     #   opentelemetry-proto
 pyasn1==0.6.1
@@ -412,8 +432,10 @@ pydantic==2.10.6
     #   langchain-core
     #   langsmith
     #   litellm
+    #   mem0ai
     #   openai
     #   pydantic-settings
+    #   qdrant-client
 pydantic-core==2.27.2
     # via pydantic
 pydantic-settings==2.7.1
@@ -454,7 +476,9 @@ python-dotenv==1.0.1
 python-pptx==1.0.2
     # via docling
 pytz==2024.2
-    # via pandas
+    # via
+    #   mem0ai
+    #   pandas
 pyyaml==6.0.2
     # via
     #   chromadb
@@ -466,6 +490,8 @@ pyyaml==6.0.2
     #   langchain-core
     #   transformers
     #   uvicorn
+qdrant-client==1.13.2
+    # via mem0ai
 referencing==0.35.1
     # via
     #   jsonschema
@@ -528,6 +554,7 @@ sentry-sdk==2.19.2
 setuptools==75.6.0
     # via
     #   versionhq (pyproject.toml)
+    #   grpcio-tools
     #   torch
 shapely==2.0.6
     # via easyocr
@@ -546,7 +573,9 @@ sniffio==1.3.1
 soupsieve==2.6
     # via beautifulsoup4
 sqlalchemy==2.0.36
-    # via langchain
+    # via
+    #   langchain
+    #   mem0ai
 starlette==0.41.3
     # via fastapi
 sympy==1.13.3
@@ -627,6 +656,7 @@ tzdata==2025.1
 urllib3==2.3.0
     # via
     #   kubernetes
+    #   qdrant-client
     #   requests
     #   sentry-sdk
     #   types-requests

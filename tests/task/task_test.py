@@ -343,6 +343,3 @@ def test_maxit():
     with patch.object(LLM, "call", wraps=agent.llm.call) as mock:
         task.execute_sync(agent=agent)
         assert mock.call_count <= 2
-
-
-# test_loop():

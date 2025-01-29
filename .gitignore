@@ -1,8 +1,8 @@
 deploy.py
 destinations.py
 
-# knowledge/
-memory/
+entity_memory.py
+long_term_memory.py
 
 # default_agents.py
 train.py
