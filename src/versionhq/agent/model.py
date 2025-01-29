@@ -93,12 +93,12 @@ class Agent(BaseModel):
     role: str = Field(description="role of the agent - used in summary and logs")
     goal: str = Field(description="concise goal of the agent (details are set in the Task instance)")
     backstory: Optional[str] = Field(default=None, description="developer prompt to the llm")
-    knowledge: Optional[str] = Field(default=None, description="external knowledge fed to the agent")
     skillsets: Optional[List[str]] = Field(default_factory=list)
     tools: Optional[List[Tool | ToolSet | Type[Tool]]] = Field(default_factory=list)
     knowledge_sources: Optional[List[BaseKnowledgeSource]] = Field(default=None)
     _knowledge: Optional[Knowledge] = PrivateAttr(default=None)
     embedder_config: Optional[Dict[str, Any]] = Field(default=None, description="embedder configuration for the agent's knowledge")
+
 
     # prompting
     use_developer_prompt: Optional[bool] = Field(default=True, description="Use developer prompt when calling the llm")
@@ -306,17 +306,15 @@ class Agent(BaseModel):
         if self.backstory is None:
             from versionhq.agent.TEMPLATES.Backstory import BACKSTORY_FULL, BACKSTORY_SHORT
             backstory = ""
+            skills = ", ".join([item for item in self.skillsets]) if self.skillsets else ""
+            tools = ", ".join([item.name for item in self.tools if hasattr(item, "name")]) if self.tools else ""
+            role = self.role.lower()
+            goal = self.goal.lower()
 
-            if self.tools or self.knowledge or self.skillsets:
-                backstory = BACKSTORY_FULL.format(
-                    role=self.role,
-                    goal=self.goal,
-                    knowledge=self.knowledge if isinstance(self.knowledge, str) else None,
-                    skillsets=", ".join([item for item in self.skillsets]),
-                    rag_tool_overview=", ".join([item.name for item in self.tools if hasattr(item, "name")]) if self.tools else "",
-                )
+            if self.tools or self.skillsets:
+                backstory = BACKSTORY_FULL.format(role=role, goal=goal, skills=skills, tools=tools)
             else:
-                backstory = BACKSTORY_SHORT.format(role=self.role, goal=self.goal)
+                backstory = BACKSTORY_SHORT.format(role=role, goal=goal)
 
             self.backstory = backstory
 
@@ -437,7 +435,6 @@ class Agent(BaseModel):
 
         if self._knowledge:
             agent_knowledge = self._knowledge.query(query=[task_prompt,])
-            print(agent_knowledge)
             if agent_knowledge:
                 agent_knowledge_context = extract_knowledge_context(knowledge_snippets=agent_knowledge)
                 if agent_knowledge_context:

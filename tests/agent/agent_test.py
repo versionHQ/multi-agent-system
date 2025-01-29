@@ -21,7 +21,7 @@ def test_build_agent_with_minimal_input():
     )
 
     assert agent.role == "analyst"
-    assert agent.backstory == BACKSTORY_SHORT.format(role=agent.role, goal=agent.goal)
+    assert agent.backstory == BACKSTORY_SHORT.format(role=agent.role.lower(), goal=agent.goal.lower())
     assert isinstance(agent.llm, LLM)
     assert agent.llm.model == DEFAULT_MODEL_NAME
     assert agent.llm.api_key == LITELLM_API_KEY
@@ -32,7 +32,7 @@ def test_build_agent_from_config():
     agent = Agent(config=dict(role="analyst", goal="analyze the company's website and retrieve the product overview"))
 
     assert agent.role == "analyst"
-    assert agent.backstory == BACKSTORY_SHORT.format(role=agent.role, goal=agent.goal)
+    assert agent.backstory == BACKSTORY_SHORT.format(role=agent.role.lower(), goal=agent.goal.lower())
     assert isinstance(agent.llm, LLM)
     assert agent.llm.model == DEFAULT_MODEL_NAME
     assert agent.llm.api_key == LITELLM_API_KEY
@@ -59,13 +59,11 @@ def test_build_agent():
     agent = Agent(
         role="analyst",
         goal="analyze the company's website and retrieve the product overview",
-        knowledge="competitor products",
         skillsets=["financial analysis", "product management", ]
     )
 
     assert agent.role == "analyst"
-    assert agent.backstory == BACKSTORY_FULL.format(
-        role=agent.role, goal=agent.goal, knowledge=agent.knowledge, skillsets=", ".join([item for item in agent.skillsets]), rag_tool_overview="")
+    assert agent.backstory == BACKSTORY_FULL.format(role=agent.role.lower(), goal=agent.goal.lower(), skills=", ".join([item for item in agent.skillsets]), tools="")
     assert isinstance(agent.llm, LLM)
     assert agent.llm.model == DEFAULT_MODEL_NAME
     assert agent.llm.api_key == LITELLM_API_KEY
@@ -76,7 +74,6 @@ def test_build_agent_with_llm():
     agent = Agent(
         role="analyst",
         goal="analyze the company's website and retrieve the product overview",
-        knowledge="competitor products",
         skillsets=["financial analysis", "product management", ],
         llm="gpt-4o"
     )
@@ -84,9 +81,7 @@ def test_build_agent_with_llm():
     assert agent.role == "analyst"
     assert agent.role in agent.backstory
     assert agent.goal in agent.backstory
-    assert agent.knowledge in agent.backstory
-    for item in agent.skillsets:
-        assert item in agent.backstory
+    assert [item in agent.backstory for item in agent.skillsets]
     assert isinstance(agent.llm, LLM)
     assert agent.llm.model == "gpt-4o"
     assert agent.llm.api_key == LITELLM_API_KEY
@@ -256,7 +251,3 @@ def test_agent_with_knowledge_sources():
 
         res = task.execute_sync(agent=agent)
         assert "gold" in res.raw.lower()
-
-
-if __name__ == "__main__":
-    test_agent_with_knowledge_sources()

@@ -4,6 +4,8 @@ from typing import Any, Dict, cast
 from chromadb import Documents, EmbeddingFunction, Embeddings
 from chromadb.api.types import validate_embedding_function
 
+from versionhq._utils.logger import Logger
+
 
 class EmbeddingConfigurator:
     def __init__(self):
@@ -184,7 +186,7 @@ class EmbeddingConfigurator:
                     embeddings = embedding.embed_documents(input)
                     return cast(Embeddings, embeddings)
                 except Exception as e:
-                    print("Error during Watson embedding:", e)
+                    Logger(verbose=True).log(level="error", message=f"Error during Watson embedding: {str(e)}", color="red")
                     raise e
 
         return WatsonEmbeddingFunction()
