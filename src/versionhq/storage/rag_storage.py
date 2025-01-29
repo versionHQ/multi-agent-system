@@ -219,9 +219,7 @@ class RAGStorage(BaseRAGStorage):
             if "attempt to write a readonly database" in str(e):
                 pass
             else:
-                raise Exception(
-                    f"An error occurred while resetting the {self.type} memory: {e}"
-                )
+                raise Exception(f"An error occurred while resetting the {self.type} memory: {e}")
 
     def _create_default_embedding_function(self):
         from chromadb.utils.embedding_functions.openai_embedding_function import (

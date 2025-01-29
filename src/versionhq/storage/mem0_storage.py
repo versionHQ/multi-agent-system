@@ -11,21 +11,21 @@ class Mem0Storage(Storage):
     Extends Storage to handle embedding and searching across entities using Mem0.
     """
 
-    def __init__(self, type, agent=None):
+    def __init__(self, type, agent=None, user_id=None):
         """
         Create a memory client using API keys and other config.
         """
 
         super().__init__()
 
-        if type not in ["user", "short_term", "long_term", "entities"]:
+        if type not in ["user", "stm", "ltm", "entities"]:
             raise ValueError("Invalid type for Mem0Storage. Must be 'user' or 'agent'.")
 
         self.memory_type = type
         self.agent= agent
         self.memory_config = agent.memory_config
 
-        user_id = self._get_user_id()
+        user_id = user_id if user_id else self._get_user_id()
         if type == "user" and not user_id:
             raise ValueError("User ID is required for user memory type")
 
@@ -54,13 +54,13 @@ class Mem0Storage(Storage):
         if self.memory_type == "user":
             self.memory.add(value, user_id=user_id, metadata={**metadata})
 
-        elif self.memory_type == "short_term":
+        elif self.memory_type == "stm":
             agent_name = self._get_agent_name()
-            self.memory.add(value, agent_id=agent_name, metadata={"type": "short_term", **metadata})
+            self.memory.add(value, agent_id=agent_name, metadata={"type": "stm", **metadata})
 
-        elif self.memory_type == "long_term":
+        elif self.memory_type == "ltm":
             agent_name = self._get_agent_name()
-            self.memory.add(value, agent_id=agent_name, infer=False, metadata={"type": "long_term", **metadata})
+            self.memory.add(value, agent_id=agent_name, infer=False, metadata={"type": "ltm", **metadata})
 
         elif self.memory_type == "entities":
             entity_name = self._get_agent_name()
@@ -74,15 +74,15 @@ class Mem0Storage(Storage):
             user_id = self._get_user_id()
             params["user_id"] = user_id
 
-        elif self.memory_type == "short_term":
+        elif self.memory_type == "stm":
             agent_name = self._get_agent_name()
             params["agent_id"] = agent_name
-            params["metadata"] = {"type": "short_term"}
+            params["metadata"] = {"type": "stm"}
 
-        elif self.memory_type == "long_term":
+        elif self.memory_type == "ltm":
             agent_name = self._get_agent_name()
             params["agent_id"] = agent_name
-            params["metadata"] = {"type": "long_term"}
+            params["metadata"] = {"type": "ltm"}
 
         elif self.memory_type == "entities":
             agent_name = self._get_agent_name()

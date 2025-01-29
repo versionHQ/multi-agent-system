@@ -39,7 +39,7 @@ class ShortTermMemoryItem:
 
 class ShortTermMemory(Memory):
     """
-    ShortTermMemory class for managing transient data related to immediate tasks and interactions.
+    A class for managing transient data related to immediate tasks and interactions.
     """
 
     def __init__(self, agent = None, embedder_config: Dict[str, Any] = None, storage=None, path=None):
@@ -54,9 +54,9 @@ class ShortTermMemory(Memory):
             except ImportError:
                 raise ImportError("Mem0 is not installed. Please install it with `uv pip install mem0ai`.")
 
-            storage = Mem0Storage(type="short_term", agent=agent)
+            storage = Mem0Storage(type="stm", agent=agent)
         else:
-            storage = storage if storage else RAGStorage(type="short_term", embedder_config=embedder_config, agents=[agent,], path=path)
+            storage = storage if storage else RAGStorage(type="stm", embedder_config=embedder_config, agents=[agent,], path=path)
 
         super().__init__(storage)
 
@@ -92,20 +92,23 @@ class UserMemory(Memory):
     UserMemory class for handling user memory storage and retrieval.
     """
 
-    def __init__(self, agent=None):
+    def __init__(self, agent=None, user_id=None):
         try:
             from versionhq.storage.mem0_storage import Mem0Storage
         except ImportError:
             raise ImportError("Mem0 is not installed. Please install it with `uv pip install mem0ai`.")
 
-        storage = Mem0Storage(type="user", agent=agent)
-        super().__init__(storage)
+        if not user_id:
+            raise ValueError("Need User Id to create UserMemory.")
+
+        else:
+            storage = Mem0Storage(type="user", agent=agent, user_id=user_id)
+            super().__init__(storage)
 
 
-    def save(self, value, metadata: Optional[Dict[str, Any]] = None, agent: Optional[str] = None) -> None:
-        # TODO: Change this function since we want to take care of the case where we save memories for the usr
+    def save(self, value: str, metadata: Optional[Dict[str, Any]] = None, agent: Optional[str] = None) -> None:
         data = f"Remember the details about the user: {value}"
-        super().save(data, metadata)
+        super().save(value=data, metadata=metadata, agent=agent)
 
 
     def search(self, query: str, limit: int = 3, score_threshold: float = 0.35):

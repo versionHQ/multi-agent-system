@@ -258,8 +258,11 @@ def test_using_contextual_memory():
     from unittest.mock import patch
     from versionhq.task.model import Task
     from versionhq.memory.contextual_memory import ContextualMemory
+    from versionhq.storage.rag_storage import RAGStorage
 
     agent = Agent(role="Researcher", goal="You research about math.", use_memory=True)
+    assert agent.short_term_memory.storage and isinstance(agent.short_term_memory.storage, RAGStorage) and agent.short_term_memory.storage.type == "stm"
+
     task = Task(description="Research a topic to teach a kid aged 6 about math.")
     with patch.object(ContextualMemory, "build_context_for_task") as contextual_mem:
         task.execute_sync(agent=agent)
@@ -282,4 +285,16 @@ def test_disabled_memory_using_contextual_memory():
         contextual_mem.assert_not_called()
 
 
+def test_agent_with_memory_config():
+    agent_1 = Agent(role="Researcher", goal="You research about math.", use_memory=True, memory_config=dict(provider="mem0"))
+    agent_2 = Agent(role="Researcher", goal="You research about math.", use_memory=True, memory_config=dict(provider="mem0", user_id="123"))
+
+
+    assert agent_1.short_term_memory and agent_1.short_term_memory.memory_provider == "mem0" and agent_1.short_term_memory.storage.memory_type == "stm"
+    assert agent_1.user_memory is None
+    assert agent_2.short_term_memory and agent_2.short_term_memory.memory_provider == "mem0" and agent_2.short_term_memory.storage.memory_type == "stm"
+    assert agent_2.user_memory and agent_2.user_memory.storage and agent_2.user_memory.storage.memory_type == "user"
+
+if __name__ == "__main__":
+    test_using_contextual_memory()
 # embedder_config

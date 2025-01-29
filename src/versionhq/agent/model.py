@@ -104,7 +104,7 @@ class Agent(BaseModel):
 
     # memory
     use_memory: bool = Field(default=False, description="whether to store/use memory when executing the task")
-    memory_config: Optional[Dict[str, Any]] = Field(default=None, description="configuration for the memory")
+    memory_config: Optional[Dict[str, Any]] = Field(default=None, description="configuration for the memory. need to store user_id for UserMemory")
     short_term_memory: Optional[InstanceOf[ShortTermMemory]] = Field(default=None)
     user_memory: Optional[InstanceOf[UserMemory]] = Field(default=None)
     # _short_term_memory: Optional[InstanceOf[ShortTermMemory]] = PrivateAttr()
@@ -336,7 +336,7 @@ class Agent(BaseModel):
     @model_validator(mode="after")
     def set_up_rpm(self) -> Self:
         """
-        Set up Request per Minitue controller.
+        Set up RPM controller.
         """
         if self.max_rpm:
             self._rpm_controller = RPMController(max_rpm=self.max_rpm, _current_rpm=0)
@@ -369,7 +369,9 @@ class Agent(BaseModel):
             self.short_term_memory = self.short_term_memory if self.short_term_memory else ShortTermMemory(agent=self, embedder_config=self.embedder_config)
 
             if hasattr(self, "memory_config") and self.memory_config is not None:
-                self.user_memory = self.user_memory if self.user_memory else UserMemory(agent=self)
+                user_id = self.memory_config.get("user_id", None)
+                if user_id:
+                    self.user_memory = self.user_memory if self.user_memory else UserMemory(agent=self, user_id=user_id)
             else:
                 self.user_memory = None
 
@@ -471,7 +473,7 @@ class Agent(BaseModel):
 
         if self.use_memory == True:
             contextual_memory = ContextualMemory(memory_config=self.memory_config, stm=self.short_term_memory, um=self.user_memory)
-            memory = contextual_memory.build_context_for_task(task, context)
+            memory = contextual_memory.build_context_for_task(task=task, context=context)
             if memory.strip() != "":
                 task_prompt += memory.strip()
 
