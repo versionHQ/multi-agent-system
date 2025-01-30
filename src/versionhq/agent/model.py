@@ -13,7 +13,7 @@ from versionhq.llm.model import LLM, DEFAULT_CONTEXT_WINDOW_SIZE, DEFAULT_MODEL_
 from versionhq.tool.model import Tool, ToolSet
 from versionhq.knowledge.model import BaseKnowledgeSource, Knowledge
 from versionhq.memory.contextual_memory import ContextualMemory
-from versionhq.memory.model import ShortTermMemory, UserMemory
+from versionhq.memory.model import ShortTermMemory, LongTermMemory, UserMemory
 from versionhq._utils.logger import Logger
 from versionhq.agent.rpm_controller import RPMController
 from versionhq._utils.usage_metrics import UsageMetrics
@@ -96,7 +96,7 @@ class Agent(BaseModel):
     goal: str = Field(description="concise goal of the agent (details are set in the Task instance)")
     backstory: Optional[str] = Field(default=None, description="developer prompt to the llm")
     skillsets: Optional[List[str]] = Field(default_factory=list)
-    tools: Optional[List[Tool | ToolSet | Type[Tool]]] = Field(default_factory=list)
+    tools: Optional[List[InstanceOf[Tool | ToolSet] | Type[Tool] | Any]] = Field(default_factory=list)
 
     # knowledge
     knowledge_sources: Optional[List[BaseKnowledgeSource]] = Field(default=None)
@@ -106,10 +106,8 @@ class Agent(BaseModel):
     use_memory: bool = Field(default=False, description="whether to store/use memory when executing the task")
     memory_config: Optional[Dict[str, Any]] = Field(default=None, description="configuration for the memory. need to store user_id for UserMemory")
     short_term_memory: Optional[InstanceOf[ShortTermMemory]] = Field(default=None)
+    long_term_memory: Optional[InstanceOf[LongTermMemory]] = Field(default=None)
     user_memory: Optional[InstanceOf[UserMemory]] = Field(default=None)
-    # _short_term_memory: Optional[InstanceOf[ShortTermMemory]] = PrivateAttr()
-    # _user_memory: Optional[InstanceOf[UserMemory]] = PrivateAttr()
-
     embedder_config: Optional[Dict[str, Any]] = Field(default=None, description="embedder configuration for the agent's knowledge")
 
     # prompting
@@ -366,6 +364,7 @@ class Agent(BaseModel):
         """
 
         if self.use_memory == True:
+            self.long_term_memory = self.long_term_memory if self.long_term_memory else LongTermMemory()
             self.short_term_memory = self.short_term_memory if self.short_term_memory else ShortTermMemory(agent=self, embedder_config=self.embedder_config)
 
             if hasattr(self, "memory_config") and self.memory_config is not None:
@@ -385,12 +384,14 @@ class Agent(BaseModel):
         if not isinstance(self.llm, LLM):
             pass
 
+
     def invoke(
         self,
         prompts: str,
         response_format: Optional[Dict[str, Any]] = None,
-        tools: Optional[List[Tool | ToolSet | Type[Tool]]] = None,
-        tool_res_as_final: bool = False
+        tools: Optional[List[InstanceOf[Tool]| InstanceOf[ToolSet] | Type[Tool]]] = None,
+        tool_res_as_final: bool = False,
+        task: Any = None
         ) -> Dict[str, Any]:
         """
         Create formatted prompts using the developer prompt and the agent's backstory, then call the base model.
@@ -401,6 +402,7 @@ class Agent(BaseModel):
         task_execution_counter = 0
         iterations = 0
         raw_response = None
+
         messages = []
         messages.append({ "role": "user", "content": prompts })
         if self.use_developer_prompt:
@@ -415,8 +417,10 @@ class Agent(BaseModel):
             if tool_res_as_final:
                 func_llm = self.function_calling_llm if self.function_calling_llm and self.function_calling_llm._supports_function_calling() else LLM(model=DEFAULT_MODEL_NAME)
                 raw_response = func_llm.call(messages=messages, tools=tools, tool_res_as_final=True)
+                task.tokens = func_llm._tokens
             else:
                 raw_response = self.llm.call(messages=messages, response_format=response_format, tools=tools)
+                task.tokens = self.llm._tokens
 
             task_execution_counter += 1
             self._logger.log(level="info", message=f"Agent response: {raw_response}", color="blue")
@@ -431,6 +435,7 @@ class Agent(BaseModel):
                         self._rpm_controller.check_or_wait()
 
                     raw_response = self.llm.call(messages=messages, response_format=response_format, tools=tools)
+                    task.tokens = self.llm._tokens
                     iterations += 1
 
                 task_execution_counter += 1
@@ -454,7 +459,7 @@ class Agent(BaseModel):
         from versionhq.knowledge._utils import extract_knowledge_context
 
         task: InstanceOf[Task] = task
-        tools: Optional[List[Tool | ToolSet | Type[Tool]]] = task_tools + self.tools if task.can_use_agent_tools else task_tools
+        tools: Optional[List[InstanceOf[Tool]| InstanceOf[ToolSet] | Type[Tool]]] = task_tools + self.tools if task.can_use_agent_tools else task_tools
 
         if self.max_rpm and self._rpm_controller:
             self._rpm_controller._reset_request_count()
@@ -472,7 +477,9 @@ class Agent(BaseModel):
 
 
         if self.use_memory == True:
-            contextual_memory = ContextualMemory(memory_config=self.memory_config, stm=self.short_term_memory, um=self.user_memory)
+            contextual_memory = ContextualMemory(
+                memory_config=self.memory_config, stm=self.short_term_memory, ltm=self.long_term_memory, um=self.user_memory
+            )
             memory = contextual_memory.build_context_for_task(task=task, context=context)
             if memory.strip() != "":
                 task_prompt += memory.strip()
@@ -490,6 +497,7 @@ class Agent(BaseModel):
                 response_format=task._structure_response_format(model_provider=self.llm.provider),
                 tools=tools,
                 tool_res_as_final=task.tool_res_as_final,
+                task=task
             )
 
         except Exception as e:

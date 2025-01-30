@@ -1,6 +1,7 @@
 from typing import Any, Dict, List, Optional
 
 from versionhq.storage.rag_storage import RAGStorage
+from versionhq.storage.ltm_sqlite_storage import LTMSQLiteStorage
 
 
 class Memory:
@@ -40,6 +41,8 @@ class ShortTermMemoryItem:
 class ShortTermMemory(Memory):
     """
     A class for managing transient data related to immediate tasks and interactions.
+    - Type: stm
+    - Storage: Mem0Storage | RAGStorage
     """
 
     def __init__(self, agent = None, embedder_config: Dict[str, Any] = None, storage=None, path=None):
@@ -72,6 +75,7 @@ class ShortTermMemory(Memory):
     def search(self, query: str, limit: int = 3, score_threshold: float = 0.35,):
         return self.storage.search(query=query, limit=limit, score_threshold=score_threshold)
 
+
     def reset(self) -> None:
         try:
             self.storage.reset()
@@ -80,16 +84,70 @@ class ShortTermMemory(Memory):
 
 
 
+class LongTermMemoryItem:
+    def __init__(
+        self,
+        agent: str,
+        task: str,
+        datetime: str,
+        quality: Optional[int | float] = None,
+        metadata: Optional[Dict[str, Any]] = None,
+    ):
+        self.task = task
+        self.agent = agent
+        self.quality = quality
+        self.datetime = datetime
+        self.metadata = metadata if metadata is not None else {}
+
+
+
+class LongTermMemory(Memory):
+    """
+    A class for managing cross runs data related to overall task executions.
+    - Type: ltm
+    - Storage: LTMSQLiteStorage
+    """
+
+    def __init__(self, storage=None, path=None):
+        if not storage:
+            storage = LTMSQLiteStorage(db_path=path) if path else LTMSQLiteStorage()
+
+        super().__init__(storage)
+
+
+    def save(self, item: LongTermMemoryItem) -> None:
+        metadata = item.metadata
+        metadata.update({ "agent": item.agent })
+        self.storage.save(
+            task_description=item.task,
+            score=metadata["quality"],
+            metadata=metadata,
+            datetime=item.datetime,
+        )
+
+
+    def search(self, task: str, latest_n: int = 3) -> List[Dict[str, Any]]:
+        return self.storage.load(task, latest_n)
+
+
+    def reset(self) -> None:
+        self.storage.reset()
+
+
+
 class UserMemoryItem:
     def __init__(self, data: Any, user: str, metadata: Optional[Dict[str, Any]] = None):
         self.data = data
         self.user = user
-        self.metadata = metadata if metadata is not None else {}
+        self.metadata = metadata if metadata is not None else {} # can be stored last purchased item, comm related to the user
 
 
 class UserMemory(Memory):
     """
     UserMemory class for handling user memory storage and retrieval.
+    - Type: user
+    - Storage: Mem0Storage
+    - Requirements: `user_id` in metadata
     """
 
     def __init__(self, agent=None, user_id=None):

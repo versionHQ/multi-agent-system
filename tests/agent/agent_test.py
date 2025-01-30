@@ -220,9 +220,7 @@ def test_agent_custom_max_iterations():
 
     agent = Agent(role="demo", goal="test goal", maxit=1, allow_delegation=False, tools=[get_final_answer])
 
-    with patch.object(
-        LLM, "call", wraps=LLM(model=DEFAULT_MODEL_NAME).call
-    ) as private_mock:
+    with patch.object(LLM, "call", wraps=LLM(model=DEFAULT_MODEL_NAME).call) as private_mock:
         task = Task(
             description="The final answer is 42. But don't give it yet, instead keep using the `get_final_answer` tool.",
             can_use_agent_tools=True
@@ -257,16 +255,21 @@ def test_agent_with_knowledge_sources():
 def test_using_contextual_memory():
     from unittest.mock import patch
     from versionhq.task.model import Task
+    from versionhq.task.evaluate import Evaluation
     from versionhq.memory.contextual_memory import ContextualMemory
     from versionhq.storage.rag_storage import RAGStorage
+    from versionhq.storage.ltm_sqlite_storage import LTMSQLiteStorage
 
     agent = Agent(role="Researcher", goal="You research about math.", use_memory=True)
     assert agent.short_term_memory.storage and isinstance(agent.short_term_memory.storage, RAGStorage) and agent.short_term_memory.storage.type == "stm"
+    assert agent.long_term_memory.storage and isinstance(agent.long_term_memory.storage, LTMSQLiteStorage)
 
     task = Task(description="Research a topic to teach a kid aged 6 about math.")
+
     with patch.object(ContextualMemory, "build_context_for_task") as contextual_mem:
-        task.execute_sync(agent=agent)
-        assert agent.short_term_memory is not None
+        res = task.execute_sync(agent=agent)
+        assert isinstance(res.evaluation, Evaluation) and res.evaluation.suggestion_summary is not None
+        assert res.evaluation.aggregate_score is not None
         contextual_mem.assert_called_once()
 
 
@@ -277,6 +280,8 @@ def test_disabled_memory_using_contextual_memory():
 
     agent = Agent(role="Researcher", goal="You research about math.", use_memory=False)
     assert agent.short_term_memory is None
+    assert agent.long_term_memory is None
+    assert agent.user_memory is None
 
     task = Task(description="Research a topic to teach a kid aged 6 about math.")
 
@@ -286,15 +291,26 @@ def test_disabled_memory_using_contextual_memory():
 
 
 def test_agent_with_memory_config():
+    from versionhq.storage.ltm_sqlite_storage import LTMSQLiteStorage
+
     agent_1 = Agent(role="Researcher", goal="You research about math.", use_memory=True, memory_config=dict(provider="mem0"))
     agent_2 = Agent(role="Researcher", goal="You research about math.", use_memory=True, memory_config=dict(provider="mem0", user_id="123"))
 
 
-    assert agent_1.short_term_memory and agent_1.short_term_memory.memory_provider == "mem0" and agent_1.short_term_memory.storage.memory_type == "stm"
+    assert agent_1.short_term_memory is not None
+    assert agent_1.short_term_memory.memory_provider == "mem0" and agent_1.short_term_memory.storage.memory_type == "stm"
+    assert agent_1.long_term_memory and isinstance(agent_1.long_term_memory.storage, LTMSQLiteStorage)
     assert agent_1.user_memory is None
-    assert agent_2.short_term_memory and agent_2.short_term_memory.memory_provider == "mem0" and agent_2.short_term_memory.storage.memory_type == "stm"
+
+    assert agent_2.short_term_memory is not None
+    assert agent_2.short_term_memory.memory_provider == "mem0" and agent_2.short_term_memory.storage.memory_type == "stm"
+    assert agent_2.long_term_memory and isinstance(agent_2.long_term_memory.storage, LTMSQLiteStorage)
     assert agent_2.user_memory and agent_2.user_memory.storage and agent_2.user_memory.storage.memory_type == "user"
 
+
 if __name__ == "__main__":
-    test_using_contextual_memory()
+    # test_agent_with_memory_config()
+    # test_disabled_memory_using_contextual_memory()
+    test_agent_with_random_dict_tools()
+
 # embedder_config

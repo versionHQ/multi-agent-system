@@ -342,5 +342,5 @@ class ToolSet(BaseModel):
     """
     Store the tool called and any kwargs used. (The tool name and kwargs will be stored in the cache.)
     """
-    tool: InstanceOf[Tool] | Type[Tool] = Field(..., description="store the tool instance to be called.")
+    tool: InstanceOf[Tool]| Type[Tool] = Field(..., description="store the tool instance to be called.")
     kwargs: Optional[Dict[str, Any]] = Field(..., description="kwargs passed to the tool")

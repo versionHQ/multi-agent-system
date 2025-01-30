@@ -86,7 +86,7 @@ class TeamPlanner:
 
                 Task summaries: {" ".join(task_summary_list)}
             """,
-            pydantic_custom_output=TeamPlanIdea
+            pydantic_output=TeamPlanIdea
         )
         output = task.execute_sync(agent=team_planner, context=context, tools=tools)
         return output

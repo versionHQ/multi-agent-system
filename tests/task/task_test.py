@@ -10,6 +10,7 @@ from pydantic import BaseModel, Field, InstanceOf
 from versionhq.agent.model import Agent
 from versionhq.agent.rpm_controller import RPMController
 from versionhq.task.model import Task, ResponseField, TaskOutput, ConditionalTask
+from versionhq.task.evaluate import Evaluation, EvaluationItem
 from versionhq.tool.model import Tool, ToolSet
 from versionhq.tool.decorator import tool
 from tests.task import DemoOutcome, demo_response_fields, base_agent
@@ -20,7 +21,7 @@ threading.stack_size(134217728)
 def test_sync_execute_task_with_pydantic_outcome():
     task = Task(
         description="Output random values strictly following the data type defined in the given response format.",
-        pydantic_custom_output=DemoOutcome
+        pydantic_output=DemoOutcome
     )
     res = task.execute_sync(agent=base_agent)
 
@@ -101,7 +102,7 @@ def test_sync_execute_task_with_prompt_context():
     )
     main_task = Task(
         description="return the output following the given prompt.",
-        pydantic_custom_output=Outcome,
+        pydantic_output=Outcome,
         response_fields=[
             ResponseField(title="test1", data_type=int, required=True),
             ResponseField(title="test2", data_type=str, required=True),
@@ -289,7 +290,7 @@ def test_callback():
 
     task = Task(
         description="Amazing task",
-        pydantic_custom_output=CustomOutput,
+        pydantic_output=CustomOutput,
         callback=dummy_func,
         callback_kwargs=dict(message="Hi! Here is the result: ")
     )
@@ -343,3 +344,25 @@ def test_maxit():
     with patch.object(LLM, "call", wraps=agent.llm.call) as mock:
         task.execute_sync(agent=agent)
         assert mock.call_count <= 2
+
+
+def test_evaluation():
+    """
+    See if the output will be evaluated accurately - when the task was given eval criteria
+    """
+    from versionhq.task.model import Task
+    from versionhq.task.evaluate import Evaluation, EvaluationItem
+    from versionhq.agent.default_agents import task_evaluator
+
+    agent = Agent(role="Researcher", goal="You research about math.")
+    task = Task(
+        description="Research a topic to teach a kid aged 6 about math.",
+        should_evaluate=True,
+        eval_criteria=["Uniquness of the topic researched", "Fit to the target audience",]
+    )
+    res = task.execute_sync(agent=agent)
+
+    assert res.evaluation and isinstance(res.evaluation, Evaluation)
+    assert [isinstance(item, EvaluationItem) and item.criteria in task.eval_criteria for item in res.evaluation.items]
+    assert res.evaluation.latency and res.evaluation.tokens and res.evaluation.responsible_agent == task_evaluator
+    assert res.evaluation.aggregate_score is not None and res.evaluation.suggestion_summary

@@ -2,9 +2,7 @@ deploy.py
 destinations.py
 
 entity_memory.py
-long_term_memory.py
 
-# default_agents.py
 train.py
 
 memo.txt

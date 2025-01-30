@@ -1,6 +1,6 @@
 from typing import Any, Dict, Optional, List
 
-from versionhq.memory.model import ShortTermMemory, UserMemory
+from versionhq.memory.model import ShortTermMemory, LongTermMemory, UserMemory
 
 
 class ContextualMemory:
@@ -13,12 +13,13 @@ class ContextualMemory:
         self,
         memory_config: Optional[Dict[str, Any]],
         stm: ShortTermMemory,
+        ltm: LongTermMemory,
         um: UserMemory,
-        # ltm: LongTermMemory,
         # em: EntityMemory,
     ):
         self.memory_provider = memory_config.get("provider") if memory_config is not None else None
         self.stm = stm
+        self.ltm = ltm
         self.um = um
 
 
@@ -53,6 +54,20 @@ class ContextualMemory:
         return f"Recent Insights:\n{formatted_results}" if stm_results else ""
 
 
+    def _fetch_ltm_context(self, task) -> Optional[str]:
+        """
+        Fetches historical data or insights from LTM that are relevant to the task's description and expected_output, formatted as bullet points.
+        """
+        ltm_results = self.ltm.search(task, latest_n=2)
+        if not ltm_results:
+            return None
+
+        formatted_results = [suggestion for result in ltm_results for suggestion in result["metadata"]["suggestions"]]
+        formatted_results = list(dict.fromkeys(formatted_results))
+        formatted_results = "\n".join([f"- {result}" for result in formatted_results])
+        return f"Historical Data:\n{formatted_results}" if ltm_results else ""
+
+
     def _fetch_user_context(self, query: str) -> str:
         """
         Fetches and formats relevant user information from User Memory.
@@ -65,25 +80,6 @@ class ContextualMemory:
         formatted_memories = "\n".join(f"- {result['memory']}" for result in user_memories)
         return f"User memories/preferences:\n{formatted_memories}"
 
-
-    # def _fetch_ltm_context(self, task) -> Optional[str]:
-    #     """
-    #     Fetches historical data or insights from LTM that are relevant to the task's description and expected_output,
-    #     formatted as bullet points.
-    #     """
-    #     ltm_results = self.ltm.search(task, latest_n=2)
-    #     if not ltm_results:
-    #         return None
-
-    #     formatted_results = [
-    #         suggestion
-    #         for result in ltm_results
-    #         for suggestion in result["metadata"]["suggestions"]  # type: ignore # Invalid index type "str" for "str"; expected type "SupportsIndex | slice"
-    #     ]
-    #     formatted_results = list(dict.fromkeys(formatted_results))
-    #     formatted_results = "\n".join([f"- {result}" for result in formatted_results])  # type: ignore # Incompatible types in assignment (expression has type "str", variable has type "list[str]")
-
-    #     return f"Historical Data:\n{formatted_results}" if ltm_results else ""
 
     # def _fetch_entity_context(self, query) -> str:
     #     """

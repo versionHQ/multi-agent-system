@@ -82,6 +82,7 @@ class LLM(BaseModel):
 
     _logger: Logger = PrivateAttr(default_factory=lambda: Logger(verbose=True))
     _init_model_name: str = PrivateAttr(default=None)
+    _tokens: int = PrivateAttr(default=0) # accumulate total tokens used for the call
     model_config = ConfigDict(extra="allow")
 
     model: str = Field(default=DEFAULT_MODEL_NAME)
@@ -136,6 +137,7 @@ class LLM(BaseModel):
 
         self._init_model_name = self.model
         self.model = None
+        self._tokens = 0
 
         if self.provider and MODELS.get(self.provider):
             provider_model_list = MODELS.get(self.provider)
@@ -184,6 +186,7 @@ class LLM(BaseModel):
 
         return self
 
+
     def _create_valid_params(self, config: Dict[str, Any], provider: str = None) -> Dict[str, Any]:
         params = dict()
         valid_keys = list()
@@ -227,6 +230,7 @@ class LLM(BaseModel):
                 if not tools:
                     params = self._create_valid_params(config=config)
                     res = litellm.completion(messages=messages, stream=False, **params)
+                    self._tokens += int(res["usage"]["total_tokens"])
                     return res["choices"][0]["message"]["content"]
 
                 else:
@@ -275,6 +279,7 @@ class LLM(BaseModel):
                             return tool_res
                         else:
                             res = openai_client.chat.completions.create(messages=messages, model=self.model, tools=self.tools)
+                            self._tokens += int(res["usage"]["total_tokens"])
                             return res.choices[0].message.content
 
             except JSONSchemaValidationError as e:
@@ -285,7 +290,6 @@ class LLM(BaseModel):
                 self._logger.log(level="error", message=f"{self.model} failed to execute: {str(e)}", color="red")
                 if "litellm.RateLimitError" in str(e):
                     raise e
-
 
 
     def _supports_function_calling(self) -> bool:
