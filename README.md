@@ -342,6 +342,7 @@ Common issues and solutions:
 - API key errors: Ensure all API keys in the `.env` file are correct and up to date. Make sure to add `load_dotenv()` on the top of the python file to apply the latest environment values.
 - Database connection issues: Check if the Chroma DB is properly initialized and accessible.
 - Memory errors: If processing large contracts, you may need to increase the available memory for the Python process.
+- Issues related to the Python version: Docling/Pytorch is not ready for Python 3.13 as of Jan 2025. Use Python 3.12.x as default by running `uv venv --python 3.12.8` and `uv python pin 3.12.8`.
 - Issues related to dependencies: `rm -rf uv.lock`, `uv cache clean`, `uv venv`, and run `uv pip install -r requirements.txt -v`.
 - Issues related to the AI agents or RAG system: Check the `output.log` file for detailed error messages and stack traces.
 - Issues related to `Python quit unexpectedly`: Check [this stackoverflow article](https://stackoverflow.com/questions/59888499/macos-catalina-python-quit-unexpectedly-error).
