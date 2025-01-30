@@ -89,13 +89,8 @@ You can specify which formation you want them to generate, or let the agent deci
       test1: str
       test2: list[str]
 
-   def dummy_func(message: str, *args, **kwargs) -> str:
-      test1 = kwargs.get("test1")
-      test2 = kwargs.get("test2")
-      if test1 and test2:
-         return f"{message}: {test1}, {", ".join(test2)}"
-      else:
-         return message
+   def dummy_func(message: str, test1: str, test2: list[str]) -> str:
+      return f"{message}: {test1}, {", ".join(test2)}"
 
 
    agent = Agent(role="demo", goal="amazing project goal")
