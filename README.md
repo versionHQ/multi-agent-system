@@ -89,15 +89,20 @@ You can specify which formation you want them to generate, or let the agent deci
       test1: str
       test2: list[str]
 
-   def dummy_func(message: str, test1: str, test2: list[str]) -> str:
-      return f"{message}: {test1}, {", ".join(test2)}"
+   def dummy_func(message: str, *args, **kwargs) -> str:
+      test1 = kwargs.get("test1")
+      test2 = kwargs.get("test2")
+      if test1 and test2:
+         return f"{message}: {test1}, {", ".join(test2)}"
+      else:
+         return message
 
 
    agent = Agent(role="demo", goal="amazing project goal")
 
    task = Task(
       description="Amazing task",
-      pydantic_custom_output=CustomOutput,
+      pydantic_output=CustomOutput,
       callback=dummy_func,
       callback_kwargs=dict(message="Hi! Here is the result: ")
    )
@@ -106,14 +111,17 @@ You can specify which formation you want them to generate, or let the agent deci
    print(res)
    ```
 
-This will return `TaskOutput` that stores a response in string, JSON dict, and Pydantic model: `CustomOutput` formats with a callback result.
+This will return `TaskOutput` instance that stores a response in plane text, JSON serializable dict, and Pydantic model: `CustomOutput` formats with a callback result, tool output (if given), and evaluation results (if given).
 
    ```
    res == TaskOutput(
-      raw="{\\"test1\\": \\"random str\\", \\"test2\\": [\\"item1\\", \\"item2\\"]}",
-      json_dict={"test1": "random str", "test2": ["item1", "item2"]},
-      pydantic=CustomOutput(test1="random str", test2=["item 1", "item 2"]),
-      callback_output="Hi! Here is the result: random str, item 1, item 2",
+      task_id=UUID('<TASK UUID>')
+      raw='{\"test1\":\"random str\", \"test2\":[\"str item 1\", \"str item 2\", \"str item 3\"]}',
+      json_dict={'test1': 'random str', 'test2': ['str item 1', 'str item 2', 'str item 3']},
+      pydantic=<class '__main__.CustomOutput'>
+      tool_output=None,
+      callback_output='Hi! Here is the result: random str, str item 1, str item 2, str item 3',
+      evaluation=None
    )
    ```
 
