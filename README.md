@@ -2,7 +2,7 @@
 
 ![MIT license](https://img.shields.io/badge/License-MIT-green)
 [![Publisher](https://github.com/versionHQ/multi-agent-system/actions/workflows/publish.yml/badge.svg)](https://github.com/versionHQ/multi-agent-system/actions/workflows/publish.yml)
-![PyPI](https://img.shields.io/badge/PyPI->=v1.1.10-blue)
+![PyPI](https://img.shields.io/badge/PyPI->=v1.1.11.1-blue)
 ![python ver](https://img.shields.io/badge/Python->=3.12-purple)
 ![pyenv ver](https://img.shields.io/badge/pyenv-2.5.0-orange)
 
@@ -160,7 +160,6 @@ Tasks can be delegated to a team manager, peers in the team, or completely new a
 ## Technologies Used
 **Schema, Data Validation**
    - [Pydantic](https://docs.pydantic.dev/latest/): Data validation and serialization library for Python.
-   - [Pydantic_core](https://pypi.org/project/pydantic-core/): Core func packages for Pydantic.
    - [Upstage](https://console.upstage.ai/docs/getting-started/overview): Document processer for ML tasks. (Use `Document Parser API` to extract data from documents)
    - [Docling](https://ds4sd.github.io/docling/): Document parsing
 
@@ -226,7 +225,8 @@ src/
    ```
    uv venv
    source .venv/bin/activate
-   uv pip sync
+   uv lock --upgrade
+   uv sync --all-extras
    ```
 
 * In case of AssertionError/module mismatch, run Python version control using `.pyenv`

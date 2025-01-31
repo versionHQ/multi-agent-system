@@ -24,7 +24,6 @@ asgiref==3.8.1
 attrs==24.3.0
     # via
     #   aiohttp
-    #   jsonlines
     #   jsonschema
     #   referencing
 backoff==2.2.1
@@ -33,15 +32,12 @@ bcrypt==4.2.1
     # via
     #   chromadb
     #   paramiko
-beautifulsoup4==4.12.3
-    # via docling
 build==1.2.2.post1
     # via chromadb
 cachetools==5.5.1
     # via google-auth
 certifi==2024.12.14
     # via
-    #   docling
     #   httpcore
     #   httpx
     #   kubernetes
@@ -52,9 +48,7 @@ cffi==1.17.1
     #   cryptography
     #   pynacl
 charset-normalizer==3.4.1
-    # via
-    #   pdfminer-six
-    #   requests
+    # via requests
 chroma-hnswlib==0.7.6
     # via chromadb
 chromadb==0.6.3
@@ -78,47 +72,22 @@ composio-langchain==0.6.12
 composio-openai==0.6.9
     # via versionhq (pyproject.toml)
 cryptography==44.0.0
-    # via
-    #   paramiko
-    #   pdfminer-six
-deepsearch-glm==1.0.0
-    # via docling
+    # via paramiko
 deprecated==1.2.18
     # via
     #   opentelemetry-api
     #   opentelemetry-exporter-otlp-proto-grpc
     #   opentelemetry-semantic-conventions
-dill==0.3.9
-    # via multiprocess
 distro==1.9.0
     # via openai
-docling==2.17.0
-    # via versionhq (pyproject.toml)
-docling-core==2.15.1
-    # via
-    #   docling
-    #   docling-parse
-docling-ibm-models==3.3.0
-    # via docling
-docling-parse==3.1.2
-    # via docling
 durationpy==0.9
     # via kubernetes
-easyocr==1.7.2
-    # via docling
-et-xmlfile==2.0.0
-    # via openpyxl
 fastapi==0.115.6
     # via
     #   chromadb
     #   composio-core
 filelock==3.16.1
-    # via
-    #   huggingface-hub
-    #   torch
-    #   transformers
-filetype==1.2.0
-    # via docling
+    # via huggingface-hub
 flatbuffers==25.1.24
     # via onnxruntime
 frozenlist==1.5.0
@@ -126,9 +95,7 @@ frozenlist==1.5.0
     #   aiohttp
     #   aiosignal
 fsspec==2024.12.0
-    # via
-    #   huggingface-hub
-    #   torch
+    # via huggingface-hub
 google-auth==2.38.0
     # via kubernetes
 googleapis-common-protos==1.66.0
@@ -136,19 +103,11 @@ googleapis-common-protos==1.66.0
 grpcio==1.70.0
     # via
     #   chromadb
-    #   grpcio-tools
     #   opentelemetry-exporter-otlp-proto-grpc
-    #   qdrant-client
-grpcio-tools==1.70.0
-    # via qdrant-client
 h11==0.14.0
     # via
     #   httpcore
     #   uvicorn
-h2==4.1.0
-    # via httpx
-hpack==4.1.0
-    # via h2
 httpcore==1.0.7
     # via httpx
 httptools==0.6.4
@@ -159,25 +118,16 @@ httpx==0.27.2
     #   langsmith
     #   litellm
     #   openai
-    #   qdrant-client
 huggingface-hub==0.27.0
-    # via
-    #   docling
-    #   docling-ibm-models
-    #   tokenizers
-    #   transformers
+    # via tokenizers
 humanfriendly==10.0
     # via coloredlogs
-hyperframe==6.1.0
-    # via h2
 idna==3.10
     # via
     #   anyio
     #   httpx
     #   requests
     #   yarl
-imageio==2.37.0
-    # via scikit-image
 importlib-metadata==8.5.0
     # via
     #   composio-core
@@ -188,27 +138,20 @@ importlib-resources==6.5.2
 inflection==0.5.1
     # via composio-core
 jinja2==3.1.5
-    # via
-    #   litellm
-    #   torch
+    # via litellm
 jiter==0.8.2
     # via openai
 json-repair==0.35.0
     # via versionhq (pyproject.toml)
-jsonlines==3.1.0
-    # via docling-ibm-models
 jsonpatch==1.33
     # via langchain-core
 jsonpointer==3.0.0
     # via jsonpatch
 jsonref==1.1.0
-    # via
-    #   composio-core
-    #   docling-core
+    # via composio-core
 jsonschema==4.23.0
     # via
     #   composio-core
-    #   docling-core
     #   litellm
 jsonschema-specifications==2024.10.1
     # via jsonschema
@@ -235,66 +178,32 @@ langsmith==0.2.10
     # via
     #   langchain
     #   langchain-core
-lazy-loader==0.4
-    # via scikit-image
 litellm==1.56.5
     # via versionhq (pyproject.toml)
-lxml==5.3.0
-    # via
-    #   docling
-    #   python-docx
-    #   python-pptx
 markdown-it-py==3.0.0
     # via rich
-marko==2.1.2
-    # via docling
 markupsafe==3.0.2
     # via
     #   jinja2
     #   werkzeug
 mdurl==0.1.2
     # via markdown-it-py
-mem0ai==0.1.48
-    # via versionhq (pyproject.toml)
 mmh3==5.1.0
     # via chromadb
 monotonic==1.6
     # via posthog
-mpire==2.10.2
-    # via semchunk
 mpmath==1.3.0
     # via sympy
 multidict==6.1.0
     # via
     #   aiohttp
     #   yarl
-multiprocess==0.70.17
-    # via mpire
-networkx==3.4.2
-    # via
-    #   scikit-image
-    #   torch
-ninja==1.11.1.3
-    # via easyocr
 numpy==2.2.1
     # via
     #   chroma-hnswlib
     #   chromadb
-    #   docling-ibm-models
-    #   easyocr
-    #   imageio
     #   langchain
     #   onnxruntime
-    #   opencv-python-headless
-    #   pandas
-    #   qdrant-client
-    #   safetensors
-    #   scikit-image
-    #   scipy
-    #   shapely
-    #   tifffile
-    #   torchvision
-    #   transformers
 oauthlib==3.2.2
     # via
     #   kubernetes
@@ -307,13 +216,6 @@ openai==1.58.1
     #   composio-openai
     #   langchain-openai
     #   litellm
-    #   mem0ai
-opencv-python-headless==4.11.0.86
-    # via
-    #   docling-ibm-models
-    #   easyocr
-openpyxl==3.1.5
-    # via docling
 opentelemetry-api==1.29.0
     # via
     #   chromadb
@@ -365,39 +267,12 @@ packaging==24.2
     #   huggingface-hub
     #   langchain-core
     #   langchainhub
-    #   lazy-loader
     #   onnxruntime
     #   opentelemetry-instrumentation
-    #   scikit-image
-    #   transformers
-pandas==2.2.3
-    # via
-    #   docling
-    #   docling-core
 paramiko==3.5.0
     # via composio-core
-pdfminer-six==20231228
-    # via pdfplumber
-pdfplumber==0.11.5
-    # via versionhq (pyproject.toml)
-pillow==10.4.0
-    # via
-    #   docling
-    #   docling-core
-    #   docling-ibm-models
-    #   docling-parse
-    #   easyocr
-    #   imageio
-    #   pdfplumber
-    #   python-pptx
-    #   scikit-image
-    #   torchvision
-portalocker==2.10.1
-    # via qdrant-client
 posthog==3.11.0
-    # via
-    #   chromadb
-    #   mem0ai
+    # via chromadb
 propcache==0.2.1
     # via
     #   aiohttp
@@ -405,7 +280,6 @@ propcache==0.2.1
 protobuf==5.29.3
     # via
     #   googleapis-common-protos
-    #   grpcio-tools
     #   onnxruntime
     #   opentelemetry-proto
 pyasn1==0.6.1
@@ -414,8 +288,6 @@ pyasn1==0.6.1
     #   rsa
 pyasn1-modules==0.4.1
     # via google-auth
-pyclipper==1.3.0.post6
-    # via easyocr
 pycparser==2.22
     # via cffi
 pydantic==2.10.6
@@ -424,32 +296,18 @@ pydantic==2.10.6
     #   chromadb
     #   composio-core
     #   composio-langchain
-    #   docling
-    #   docling-core
-    #   docling-parse
     #   fastapi
     #   langchain
     #   langchain-core
     #   langsmith
     #   litellm
-    #   mem0ai
     #   openai
-    #   pydantic-settings
-    #   qdrant-client
 pydantic-core==2.27.2
     # via pydantic
-pydantic-settings==2.7.1
-    # via docling
 pygments==2.18.0
-    # via
-    #   mpire
-    #   rich
+    # via rich
 pynacl==1.5.0
     # via paramiko
-pypdfium2==4.30.1
-    # via
-    #   docling
-    #   pdfplumber
 pyperclip==1.9.0
     # via composio-core
 pypika==0.48.9
@@ -458,40 +316,23 @@ pyproject-hooks==1.2.0
     # via build
 pysher==1.0.8
     # via composio-core
-python-bidi==0.6.3
-    # via easyocr
 python-dateutil==2.9.0.post0
     # via
     #   kubernetes
-    #   pandas
     #   posthog
-python-docx==1.1.2
-    # via docling
 python-dotenv==1.0.1
     # via
     #   versionhq (pyproject.toml)
     #   litellm
-    #   pydantic-settings
     #   uvicorn
-python-pptx==1.0.2
-    # via docling
-pytz==2024.2
-    # via
-    #   mem0ai
-    #   pandas
 pyyaml==6.0.2
     # via
     #   chromadb
-    #   docling-core
-    #   easyocr
     #   huggingface-hub
     #   kubernetes
     #   langchain
     #   langchain-core
-    #   transformers
     #   uvicorn
-qdrant-client==1.13.2
-    # via mem0ai
 referencing==0.35.1
     # via
     #   jsonschema
@@ -500,12 +341,10 @@ regex==2024.11.6
     # via
     #   versionhq (pyproject.toml)
     #   tiktoken
-    #   transformers
 requests==2.32.3
     # via
     #   versionhq (pyproject.toml)
     #   composio-core
-    #   docling
     #   huggingface-hub
     #   kubernetes
     #   langchain
@@ -516,7 +355,6 @@ requests==2.32.3
     #   requests-oauthlib
     #   requests-toolbelt
     #   tiktoken
-    #   transformers
 requests-oauthlib==2.0.0
     # via kubernetes
 requests-toolbelt==1.0.0
@@ -532,32 +370,12 @@ rpds-py==0.22.3
     #   referencing
 rsa==4.9
     # via google-auth
-rtree==1.3.0
-    # via docling
-safetensors==0.5.2
-    # via
-    #   docling-ibm-models
-    #   transformers
-scikit-image==0.25.1
-    # via easyocr
-scipy==1.15.1
-    # via
-    #   docling
-    #   easyocr
-    #   scikit-image
-semchunk==2.2.2
-    # via docling-core
 semver==3.0.2
     # via composio-core
 sentry-sdk==2.19.2
     # via composio-core
 setuptools==75.6.0
-    # via
-    #   versionhq (pyproject.toml)
-    #   grpcio-tools
-    #   torch
-shapely==2.0.6
-    # via easyocr
+    # via versionhq (pyproject.toml)
 shellingham==1.5.4
     # via typer
 six==1.17.0
@@ -570,29 +388,17 @@ sniffio==1.3.1
     #   anyio
     #   httpx
     #   openai
-soupsieve==2.6
-    # via beautifulsoup4
 sqlalchemy==2.0.36
-    # via
-    #   langchain
-    #   mem0ai
+    # via langchain
 starlette==0.41.3
     # via fastapi
 sympy==1.13.3
-    # via
-    #   onnxruntime
-    #   torch
-tabulate==0.9.0
-    # via
-    #   docling-core
-    #   docling-parse
+    # via onnxruntime
 tenacity==9.0.0
     # via
     #   chromadb
     #   langchain
     #   langchain-core
-tifffile==2025.1.10
-    # via scikit-image
 tiktoken==0.8.0
     # via
     #   langchain-openai
@@ -601,35 +407,13 @@ tokenizers==0.21.0
     # via
     #   chromadb
     #   litellm
-    #   transformers
-torch==2.4.1
-    # via
-    #   docling-ibm-models
-    #   easyocr
-    #   safetensors
-    #   torchvision
-torchvision==0.19.1
-    # via
-    #   docling-ibm-models
-    #   easyocr
 tqdm==4.67.1
     # via
     #   chromadb
-    #   docling-ibm-models
     #   huggingface-hub
-    #   mpire
     #   openai
-    #   semchunk
-    #   transformers
-transformers==4.48.1
-    # via
-    #   docling-core
-    #   docling-ibm-models
 typer==0.12.5
-    # via
-    #   chromadb
-    #   docling
-    #   docling-core
+    # via chromadb
 types-requests==2.32.0.20241016
     # via langchainhub
 typing==3.10.0.0
@@ -638,7 +422,6 @@ typing-extensions==4.12.2
     # via
     #   anyio
     #   chromadb
-    #   docling-core
     #   fastapi
     #   huggingface-hub
     #   langchain-core
@@ -646,17 +429,11 @@ typing-extensions==4.12.2
     #   opentelemetry-sdk
     #   pydantic
     #   pydantic-core
-    #   python-docx
-    #   python-pptx
     #   sqlalchemy
-    #   torch
     #   typer
-tzdata==2025.1
-    # via pandas
 urllib3==2.3.0
     # via
     #   kubernetes
-    #   qdrant-client
     #   requests
     #   sentry-sdk
     #   types-requests
@@ -682,8 +459,6 @@ wrapt==1.17.2
     # via
     #   deprecated
     #   opentelemetry-instrumentation
-xlsxwriter==3.2.2
-    # via python-pptx
 yarl==1.18.3
     # via aiohttp
 zipp==3.21.0

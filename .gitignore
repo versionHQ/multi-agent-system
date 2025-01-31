@@ -5,17 +5,23 @@ entity_memory.py
 
 train.py
 
-memo.txt
-
 dist/
+lib/
 build/
 .pypirc
 uploads/
 sample_dataset/
 chroma.sqlite3
 *egg-info/
+test/
+db/
+rc-tests/*
+temp/*
+.vscode/*
+assets/*
+memo.txt
 
-__pycache__/
+__pycache__
 .ruff_cache/
 .pytest_cache/
 
