@@ -34,7 +34,7 @@ class DoclingSource(BaseKnowledgeSource):
 
     file_paths: List[Path | str] = Field(default_factory=list)
     valid_file_paths: List[Path | str] = Field(default_factory=list)
-    content: List[InstanceOf[DoclingDocument]] = Field(default_factory=list)
+    content: List["DoclingDocument"] = Field(default_factory=list)
     document_converter: "DocumentConverter" = Field(
         default_factory=lambda: DocumentConverter(
             allowed_formats=[
@@ -51,12 +51,12 @@ class DoclingSource(BaseKnowledgeSource):
     )
 
 
-    def _convert_source_to_docling_documents(self) -> List[InstanceOf[DoclingDocument]]:
+    def _convert_source_to_docling_documents(self) -> List["DoclingDocument"]:
         conv_results_iter = self.document_converter.convert_all(self.valid_file_paths)
         return [result.document for result in conv_results_iter]
 
 
-    def _load_content(self) -> List[InstanceOf[DoclingDocument]]:
+    def _load_content(self) -> List["DoclingDocument"]:
         try:
             return self._convert_source_to_docling_documents()
         except ConversionError as e:
@@ -67,7 +67,7 @@ class DoclingSource(BaseKnowledgeSource):
             raise e
 
 
-    def _chunk_doc(self, doc: InstanceOf[DoclingDocument]) -> Iterator[str]:
+    def _chunk_doc(self, doc: "DoclingDocument") -> Iterator[str]:
         chunker = HierarchicalChunker()
         for chunk in chunker.chunk(doc):
             yield chunk.text
