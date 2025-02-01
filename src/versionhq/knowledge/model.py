@@ -26,13 +26,17 @@ class Knowledge(BaseModel):
         **data,
     ):
         super().__init__(**data)
+
+
         if storage:
             self.storage = storage
         else:
             self.storage = KnowledgeStorage(embedder_config=embedder_config, collection_name=collection_name)
 
-        self.sources = sources
+        self.storage._set_embedding_function(embedder_config=embedder_config)
         self.storage.initialize_knowledge_storage()
+
+        self.sources = sources
         for source in sources:
             source.storage = self.storage
             source.add()

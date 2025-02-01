@@ -469,7 +469,7 @@ class Agent(BaseModel):
             task_prompt += context
 
         if self._knowledge:
-            agent_knowledge = self._knowledge.query(query=[task_prompt,])
+            agent_knowledge = self._knowledge.query(query=[task_prompt,], limit=5)
             if agent_knowledge:
                 agent_knowledge_context = extract_knowledge_context(knowledge_snippets=agent_knowledge)
                 if agent_knowledge_context:

@@ -12,11 +12,11 @@ try:
 except ImportError:
     DOCLING_AVAILABLE = False
 
-from pydantic import Field
+from pydantic import Field, InstanceOf
 
 from versionhq.knowledge.source import BaseKnowledgeSource
+from versionhq.storage.utils import fetch_db_storage_path
 from versionhq._utils.vars import KNOWLEDGE_DIRECTORY
-from versionhq._utils.logger import Logger
 
 
 class DoclingSource(BaseKnowledgeSource):
@@ -31,11 +31,10 @@ class DoclingSource(BaseKnowledgeSource):
 
         super().__init__(*args, **kwargs)
 
-    _logger: Logger = Logger(verbose=True)
+
     file_paths: List[Path | str] = Field(default_factory=list)
-    chunks: List[str] = Field(default_factory=list)
-    safe_file_paths: List[Path | str] = Field(default_factory=list)
-    content: List["DoclingDocument"] = Field(default_factory=list)
+    valid_file_paths: List[Path | str] = Field(default_factory=list)
+    content: List[InstanceOf[DoclingDocument]] = Field(default_factory=list)
     document_converter: "DocumentConverter" = Field(
         default_factory=lambda: DocumentConverter(
             allowed_formats=[
@@ -51,44 +50,46 @@ class DoclingSource(BaseKnowledgeSource):
         )
     )
 
-    def model_post_init(self, _) -> None:
-        self.safe_file_paths = self.validate_content()
-        self.content = self._load_content()
 
-
-    def _load_content(self) -> List["DoclingDocument"]:
-        try:
-            return self._convert_source_to_docling_documents()
-        except ConversionError as e:
-            self._logger.log(
-                level="error",
-                message=f"Error loading content: {str(e)}. Supported formats: {self.document_converter.allowed_formats}",
-                color="red",
-            )
-            raise e
-        except Exception as e:
-            self._logger.log(level="error", message=f"Error loading content: {e}", color="red")
-            raise e
-
-
-    def add(self) -> None:
-        if self.content is None:
-            return
-        for doc in self.content:
-            new_chunks_iterable = self._chunk_doc(doc)
-            self.chunks.extend(list(new_chunks_iterable))
-        self._save_documents()
-
-
-    def _convert_source_to_docling_documents(self) -> List["DoclingDocument"]:
-        conv_results_iter = self.document_converter.convert_all(self.safe_file_paths)
+    def _convert_source_to_docling_documents(self) -> List[InstanceOf[DoclingDocument]]:
+        conv_results_iter = self.document_converter.convert_all(self.valid_file_paths)
         return [result.document for result in conv_results_iter]
 
 
-    def _chunk_doc(self, doc: "DoclingDocument") -> Iterator[str]:
+    def _load_content(self) -> List[InstanceOf[DoclingDocument]]:
+        try:
+            return self._convert_source_to_docling_documents()
+        except ConversionError as e:
+            self._logger.log(level="error", message=f"Error loading content: {str(e)}. Supported formats: {self.document_converter.allowed_formats}", color="red")
+            raise e
+        except Exception as e:
+            self._logger.log(level="error", message=f"Error loading content: {str(e)}", color="red")
+            raise e
+
+
+    def _chunk_doc(self, doc: InstanceOf[DoclingDocument]) -> Iterator[str]:
         chunker = HierarchicalChunker()
         for chunk in chunker.chunk(doc):
             yield chunk.text
+
+
+    def _validate_url(self, url: str) -> bool:
+        try:
+            result = urlparse(url)
+            return all(
+                [
+                    result.scheme in ("http", "https"),
+                    result.netloc,
+                    len(result.netloc.split(".")) >= 2,  # Ensure domain has TLD
+                ]
+            )
+        except Exception:
+            return False
+
+
+    def model_post_init(self, _) -> None:
+        self.valid_file_paths = self.validate_content()
+        self.content.extend(self._load_content())
 
 
     def validate_content(self) -> List[Path | str]:
@@ -108,22 +109,23 @@ class DoclingSource(BaseKnowledgeSource):
                     if local_path.exists():
                         processed_paths.append(local_path)
                     else:
-                        raise FileNotFoundError(f"File not found: {local_path}")
+                        local_path = Path(fetch_db_storage_path() + "/" + KNOWLEDGE_DIRECTORY + "/" + path) # try with abs. path
+                        if local_path.exists():
+                            processed_paths.append(local_path)
+                        else:
+                            raise FileNotFoundError(f"File not found: {local_path}")
             else:
                 if isinstance(path, Path):
                     processed_paths.append(path)
         return processed_paths
 
 
-    def _validate_url(self, url: str) -> bool:
-        try:
-            result = urlparse(url)
-            return all(
-                [
-                    result.scheme in ("http", "https"),
-                    result.netloc,
-                    len(result.netloc.split(".")) >= 2,  # Ensure domain has TLD
-                ]
-            )
-        except Exception:
-            return False
+    def add(self) -> None:
+        if self.content is None:
+            self.model_post_init()
+
+        if self.content:
+            for doc in self.content:
+                new_chunks_iterable = self._chunk_doc(doc)
+                self.chunks.extend(list(new_chunks_iterable))
+            self._save_documents()

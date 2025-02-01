@@ -229,7 +229,6 @@ def test_agent_custom_max_iterations():
         assert private_mock.call_count == 1
 
 
-
 def test_agent_with_knowledge_sources():
     from versionhq.knowledge.source import StringKnowledgeSource
     from versionhq.task.model import Task

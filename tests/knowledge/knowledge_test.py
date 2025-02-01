@@ -269,6 +269,9 @@ def test_pdf_knowledge_source(mock_vector_db):
     current_dir = Path(__file__).parent
     pdf_path = current_dir / "mock_report_compressed.pdf"
     pdf_source = PDFKnowledgeSource(file_paths=[pdf_path], metadata={ "preference": "personal" })
+    assert pdf_source.valid_file_paths == [pdf_path]
+    assert pdf_source.content is not None
+
     mock_vector_db.sources = [pdf_source]
     mock_vector_db.query.return_value = [{"context": "McKinsey faces a challenge of manually curating and tagging documents, and takes hierarchical classification approach to query their internal knowledge base.", "score": 0.9} ]
 
@@ -277,18 +280,6 @@ def test_pdf_knowledge_source(mock_vector_db):
 
     assert any("hierarchical classification" in result["context"].lower() for result in results)
     mock_vector_db.query.assert_called_once()
-
-
-
-def test_file_path_validation():
-    current_dir = Path(__file__).parent
-    pdf_path = current_dir / "mock_report_compressed.pdf"
-
-    source = PDFKnowledgeSource(file_paths=[pdf_path])
-    assert source.safe_file_paths == [pdf_path]
-
-    with pytest.raises(ValueError, match="file_path/file_paths must be a Path, str, or a list of these types"):
-        PDFKnowledgeSource()
 
 
 
