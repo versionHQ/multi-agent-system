@@ -73,9 +73,19 @@ class KnowledgeStorage(BaseKnowledgeStorage):
 
 
     def __init__(self, embedder_config: Optional[Dict[str, Any]] = None, collection_name: Optional[str] = None):
-        self.collection_name = collection_name if collection_name else "knowledge"
+        self.collection_name = self._validate_collection_name(collection_name) if collection_name else "knowledge"
         self.embedder_config = embedder_config
         self.initialize_knowledge_storage()
+
+
+    def _validate_collection_name(self, collection_name: str = None) -> str:
+        """
+        Return a valid collection name from the given collection name.
+        Expected collection name (1) contains 3-63 characters, (2) starts and ends with an alphanumeric character, (3) otherwise contains only alphanumeric characters, underscores or hyphens (-), (4) contains no two consecutive periods (..) and (5) is not a valid IPv4 address.
+        """
+        collection_name = collection_name if collection_name else self.collection_name
+        valid_collection_name = collection_name.replace(' ', "-").replace("(", "-").replace(")", "").replace("..", "")
+        return valid_collection_name
 
 
     def _create_default_embedding_function(self) -> Any:
@@ -101,6 +111,7 @@ class KnowledgeStorage(BaseKnowledgeStorage):
         chroma_client = chromadb.PersistentClient(path=base_path, settings=Settings(allow_reset=True))
         self.app = chroma_client
         self._set_embedding_function(embedder_config=self.embedder_config)
+        self.collection_name = self.collection_name if self.collection_name else "knowledge"
 
         try:
             if self.app:
