@@ -3,6 +3,7 @@ from typing import Iterator, List, Optional
 from urllib.parse import urlparse
 
 try:
+    import docling
     from docling.datamodel.base_models import InputFormat
     from docling.document_converter import DocumentConverter
     from docling.exceptions import ConversionError
@@ -10,6 +11,17 @@ try:
     from docling_core.types.doc.document import DoclingDocument
     DOCLING_AVAILABLE = True
 except ImportError:
+    import envoy
+    r = envoy.run("uv add docling --optional docling")
+
+    import docling
+    from docling.datamodel.base_models import InputFormat
+    from docling.document_converter import DocumentConverter
+    from docling.exceptions import ConversionError
+    from docling_core.transforms.chunker.hierarchical_chunker import HierarchicalChunker
+    from docling_core.types.doc.document import DoclingDocument
+    DOCLING_AVAILABLE = True
+except:
     DOCLING_AVAILABLE = False
 
 from pydantic import Field, InstanceOf
@@ -25,30 +37,27 @@ class DoclingSource(BaseKnowledgeSource):
     Support PDF, DOCX, TXT, XLSX, PPTX, MD, Images, and HTML files without any additional dependencies.
     """
 
-    def __init__(self, *args, **kwargs):
-        if not DOCLING_AVAILABLE:
-            raise ImportError("The docling package is required. Please install the package using: $ uv add docling.")
-
-        super().__init__(*args, **kwargs)
-
-
     file_paths: List[Path | str] = Field(default_factory=list)
     valid_file_paths: List[Path | str] = Field(default_factory=list)
     content: List["DoclingDocument"] = Field(default_factory=list)
-    document_converter: "DocumentConverter" = Field(
-        default_factory=lambda: DocumentConverter(
-            allowed_formats=[
-                InputFormat.MD,
-                InputFormat.ASCIIDOC,
-                InputFormat.PDF,
-                InputFormat.DOCX,
-                InputFormat.HTML,
-                InputFormat.IMAGE,
-                InputFormat.XLSX,
-                InputFormat.PPTX,
-            ]
-        )
-    )
+    document_converter: "DocumentConverter" = Field(default_factory=lambda: DocumentConverter(
+        allowed_formats=[
+            InputFormat.MD,
+            InputFormat.ASCIIDOC,
+            InputFormat.PDF,
+            InputFormat.DOCX,
+            InputFormat.HTML,
+            InputFormat.IMAGE,
+            InputFormat.XLSX,
+            InputFormat.PPTX,
+        ]
+    ))
+
+    def __init__(self, *args, **kwargs):
+        if not DOCLING_AVAILABLE:
+            raise ImportError("The docling package is required. Please install the package using: $ uv add docling.")
+        else:
+            super().__init__(*args, **kwargs)
 
 
     def _convert_source_to_docling_documents(self) -> List["DoclingDocument"]:

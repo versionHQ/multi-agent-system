@@ -345,14 +345,13 @@ class Agent(BaseModel):
     @model_validator(mode="after")
     def set_up_knowledge(self) -> Self:
         if self.knowledge_sources:
-            knowledge_agent_name = f"{self.role.replace(' ', '_')}"
+            collection_name = f"{self.role.replace(' ', '_')}"
 
-            if isinstance(self.knowledge_sources, list) and all(isinstance(k, BaseKnowledgeSource) for k in self.knowledge_sources):
-                self._knowledge = Knowledge(
-                    sources=self.knowledge_sources,
-                    embedder_config=self.embedder_config,
-                    collection_name=knowledge_agent_name,
-                )
+            self._knowledge = Knowledge(
+                sources=self.knowledge_sources,
+                embedder_config=self.embedder_config,
+                collection_name=collection_name,
+            )
 
         return self
 

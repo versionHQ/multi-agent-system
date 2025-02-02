@@ -11,11 +11,11 @@ class Knowledge(BaseModel):
     """
     Knowlede class for collection of sources and setup for the vector store to query relevant context.
     """
+    collection_name: Optional[str] = None
     sources: List[BaseKnowledgeSource] = Field(default_factory=list)
-    model_config = ConfigDict(arbitrary_types_allowed=True)
     storage: KnowledgeStorage = Field(default_factory=KnowledgeStorage)
     embedder_config: Optional[Dict[str, Any]] = None
-    collection_name: Optional[str] = None
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     def __init__(
         self,
@@ -27,16 +27,12 @@ class Knowledge(BaseModel):
     ):
         super().__init__(**data)
 
-
-        if storage:
-            self.storage = storage
-        else:
-            self.storage = KnowledgeStorage(embedder_config=embedder_config, collection_name=collection_name)
-
-        self.storage._set_embedding_function(embedder_config=embedder_config)
+        self.collection_name = collection_name
+        self.sources = sources
+        self.embedder_config = embedder_config
+        self.storage = storage if storage else KnowledgeStorage(embedder_config=embedder_config, collection_name=self.collection_name)
         self.storage.initialize_knowledge_storage()
 
-        self.sources = sources
         for source in sources:
             source.storage = self.storage
             source.add()

@@ -237,7 +237,10 @@ def test_agent_with_knowledge_sources():
     string_source = StringKnowledgeSource(content=content)
 
     agent = Agent(role="Information Agent", goal="Provide information based on knowledge sources", knowledge_sources=[string_source])
+
+    assert agent._knowledge.collection_name == f"{agent.role.replace(' ', '_')}"
     assert agent._knowledge.sources == [string_source] and agent._knowledge.embedder_config == agent.embedder_config
+    assert agent._knowledge.storage and agent._knowledge.storage.embedding_function and  agent._knowledge.storage.app is not None and agent._knowledge.storage.collection_name is not None
 
     task = Task(description="Answer the following question: What is Kuriko's favorite color?")
 
@@ -305,11 +308,3 @@ def test_agent_with_memory_config():
     assert agent_2.short_term_memory.memory_provider == "mem0" and agent_2.short_term_memory.storage.memory_type == "stm"
     assert agent_2.long_term_memory and isinstance(agent_2.long_term_memory.storage, LTMSQLiteStorage)
     assert agent_2.user_memory and agent_2.user_memory.storage and agent_2.user_memory.storage.memory_type == "user"
-
-
-if __name__ == "__main__":
-    # test_agent_with_memory_config()
-    # test_disabled_memory_using_contextual_memory()
-    test_agent_with_random_dict_tools()
-
-# embedder_config

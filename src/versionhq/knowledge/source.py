@@ -237,7 +237,10 @@ class PDFKnowledgeSource(BaseFileKnowledgeSource):
         """
         Load and preprocess PDF file content.
         """
-        pdfplumber = self._import_pdfplumber()
+        self._import_pdfplumber()
+
+        import pdfplumber
+
         content = {}
         for path in self.valid_file_paths:
             text = ""
@@ -257,9 +260,12 @@ class PDFKnowledgeSource(BaseFileKnowledgeSource):
         """
         try:
             import pdfplumber
-            return pdfplumber
         except ImportError:
-            raise ImportError("pdfplumber is not installed. Please install it with: pip install pdfplumber")
+            try:
+                import os
+                os.system("uv add pdfplumber --optional pdfplumber")
+            except:
+                raise ImportError("pdfplumber is not installed. Please install it with: uv add pdfplumber")
 
 
     def add(self) -> None:
@@ -381,10 +387,16 @@ class ExcelKnowledgeSource(BaseFileKnowledgeSource):
             import pandas as pd
             return pd
         except ImportError as e:
-            missing_package = str(e).split()[-1]
-            raise ImportError(
-                f"{missing_package} is not installed. Please install it with: pip install {missing_package}"
-            )
+            try:
+                import os
+                os.system("uv add pandas --optional pandas")
+                import pandas as pd
+                return pd
+            except:
+                missing_package = str(e).split()[-1]
+                raise ImportError(
+                    f"{missing_package} is not installed. Please install it with: pip install {missing_package}"
+                )
 
 
     def add(self) -> None:

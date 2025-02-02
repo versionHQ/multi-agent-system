@@ -65,15 +65,15 @@ class KnowledgeStorage(BaseKnowledgeStorage):
     A class to store ChromaDB Storage vals that handles embeddings, ChromaClient, and Collection.
     """
 
-    collection: Optional[chromadb.Collection] = None
+    app: Optional[ClientAPI] = None # store ChromaDBClient object
     collection_name: Optional[str] = "knowledge"
-    app: Optional[ClientAPI] = None
-    embedding_function: Optional[Any] = None # store ChromaDB's EmbeddingFunction instance
+    collection: Optional[chromadb.Collection] = None
+    embedding_function: Optional[Any] = None # store ChromaDB's EmbeddingFunction object
     embedder_config: Optional[Dict[str, Any]] = None # store config dict for embedding_function
 
 
     def __init__(self, embedder_config: Optional[Dict[str, Any]] = None, collection_name: Optional[str] = None):
-        self.collection_name = collection_name
+        self.collection_name = collection_name if collection_name else "knowledge"
         self.embedder_config = embedder_config
         self.initialize_knowledge_storage()
 
@@ -100,13 +100,11 @@ class KnowledgeStorage(BaseKnowledgeStorage):
         base_path = os.path.join(fetch_db_storage_path(), "knowledge")
         chroma_client = chromadb.PersistentClient(path=base_path, settings=Settings(allow_reset=True))
         self.app = chroma_client
-
-        self._set_embedding_function(self.embedder_config)
+        self._set_embedding_function(embedder_config=self.embedder_config)
 
         try:
-            collection_name = f"knowledge_{self.collection_name}" if self.collection_name else "knowledge"
             if self.app:
-                self.collection = self.app.get_or_create_collection(name=collection_name, embedding_function=self.embedding_function)
+                self.collection = self.app.get_or_create_collection(name=self.collection_name, embedding_function=self.embedding_function)
             else:
                 raise Exception("Vector Database Client not initialized")
         except Exception:
