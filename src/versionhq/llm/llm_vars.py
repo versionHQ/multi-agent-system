@@ -60,6 +60,8 @@ MODELS = {
     "ollama": [
       "ollama/llama3.1",
       "ollama/mixtral",
+      "ollama/mixtral-8x22B-Instruct-v0.1",
+
     ],
     "deepseek": [
         "deepseek/deepseek-reasoner",

@@ -179,11 +179,11 @@ class LLM(BaseModel):
         if api_key_name:
             self.api_key = os.environ.get(api_key_name, None)
 
-        ## To avoid pass-through, comment out.
-        # base_url_key_name = self.provider.upper() + "_API_BASE" if self.provider else None
-        # if base_url_key_name:
-            # self.base_url = os.environ.get(base_url_key_name)
-            # self.api_base = self.base_url
+
+        base_url_key_name = self.provider.upper() + "_API_BASE" if self.provider else None
+        if base_url_key_name:
+            self.base_url = os.environ.get(base_url_key_name)
+            self.api_base = self.base_url
 
         return self
 

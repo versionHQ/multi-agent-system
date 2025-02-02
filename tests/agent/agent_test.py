@@ -231,22 +231,26 @@ def test_agent_custom_max_iterations():
 
 def test_agent_with_knowledge_sources():
     from versionhq.knowledge.source import StringKnowledgeSource
+    from versionhq.knowledge.source_docling import DoclingSource
     from versionhq.task.model import Task
 
     content = "Kuriko's favorite color is gold, and she enjoy Japanese food."
     string_source = StringKnowledgeSource(content=content)
+    html = "https://github.blog/security/vulnerability-research/cybersecurity-researchers-digital-detectives-in-a-connected-world/"
+    knowledge_sources = [content, string_source, html,]
 
-    agent = Agent(role="Information Agent", goal="Provide information based on knowledge sources", knowledge_sources=[string_source])
+    agent = Agent(role="Information Agent", goal="Provide information based on knowledge sources", knowledge_sources=knowledge_sources)
 
     assert agent._knowledge.collection_name == f"{agent.role.replace(' ', '_')}"
-    assert agent._knowledge.sources == [string_source] and agent._knowledge.embedder_config == agent.embedder_config
+    assert [isinstance(item, StringKnowledgeSource | DoclingSource) for item in agent.knowledge_sources]
+    assert agent._knowledge.embedder_config == agent.embedder_config
     assert agent._knowledge.storage and agent._knowledge.storage.embedding_function and  agent._knowledge.storage.app is not None and agent._knowledge.storage.collection_name is not None
 
     task = Task(description="Answer the following question: What is Kuriko's favorite color?")
 
     with patch("versionhq.knowledge.storage.KnowledgeStorage") as MockKnowledge:
         mock_knowledge_instance = MockKnowledge.return_value
-        mock_knowledge_instance.sources = [string_source, ]
+        isinstance(mock_knowledge_instance.sources[0], StringKnowledgeSource)
         mock_knowledge_instance.query.return_value = [{ "content": content }]
 
         res = task.execute_sync(agent=agent)
@@ -308,3 +312,8 @@ def test_agent_with_memory_config():
     assert agent_2.short_term_memory.memory_provider == "mem0" and agent_2.short_term_memory.storage.memory_type == "stm"
     assert agent_2.long_term_memory and isinstance(agent_2.long_term_memory.storage, LTMSQLiteStorage)
     assert agent_2.user_memory and agent_2.user_memory.storage and agent_2.user_memory.storage.memory_type == "user"
+
+
+
+if __name__ == "__main__":
+    test_agent_with_knowledge_sources()

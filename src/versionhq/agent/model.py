@@ -99,7 +99,7 @@ class Agent(BaseModel):
     tools: Optional[List[InstanceOf[Tool | ToolSet] | Type[Tool] | Any]] = Field(default_factory=list)
 
     # knowledge
-    knowledge_sources: Optional[List[BaseKnowledgeSource]] = Field(default=None)
+    knowledge_sources: Optional[List[BaseKnowledgeSource | Any]] = Field(default=None)
     _knowledge: Optional[Knowledge] = PrivateAttr(default=None)
 
     # memory
@@ -344,14 +344,46 @@ class Agent(BaseModel):
 
     @model_validator(mode="after")
     def set_up_knowledge(self) -> Self:
-        if self.knowledge_sources:
-            collection_name = f"{self.role.replace(' ', '_')}"
+        from versionhq.knowledge.source import BaseKnowledgeSource, StringKnowledgeSource, TextFileKnowledgeSource, CSVKnowledgeSource, ExcelKnowledgeSource, JSONKnowledgeSource
+        from versionhq.knowledge.source_docling import DoclingSource
 
-            self._knowledge = Knowledge(
-                sources=self.knowledge_sources,
-                embedder_config=self.embedder_config,
-                collection_name=collection_name,
-            )
+        if self.knowledge_sources:
+            try:
+                collection_name = f"{self.role.replace(' ', '_')}"
+                knowledge_sources = []
+                docling_fp, txt_fp, json_fp, excel_fp, csv_fp, pdf_fp = [], [], [], [], [], []
+                str_cont = ""
+
+                for item in self.knowledge_sources:
+                    if isinstance(item, BaseKnowledgeSource):
+                        knowledge_sources.append(item)
+
+                    elif isinstance(item, str) and "http" in item:
+                        docling_fp.append(item)
+
+                    elif isinstance(item, str):
+                        match  os.path.splitext(item)[1]:
+                            case ".txt": txt_fp.append(item)
+                            case ".json": json_fp.append(item)
+                            case ".xls" | ".xlsx": excel_fp.append(item)
+                            case ".pdf": pdf_fp.append(item)
+                            case ".csv": csv_fp.append(item)
+                            case _: str_cont += str(item)
+
+                    else:
+                        str_cont += str(item)
+
+                if docling_fp: knowledge_sources.append(DoclingSource(file_paths=docling_fp))
+                if str_cont: knowledge_sources.append(StringKnowledgeSource(content=str_cont))
+                if txt_fp: knowledge_sources.append(TextFileKnowledgeSource(file_paths=txt_fp))
+                if csv_fp: knowledge_sources.append(CSVKnowledgeSource(file_path=csv_fp))
+                if excel_fp: knowledge_sources.append(ExcelKnowledgeSource(file_path=excel_fp))
+                if json_fp: knowledge_sources.append(JSONKnowledgeSource(file_paths=json_fp))
+
+                self._knowledge = Knowledge(sources=knowledge_sources, embedder_config=self.embedder_config, collection_name=collection_name)
+
+            except:
+                self._logger.log(level="warning", message="We cannot find the format for the source. Add BaseKnowledgeSource objects instead.", color="yellow")
 
         return self
 
