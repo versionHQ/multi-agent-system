@@ -18,7 +18,7 @@ from pydantic_core import PydanticCustomError
 
 from openai import OpenAI
 
-from versionhq.llm.llm_vars import LLM_CONTEXT_WINDOW_SIZES, LLM_API_KEY_NAMES, LLM_BASE_URL_KEY_NAMES, MODELS, PARAMS, SchemaType
+from versionhq.llm.llm_vars import LLM_CONTEXT_WINDOW_SIZES, MODELS, PARAMS, SchemaType
 from versionhq.task import TaskOutputFormat
 from versionhq.task.model import ResponseField, Task
 from versionhq.tool.model import Tool, ToolSet
@@ -179,10 +179,11 @@ class LLM(BaseModel):
         if api_key_name:
             self.api_key = os.environ.get(api_key_name, None)
 
-        base_url_key_name = self.provider.upper() + "_API_BASE" if self.provider else None
-        if base_url_key_name:
-            self.base_url = os.environ.get(base_url_key_name)
-            self.api_base = self.base_url
+        ## To avoid pass-through, comment out.
+        # base_url_key_name = self.provider.upper() + "_API_BASE" if self.provider else None
+        # if base_url_key_name:
+            # self.base_url = os.environ.get(base_url_key_name)
+            # self.api_base = self.base_url
 
         return self
 
@@ -236,51 +237,51 @@ class LLM(BaseModel):
                 else:
                     self.tools = [item.tool.properties if isinstance(item, ToolSet) else item.properties for item in tools]
 
-                    if provider == "openai":
-                        params = self._create_valid_params(config=config, provider=provider)
-                        res = openai_client.chat.completions.create(messages=messages, model=self.model, tools=self.tools)
-                        tool_calls = res.choices[0].message.tool_calls
-                        tool_res = ""
+                    # if provider == "openai":
+                    params = self._create_valid_params(config=config, provider=provider)
+                    res = litellm.completion(messages=messages, model=self.model, tools=self.tools)
+                    tool_calls = res.choices[0].message.tool_calls
+                    tool_res = ""
 
-                        for item in tool_calls:
-                            func_name = item.function.name
-                            func_args = item.function.arguments
+                    for item in tool_calls:
+                        func_name = item.function.name
+                        func_args = item.function.arguments
 
-                            if not isinstance(func_args, dict):
+                        if not isinstance(func_args, dict):
+                            try:
+                                func_args = json.loads(json.dumps(eval(str(func_args))))
+                            except:
+                                pass
+
+                        for tool in tools:
+                            if isinstance(tool, ToolSet) and (tool.tool.name == func_name or tool.tool.func.__name__ == func_name or func_name == "random_func"):
+                                tool_instance = tool.tool
+                                args = tool.kwargs
+                                tool_res_to_add = tool_instance.run(params=args)
+
+                                if tool_res_as_final:
+                                    tool_res += str(tool_res_to_add)
+                                else:
+                                    messages.append(res.choices[0].message)
+                                    messages.append({ "role": "tool", "tool_call_id": item.id, "content": str(tool_res_to_add) })
+
+                            else:
                                 try:
-                                    func_args = json.loads(json.dumps(eval(str(func_args))))
-                                except:
-                                    pass
-
-                            for tool in tools:
-                                if isinstance(tool, ToolSet) and (tool.tool.name == func_name or tool.tool.func.__name__ == func_name or func_name == "random_func"):
-                                    tool_instance = tool.tool
-                                    args = tool.kwargs
-                                    tool_res_to_add = tool_instance.run(params=args)
-
+                                    tool_res_to_add = tool.run(params=func_args)
                                     if tool_res_as_final:
                                         tool_res += str(tool_res_to_add)
                                     else:
                                         messages.append(res.choices[0].message)
                                         messages.append({ "role": "tool", "tool_call_id": item.id, "content": str(tool_res_to_add) })
+                                except:
+                                    pass
 
-                                else:
-                                    try:
-                                        tool_res_to_add = tool.run(params=func_args)
-                                        if tool_res_as_final:
-                                            tool_res += str(tool_res_to_add)
-                                        else:
-                                            messages.append(res.choices[0].message)
-                                            messages.append({ "role": "tool", "tool_call_id": item.id, "content": str(tool_res_to_add) })
-                                    except:
-                                        pass
-
-                        if tool_res_as_final:
-                            return tool_res
-                        else:
-                            res = openai_client.chat.completions.create(messages=messages, model=self.model, tools=self.tools)
-                            self._tokens += int(res["usage"]["total_tokens"])
-                            return res.choices[0].message.content
+                    if tool_res_as_final:
+                        return tool_res
+                    else:
+                        res = litellm.completione(messages=messages, model=self.model, tools=self.tools)
+                        self._tokens += int(res["usage"]["total_tokens"])
+                        return res.choices[0].message.content
 
             except JSONSchemaValidationError as e:
                 self._logger.log(level="error", message="Raw Response: {}".format(e.raw_response), color="red")

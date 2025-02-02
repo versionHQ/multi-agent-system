@@ -82,12 +82,13 @@ class StructuredList:
 
                 if nested_object_type == dict:
                     props.update({
-                        "nest":  {
+                        # "nest":  {
                             "type": "object",
                             "properties": { "item": { "type": "string"} }, #! REFINEME - field title <>`item`
                             "required": ["item",],
                             "additionalProperties": False
-                        }})
+                        # }
+                        })
 
                 elif nested_object_type == list:
                     props.update({
@@ -110,7 +111,7 @@ class StructuredList:
 
 
 class StructuredOutput(BaseModel):
-    response_format: Any = None
+    response_format: Any = None # pydantic base model
     provider: str = "openai"
     applicable_models: List[InstanceOf[LLM] | str] = list()
     name: str = ""

@@ -3,7 +3,6 @@ from typing import Iterator, List, Optional
 from urllib.parse import urlparse
 
 try:
-    import docling
     from docling.datamodel.base_models import InputFormat
     from docling.document_converter import DocumentConverter
     from docling.exceptions import ConversionError
@@ -12,9 +11,8 @@ try:
     DOCLING_AVAILABLE = True
 except ImportError:
     import envoy
-    r = envoy.run("uv add docling --optional docling")
+    envoy.run("uv add docling --optional docling")
 
-    import docling
     from docling.datamodel.base_models import InputFormat
     from docling.document_converter import DocumentConverter
     from docling.exceptions import ConversionError

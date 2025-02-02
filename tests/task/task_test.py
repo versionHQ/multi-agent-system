@@ -350,7 +350,6 @@ def test_evaluation():
     """
     See if the output will be evaluated accurately - when the task was given eval criteria
     """
-    from versionhq.task.model import Task
     from versionhq.task.evaluate import Evaluation, EvaluationItem
     from versionhq.agent.default_agents import task_evaluator
 
@@ -366,3 +365,54 @@ def test_evaluation():
     assert [isinstance(item, EvaluationItem) and item.criteria in task.eval_criteria for item in res.evaluation.items]
     assert res.evaluation.latency and res.evaluation.tokens and res.evaluation.responsible_agent == task_evaluator
     assert res.evaluation.aggregate_score is not None and res.evaluation.suggestion_summary
+
+
+
+def test_gemini_schema():
+    """
+    See if response schema and tools (func_calling) works.
+    """
+    from tests.task import DemoOutcome
+    agent = Agent(role="demo", goal="demo", llm="gemini/gemini-1.5-pro")
+    task = Task(
+        description="return random values strictly following the given response format.",
+        pydantic_output=DemoOutcome
+    )
+    res = task.execute_sync(agent=agent, context="We are running a test.")
+    assert [
+        getattr(res.pydantic, k) and type(getattr(res.pydantic, k)) == v for k, v in DemoOutcome.__annotations__.items()
+    ]
+
+
+def test_gemini_res_fields():
+    from tests.task import demo_response_fields
+    agent = Agent(role="demo", goal="demo", llm="gemini/gemini-1.5-pro")
+    task = Task(
+        description="return random values strictly following the given response format.",
+        response_fields=demo_response_fields
+    )
+    res = task.execute_sync(agent=agent, context="We are running a test.")
+    assert [k in item.title for item in demo_response_fields for k, v in res.json_dict.items()]
+
+
+def test_gemini_func():
+    from tests.task import demo_response_fields
+    from versionhq.tool.model import Tool
+
+    class DemoTool(Tool):
+        func: Callable[..., Any] = lambda x: "Gemini"
+
+    agent = Agent(role="demo", goal="demo", llm="gemini/gemini-1.5-pro")
+    task = Task(
+        description="Simply execute the given tools.",
+        tools=[DemoTool,],
+        tool_res_as_final=True
+    )
+    res = task.execute_sync(agent=agent, context="We are running a test.")
+    assert res.tool_output and res.raw
+
+
+if __name__ == "__main__":
+    from dotenv import load_dotenv
+    load_dotenv(override=True)
+    test_gemini_func()

@@ -414,7 +414,7 @@ class Agent(BaseModel):
             self._logger.log(level="info", message=f"Messages sent to the model: {messages}", color="blue")
 
             if tool_res_as_final:
-                func_llm = self.function_calling_llm if self.function_calling_llm and self.function_calling_llm._supports_function_calling() else LLM(model=DEFAULT_MODEL_NAME)
+                func_llm = self.function_calling_llm if self.function_calling_llm and self.function_calling_llm._supports_function_calling() else self.llm if self.llm and self.llm._supports_function_calling() else LLM(model=DEFAULT_MODEL_NAME)
                 raw_response = func_llm.call(messages=messages, tools=tools, tool_res_as_final=True)
                 task.tokens = func_llm._tokens
             else:
@@ -458,7 +458,7 @@ class Agent(BaseModel):
         from versionhq.knowledge._utils import extract_knowledge_context
 
         task: InstanceOf[Task] = task
-        tools: Optional[List[InstanceOf[Tool]| InstanceOf[ToolSet] | Type[Tool]]] = task_tools + self.tools if task.can_use_agent_tools else task_tools
+        tools: Optional[List[InstanceOf[Tool | ToolSet] | Type[Tool]]] = task_tools + self.tools if task.can_use_agent_tools else task_tools
 
         if self.max_rpm and self._rpm_controller:
             self._rpm_controller._reset_request_count()
@@ -473,7 +473,6 @@ class Agent(BaseModel):
                 agent_knowledge_context = extract_knowledge_context(knowledge_snippets=agent_knowledge)
                 if agent_knowledge_context:
                     task_prompt += agent_knowledge_context
-
 
         if self.use_memory == True:
             contextual_memory = ContextualMemory(

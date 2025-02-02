@@ -3,6 +3,20 @@ from typing import Type
 
 JSON_URL = "https://raw.githubusercontent.com/BerriAI/litellm/main/model_prices_and_context_window.json"
 
+PROVIDERS = [
+    "openai",
+    "gemini",
+    "sagemaker",
+
+    "anthropic",
+    "ollama",
+    "watson",
+    "bedrock",
+    "azure",
+    "cerebras",
+    "llama",
+]
+
 
 """
 List of models available on the framework.
@@ -16,7 +30,6 @@ litellm.pick_cheapest_chat_models_from_llm_provider(custom_llm_provider: str, n=
 
 MODELS = {
     "openai": [
-        # "gpt-3.5-turbo",
         "gpt-4",
         "gpt-4o",
         "gpt-4o-mini",
@@ -27,11 +40,7 @@ MODELS = {
         "gemini/gemini-1.5-flash",
         "gemini/gemini-1.5-pro",
         "gemini/gemini-2.0-flash-exp",
-        # "gemini/gemini-gemma-2-9b-it",
-        # "gemini/gemini-gemma-2-27b-it",
     ],
-    # "vetrex_ai": [
-    # ],
     "anthropic": [
         "claude-3-5-sonnet-20241022",
         "claude-3-5-sonnet-20240620",
@@ -39,10 +48,24 @@ MODELS = {
         "claude-3-opus-20240229",
         "claude-3-haiku-20240307",
     ],
-    # "ollama": [
-    #   "ollama/llama3.1",
-    #   "ollama/mixtral",
-    # ],
+    # "sagemaker": [
+    #     "sagemaker/huggingface-text2text-flan-t5-base",
+    #     "sagemaker/huggingface-llm-gemma-7b",
+    #     "sagemaker/jumpstart-dft-meta-textgeneration-llama-2-13b",
+    #     "sagemaker/jumpstart-dft-meta-textgeneration-llama-2-70b",
+    #     "sagemaker/jumpstart-dft-meta-textgeneration-llama-3-8b",
+    #     "sagemaker/jumpstart-dft-meta-textgeneration-llama-3-70b",
+    #     "sagemaker/huggingface-llm-mistral-7b"
+    # ], #https://docs.aws.amazon.com/sagemaker/latest/dg/jumpstart-foundation-models-latest.html
+    "ollama": [
+      "ollama/llama3.1",
+      "ollama/mixtral",
+    ],
+    "deepseek": [
+        "deepseek/deepseek-reasoner",
+
+    ],
+
     # "watson": [
     #     "watsonx/meta-llama/llama-3-1-70b-instruct",
     #     "watsonx/meta-llama/llama-3-1-8b-instruct",
@@ -53,44 +76,48 @@ MODELS = {
     #     "watsonx/mistral/mistral-large",
     #     "watsonx/ibm/granite-3-8b-instruct",
     # ],
-    # "bedrock": [
-    #     "bedrock/anthropic.claude-3-5-sonnet-20240620-v1:0",
-    #     "bedrock/anthropic.claude-3-sonnet-20240229-v1:0",
-    #     "bedrock/anthropic.claude-3-haiku-20240307-v1:0",
-    #     "bedrock/anthropic.claude-3-opus-20240229-v1:0",
-    #     "bedrock/anthropic.claude-v2:1",
-    #     "bedrock/anthropic.claude-v2",
-    #     "bedrock/anthropic.claude-instant-v1",
-    #     "bedrock/meta.llama3-1-405b-instruct-v1:0",
-    #     "bedrock/meta.llama3-1-70b-instruct-v1:0",
-    #     "bedrock/meta.llama3-1-8b-instruct-v1:0",
-    #     "bedrock/meta.llama3-70b-instruct-v1:0",
-    #     "bedrock/meta.llama3-8b-instruct-v1:0",
-    #     "bedrock/amazon.titan-text-lite-v1",
-    #     "bedrock/amazon.titan-text-express-v1",
-    #     "bedrock/cohere.command-text-v14",
-    #     "bedrock/ai21.j2-mid-v1",
-    #     "bedrock/ai21.j2-ultra-v1",
-    #     "bedrock/ai21.jamba-instruct-v1:0",
-    #     "bedrock/meta.llama2-13b-chat-v1",
-    #     "bedrock/meta.llama2-70b-chat-v1",
-    #     "bedrock/mistral.mistral-7b-instruct-v0:2",
-    #     "bedrock/mistral.mixtral-8x7b-instruct-v0:1",
-    # ],
+    "bedrock": [
+        "bedrock/anthropic.claude-3-5-sonnet-20240620-v1:0",
+        "bedrock/anthropic.claude-3-sonnet-20240229-v1:0",
+        "bedrock/anthropic.claude-3-haiku-20240307-v1:0",
+        "bedrock/anthropic.claude-3-opus-20240229-v1:0",
+        # "bedrock/anthropic.claude-v2:1",
+        "bedrock/anthropic.claude-v2",
+        "bedrock/anthropic.claude-instant-v1",
+        "bedrock/meta.llama3-1-405b-instruct-v1:0",
+        "bedrock/meta.llama3-1-70b-instruct-v1:0",
+        "bedrock/meta.llama3-1-8b-instruct-v1:0",
+        "bedrock/meta.llama3-70b-instruct-v1:0",
+        "bedrock/meta.llama3-8b-instruct-v1:0",
+        "bedrock/amazon.titan-text-lite-v1",
+        "bedrock/amazon.titan-text-express-v1",
+        "bedrock/cohere.command-text-v14",
+        "bedrock/ai21.j2-mid-v1",
+        "bedrock/ai21.j2-ultra-v1",
+        "bedrock/ai21.jamba-instruct-v1:0",
+        "bedrock/meta.llama2-13b-chat-v1",
+        "bedrock/meta.llama2-70b-chat-v1",
+        "bedrock/mistral.mistral-7b-instruct-v0:2",
+        "bedrock/mistral.mixtral-8x7b-instruct-v0:1",
+    ],
 }
 
 
-PROVIDERS = [
-    "openai",
-    "anthropic",
-    "gemini",
-    "ollama",
-    "watson",
-    "bedrock",
-    "azure",
-    "cerebras",
-    "llama",
-]
+
+KEYS = {
+    "openai": ["OPENAI_API_KEY"],
+    "gemini": ["GEMINI_API_KEY"],
+    "sagemaker": ["AWS_ACCESS_KEY_ID", "ADW_SECURET_ACCESS_KEY", "AWS_REGION_NAME"],
+    "anthropic": ["ANTHROPIC_API_KEY"],
+}
+
+
+"""
+Use base_url to specify
+"""
+BASE_URLS = {
+    "deepseek": "https://api.deepseek.com"
+}
 
 
 """
@@ -118,6 +145,8 @@ LLM_CONTEXT_WINDOW_SIZES = {
     "claude-3-haiku-20240307": 200000,
 
     "deepseek-chat": 128000,
+    "deepseek/deepseek-reasoner": 8192,
+
     "gemma2-9b-it": 8192,
     "gemma-7b-it": 8192,
     "llama3-groq-70b-8192-tool-use-preview": 8192,
@@ -135,11 +164,7 @@ LLM_CONTEXT_WINDOW_SIZES = {
 }
 
 
-LLM_API_KEY_NAMES = {
-    "openai":  "OPENAI_API_KEY",
-    "anthropic": "ANTHROPIC_API_KEY",
-    "gemini": "GEMINI_API_KEY",
-}
+
 
 LLM_BASE_URL_KEY_NAMES = {
     "openai":  "OPENAI_API_BASE",
@@ -262,14 +287,8 @@ PARAMS = {
     ],
     "openai": [
         "timeout",
-        # "temperature",
-        # "top_p",
-        # "n",
-        # "stream",
         "stream_options",
-        # "stop",
         "max_compl,etion_tokens",
-        # "max_tokens",
         "modalities",
         "prediction",
         "audio",
@@ -277,10 +296,7 @@ PARAMS = {
         "frequency_penalty",
         "logit_bias",
         "user",
-        # "response_format",
         "seed",
-        # "tools",
-        # "tool_choice",
         "logprobs",
         "top_logprobs",
         "parallel_tool_calls",
