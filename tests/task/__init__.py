@@ -43,11 +43,3 @@ demo_response_fields = [
     ResponseField(title="test6", data_type=list, items=Any, required=False),
     # ResponseField(title="children", data_type=list, items=type(DemoChild)),
 ]
-
-
-def create_base_agent(model: str | LLM | Dict[str, Any]) -> Agent:
-    agent = Agent(role="demo", goal="My amazing goals", llm=model, max_tokens=3000, maxit=1)
-    return agent
-
-
-base_agent = create_base_agent(model=DEFAULT_MODEL_NAME)

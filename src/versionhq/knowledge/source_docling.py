@@ -12,17 +12,11 @@ try:
 except ImportError:
     import envoy
     envoy.run("uv add docling --optional docling")
-
-    from docling.datamodel.base_models import InputFormat
-    from docling.document_converter import DocumentConverter
-    from docling.exceptions import ConversionError
-    from docling_core.transforms.chunker.hierarchical_chunker import HierarchicalChunker
-    from docling_core.types.doc.document import DoclingDocument
     DOCLING_AVAILABLE = True
 except:
     DOCLING_AVAILABLE = False
 
-from pydantic import Field, InstanceOf
+from pydantic import Field
 
 from versionhq.knowledge.source import BaseKnowledgeSource
 from versionhq.storage.utils import fetch_db_storage_path
@@ -52,10 +46,19 @@ class DoclingSource(BaseKnowledgeSource):
     ))
 
     def __init__(self, *args, **kwargs):
-        if not DOCLING_AVAILABLE:
-            raise ImportError("The docling package is required. Please install the package using: $ uv add docling.")
-        else:
+        if DOCLING_AVAILABLE:
+            from docling.datamodel.base_models import InputFormat
+            from docling.document_converter import DocumentConverter
+            from docling.exceptions import ConversionError
+            from docling_core.transforms.chunker.hierarchical_chunker import HierarchicalChunker
+            from docling_core.types.doc.document import DoclingDocument
+
             super().__init__(*args, **kwargs)
+
+        else:
+            raise ImportError("The docling package is required. Please install the package using: $ uv add docling.")
+        # else:
+        #     super().__init__(*args, **kwargs)
 
 
     def _convert_source_to_docling_documents(self) -> List["DoclingDocument"]:

@@ -6,10 +6,10 @@ from typing_extensions import Self
 from dotenv import load_dotenv
 import litellm
 
-from pydantic import UUID4, BaseModel, Field, InstanceOf, PrivateAttr, model_validator, field_validator, ConfigDict
+from pydantic import UUID4, BaseModel, Field, InstanceOf, PrivateAttr, model_validator, field_validator
 from pydantic_core import PydanticCustomError
 
-from versionhq.llm.model import LLM, DEFAULT_CONTEXT_WINDOW_SIZE, DEFAULT_MODEL_NAME
+from versionhq.llm.model import LLM, DEFAULT_CONTEXT_WINDOW_SIZE, DEFAULT_MODEL_NAME, PROVIDERS
 from versionhq.tool.model import Tool, ToolSet
 from versionhq.knowledge.model import BaseKnowledgeSource, Knowledge
 from versionhq.memory.contextual_memory import ContextualMemory
@@ -162,90 +162,44 @@ class Agent(BaseModel):
     @model_validator(mode="after")
     def set_up_llm(self) -> Self:
         """
-        Set up the base model and function calling model (if any) using the LLM class.
-        Pass the model config params: `llm`, `max_tokens`, `max_execution_time`, `callbacks`,`respect_context_window` to the LLM class.
-        The base model is selected on the client app, else use the default model.
+        Set up `llm` and `function_calling_llm` as valid LLM objects using the given values.
         """
-
         self.agent_ops_agent_name = self.role
-
-        if isinstance(self.llm, LLM):
-            llm = self._set_llm_params(self.llm)
-            self.llm = llm
-
-        elif isinstance(self.llm, str) or self.llm is None:
-            model_name = self.llm if self.llm is not None else DEFAULT_MODEL_NAME
-            llm = LLM(model=model_name)
-            updated_llm = self._set_llm_params(llm)
-            self.llm = updated_llm
-
-        else:
-            if isinstance(self.llm, dict):
-                model_name = self.llm.pop("model_name", self.llm.pop("deployment_name", str(self.llm)))
-                llm = LLM(model=model_name if model_name is not None else DEFAULT_MODEL_NAME)
-                updated_llm = self._set_llm_params(llm, { k: v for k, v in self.llm.items() if v is not None })
-                self.llm = updated_llm
-
-            else:
-                model_name = (getattr(self.llm, "model_name") or getattr(self.llm, "deployment_name") or str(self.llm))
-                llm = LLM(model=model_name)
-                llm_params = {
-                    "max_tokens": (getattr(self.llm, "max_tokens") or self.max_tokens or 3000),
-                    "timeout": getattr(self.llm, "timeout", self.max_execution_time),
-                    "callbacks": getattr(self.llm, "callbacks", None),
-                    "temperature": getattr(self.llm, "temperature", None),
-                    "logprobs": getattr(self.llm, "logprobs", None),
-                    "api_key": getattr(self.llm, "api_key", os.environ.get("LITELLM_API_KEY", None)),
-                    "base_url": getattr(self.llm, "base_url", None),
-                }
-                updated_llm = self._set_llm_params(llm, llm_params)
-                self.llm = updated_llm
-
-
-        """
-        Set up funcion_calling LLM as well.
-        Check if the model supports function calling, setup LLM instance accordingly, using the same params with the LLM.
-        """
-        if self.function_calling_llm:
-            if isinstance(self.function_calling_llm, LLM):
-                if self.function_calling_llm._supports_function_calling() == False:
-                    self.function_calling_llm = LLM(model=DEFAULT_MODEL_NAME)
-
-                updated_llm = self._set_llm_params(self.function_calling_llm)
-                self.function_calling_llm = updated_llm
-
-            elif isinstance(self.function_calling_llm, str):
-                llm = LLM(model=self.function_calling_llm)
-
-                if llm._supports_function_calling() == False:
-                    llm = LLM(model=DEFAULT_MODEL_NAME)
-
-                updated_llm = self._set_llm_params(llm)
-                self.function_calling_llm = updated_llm
-
-            else:
-                if isinstance(self.function_calling_llm, dict):
-                    model_name = self.function_calling_llm.pop("model_name", self.function_calling_llm.pop("deployment_name", str(self.function_calling_llm)))
-                    llm = LLM(model=model_name)
-                    updated_llm = self._set_llm_params(llm, { k: v for k, v in self.function_calling_llm.items() if v is not None })
-                    self.function_calling_llm = updated_llm
-
-                else:
-                    model_name = (getattr(self.function_calling_llm, "model_name") or getattr(self.function_calling_llm, "deployment_name") or str(self.function_calling_llm))
-                    llm = LLM(model=model_name)
-                    llm_params = {
-                        "max_tokens": (getattr(self.function_calling_llm, "max_tokens") or self.max_tokens or 3000),
-                        "timeout": getattr(self.function_calling_llm, "timeout", self.max_execution_time),
-                        "callbacks": getattr(self.function_calling_llm, "callbacks", None),
-                        "temperature": getattr(self.function_calling_llm, "temperature", None),
-                        "logprobs": getattr(self.function_calling_llm, "logprobs", None),
-                        "api_key": getattr(self.function_calling_llm, "api_key", os.environ.get("LITELLM_API_KEY", None)),
-                        "base_url": getattr(self.function_calling_llm, "base_url", None),
-                    }
-                    updated_llm = self._set_llm_params(llm, llm_params)
-                    self.function_calling_llm = updated_llm
-
+        self.llm = self._set_llm(llm=self.llm)
+        function_calling_llm = self.function_calling_llm if self.function_calling_llm else self.llm if self.llm else None
+        self.function_calling_llm = self._set_llm(llm=function_calling_llm)
         return self
+
+
+    def _set_llm(self, llm: Any | None) -> LLM:
+        llm = llm if llm is not None else DEFAULT_MODEL_NAME
+
+        match llm:
+            case LLM():
+                return self._set_llm_params(llm=llm)
+
+            case str():
+                llm_obj = LLM(model=llm)
+                return self._set_llm_params(llm=llm_obj)
+
+            case dict():
+                model_name = llm.pop("model_name", llm.pop("deployment_name", str(llm)))
+                llm_obj = LLM(model=model_name if model_name else DEFAULT_MODEL_NAME)
+                return self._set_llm_params(llm_obj, { k: v for k, v in llm.items() if v is not None })
+
+            case _:
+                model_name = (getattr(self.llm, "model_name") or getattr(self.llm, "deployment_name") or str(self.llm))
+                llm_obj = LLM(model=model_name)
+                llm_params = {
+                    "max_tokens": (getattr(llm, "max_tokens") or self.max_tokens or 3000),
+                    "timeout": getattr(llm, "timeout", self.max_execution_time),
+                    "callbacks": getattr(llm, "callbacks", None),
+                    "temperature": getattr(llm, "temperature", None),
+                    "logprobs": getattr(llm, "logprobs", None),
+                    "api_key": getattr(llm, "api_key", os.environ.get("LITELLM_API_KEY", None)),
+                    "base_url": getattr(llm, "base_url", None),
+                }
+                return self._set_llm_params(llm=llm_obj, config=llm_params)
 
 
     def _set_llm_params(self, llm: LLM, config: Dict[str, Any] = None) -> LLM:
@@ -256,6 +210,11 @@ class Agent(BaseModel):
 
         llm.timeout = self.max_execution_time if llm.timeout is None else llm.timeout
         llm.max_tokens = self.max_tokens if self.max_tokens else llm.max_tokens
+
+        if llm.provider is None:
+            provider_name = llm.model.split("/")[0]
+            valid_provider = provider_name if provider_name in PROVIDERS else None
+            llm.provider = valid_provider
 
         if self.callbacks:
             llm.callbacks = self.callbacks

@@ -7,7 +7,7 @@ PROVIDERS = [
     "openai",
     "gemini",
     "sagemaker",
-
+    "huggingface", # need api base
     "anthropic",
     "ollama",
     "watson",
@@ -17,6 +17,19 @@ PROVIDERS = [
     "llama",
 ]
 
+ENDPOINT_PROVIDERS = [
+    # "openai",
+    # "gemini",
+    # "sagemaker",
+    "huggingface",
+    # "anthropic",
+    # "ollama",
+    # "watson",
+    # "bedrock",
+    # "azure",
+    # "cerebras",
+    # "llama",
+]
 
 """
 List of models available on the framework.
@@ -48,6 +61,9 @@ MODELS = {
         "claude-3-opus-20240229",
         "claude-3-haiku-20240307",
     ],
+    "huggingface": [
+        "huggingface/qwen/qwen2.5-VL-72B-Instruct",
+    ],
     # "sagemaker": [
     #     "sagemaker/huggingface-text2text-flan-t5-base",
     #     "sagemaker/huggingface-llm-gemma-7b",
@@ -61,7 +77,6 @@ MODELS = {
       "ollama/llama3.1",
       "ollama/mixtral",
       "ollama/mixtral-8x22B-Instruct-v0.1",
-
     ],
     "deepseek": [
         "deepseek/deepseek-reasoner",

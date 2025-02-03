@@ -10,10 +10,10 @@ from litellm import get_supported_openai_params, JSONSchemaValidationError
 from contextlib import contextmanager
 from typing import Any, Dict, List, Optional
 from typing_extensions import Self
-from pydantic import UUID4, BaseModel, Field, PrivateAttr, field_validator, model_validator, create_model, InstanceOf, ConfigDict
+from pydantic import BaseModel, Field, PrivateAttr, field_validator, model_validator, create_model, InstanceOf, ConfigDict
 from pydantic_core import PydanticCustomError
 
-from versionhq.llm.llm_vars import LLM_CONTEXT_WINDOW_SIZES, MODELS, PARAMS
+from versionhq.llm.llm_vars import LLM_CONTEXT_WINDOW_SIZES, MODELS, PARAMS, PROVIDERS, ENDPOINT_PROVIDERS
 from versionhq.tool.model import Tool, ToolSet
 from versionhq._utils.logger import Logger
 
@@ -22,7 +22,8 @@ load_dotenv(override=True)
 LITELLM_API_KEY = os.environ.get("LITELLM_API_KEY")
 LITELLM_API_BASE = os.environ.get("LITELLM_API_BASE")
 DEFAULT_CONTEXT_WINDOW_SIZE = int(8192 * 0.75)
-DEFAULT_MODEL_NAME = os.environ.get("DEFAULT_MODEL_NAME")
+DEFAULT_MODEL_NAME = os.environ.get("DEFAULT_MODEL_NAME", "gpt-4o-mini")
+DEFAULT_MODEL_PROVIDER_NAME = os.environ.get("DEFAULT_MODEL_PROVIDER_NAME", "openai")
 
 # proxy_openai_client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"), organization="versionhq", base_url=LITELLM_API_BASE)
 # openai_client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
@@ -67,10 +68,7 @@ def suppress_warnings():
 
 class LLM(BaseModel):
     """
-    An LLM class to store params except for response formats which will be given in the task handling process.
-    Use LiteLLM to connect with the model of choice.
-    Some optional params are passed by the agent, else follow the default settings of the model provider.
-    Ref. https://docs.litellm.ai/docs/completion/input
+    An LLM class to store params to send to the LLM. Use LiteLLM or custom providers for the endpoint.
     """
 
     _logger: Logger = PrivateAttr(default_factory=lambda: Logger(verbose=True))
@@ -78,10 +76,11 @@ class LLM(BaseModel):
     _tokens: int = PrivateAttr(default=0) # accumulate total tokens used for the call
     model_config = ConfigDict(extra="allow")
 
-    model: str = Field(default=DEFAULT_MODEL_NAME)
-    provider: Optional[str] = Field(default=None, description="model provider or custom model provider")
-    base_url: Optional[str] = Field(default=None, description="api base of the model provider")
-    api_key: Optional[str] = Field(default=None, description="api key of the model provider")
+    model: str = Field(default=None)
+    provider: Optional[str] = Field(default=None, description="model provider")
+    endpoint_provider: Optional[str] = Field(default=None, description="custom endpoint provider for pass through llm call. must need base_url")
+    base_url: Optional[str] = Field(default=None, description="api base url for endpoint provider")
+    api_key: Optional[str] = Field(default=None, description="api key to access the model")
 
     # optional params
     timeout: Optional[float | int] = Field(default=None)
@@ -114,54 +113,89 @@ class LLM(BaseModel):
     litellm.set_verbose = True
     os.environ['LITELLM_LOG'] = 'DEBUG'
 
+
     @model_validator(mode="after")
-    def validate_base_params(self) -> Self:
+    def validate_model_providers(self) -> Self:
         """
-        1) Set up a valid model name with the provider name using the MODEL list.
-        * Assign a default model and provider based on the given information when no model key is found in the MODEL list.
-
-        2) Set up other base parameters for the model and LiteLLM.
+        Validate the given model, provider, interface provider.
         """
-
-        if self.model is None:
-            self._logger.log(level="error", message="Model name is missing.", color="red")
-            raise PydanticCustomError("model_missing", "The model name must be provided.", {})
-
 
         self._init_model_name = self.model
-        self.model = None
-        self._tokens = 0
 
-        if self.provider and MODELS.get(self.provider):
-            provider_model_list = MODELS.get(self.provider)
-            for item in provider_model_list:
-                if self.model is None:
-                    if item == self._init_model_name:
-                        self.model = item
-                    elif self._init_model_name in item and self.model is None:
-                        self.model = item
-                    else:
-                        temp_model = provider_model_list[0]
-                        self._logger.log(level="warning", message=f"The provided model: {self._init_model_name} is not in the list. We'll assign a model: {temp_model} from the selected model provider: {self.provider}.", color="yellow")
-                        self.model = temp_model
+        if self.model is None and self.provider is None:
+            self.model = DEFAULT_MODEL_NAME
+            self.provider = DEFAULT_MODEL_PROVIDER_NAME
+
+        elif self.model is None and self.provider:
+            if self.provider not in PROVIDERS:
+                self._logger.log(level="warning", message=f"Invalid model provider is provided. We will assign a default model.", color="yellow")
+                self.model = DEFAULT_MODEL_NAME
+                self.provider = DEFAULT_MODEL_PROVIDER_NAME
+
+            else:
+                provider_model_list = MODELS.get(self.provider)
+                if provider_model_list:
+                    self.model = provider_model_list[0]
+                    self.provider = self.provider
+                else:
+                    self._logger.log(level="warning", message=f"This provider has not models to be called. We will assign a default model.", color="yellow")
+                    self.model = DEFAULT_MODEL_NAME
+                    self.provider = DEFAULT_MODEL_PROVIDER_NAME
+
+        elif self.model and self.provider is None:
+            model_match = [
+                item for item in [
+                    [val for val in v if val == self.model][0] for k, v in MODELS.items() if [val for val in v if val == self.model]
+                ] if item
+            ]
+            model_partial_match = [
+                item for item in [
+                    [val for val in v if val.find(self.model) != -1][0] for k, v in MODELS.items() if [val for val in v if val.find(self.model) != -1]
+                ] if item
+            ]
+            provider_match = [k for k, v in MODELS.items() if k == self.model]
+
+            if model_match:
+                self.model = model_match[0]
+                self.provider = [k for k, v in MODELS.items() if self.model in v][0]
+
+            elif model_partial_match:
+                self.model = model_partial_match[0]
+                self.provider = [k for k, v in MODELS.items() if [item for item in v if item.find(self.model) != -1]][0]
+
+            elif provider_match:
+                provider = provider_match[0]
+                if self.MODELS.get(provider):
+                    self.provider = provider
+                    self.model = self.MODELS.get(provider)[0]
+                else:
+                    self.provider = DEFAULT_MODEL_PROVIDER_NAME
+                    self.model = DEFAULT_MODEL_NAME
+
+            else:
+                self.model = DEFAULT_MODEL_NAME
+                self.provider = DEFAULT_MODEL_PROVIDER_NAME
 
         else:
-            for k, v in MODELS.items():
-                for item in v:
-                    if self.model is None:
-                        if self._init_model_name == item:
-                            self.model = item
-                            self.provider = k
-
-                        elif self.model is None and self._init_model_name in item:
-                            self.model = item
-                            self.provider = k
-
-            if self.model is None:
-                self._logger.log(level="warning", message=f"The provided model \'{self.model}\' is not in the list. We'll assign a default model.", color="yellow")
+            provider_model_list = MODELS.get(self.provider)
+            if self.model not in provider_model_list:
+                self._logger.log(level="warning", message=f"The provided model: {self._init_model_name} is not in the list. We will assign a default model.", color="yellow")
                 self.model = DEFAULT_MODEL_NAME
-                self.provider = "openai"
+                self.provider = DEFAULT_MODEL_PROVIDER_NAME
 
+        # trigger pass-through custom endpoint.
+        if self.provider in ENDPOINT_PROVIDERS:
+            self.endpoint_provider = self.provider
+
+        return self
+
+
+    @model_validator(mode="after")
+    def validate_model_params(self) -> Self:
+        """
+        After setting up a valid model, provider, interface provider, add params to the model.
+        """
+        self._tokens = 0
 
         if self.callbacks:
             self._set_callbacks(self.callbacks)
@@ -173,7 +207,8 @@ class LLM(BaseModel):
             self.api_key = os.environ.get(api_key_name, None)
 
 
-        base_url_key_name = self.provider.upper() + "_API_BASE" if self.provider else None
+        base_url_key_name = self.endpoint_provider.upper() + "_API_BASE" if self.endpoint_provider else None
+
         if base_url_key_name:
             self.base_url = os.environ.get(base_url_key_name)
             self.api_base = self.base_url
@@ -184,11 +219,8 @@ class LLM(BaseModel):
     def _create_valid_params(self, config: Dict[str, Any], provider: str = None) -> Dict[str, Any]:
         params = dict()
         valid_keys = list()
-
-        if not provider:
-            valid_keys = PARAMS.get("litellm") + PARAMS.get("common") + PARAMS.get(self.provider) if self.provider else PARAMS.get("litellm") + PARAMS.get("common")
-        else:
-            valid_keys = PARAMS.get("common") + PARAMS.get(self.provider)
+        provider = provider if provider else self.provider if self.provider else None
+        valid_keys = PARAMS.get("litellm") + PARAMS.get("common") + PARAMS.get(provider) if provider and PARAMS.get(provider) else PARAMS.get("litellm") + PARAMS.get("common")
 
         for item in valid_keys:
             if hasattr(self, item) and getattr(self, item):
@@ -218,7 +250,7 @@ class LLM(BaseModel):
                 self._set_callbacks(self.callbacks) # passed by agent
 
             try:
-                provider = self.provider if self.provider else "openai"
+                provider = self.provider if self.provider else DEFAULT_MODEL_PROVIDER_NAME
                 self.response_format = { "type": "json_object" } if tool_res_as_final == True else response_format
 
                 if not tools:

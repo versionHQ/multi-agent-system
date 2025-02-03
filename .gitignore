@@ -3,6 +3,8 @@ destinations.py
 
 entity_memory.py
 
+llm_connection_test.py
+
 train.py
 
 dist/

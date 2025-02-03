@@ -1,22 +1,23 @@
-import os
-import pytest
 import sys
 import threading
 from unittest.mock import patch
-from typing import Dict, Any, List, Optional, Callable
+from typing import Dict, Any, Callable
 
-from pydantic import BaseModel, Field, InstanceOf
+from pydantic import BaseModel, Field
 
-from versionhq.agent.model import Agent
+from versionhq.agent.model import Agent, DEFAULT_MODEL_NAME
 from versionhq.agent.rpm_controller import RPMController
 from versionhq.task.model import Task, ResponseField, TaskOutput, ConditionalTask
 from versionhq.task.evaluate import Evaluation, EvaluationItem
 from versionhq.tool.model import Tool, ToolSet
 from versionhq.tool.decorator import tool
-from tests.task import DemoOutcome, demo_response_fields, base_agent
+from tests.task import DemoOutcome, demo_response_fields
 
 sys.setrecursionlimit(2097152)
 threading.stack_size(134217728)
+
+
+base_agent = Agent(role="demo", goal="My amazing goals", llm=DEFAULT_MODEL_NAME, max_tokens=3000, maxit=1)
 
 def test_sync_execute_task_with_pydantic_outcome():
     task = Task(
@@ -365,54 +366,3 @@ def test_evaluation():
     assert [isinstance(item, EvaluationItem) and item.criteria in task.eval_criteria for item in res.evaluation.items]
     assert res.evaluation.latency and res.evaluation.tokens and res.evaluation.responsible_agent == task_evaluator
     assert res.evaluation.aggregate_score is not None and res.evaluation.suggestion_summary
-
-
-
-def test_gemini_schema():
-    """
-    See if response schema and tools (func_calling) works.
-    """
-    from tests.task import DemoOutcome
-    agent = Agent(role="demo", goal="demo", llm="gemini/gemini-1.5-pro")
-    task = Task(
-        description="return random values strictly following the given response format.",
-        pydantic_output=DemoOutcome
-    )
-    res = task.execute_sync(agent=agent, context="We are running a test.")
-    assert [
-        getattr(res.pydantic, k) and type(getattr(res.pydantic, k)) == v for k, v in DemoOutcome.__annotations__.items()
-    ]
-
-
-def test_gemini_res_fields():
-    from tests.task import demo_response_fields
-    agent = Agent(role="demo", goal="demo", llm="gemini/gemini-1.5-pro")
-    task = Task(
-        description="return random values strictly following the given response format.",
-        response_fields=demo_response_fields
-    )
-    res = task.execute_sync(agent=agent, context="We are running a test.")
-    assert [k in item.title for item in demo_response_fields for k, v in res.json_dict.items()]
-
-
-def test_gemini_func():
-    from tests.task import demo_response_fields
-    from versionhq.tool.model import Tool
-
-    class DemoTool(Tool):
-        func: Callable[..., Any] = lambda x: "Gemini"
-
-    agent = Agent(role="demo", goal="demo", llm="gemini/gemini-1.5-pro")
-    task = Task(
-        description="Simply execute the given tools.",
-        tools=[DemoTool,],
-        tool_res_as_final=True
-    )
-    res = task.execute_sync(agent=agent, context="We are running a test.")
-    assert res.tool_output and res.raw
-
-
-if __name__ == "__main__":
-    from dotenv import load_dotenv
-    load_dotenv(override=True)
-    test_gemini_func()

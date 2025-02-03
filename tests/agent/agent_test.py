@@ -312,8 +312,3 @@ def test_agent_with_memory_config():
     assert agent_2.short_term_memory.memory_provider == "mem0" and agent_2.short_term_memory.storage.memory_type == "stm"
     assert agent_2.long_term_memory and isinstance(agent_2.long_term_memory.storage, LTMSQLiteStorage)
     assert agent_2.user_memory and agent_2.user_memory.storage and agent_2.user_memory.storage.memory_type == "user"
-
-
-
-if __name__ == "__main__":
-    test_agent_with_knowledge_sources()

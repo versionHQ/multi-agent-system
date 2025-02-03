@@ -639,7 +639,7 @@ Ref. Output image: {output_formats_to_follow}
 
         if self.tool_res_as_final == True:
             tool_output = agent.execute_task(task=self, context=context, task_tools=task_tools)
-            task_output = TaskOutput(task_id=self.id, tool_output=tool_output, raw=tool_output)
+            task_output = TaskOutput(task_id=self.id, tool_output=tool_output, raw=str(tool_output) if tool_output else "")
 
         else:
             raw_output = agent.execute_task(task=self, context=context, task_tools=task_tools)
