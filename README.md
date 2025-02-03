@@ -243,7 +243,9 @@ src/
    pyenv install 3.12.8
    pyenv global 3.12.8  (optional: `pyenv global system` to get back to the system default ver.)
    uv python pin 3.12.8
+   echo 3.12.8 > .python-version
    ```
+
 
 3. Set up environment variables:
    Create a `.env` file in the project root and add the following:

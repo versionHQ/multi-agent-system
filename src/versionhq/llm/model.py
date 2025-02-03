@@ -4,23 +4,16 @@ import os
 import sys
 import threading
 import warnings
-import litellm
-from litellm import JSONSchemaValidationError
-from abc import ABC
 from dotenv import load_dotenv
-from litellm import get_supported_openai_params
+import litellm
+from litellm import get_supported_openai_params, JSONSchemaValidationError
 from contextlib import contextmanager
-from typing import Any, Dict, List, Optional, Type
+from typing import Any, Dict, List, Optional
 from typing_extensions import Self
-
 from pydantic import UUID4, BaseModel, Field, PrivateAttr, field_validator, model_validator, create_model, InstanceOf, ConfigDict
 from pydantic_core import PydanticCustomError
 
-from openai import OpenAI
-
-from versionhq.llm.llm_vars import LLM_CONTEXT_WINDOW_SIZES, MODELS, PARAMS, SchemaType
-from versionhq.task import TaskOutputFormat
-from versionhq.task.model import ResponseField, Task
+from versionhq.llm.llm_vars import LLM_CONTEXT_WINDOW_SIZES, MODELS, PARAMS
 from versionhq.tool.model import Tool, ToolSet
 from versionhq._utils.logger import Logger
 
@@ -31,8 +24,8 @@ LITELLM_API_BASE = os.environ.get("LITELLM_API_BASE")
 DEFAULT_CONTEXT_WINDOW_SIZE = int(8192 * 0.75)
 DEFAULT_MODEL_NAME = os.environ.get("DEFAULT_MODEL_NAME")
 
-proxy_openai_client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"), organization="versionhq", base_url=LITELLM_API_BASE)
-openai_client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+# proxy_openai_client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"), organization="versionhq", base_url=LITELLM_API_BASE)
+# openai_client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
 
 class FilteredStream:
