@@ -20,7 +20,6 @@ from versionhq._utils.usage_metrics import UsageMetrics
 
 initial_match_type = GenerateSchema.match_type
 
-
 def match_type(self, obj):
     if getattr(obj, "__name__", None) == "datetime":
         return core_schema.datetime_schema()
@@ -28,7 +27,6 @@ def match_type(self, obj):
 
 
 GenerateSchema.match_type = match_type
-
 warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")
 load_dotenv(override=True)
 
@@ -108,9 +106,14 @@ class TeamOutput(BaseModel):
 
 
 class TeamMember(BaseModel):
-    agent: Agent | None = Field(default=None, description="store the agent to be a member")
+    """
+    A class to store a team member
+    """
+    agent: Agent | None = Field(default=None)
     is_manager: bool = Field(default=False)
-    task: Optional[Task] = Field(default=None)
+    can_share_knowledge: bool = Field(default=True, description="whether to share the agent's knowledge in the team")
+    can_share_memory: bool = Field(default=True, description="whether to share the agent's memory in the team")
+    task: Optional[Task] = Field(default=None, description="task assigned to the agent")
 
     @property
     def is_idling(self):
@@ -125,17 +128,18 @@ class Team(BaseModel):
 
     __hash__ = object.__hash__
     _execution_span: Any = PrivateAttr()
-    _logger: Logger = PrivateAttr()
+    _logger: Logger = PrivateAttr(default_factory=Logger(verbose=True))
     _inputs: Optional[Dict[str, Any]] = PrivateAttr(default=None)
 
     id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True)
     name: Optional[str] = Field(default=None)
-    members: List[TeamMember] = Field(default_factory=list, description="store agents' uuids and bool if it is manager")
+    members: List[TeamMember] = Field(default_factory=list)
 
-    # work as a team
-    team_tasks: Optional[List[Task]] = Field(default_factory=list, description="optional tasks for the team")
-    planning_llm: Optional[Any] = Field(default=None, description="llm to handle the planning of the team tasks (if any)")
-    function_calling_llm: Optional[Any] = Field(default=None, description="llm to execute func after all agent execution (if any)")
+    # formation planning
+    planning_llm: Optional[Any] = Field(default=None, description="llm to generate formation")
+    team_tasks: Optional[List[Task]] = Field(default_factory=list, description="optional tasks for the team. can be assigned to team members later")
+
+    # task execution rules
     prompt_file: str = Field(default="", description="path to the prompt json file to be used by the team.")
     process: TaskHandlingProcess = Field(default=TaskHandlingProcess.sequential)
 
@@ -150,7 +154,6 @@ class Team(BaseModel):
     )
     step_callback: Optional[Any] = Field(default=None, description="callback to be executed after each step for all agents execution")
 
-    verbose: bool = Field(default=True)
     cache: bool = Field(default=True)
     memory: bool = Field(default=False, description="whether the team should use memory to store memories of its execution")
     execution_logs: List[Dict[str, Any]] = Field(default=[], description="list of execution logs for tasks")
@@ -236,7 +239,7 @@ class Team(BaseModel):
         return self
 
 
-    def _get_responsible_agent(self, task: Task) -> Agent:
+    def _get_responsible_agent(self, task: Task) -> Agent | None:
         if task is None:
             return None
         else:
@@ -244,7 +247,7 @@ class Team(BaseModel):
             return None if len(res) == 0 else res[0]
 
 
-    def _handle_team_planning(self) -> None:
+    def _handle_agent_formation(self) -> None:
         """
         Form a team considering agents and tasks given, and update `self.members` field:
             1. Idling managers to take the team tasks.
@@ -373,7 +376,7 @@ class Team(BaseModel):
 
             responsible_agent = self._get_responsible_agent(task)
             if responsible_agent is None:
-                self._handle_team_planning()
+                self._handle_agent_formation()
 
             if isinstance(task, ConditionalTask):
                 skipped_task_output = task._handle_conditional_task(task_outputs, futures, task_index, was_replayed)
@@ -415,7 +418,7 @@ class Team(BaseModel):
         metrics: List[UsageMetrics] = []
 
         if self.team_tasks or self.member_tasks_without_agent:
-            self._handle_team_planning()
+            self._handle_agent_formation()
 
         if kwargs_before is not None:
             for before_callback in self.before_kickoff_callbacks:
@@ -431,9 +434,6 @@ class Team(BaseModel):
         for member in self.members:
             agent = member.agent
             agent.team = self
-
-            if not agent.function_calling_llm and self.function_calling_llm:
-                agent.function_calling_llm = self.function_calling_llm
 
             if self.step_callback:
                 agent.callbacks.append(self.step_callback)

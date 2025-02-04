@@ -1,4 +1,3 @@
-import logging
 import json
 import os
 import sys
@@ -6,12 +5,11 @@ import threading
 import warnings
 from dotenv import load_dotenv
 import litellm
-from litellm import get_supported_openai_params, JSONSchemaValidationError
+from litellm import JSONSchemaValidationError
 from contextlib import contextmanager
 from typing import Any, Dict, List, Optional
 from typing_extensions import Self
-from pydantic import BaseModel, Field, PrivateAttr, field_validator, model_validator, create_model, InstanceOf, ConfigDict
-from pydantic_core import PydanticCustomError
+from pydantic import BaseModel, Field, PrivateAttr, model_validator, ConfigDict
 
 from versionhq.llm.llm_vars import LLM_CONTEXT_WINDOW_SIZES, MODELS, PARAMS, PROVIDERS, ENDPOINT_PROVIDERS
 from versionhq.tool.model import Tool, ToolSet
@@ -24,10 +22,6 @@ LITELLM_API_BASE = os.environ.get("LITELLM_API_BASE")
 DEFAULT_CONTEXT_WINDOW_SIZE = int(8192 * 0.75)
 DEFAULT_MODEL_NAME = os.environ.get("DEFAULT_MODEL_NAME", "gpt-4o-mini")
 DEFAULT_MODEL_PROVIDER_NAME = os.environ.get("DEFAULT_MODEL_PROVIDER_NAME", "openai")
-
-# proxy_openai_client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"), organization="versionhq", base_url=LITELLM_API_BASE)
-# openai_client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
-
 
 class FilteredStream:
     def __init__(self, original_stream):
@@ -53,7 +47,8 @@ class FilteredStream:
 @contextmanager
 def suppress_warnings():
     with warnings.catch_warnings():
-        warnings.filterwarnings("ignore")
+        litellm.set_verbose = False
+        warnings.filterwarnings(action="ignore")
         old_stdout = sys.stdout
         old_stderr = sys.stderr
         sys.stdout = FilteredStream(old_stdout)
@@ -259,7 +254,6 @@ class LLM(BaseModel):
                 self._set_callbacks(self.callbacks) # passed by agent
 
             try:
-                provider = self.provider if self.provider else DEFAULT_MODEL_PROVIDER_NAME
                 self.response_format = { "type": "json_object" } if tool_res_as_final == True else response_format
 
                 if not tools:

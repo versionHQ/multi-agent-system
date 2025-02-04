@@ -70,16 +70,16 @@ class EvaluationItem(BaseModel):
 
 
 class Evaluation(BaseModel):
-    # expected_outcome: Optional[str] = Field(default=None, description="human input on expected outcome")
     items: List[EvaluationItem] = []
     latency: int = Field(default=None, description="seconds")
     tokens: int = Field(default=None, description="tokens consumed")
     responsible_agent: Any = Field(default=None, description="store agent instance that evaluates the outcome")
 
+
     @model_validator(mode="after")
     def set_up_responsible_agent(self) -> Self:
-        from versionhq.agent.default_agents import task_evaluator
-        self.responsible_agent = task_evaluator
+        from versionhq.agent.inhouse_agents import vhq_task_evaluator
+        self.responsible_agent = vhq_task_evaluator
         return self
 
 

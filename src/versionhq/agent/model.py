@@ -416,7 +416,7 @@ class Agent(BaseModel):
                 task.tokens = self.llm._tokens
 
             task_execution_counter += 1
-            self._logger.log(level="info", message=f"Agent response: {raw_response}", color="blue")
+            self._logger.log(level="info", message=f"Agent response: {raw_response}", color="green")
             return raw_response
 
         except Exception as e:
@@ -432,7 +432,7 @@ class Agent(BaseModel):
                     iterations += 1
 
                 task_execution_counter += 1
-                self._logger.log(level="info", message=f"Agent #{task_execution_counter} response: {raw_response}", color="blue")
+                self._logger.log(level="info", message=f"Agent #{task_execution_counter} response: {raw_response}", color="green")
                 return raw_response
 
             if not raw_response:

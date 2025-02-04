@@ -350,7 +350,7 @@ def test_evaluation():
     See if the output will be evaluated accurately - when the task was given eval criteria
     """
     from versionhq.task.evaluate import Evaluation, EvaluationItem
-    from versionhq.agent.default_agents import task_evaluator
+    from versionhq.agent.inhouse_agents import vhq_task_evaluator
 
     agent = Agent(role="Researcher", goal="You research about math.")
     task = Task(
@@ -362,5 +362,5 @@ def test_evaluation():
 
     assert res.evaluation and isinstance(res.evaluation, Evaluation)
     assert [isinstance(item, EvaluationItem) and item.criteria in task.eval_criteria for item in res.evaluation.items]
-    assert res.evaluation.latency and res.evaluation.tokens and res.evaluation.responsible_agent == task_evaluator
+    assert res.evaluation.latency and res.evaluation.tokens and res.evaluation.responsible_agent == vhq_task_evaluator
     assert res.evaluation.aggregate_score is not None and res.evaluation.suggestion_summary
