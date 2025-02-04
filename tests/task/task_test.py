@@ -230,7 +230,7 @@ def test_task_with_tools():
     tool_set = ToolSet(tool=tool, kwargs=dict(message="empty func"))
 
     agent = Agent(role="Tool Handler", goal="execute tools", maxit=1, max_tokens=3000)
-    task = Task(description="execute the function", tools=[tool_set,], tool_res_as_final=True)
+    task = Task(description="execute the given tools", tools=[tool_set,], tool_res_as_final=True)
     res = task.execute_sync(agent=agent)
     assert res.tool_output == "empty func_demo"
 
@@ -364,17 +364,3 @@ def test_evaluation():
     assert [isinstance(item, EvaluationItem) and item.criteria in task.eval_criteria for item in res.evaluation.items]
     assert res.evaluation.latency and res.evaluation.tokens and res.evaluation.responsible_agent == task_evaluator
     assert res.evaluation.aggregate_score is not None and res.evaluation.suggestion_summary
-
-
-def schema_task(agent: Agent):
-    task = Task(description="return random values strictly following the given response format.", pydantic_output=DemoOutcome)
-    res = task.execute_sync(agent=agent, context="We are running a test.")
-    assert [
-        getattr(res.pydantic, k) and type(getattr(res.pydantic, k)) == v for k, v in DemoOutcome.__annotations__.items()
-    ]
-
-
-def res_field_task(agent: Agent):
-    task = Task(description="return random values strictly following the given response format.", response_fields=demo_response_fields)
-    res = task.execute_sync(agent=agent, context="We are running a test.")
-    assert [k in item.title for item in demo_response_fields for k, v in res.json_dict.items()]

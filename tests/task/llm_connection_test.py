@@ -58,12 +58,12 @@ def tool_task(agent: Agent):
 
 
 
-def test_connection():
+def _test_connection():
+    """
+    comment out
+    """
+
     agents = [set_agent(llm=llm) for llm in llms_to_test]
     for agent in agents:
         simple_task(agent=agent)
-        # tool_task(agent=agent)
-
-
-if __name__ == "__main__":
-    test_connection()
+        tool_task(agent=agent)

@@ -270,8 +270,8 @@ class LLM(BaseModel):
 
                 else:
                     self.tools = [item.tool.properties if isinstance(item, ToolSet) else item.properties for item in tools]
-                    params = self._create_valid_params(config=config, provider=provider)
-                    res = litellm.completion(model=self.model, messages=messages, tools=self.tools, **params)
+                    params = self._create_valid_params(config=config)
+                    res = litellm.completion(model=self.model, messages=messages, **params)
                     tool_calls = res.choices[0].message.tool_calls
                     tool_res = ""
 
@@ -311,7 +311,7 @@ class LLM(BaseModel):
                     if tool_res_as_final:
                         return tool_res
                     else:
-                        res = litellm.completion(model=self.model, messages=messages, tools=self.tools, **params)
+                        res = litellm.completion(model=self.model, messages=messages, **params)
                         self._tokens += int(res["usage"]["total_tokens"])
                         return res.choices[0].message.content
 
