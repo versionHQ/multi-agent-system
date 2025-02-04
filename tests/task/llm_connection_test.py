@@ -14,6 +14,7 @@ llms_to_test = [
     # "gpt-4o",
     # "gemini/gemini-2.0-flash",
     "openrouter/deepseek/deepseek-r1:free",
+    "claude-3-haiku",
 ]
 
 def set_agent(llm: str) -> Agent:
@@ -61,8 +62,8 @@ def test_connection():
     agents = [set_agent(llm=llm) for llm in llms_to_test]
     for agent in agents:
         simple_task(agent=agent)
-        tool_task(agent=agent)
+        # tool_task(agent=agent)
 
 
-# if __name__ == "__main__":
-#     test_connection()
+if __name__ == "__main__":
+    test_connection()

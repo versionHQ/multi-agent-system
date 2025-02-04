@@ -225,15 +225,15 @@ wheels = [
 
 [[package]]
 name = "beautifulsoup4"
-version = "4.13.0"
+version = "4.13.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "soupsieve" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/4b/d3/6f4047d1de55b7a290ef8d4b4ebf59dcc24742920ebbed0909f823424205/beautifulsoup4-4.13.0.tar.gz", hash = "sha256:b6e5afb3a2b1472c8db751a92eabf7834e5c7099f990c5e4b35f1f16b60bae64", size = 558514 }
+sdist = { url = "https://files.pythonhosted.org/packages/58/f3/d90227cc52f7b8fcd0f2af804f56e55edf8dd07036b681a2809e3245318b/beautifulsoup4-4.13.1.tar.gz", hash = "sha256:741c8b6903a1e4ae8ba32b9c9ae7510dab7a197fdbadcf9fcdeb0891ef5ec66a", size = 618295 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/6e/74/d53cf0c527b20fc87351e6fd9d51aac9b5d1e32ec5a3a32b84671806ab40/beautifulsoup4-4.13.0-py3-none-any.whl", hash = "sha256:9c4c3dfa67aba55f6cd03769c441b21e6a369797fd6766e4b4c6b3399aae2735", size = 184993 },
+    { url = "https://files.pythonhosted.org/packages/18/75/899bf9b6270b2ce5e8f01b8da121b29e4b88256feb2cf6c6418d4cc42130/beautifulsoup4-4.13.1-py3-none-any.whl", hash = "sha256:72465267014897bb10ca749bb632bde6c2d20f3254afd5458544bd74e6c2e6d8", size = 185056 },
 ]
 
 [[package]]
@@ -660,7 +660,7 @@ wheels = [
 
 [[package]]
 name = "docling"
-version = "2.17.0"
+version = "2.18.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "beautifulsoup4" },
@@ -687,14 +687,14 @@ dependencies = [
     { name = "scipy" },
     { name = "typer" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/12/97/b6feda808d155fb074386e0a576c156c8350fa182a47abf432abe17819be/docling-2.17.0.tar.gz", hash = "sha256:5a73e946b8f802deacb12e7b18e8aafb34b97a768f9d2398856b437849845648", size = 94051 }
+sdist = { url = "https://files.pythonhosted.org/packages/6b/ee/0529abed684acb91efc1a92477cbd53ead059248ea28e24a598ee1e711b9/docling-2.18.0.tar.gz", hash = "sha256:1b652f43d652db01dd49432dd142cec8358d2e2a43746cac902a5dbaa7a8840d", size = 95752 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/74/e5/220e4dc0b16efd9a030de18a22fe8b39e7a27ed0819e20da51a49816e2c0/docling-2.17.0-py3-none-any.whl", hash = "sha256:ddf547e4aaecdf9de33bc812890926d78c52fb50192f142860eac6f929b04732", size = 121851 },
+    { url = "https://files.pythonhosted.org/packages/41/64/319163f92c12d2705d29d2c26131a8033628ba603a95ceed5874fecc2248/docling-2.18.0-py3-none-any.whl", hash = "sha256:ae5221f5a799b6d3bc00ca97c74da14cf3e5d4ccc05c9551926394f5116ac04d", size = 123202 },
 ]
 
 [[package]]
 name = "docling-core"
-version = "2.17.0"
+version = "2.17.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "jsonref" },
@@ -708,9 +708,9 @@ dependencies = [
     { name = "typer" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/0c/b4/144e8f388097ab170519fa5fdccebf4a701ba902016533bf414aa01ebd07/docling_core-2.17.0.tar.gz", hash = "sha256:cfcba8d173730baf244f279369f68e3cb5ddc7680769841afd254b61e432133e", size = 74005 }
+sdist = { url = "https://files.pythonhosted.org/packages/af/b8/6c5ead6d286ec00d05e7c9b616e05eac720ebd74a5f4074a2a7b15bf50e7/docling_core-2.17.1.tar.gz", hash = "sha256:ba6eb70f77e6c41e0316bdcc92890fb8a6615c080e73629f8402f724785c4b8d", size = 74181 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/da/c4/2700972ce7633ba48613fce9ed2e9c99ee52828cbf37a22f119fc33dee33/docling_core-2.17.0-py3-none-any.whl", hash = "sha256:5c3015e0eed8e939069bdfd566761dc9f39239647893ae42c53d1333dd0a4749", size = 94026 },
+    { url = "https://files.pythonhosted.org/packages/a8/34/27828d9b5a617bb8cb293c40b2c83a777ce977efef59f0389059403c00c2/docling_core-2.17.1-py3-none-any.whl", hash = "sha256:f223973715831d4f37e1ce60f431e545599666b04fb39e60a302f8ec17f5e9eb", size = 94204 },
 ]
 
 [package.optional-dependencies]
@@ -2646,16 +2646,16 @@ wheels = [
 
 [[package]]
 name = "paramiko"
-version = "3.5.0"
+version = "3.5.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "bcrypt" },
     { name = "cryptography" },
     { name = "pynacl" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/1b/0f/c00296e36ff7485935b83d466c4f2cf5934b84b0ad14e81796e1d9d3609b/paramiko-3.5.0.tar.gz", hash = "sha256:ad11e540da4f55cedda52931f1a3f812a8238a7af7f62a60de538cd80bb28124", size = 1704305 }
+sdist = { url = "https://files.pythonhosted.org/packages/7d/15/ad6ce226e8138315f2451c2aeea985bf35ee910afb477bae7477dc3a8f3b/paramiko-3.5.1.tar.gz", hash = "sha256:b2c665bc45b2b215bd7d7f039901b14b067da00f3a11e6640995fd58f2664822", size = 1566110 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/1f/66/14b2c030fcce69cba482d205c2d1462ca5c77303a263260dcb1192801c85/paramiko-3.5.0-py3-none-any.whl", hash = "sha256:1fedf06b085359051cd7d0d270cebe19e755a8a921cc2ddbfa647fb0cd7d68f9", size = 227143 },
+    { url = "https://files.pythonhosted.org/packages/15/f8/c7bd0ef12954a81a1d3cea60a13946bd9a49a0036a5927770c461eade7ae/paramiko-3.5.1-py3-none-any.whl", hash = "sha256:43b9a0501fc2b5e70680388d9346cf252cfb7d00b0667c39e80eb43a408b8f61", size = 227298 },
 ]
 
 [[package]]
@@ -4457,7 +4457,7 @@ wheels = [
 
 [[package]]
 name = "versionhq"
-version = "1.1.11.7"
+version = "1.1.12.0"
 source = { editable = "." }
 dependencies = [
     { name = "appdirs" },

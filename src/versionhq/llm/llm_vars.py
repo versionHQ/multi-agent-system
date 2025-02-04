@@ -10,9 +10,9 @@ PROVIDERS = [
     "huggingface",
     "anthropic",
     "sagemaker",
+    "bedrock",
     "ollama",
     "watson",
-    "bedrock",
     "azure",
     "cerebras",
     "llama",
@@ -48,16 +48,16 @@ MODELS = {
     "anthropic": [
         "claude-3-5-sonnet-20241022",
         "claude-3-5-sonnet-20240620",
-        "claude-3-sonnet-20240229",
+        "claude-3-haiku-2024030",
         "claude-3-opus-20240229",
         "claude-3-haiku-20240307",
-    ],
-    "huggingface": [
-        "huggingface/qwen/qwen2.5-VL-72B-Instruct",
     ],
     "openrouter": [
         "openrouter/deepseek/deepseek-r1:free",
         "openrouter/qwen/qwen-2.5-72b-instruct",
+    ],
+    "huggingface": [
+        "huggingface/qwen/qwen2.5-VL-72B-Instruct",
     ],
     # "sagemaker": [
     #     "sagemaker/huggingface-text2text-flan-t5-base",
@@ -113,8 +113,9 @@ MODELS = {
 KEYS = {
     "openai": ["OPENAI_API_KEY"],
     "gemini": ["GEMINI_API_KEY"],
-    "sagemaker": ["AWS_ACCESS_KEY_ID", "ADW_SECURET_ACCESS_KEY", "AWS_REGION_NAME"],
     "anthropic": ["ANTHROPIC_API_KEY"],
+    "huggingface": ["HUGGINGFACE_API_KEY", ],
+    "sagemaker": ["AWS_ACCESS_KEY_ID", "ADW_SECURET_ACCESS_KEY", "AWS_REGION_NAME"],
 }
 
 
@@ -123,7 +124,6 @@ KEYS = {
 Max input token size by the model.
 """
 LLM_CONTEXT_WINDOW_SIZES = {
-    "gpt-3.5-turbo": 8192,
     "gpt-4": 8192,
     "gpt-4o": 128000,
     "gpt-4o-mini": 128000,
@@ -142,6 +142,7 @@ LLM_CONTEXT_WINDOW_SIZES = {
     "claude-3-sonnet-20240229": 200000,
     "claude-3-opus-20240229": 200000,
     "claude-3-haiku-20240307": 200000,
+    "claude-3-5-sonnet-2024102": 200000,
 
     "deepseek-chat": 128000,
     "deepseek/deepseek-reasoner": 8192,
@@ -159,111 +160,18 @@ LLM_CONTEXT_WINDOW_SIZES = {
     "llama3-70b-8192": 8192,
     "llama3-8b-8192": 8192,
     "mixtral-8x7b-32768": 32768,
-    "claude-3-5-sonnet-2024102": 200000,
-}
-
-
-
-
-LLM_BASE_URL_KEY_NAMES = {
-    "openai":  "OPENAI_API_BASE",
-     "gemini": "GEMINI_API_BASE",
-    "anthropic": "ANTHROPIC_API_BASE",
-}
-
-LLM_VARS = {
-    "openai": [
-        {
-            "prompt": "Enter your OPENAI API key (press Enter to skip)",
-            "key_name": "OPENAI_API_KEY",
-        }
-    ],
-    "anthropic": [
-        {
-            "prompt": "Enter your ANTHROPIC API key (press Enter to skip)",
-            "key_name": "ANTHROPIC_API_KEY",
-        }
-    ],
-    "gemini": [
-        {
-            "prompt": "Enter your GEMINI API key (press Enter to skip)",
-            "key_name": "GEMINI_API_KEY",
-        }
-    ],
-    "watson": [
-        {
-            "prompt": "Enter your WATSONX URL (press Enter to skip)",
-            "key_name": "WATSONX_URL",
-        },
-        {
-            "prompt": "Enter your WATSONX API Key (press Enter to skip)",
-            "key_name": "WATSONX_APIKEY",
-        },
-        {
-            "prompt": "Enter your WATSONX Project Id (press Enter to skip)",
-            "key_name": "WATSONX_PROJECT_ID",
-        },
-    ],
-    "ollama": [
-        {
-            "default": True,
-            "API_BASE": "http://localhost:11434",
-        }
-    ],
-    "bedrock": [
-        {
-            "prompt": "Enter your AWS Access Key ID (press Enter to skip)",
-            "key_name": "AWS_ACCESS_KEY_ID",
-        },
-        {
-            "prompt": "Enter your AWS Secret Access Key (press Enter to skip)",
-            "key_name": "AWS_SECRET_ACCESS_KEY",
-        },
-        {
-            "prompt": "Enter your AWS Region Name (press Enter to skip)",
-            "key_name": "AWS_REGION_NAME",
-        },
-    ],
-    "azure": [
-        {
-            "prompt": "Enter your Azure deployment name (must start with 'azure/')",
-            "key_name": "model",
-        },
-        {
-            "prompt": "Enter your AZURE API key (press Enter to skip)",
-            "key_name": "AZURE_API_KEY",
-        },
-        {
-            "prompt": "Enter your AZURE API base URL (press Enter to skip)",
-            "key_name": "AZURE_API_BASE",
-        },
-        {
-            "prompt": "Enter your AZURE API version (press Enter to skip)",
-            "key_name": "AZURE_API_VERSION",
-        },
-    ],
-    "cerebras": [
-        {
-            "prompt": "Enter your Cerebras model name (must start with 'cerebras/')",
-            "key_name": "model",
-        },
-        {
-            "prompt": "Enter your Cerebras API version (press Enter to skip)",
-            "key_name": "CEREBRAS_API_KEY",
-        },
-    ],
 }
 
 
 
 """
-Params for litellm.completion() func. Address common/unique params to each provider.
+Params for litellm.completion().
 """
 
 PARAMS = {
     "litellm": [
         "api_base",
-        "api_version,"
+        "api_version,",
         "num_retries",
         "context_window_fallback_dict",
         "fallbacks",

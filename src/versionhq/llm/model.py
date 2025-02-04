@@ -193,7 +193,7 @@ class LLM(BaseModel):
     @model_validator(mode="after")
     def validate_model_params(self) -> Self:
         """
-        After setting up a valid model, provider, interface provider, add params to the model.
+        Set up valid params to the model after setting up a valid model, provider, interface provider names.
         """
         self._tokens = 0
 
@@ -216,19 +216,28 @@ class LLM(BaseModel):
         return self
 
 
-    def _create_valid_params(self, config: Dict[str, Any], provider: str = None) -> Dict[str, Any]:
-        params = dict()
-        valid_keys = list()
-        provider = provider if provider else self.provider if self.provider else None
-        valid_keys = PARAMS.get("litellm") + PARAMS.get("common") + PARAMS.get(provider) if provider and PARAMS.get(provider) else PARAMS.get("litellm") + PARAMS.get("common")
+    def _create_valid_params(self, config: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Return valid params (model + litellm original params) from the given config dict.
+        """
+
+        valid_params, valid_keys = dict(), list()
+
+        if self.model:
+            valid_keys = litellm.get_supported_openai_params(model=self.model, custom_llm_provider=self.endpoint_provider, request_type="chat_completion")
+
+        if not valid_keys:
+            valid_keys = PARAMS.get("common")
+
+        valid_keys += PARAMS.get("litellm")
 
         for item in valid_keys:
             if hasattr(self, item) and getattr(self, item):
-                params[item] = getattr(self, item)
-            elif item in config:
-                params[item] = config[item]
+                valid_params[item] = getattr(self, item)
+            elif item in config and config[item]:
+                valid_params[item] = config[item]
 
-        return params
+        return valid_params
 
 
     def call(
@@ -255,15 +264,14 @@ class LLM(BaseModel):
 
                 if not tools:
                     params = self._create_valid_params(config=config)
-                    res = litellm.completion(messages=messages, stream=False, **params)
+                    res = litellm.completion(model=self.model, messages=messages, stream=False, **params)
                     self._tokens += int(res["usage"]["total_tokens"])
                     return res["choices"][0]["message"]["content"]
 
                 else:
                     self.tools = [item.tool.properties if isinstance(item, ToolSet) else item.properties for item in tools]
-
                     params = self._create_valid_params(config=config, provider=provider)
-                    res = litellm.completion(messages=messages, model=self.model, tools=self.tools)
+                    res = litellm.completion(model=self.model, messages=messages, tools=self.tools, **params)
                     tool_calls = res.choices[0].message.tool_calls
                     tool_res = ""
 
@@ -303,7 +311,7 @@ class LLM(BaseModel):
                     if tool_res_as_final:
                         return tool_res
                     else:
-                        res = litellm.completione(messages=messages, model=self.model, tools=self.tools)
+                        res = litellm.completion(model=self.model, messages=messages, tools=self.tools, **params)
                         self._tokens += int(res["usage"]["total_tokens"])
                         return res.choices[0].message.content
 
@@ -319,20 +327,17 @@ class LLM(BaseModel):
 
     def _supports_function_calling(self) -> bool:
         try:
-            params = get_supported_openai_params(model=self.model)
-            return "response_format" in params
+            if self.model:
+                params = litellm.get_supported_openai_params(model=self.model)
+                return "response_format" in params if params else False
         except Exception as e:
-            self._logger.log(level="error", message=f"Failed to get supported params: {str(e)}", color="red")
+            self._logger.log(level="warning", message=f"Failed to get supported params: {str(e)}", color="yellow")
             return False
 
 
     def _supports_stop_words(self) -> bool:
-        try:
-            params = get_supported_openai_params(model=self.model)
-            return "stop" in params
-        except Exception as e:
-            self._logger.log(level="error", message=f"Failed to get supported params: {str(e)}", color="red")
-            return False
+        supported_params = litellm.get_supported_openai_params(model=self.model, custom_llm_provider=self.endpoint_provider)
+        return "stop" in supported_params if supported_params else False
 
 
     def _get_context_window_size(self) -> int:

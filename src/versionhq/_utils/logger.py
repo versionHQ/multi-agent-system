@@ -42,4 +42,4 @@ class Logger(BaseModel):
     def log(self, level, message, color="yellow"):
         if self.verbose:
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            self._printer.print(f"\n{timestamp} - versionHQ - {level.upper()}: {message}", color=color)
+            self._printer.print(f"\n{timestamp} - versionHQ [{level.upper()}]: {message}", color=color)
