@@ -1,13 +1,11 @@
 from typing import List, Optional, Dict, Any
 from typing_extensions import Self
 
-from pydantic import BaseModel, Field, InstanceOf, model_validator
+from pydantic import BaseModel, Field, model_validator
 
 """
 Evaluate task output from accuracy, token consumption, latency perspectives, and mark the score from 0 to 1.
 """
-
-
 
 
 class ScoreFormat:

@@ -2,12 +2,12 @@
 
 ![MIT license](https://img.shields.io/badge/License-MIT-green)
 [![Publisher](https://github.com/versionHQ/multi-agent-system/actions/workflows/publish.yml/badge.svg)](https://github.com/versionHQ/multi-agent-system/actions/workflows/publish.yml)
-![PyPI](https://img.shields.io/badge/PyPI->=v1.1.11.4-blue)
-![python ver](https://img.shields.io/badge/Python->=3.12-purple)
+![PyPI](https://img.shields.io/badge/PyPI-v1.1.11+-blue)
+![python ver](https://img.shields.io/badge/Python-3.11/3.12/3.13-purple)
 ![pyenv ver](https://img.shields.io/badge/pyenv-2.5.0-orange)
 
 
-LLM orchestration frameworks to deploy multi-agent systems with task-based formation.
+LLM orchestration frameworks to deploy multi-agent systems and automate complex tasks with network formations.
 
 **Visit:**
 
@@ -46,15 +46,16 @@ LLM orchestration frameworks to deploy multi-agent systems with task-based forma
 
 ## Key Features
 
-Generate mulit-agent systems depending on the complexity of the task, and execute the task with agents of choice.
+Generate multi-agent systems based on the task complexity, execute tasks, and evaluate output based on the given criteria.
 
-Model-agnostic agents can handle RAG tools, tools, callbacks, and knowledge sharing among other agents.
+Agents are model-agnostic, and can handle and share RAG tools, knowledge, memory, and callbacks among other agents. (self-learn)
 
 
 ###  Agent formation
-Depending on the task complexity, agents can make a different formation.
 
-You can specify which formation you want them to generate, or let the agent decide if you don’t have a clear plan.
+Agents adapt their formation based on task complexity.
+
+You can specify a desired formation or allow the agents to determine it autonomously (default).
 
 
 |  | **Solo Agent** | **Supervising** | **Network** | **Random** |

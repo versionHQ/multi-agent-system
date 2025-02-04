@@ -6,9 +6,10 @@ JSON_URL = "https://raw.githubusercontent.com/BerriAI/litellm/main/model_prices_
 PROVIDERS = [
     "openai",
     "gemini",
-    "sagemaker",
-    "huggingface", # need api base
+    "openrouter",
+    "huggingface",
     "anthropic",
+    "sagemaker",
     "ollama",
     "watson",
     "bedrock",
@@ -18,17 +19,7 @@ PROVIDERS = [
 ]
 
 ENDPOINT_PROVIDERS = [
-    # "openai",
-    # "gemini",
-    # "sagemaker",
     "huggingface",
-    # "anthropic",
-    # "ollama",
-    # "watson",
-    # "bedrock",
-    # "azure",
-    # "cerebras",
-    # "llama",
 ]
 
 """
@@ -64,6 +55,10 @@ MODELS = {
     "huggingface": [
         "huggingface/qwen/qwen2.5-VL-72B-Instruct",
     ],
+    "openrouter": [
+        "openrouter/deepseek/deepseek-r1:free",
+        "openrouter/qwen/qwen-2.5-72b-instruct",
+    ],
     # "sagemaker": [
     #     "sagemaker/huggingface-text2text-flan-t5-base",
     #     "sagemaker/huggingface-llm-gemma-7b",
@@ -78,11 +73,6 @@ MODELS = {
       "ollama/mixtral",
       "ollama/mixtral-8x22B-Instruct-v0.1",
     ],
-    "deepseek": [
-        "deepseek/deepseek-reasoner",
-
-    ],
-
     # "watson": [
     #     "watsonx/meta-llama/llama-3-1-70b-instruct",
     #     "watsonx/meta-llama/llama-3-1-8b-instruct",
@@ -98,7 +88,6 @@ MODELS = {
         "bedrock/anthropic.claude-3-sonnet-20240229-v1:0",
         "bedrock/anthropic.claude-3-haiku-20240307-v1:0",
         "bedrock/anthropic.claude-3-opus-20240229-v1:0",
-        # "bedrock/anthropic.claude-v2:1",
         "bedrock/anthropic.claude-v2",
         "bedrock/anthropic.claude-instant-v1",
         "bedrock/meta.llama3-1-405b-instruct-v1:0",
@@ -128,13 +117,6 @@ KEYS = {
     "anthropic": ["ANTHROPIC_API_KEY"],
 }
 
-
-"""
-Use base_url to specify
-"""
-BASE_URLS = {
-    "deepseek": "https://api.deepseek.com"
-}
 
 
 """

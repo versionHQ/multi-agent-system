@@ -1,10 +1,8 @@
-from typing import Dict, Any
+from typing import Any
 
 from pydantic import BaseModel
 
-from versionhq.agent.model import Agent
 from versionhq.task.model import ResponseField
-from versionhq.llm.model import DEFAULT_MODEL_NAME, LLM
 
 
 class DemoChild(BaseModel):
@@ -27,7 +25,15 @@ class DemoOutcome(BaseModel):
     test5: dict[str, Any]
     test6: list[dict[str, Any]]
     test8: list[list[str]]
-    # children: List[DemoChild]
+
+
+class DemoOutcomeNoNest(BaseModel):
+    test0: int
+    test1: float
+    test2: str
+    test3: bool
+    test4: list[str]
+    test5: dict[str, Any]
 
 
 demo_response_fields = [
@@ -41,5 +47,13 @@ demo_response_fields = [
     ResponseField(title="test4", data_type=dict, properties=[ResponseField(title="ch", data_type=tuple)]),
     ResponseField(title="test5", data_type=bool),
     ResponseField(title="test6", data_type=list, items=Any, required=False),
-    # ResponseField(title="children", data_type=list, items=type(DemoChild)),
+]
+
+demo_response_fields_no_nest = [
+    ResponseField(title="test0", data_type=int),
+    ResponseField(title="test1", data_type=str, required=True),
+    ResponseField(title="test2", data_type=list, items=str),
+    ResponseField(title="test4", data_type=dict, properties=[ResponseField(title="ch", data_type=tuple)]),
+    ResponseField(title="test5", data_type=bool),
+    ResponseField(title="test6", data_type=list, items=Any, required=False),
 ]

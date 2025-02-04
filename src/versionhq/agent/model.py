@@ -165,13 +165,16 @@ class Agent(BaseModel):
         Set up `llm` and `function_calling_llm` as valid LLM objects using the given values.
         """
         self.agent_ops_agent_name = self.role
-        self.llm = self._set_llm(llm=self.llm)
+        self.llm = self._convert_to_llm_class(llm=self.llm)
+
         function_calling_llm = self.function_calling_llm if self.function_calling_llm else self.llm if self.llm else None
-        self.function_calling_llm = self._set_llm(llm=function_calling_llm)
+        function_calling_llm = self._convert_to_llm_class(llm=function_calling_llm)
+        if function_calling_llm._supports_function_calling():
+            self.function_calling_llm = function_calling_llm
         return self
 
 
-    def _set_llm(self, llm: Any | None) -> LLM:
+    def _convert_to_llm_class(self, llm: Any | None) -> LLM:
         llm = llm if llm is not None else DEFAULT_MODEL_NAME
 
         match llm:
@@ -474,6 +477,7 @@ class Agent(BaseModel):
                 task_prompt += memory.strip()
 
 
+        ## comment out for now
         # if self.team and self.team._train:
         #     task_prompt = self._training_handler(task_prompt=task_prompt)
         # else:

@@ -16,6 +16,7 @@ env:
   ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
   ANTHROPIC_API_BASE: ${{ secrets.ANTHROPIC_API_BASE }}
   MEM0_API_KEY: ${{ secrets.MEM0_API_KEY }}
+  OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
 
 jobs:
   run_test:

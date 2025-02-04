@@ -8,7 +8,7 @@ from hashlib import md5
 from typing import Any, Dict, List, Set, Optional, Tuple, Callable, Type, TypeVar
 from typing_extensions import Annotated, Self
 
-from pydantic import UUID4, BaseModel, Field, PrivateAttr, field_validator, model_validator, create_model, InstanceOf, field_validator
+from pydantic import UUID4, BaseModel, Field, PrivateAttr, field_validator, model_validator, InstanceOf, field_validator
 from pydantic_core import PydanticCustomError
 
 from versionhq._utils.process_config import process_config
@@ -286,7 +286,7 @@ class Task(BaseModel):
     processed_by_agents: Set[str] = Field(default_factory=set, description="store responsible agents' roles")
     tools_errors: int = 0
     delegations: int = 0
-    latency: int | float = 0 # execution latency in sec
+    latency: int | float = 0 # job latency in sec
     tokens: int = 0 # tokens consumed
 
 
@@ -412,37 +412,38 @@ Ref. Output image: {output_formats_to_follow}
 
         response_format: Dict[str, Any] = None
 
-        # match model_provider:
-        #     case "openai":
-        if self.response_fields:
-            properties, required_fields = {}, []
-            for i, item in enumerate(self.response_fields):
-                if item:
-                    if item.data_type is dict:
-                        properties.update(item._format_props())
-                    else:
-                        properties.update(item._format_props())
+        if model_provider == "openrouter":
+            return response_format
 
-                    required_fields.append(item.title)
+        else:
+            if self.response_fields:
+                properties, required_fields = {}, []
+                for i, item in enumerate(self.response_fields):
+                    if item:
+                        if item.data_type is dict:
+                            properties.update(item._format_props())
+                        else:
+                            properties.update(item._format_props())
 
-            response_schema = {
-                "type": "object",
-                "properties": properties,
-                "required": required_fields,
-                "additionalProperties": False,
-            }
+                        required_fields.append(item.title)
 
-            response_format = {
-                "type": "json_schema",
-                "json_schema": { "name": "outcome", "schema": response_schema }
-            }
+                response_schema = {
+                    "type": "object",
+                    "properties": properties,
+                    "required": required_fields,
+                    "additionalProperties": False,
+                }
+
+                response_format = {
+                    "type": "json_schema",
+                    "json_schema": { "name": "outcome", "schema": response_schema }
+                }
 
 
-        elif self.pydantic_output:
-            response_format = StructuredOutput(response_format=self.pydantic_output)._format()
+            elif self.pydantic_output:
+                response_format = StructuredOutput(response_format=self.pydantic_output)._format()
 
-            # case "gemini":
-        return response_format
+            return response_format
 
 
     def _create_json_output(self, raw: str) -> Dict[str, Any]:
@@ -612,7 +613,7 @@ Ref. Output image: {output_formats_to_follow}
         task_output: InstanceOf[TaskOutput] = None
         tool_output: str | list = None
         task_tools: List[List[InstanceOf[Tool]| InstanceOf[ToolSet] | Type[Tool]]] = []
-        started_at = datetime.datetime.now()
+        started_at, ended_at = datetime.datetime.now(), datetime.datetime.now()
 
         if self.tools:
             for item in self.tools:
@@ -638,11 +639,16 @@ Ref. Output image: {output_formats_to_follow}
 
 
         if self.tool_res_as_final == True:
+            started_at = datetime.datetime.now()
             tool_output = agent.execute_task(task=self, context=context, task_tools=task_tools)
+            ended_at = datetime.datetime.now()
             task_output = TaskOutput(task_id=self.id, tool_output=tool_output, raw=str(tool_output) if tool_output else "")
 
         else:
+            started_at = datetime.datetime.now()
             raw_output = agent.execute_task(task=self, context=context, task_tools=task_tools)
+            ended_at = datetime.datetime.now()
+
             json_dict_output = self._create_json_output(raw=raw_output)
             if "outcome" in json_dict_output:
                 json_dict_output = self._create_json_output(raw=str(json_dict_output["outcome"]))
@@ -656,9 +662,8 @@ Ref. Output image: {output_formats_to_follow}
                 json_dict=json_dict_output
             )
 
-        ended_at = datetime.datetime.now()
-        self.latency = (ended_at - started_at).total_seconds()
 
+        self.latency = (ended_at - started_at).total_seconds()
         self.output = task_output
         self.processed_by_agents.add(agent.role)
 

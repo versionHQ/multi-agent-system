@@ -83,11 +83,11 @@ class LLM(BaseModel):
     api_key: Optional[str] = Field(default=None, description="api key to access the model")
 
     # optional params
+    response_format: Optional[Any] = Field(default=None)
     timeout: Optional[float | int] = Field(default=None)
     max_tokens: Optional[int] = Field(default=None)
     max_completion_tokens: Optional[int] = Field(default=None)
     context_window_size: Optional[int] = Field(default=DEFAULT_CONTEXT_WINDOW_SIZE)
-    callbacks: List[Any] = Field(default_factory=list)
     temperature: Optional[float] = Field(default=None)
     top_p: Optional[float] = Field(default=None)
     n: Optional[int] = Field(default=None)
@@ -98,8 +98,8 @@ class LLM(BaseModel):
     seed: Optional[int] = Field(default=None)
     logprobs: Optional[bool] = Field(default=None)
     top_logprobs: Optional[int] = Field(default=None)
-    response_format: Optional[Any] = Field(default=None)
     tools: Optional[List[Dict[str, Any]]] = Field(default_factory=list, description="store a list of tool properties")
+    callbacks: List[Any] = Field(default_factory=list)
 
     # LiteLLM specific fields
     api_base: Optional[str] = Field(default=None, description="litellm specific field - api base of the model provider")
@@ -262,7 +262,6 @@ class LLM(BaseModel):
                 else:
                     self.tools = [item.tool.properties if isinstance(item, ToolSet) else item.properties for item in tools]
 
-                    # if provider == "openai":
                     params = self._create_valid_params(config=config, provider=provider)
                     res = litellm.completion(messages=messages, model=self.model, tools=self.tools)
                     tool_calls = res.choices[0].message.tool_calls
