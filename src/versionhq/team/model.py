@@ -128,7 +128,7 @@ class Team(BaseModel):
 
     __hash__ = object.__hash__
     _execution_span: Any = PrivateAttr()
-    _logger: Logger = PrivateAttr(default_factory=Logger(verbose=True))
+    _logger: Logger = PrivateAttr(default_factory=lambda: Logger(verbose=True))
     _inputs: Optional[Dict[str, Any]] = PrivateAttr(default=None)
 
     id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True)
