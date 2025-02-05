@@ -367,7 +367,7 @@ def test_agent_formation():
     from versionhq.task.formation import form_agent_network
 
     created_team = form_agent_network(
-        task_overview="Launch an outbound campaign to attract young male audience.",
+        task="Launch an outbound campaign to attract young male audience.",
         expected_outcome="Best social media mix plan and key communication lines",
         context="We sell luxuary sportswear targeting male in 30th, and are expanding our market to younger male.",
     )

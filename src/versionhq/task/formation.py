@@ -11,7 +11,7 @@ from versionhq._utils import Logger
 
 
 def form_agent_network(
-        task_overview: str,
+        task: str,
         expected_outcome: str,
         agents: List[Agent] = None,
         context: str = None,
@@ -21,7 +21,7 @@ def form_agent_network(
     Make a formation of agents from the given task description, agents (optional), context (optional), and expected outcome (optional).
     """
 
-    if not task_overview:
+    if not task:
         Logger(verbose=True).log(level="error", message="Missing task description.", color="red")
         return None
 
@@ -40,7 +40,7 @@ def form_agent_network(
         vhq_task = Task(
             description=f"""
     Create a team of specialized agents designed to automate the following task and deliver the expected outcome. Consider the necessary roles for each agent with a clear task description. If you think we neeed a leader to handle the automation, return a leader_agent role as well, but if not, leave the a leader_agent role blank.
-    Task: {str(task_overview)}
+    Task: {str(task)}
     Expected outcome: {str(expected_outcome)}
             """,
             pydantic_output=Outcome
@@ -112,12 +112,3 @@ def form_agent_network(
     except Exception as e:
         Logger(verbose=True).log(level="error", message=f"Failed to create an agent network - return None. You can try with solo agent. Error: {str(e)}", color="red")
         return None
-
-
-
-if __name__ == "__main__":
-    res = form_agent_network(
-        task_overview="Launch an outbound campaign to attract young audience.",
-        expected_outcome="Best media mix of the campaign.",
-        context="We are selling sports wear.",
-    )

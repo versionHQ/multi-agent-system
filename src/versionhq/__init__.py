@@ -21,9 +21,10 @@ from versionhq.tool.composio_tool import ComposioHandler
 from versionhq.memory.contextual_memory import ContextualMemory
 from versionhq.memory.model import ShortTermMemory,LongTermMemory, UserMemory, MemoryItem
 
+from versionhq.task.formation import form_agent_network
 
 
-__version__ = "1.1.12.2"
+__version__ = "1.1.12.3"
 __all__ = [
     "Agent",
 
@@ -67,5 +68,7 @@ __all__ = [
     "ShortTermMemory",
     "LongTermMemory",
     "UserMemory",
-    "MemoryItem"
+    "MemoryItem",
+
+    "form_agent_network"
 ]

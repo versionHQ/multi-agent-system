@@ -98,7 +98,7 @@ def test_kickoff_without_leader():
             TeamMember(agent=agent_b, is_manager=False, task=task_2),
         ],
     )
-    res = team.kickoff()
+    res = team.launch()
     res_all = res.return_all_task_outputs()
 
     assert isinstance(res, TeamOutput)
@@ -158,7 +158,7 @@ def team_kickoff_with_task_callback():
             TeamMember(agent=agent_b, is_manager=False, task=task_2),
         ],
     )
-    res = team.kickoff()
+    res = team.launch()
 
     assert res.raw is not None
     assert res.json_dict is not None
@@ -191,7 +191,7 @@ def test_delegate_in_team():
             TeamMember(agent=agent_b, is_manager=False, task=task_2),
         ],
     )
-    res = team.kickoff()
+    res = team.launch()
 
     assert res.raw is not None
     assert res.json_dict is not None
@@ -218,7 +218,7 @@ def test_kickoff_with_leader():
             TeamMember(agent=agent_b, is_manager=True, task=task_2),
         ],
     )
-    res = team.kickoff()
+    res = team.launch()
 
     assert isinstance(res, TeamOutput)
     assert res.team_id is team.id
@@ -258,7 +258,7 @@ def test_hierarchial_process():
         ],
         process=TaskHandlingProcess.hierarchical
     )
-    res = team.kickoff()
+    res = team.launch()
 
     assert isinstance(res, TeamOutput)
     assert res.team_id is team.id
@@ -334,7 +334,7 @@ def test_handle_team_task():
     teams = [team_solo, team_flat, team_leader, team_dual_leaders, team_leader_without_task]
 
     for team in teams:
-        res = team.kickoff()
+        res = team.launch()
         assert team._get_responsible_agent(task=team_task) is not None
         assert isinstance(res, TeamOutput)
         assert res.team_id is team.id

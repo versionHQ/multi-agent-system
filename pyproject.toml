@@ -15,9 +15,9 @@ exclude = ["test*", "__pycache__", "*.egg-info"]
 
 [project]
 name = "versionhq"
-version = "1.1.12.2"
+version = "1.1.12.3"
 authors = [{ name = "Kuriko Iwai", email = "kuriko@versi0n.io" }]
-description = "Agentic orchestration framework for task automation"
+description = "An agentic orchestration framework for multi-agent system that shares memory, knowledge base, and RAG tools."
 readme = "README.md"
 requires-python = ">=3.11"
 license = { file = "LICENSE" }
@@ -91,6 +91,7 @@ dev-dependencies = [
   "bandit",
   "twine",
   "pytest>=8.3.4",
+  "mkdocs>=1.6.1",
 ]
 
 [tool.uv.workspace]

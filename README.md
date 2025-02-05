@@ -26,6 +26,7 @@ Agentic orchestration framework to deploy agent network and handle complex task 
 - [Key Features](#key-features)
   - [Agent formation](#agent-formation)
 - [Quick Start](#quick-start)
+  - [Generate and launch an agent network](#generate-and-launch-an-agent-network)
   - [Case 1. Solo Agent:](#case-1-solo-agent)
     - [Return a structured output with a summary in string.](#return-a-structured-output-with-a-summary-in-string)
   - [Case 2. Supervising:](#case-2-supervising)
@@ -46,9 +47,9 @@ Agentic orchestration framework to deploy agent network and handle complex task 
 
 ## Key Features
 
-Generate multi-agent systems based on the task complexity, execute tasks, and evaluate output based on the given criteria.
+`versionhq` is a Python framework that can generate agent networks for complex task automation without human interaction.
 
-Agents are model-agnostic, and can handle and share RAG tools, knowledge, memory, and callbacks among other agents. (self-learn)
+Agents are model-agnostic, and will improve task output, while oprimizing token cost and job latency, by sharing their memory, knowledge base, and RAG tools with other agents in the network.
 
 
 ###  Agent formation
@@ -75,6 +76,20 @@ You can specify a desired formation or allow the agents to determine it autonomo
    ```
 
 (Python 3.11 or higher)
+
+### Generate and launch an agent network
+
+   ```
+   from versionhq import form_agent_network
+
+   network = form_agent_network(
+      task="YOUR AMAZING TASK OVERVIEW",
+      expected_outcome="YOUR OUTCOME EXPECTATION",
+   )
+   res = network.launch()
+   ```
+
+   This will form a network with multiple agents on `Formation` and return `TaskOutput` object with output in JSON, plane text, Pydantic model format with evaluation.
 
 
 ### Case 1. Solo Agent:

@@ -387,9 +387,9 @@ class Team(BaseModel):
         return self._create_team_output(task_outputs, lead_task_output)
 
 
-    def kickoff(self, kwargs_before: Optional[Dict[str, str]] = None, kwargs_after: Optional[Dict[str, Any]] = None) -> TeamOutput:
+    def launch(self, kwargs_before: Optional[Dict[str, str]] = None, kwargs_after: Optional[Dict[str, Any]] = None) -> TeamOutput:
         """
-        Kickoff the team:
+        Confirm and launch the formation - execute tasks and record outputs.
         0. Assign an agent to a task - using conditions (manager prioritizes team_tasks) and planning_llm.
         1. Address `before_kickoff_callbacks` if any.
         2. Handle team members' tasks in accordance with the process.
