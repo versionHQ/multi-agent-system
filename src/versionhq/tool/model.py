@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from inspect import signature
 from typing import Any, Dict, Callable, Type, Optional, get_args, get_origin, get_type_hints
 from typing_extensions import Self
-from pydantic import InstanceOf, BaseModel, ConfigDict, Field, field_validator, model_validator, PrivateAttr, create_model
+from pydantic import InstanceOf, BaseModel, Field, field_validator, model_validator, PrivateAttr, create_model
 from pydantic_core import PydanticCustomError
 
 from versionhq.llm.llm_vars import SchemaType

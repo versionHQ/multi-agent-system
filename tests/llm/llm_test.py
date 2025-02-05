@@ -4,7 +4,7 @@ import litellm
 from unittest.mock import patch
 
 from versionhq.llm.llm_vars import MODELS, LLM_CONTEXT_WINDOW_SIZES
-from versionhq.llm.model import LLM, DEFAULT_CONTEXT_WINDOW_SIZE, DEFAULT_MODEL_NAME
+from versionhq.llm.model import LLM, DEFAULT_CONTEXT_WINDOW_SIZE
 
 
 def dummy_func() -> str:

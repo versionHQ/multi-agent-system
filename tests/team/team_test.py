@@ -1,11 +1,10 @@
-import os
 
 from versionhq.agent.model import Agent
 from versionhq.task.model import Task, ResponseField, TaskOutput
 from versionhq.team.model import Team, TeamMember, TaskHandlingProcess, TeamOutput
 from versionhq._utils.usage_metrics import UsageMetrics
-from versionhq.llm.llm_vars import MODELS
-from versionhq.llm.model import DEFAULT_MODEL_NAME, LLM
+from versionhq.llm.model import DEFAULT_MODEL_NAME
+
 
 
 def test_form_team():
@@ -109,7 +108,7 @@ def test_kickoff_without_leader():
     assert res.json_dict is not None
     assert isinstance(res.json_dict, dict)
     assert res.pydantic is None
-    for item in res.task_output_list:
+    for item in res.task_outputs:
         assert isinstance(item, TaskOutput)
     assert isinstance(res_all, list)
     assert len(res_all) == 2
@@ -226,8 +225,8 @@ def test_kickoff_with_leader():
     assert res.raw is not None
     assert res.json_dict is not None
     assert team.managers[0].agent.id is agent_b.id
-    assert len(res.task_output_list) == 2
-    assert [item.raw is not None for item in res.task_output_list]
+    assert len(res.task_outputs) == 2
+    assert [item.raw is not None for item in res.task_outputs]
     assert len(team.tasks) == 2
     assert team.tasks[0].output.raw == res.raw
 
@@ -266,8 +265,8 @@ def test_hierarchial_process():
     assert res.raw is not None
     assert res.json_dict is not None
     assert team.managers[0].agent.id is agent_b.id
-    assert len(res.task_output_list) == 2
-    assert [item.raw is not None for item in res.task_output_list]
+    assert len(res.task_outputs) == 2
+    assert [item.raw is not None for item in res.task_outputs]
     assert len(team.tasks) == 2
     assert team.tasks[0].output.raw == res.raw
 

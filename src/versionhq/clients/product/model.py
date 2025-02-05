@@ -56,7 +56,6 @@ class ProductProvider(ABC, BaseModel):
         return self
 
 
-
 class Product(BaseModel):
     """
     A class to store product information used to create outbound

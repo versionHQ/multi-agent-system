@@ -47,7 +47,7 @@ class Mem0Storage(Storage):
         return role.replace("\n", "").replace(" ", "_").replace("/", "_")
 
 
-    def save(self, value: Any, metadata: Dict[str, Any]) -> None:
+    def save(self, value: Dict[str, Any] | str, metadata: Dict[str, Any]) -> None:
         user_id = self._get_user_id()
         agent_name = self._get_agent_name()
 

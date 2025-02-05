@@ -280,7 +280,6 @@ class PDFKnowledgeSource(BaseFileKnowledgeSource):
 
 
 
-
 class CSVKnowledgeSource(BaseFileKnowledgeSource):
     """
     A knowledge source class that stores and queries CSV file content using embeddings.

@@ -3,6 +3,8 @@ from typing_extensions import Self
 
 from pydantic import BaseModel, Field, model_validator
 
+from versionhq.memory.model import MemoryMetadata
+
 """
 Evaluate task output from accuracy, token consumption, latency perspectives, and mark the score from 0 to 1.
 """
@@ -59,10 +61,10 @@ class EvaluationItem(BaseModel):
     """
     criteria: str
     suggestion: str
-    score: int | float
+    score: float
 
     def _convert_score_to_score_format(self, weight: int = 1) -> ScoreFormat | None:
-        if self.score and isinstance(self.score, (int, float)):
+        if self.score and isinstance(self.score, float):
             return ScoreFormat(rate=self.score, weight=weight)
 
         else: return None
@@ -75,12 +77,23 @@ class Evaluation(BaseModel):
     tokens: int = Field(default=None, description="tokens consumed")
     responsible_agent: Any = Field(default=None, description="store agent instance that evaluates the outcome")
 
-
     @model_validator(mode="after")
     def set_up_responsible_agent(self) -> Self:
         from versionhq.agent.inhouse_agents import vhq_task_evaluator
         self.responsible_agent = vhq_task_evaluator
         return self
+
+
+    def _create_memory_metadata(self) -> MemoryMetadata:
+        """
+        Create and store evaluation results in the memory metadata
+        """
+        eval_by = self.responsible_agent.role if self.responsible_agent else None
+        score = self.aggregate_score
+        eval_criteria = ", ".join([item.criteria for item in self.items]) if self.items else None
+        suggestion = self.suggestion_summary
+        memory_metadata = MemoryMetadata(eval_by=eval_by, score=score, eval_criteria=eval_criteria, suggestion=suggestion)
+        return memory_metadata
 
 
     @property

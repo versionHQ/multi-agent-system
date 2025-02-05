@@ -5,10 +5,11 @@ from typing import Dict, Any, Callable
 
 from pydantic import BaseModel, Field
 
-from versionhq.agent.model import Agent, DEFAULT_MODEL_NAME
+from versionhq.agent.model import Agent, DEFAULT_MODEL_NAME, LLM
 from versionhq.task.model import Task, ResponseField, TaskOutput, ConditionalTask
 from versionhq.tool.model import Tool, ToolSet
 from versionhq.tool.decorator import tool
+
 from tests.task import DemoOutcome, demo_response_fields
 
 sys.setrecursionlimit(2097152)
@@ -274,10 +275,6 @@ def test_build_agent_without_developer_prompt():
 
 
 def test_callback():
-    from pydantic import BaseModel
-    from versionhq.agent.model import Agent
-    from versionhq.task.model import Task
-
     class CustomOutput(BaseModel):
         test1: str
         test2: list[str]
@@ -329,8 +326,6 @@ def test_rpm():
 
 
 def test_maxit():
-    from versionhq.llm.model import LLM
-
     @tool
     def demo() -> str:
         """Get the final answer but don't give it yet, just re-use this
@@ -352,11 +347,11 @@ def test_evaluation():
     from versionhq.task.evaluate import Evaluation, EvaluationItem
     from versionhq.agent.inhouse_agents import vhq_task_evaluator
 
-    agent = Agent(role="Researcher", goal="You research about math.")
+    agent = Agent(role="Researcher", goal="You research about math.", max_retry_limit=1, maxit=1)
     task = Task(
         description="Research a topic to teach a kid aged 6 about math.",
         should_evaluate=True,
-        eval_criteria=["Uniquness of the topic researched", "Fit to the target audience",]
+        eval_criteria=["Uniquness of the topic researched", "Fit to the target audience",],
     )
     res = task.execute_sync(agent=agent)
 
@@ -364,3 +359,18 @@ def test_evaluation():
     assert [isinstance(item, EvaluationItem) and item.criteria in task.eval_criteria for item in res.evaluation.items]
     assert res.evaluation.latency and res.evaluation.tokens and res.evaluation.responsible_agent == vhq_task_evaluator
     assert res.evaluation.aggregate_score is not None and res.evaluation.suggestion_summary
+
+
+
+def test_agent_formation():
+    from versionhq.team.model import Team, Formation
+    from versionhq.task.formation import form_agent_network
+
+    created_team = form_agent_network(
+        task_overview="Launch an outbound campaign to attract young male audience.",
+        expected_outcome="Best social media mix plan and key communication lines",
+        context="We sell luxuary sportswear targeting male in 30th, and are expanding our market to younger male.",
+    )
+    assert isinstance(created_team, Team) and created_team.id
+    assert created_team.members and created_team.formation in Formation and created_team.tasks
+    assert created_team.managers if created_team.formation == Formation.SUPERVISING else created_team.managers is None

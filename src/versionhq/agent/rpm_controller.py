@@ -5,7 +5,7 @@ from typing_extensions import Self
 
 from pydantic import BaseModel, Field, PrivateAttr, model_validator
 
-from versionhq._utils.logger import Logger
+from versionhq._utils import Logger
 
 
 class RPMController(BaseModel):

@@ -1,6 +1,5 @@
 import os
 import uuid
-import datetime
 from typing import Any, Dict, List, Optional, TypeVar, Callable, Type
 from typing_extensions import Self
 from dotenv import load_dotenv
@@ -353,7 +352,7 @@ class Agent(BaseModel):
     @model_validator(mode="after")
     def set_up_memory(self) -> Self:
         """
-        Set up memories: stm, um
+        Set up memories: stm, ltm, and um
         """
 
         if self.use_memory == True:

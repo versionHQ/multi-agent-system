@@ -4,15 +4,15 @@ from unittest.mock import patch
 
 import pytest
 
-from versionhq.knowledge.source import (
+from versionhq import (
     StringKnowledgeSource,
     TextFileKnowledgeSource,
     PDFKnowledgeSource,
     CSVKnowledgeSource,
     JSONKnowledgeSource,
-    ExcelKnowledgeSource
+    ExcelKnowledgeSource,
+    DoclingSource
 )
-from versionhq.knowledge.source_docling import DoclingSource
 
 str_content = "Kuriko's favorite color is black, and she likes Japanese food."
 str_content_long = (

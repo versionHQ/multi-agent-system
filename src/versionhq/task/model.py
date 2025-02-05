@@ -5,18 +5,17 @@ import uuid
 import inspect
 from concurrent.futures import Future
 from hashlib import md5
-from typing import Any, Dict, List, Set, Optional, Tuple, Callable, Type, TypeVar
+from typing import Any, Dict, List, Set, Optional, Callable, Type
 from typing_extensions import Annotated, Self
 
 from pydantic import UUID4, BaseModel, Field, PrivateAttr, field_validator, model_validator, InstanceOf, field_validator
 from pydantic_core import PydanticCustomError
 
-from versionhq._utils.process_config import process_config
-from versionhq.task import TaskOutputFormat
+
 from versionhq.task.log_handler import TaskOutputStorageHandler
 from versionhq.task.evaluate import Evaluation, EvaluationItem
 from versionhq.tool.model import Tool, ToolSet
-from versionhq._utils.logger import Logger
+from versionhq._utils import process_config, Logger
 
 
 class ResponseField(BaseModel):
@@ -77,9 +76,7 @@ class ResponseField(BaseModel):
             if self.properties:
                 for item in self.properties:
                     nested_p.update(**item._format_props())
-
-                    if item.required:
-                        nested_r.append(item.title)
+                    nested_r.append(item.title)
 
             props = {
                 "type": schema_type,
@@ -97,8 +94,6 @@ class ResponseField(BaseModel):
             if self.properties:
                 for item in self.properties:
                     p.update(**item._format_props())
-
-                    # if item.required:
                     r.append(item.title)
 
             props = {
@@ -204,12 +199,25 @@ class TaskOutput(BaseModel):
         eval_criteria = task.eval_criteria if task.eval_criteria else  ["Overall competitiveness", ]
 
         for item in eval_criteria:
-            task_1 = Task(
+            task_eval = Task(
                 description=EVALUATE.format(task_description=task.description, task_output=self.raw, eval_criteria=str(item)),
                 pydantic_output=EvaluationItem
             )
-            res_a = task_1.execute_sync(agent=self.evaluation.responsible_agent)
-            self.evaluation.items.append(EvaluationItem(**res_a.json_dict))
+            res = task_eval.execute_sync(agent=self.evaluation.responsible_agent)
+
+            if res.pydantic:
+                item = EvaluationItem(score=res.pydantic.score, suggestion=res.pydantic.suggestion, criteria=res.pydantic.criteria)
+                self.evaluation.items.append(item)
+
+            else:
+                try:
+                    item = EvaluationItem(
+                        score=float(res.json_dict["score"]), suggestion=res.json_dict["suggestion"], criteria=res.json_dict["criteria"]
+                    )
+                    self.evaluation.items.append(item)
+                except Exception as e:
+                    Logger(verbose=True).log(level="error", message=f"Failed to convert the evaluation items: {str(e)}", color="red")
+                    pass
 
         return self.evaluation
 
@@ -224,20 +232,11 @@ class TaskOutput(BaseModel):
 
     @property
     def json(self) -> Optional[str]:
-        if self.output_format != TaskOutputFormat.JSON:
-            raise ValueError(
-                """
-                Invalid output format requested.
-                If you would like to access the JSON output,
-                pleae make sure to set the output_json property for the task
-                """
-            )
         return json.dumps(self.json_dict)
 
 
     def __str__(self) -> str:
         return str(self.pydantic) if self.pydantic else str(self.json_dict) if self.json_dict else self.raw
-
 
 
 class Task(BaseModel):
@@ -394,14 +393,6 @@ Ref. Output image: {output_formats_to_follow}
         return "\n".join(task_slices)
 
 
-    def _get_output_format(self) -> TaskOutputFormat:
-        if self.output_json == True:
-            return TaskOutputFormat.JSON
-        if self.output_pydantic == True:
-            return TaskOutputFormat.PYDANTIC
-        return TaskOutputFormat.RAW
-
-
     def _structure_response_format(self, data_type: str = "object", model_provider: str = "gemini") -> Dict[str, Any] | None:
         """
         Structure a response format either from`response_fields` or `pydantic_output`.
@@ -508,75 +499,59 @@ Ref. Output image: {output_formats_to_follow}
             self.description = self._original_description.format(**inputs)
 
 
-    def _create_short_term_memory(self, agent, task_output: TaskOutput) -> None:
+    def _create_short_and_long_term_memories(self, agent: Any, task_output: TaskOutput) -> None:
         """
-        After the task execution, create and save short-term memory of the responsible agent.
-        """
-
-        from versionhq.agent.model import Agent
-        from versionhq.memory.model import ShortTermMemory
-
-        try:
-            if isinstance(agent, Agent) and agent.use_memory == True:
-                if hasattr(agent, "short_term_memory"):
-                    agent.short_term_memory.save(value=task_output.raw, metadata={ "observation": self.description, }, agent=agent.role)
-                else:
-                    agent.short_term_memory = ShortTermMemory(agent=agent, embedder_config=agent.embedder_config)
-                    agent.short_term_memory.save(value=task_output.raw, metadata={ "observation": self.description, }, agent=agent.role)
-
-        except Exception as e:
-            self._logger.log(level="error", message=f"Failed to add to short term memory: {str(e)}", color="red")
-            pass
-
-
-    def _create_long_term_memory(self, agent, task_output: TaskOutput) -> None:
-        """
-        Create and save long-term and entity memory items based on evaluation.
+        After the task execution, create and save short-term/long-term memories in the storage.
         """
         from versionhq.agent.model import Agent
-        from versionhq.memory.model import LongTermMemory, LongTermMemoryItem
+        from versionhq.memory.model import ShortTermMemory, MemoryMetadata, LongTermMemory
+
+        agent = agent if isinstance(agent, Agent) else Agent(role=str(agent), goal=str(agent), use_memory=True)
+
+        if agent.use_memory == False:
+            return None
 
         try:
-            if isinstance(agent, Agent) and agent.use_memory == True:
-                evaluation = task_output.evaluation if task_output.evaluation else task_output.evaluate(task=self)
+            evaluation = task_output.evaluation if task_output.evaluation else None
+            memory_metadata = evaluation._create_memory_metadata() if evaluation else MemoryMetadata()
 
-                long_term_memory_item = LongTermMemoryItem(
-                    agent=str(agent.role),
-                    task=str(self.description),
-                    datetime=str(datetime.datetime.now()),
-                    quality=evaluation.aggregate_score,
-                    metadata={
-                        "suggestions": evaluation.suggestion_summary,
-                        "quality": evaluation.aggregate_score,
-                    },
+            agent.short_term_memory = agent.short_term_memory if agent.short_term_memory else ShortTermMemory(agent=agent, embedder_config=agent.embedder_config)
+            agent.short_term_memory.save(
+                task_description=str(self.description),
+                task_output=str(task_output.raw),
+                agent=str(agent.role),
+                metadata=memory_metadata
+            )
+
+            agent.long_term_memory = agent.long_term_memory if agent.long_term_memory else LongTermMemory()
+            agent.long_term_memory.save(
+                task_description=str(self.description),
+                task_output=str(task_output.raw),
+                agent=str(agent.role),
+                metadata=memory_metadata
                 )
-
-                if hasattr(agent, "long_term_memory"):
-                    agent.long_term_memory.save(item=long_term_memory_item)
-                else:
-                    agent.long_term_memory = LongTermMemory(agent=agent)
-                    agent.long_term_memory.save(item=long_term_memory_item)
 
         except AttributeError as e:
             self._logger.log(level="error", message=f"Missing attributes for long term memory: {str(e)}", color="red")
             pass
 
         except Exception as e:
-            self._logger.log(level="error", message=f"Failed to add to long term memory: {str(e)}", color="red")
+            self._logger.log(level="error", message=f"Failed to add to the memory: {str(e)}", color="red")
             pass
 
 
     # task execution
-    def execute_sync(self, agent, context: Optional[str] = None) -> TaskOutput:
+    def execute_sync(self, agent, context: Optional[str | List[Any]] = None) -> TaskOutput:
         """
         Execute the task synchronously.
         When the task has context, make sure we have executed all the tasks in the context first.
         """
 
         if self.context:
-            for task in self.context:
-                if task.output is None:
-                    task._execute_core(agent, context)
+            if isinstance(self.context, list):
+                for task in self.context:
+                    if isinstance(task, Task) and task.output is None:
+                        task._execute_core(agent, context)
 
         return self._execute_core(agent, context)
 
@@ -670,9 +645,7 @@ Ref. Output image: {output_formats_to_follow}
         if self.should_evaluate:
             task_output.evaluate(task=self, latency=self.latency, tokens=self.tokens)
 
-        self._create_short_term_memory(agent=agent, task_output=task_output)
-        self._create_long_term_memory(agent=agent, task_output=task_output)
-
+        self._create_short_and_long_term_memories(agent=agent, task_output=task_output)
 
         if self.callback and isinstance(self.callback, Callable):
             kwargs = { **self.callback_kwargs, **task_output.json_dict }
@@ -702,7 +675,7 @@ Ref. Output image: {output_formats_to_follow}
 
     @property
     def key(self) -> str:
-        output_format = TaskOutputFormat.JSON if self.response_fields else TaskOutputFormat.PYDANTIC if self.pydantic_output is not None else TaskOutputFormat.RAW
+        output_format = "json" if self.response_fields else "pydantic" if self.pydantic_output is not None else "raw"
         source = [self.description, output_format]
         return md5("|".join(source).encode(), usedforsecurity=False).hexdigest()
 

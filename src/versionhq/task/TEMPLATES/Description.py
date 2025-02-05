@@ -1,5 +1,5 @@
-EVALUATE="""Assess the accuracy and quality of the following task output to the task described below. Score based on the criterion (0-1, 0=worst, 1=best) and suggest improvements. Vary scores; don't assign identical values. Store criteria in the "criteria" field.
-Task: {task_description}
-Task Output: {task_output}
+EVALUATE="""Evaluate the provided task output against the given task description, assigning a score between 0 (worst) and 1 (best) based on the specified criteria. Scores should be numerical (integers or decimals). Provide specific suggestions for improvement. Do not assign identical scores to different criteria:
+Task output: {task_output}
+Task description: {task_description}
 Evaluation criteria: {eval_criteria}
 """

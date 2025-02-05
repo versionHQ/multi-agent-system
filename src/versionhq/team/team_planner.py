@@ -8,7 +8,11 @@ load_dotenv(override=True)
 
 class TeamPlanner:
     """
-    Assign agents to multiple tasks.
+    A class to handle agent formations based on the given task description.
+    1) complexity
+    2) agent built (or use given agents)
+    3) knowledge, memory sharing
+    4) form a team
     """
 
     from versionhq.task.model import Task, ResponseField, TaskOutput
@@ -57,7 +61,6 @@ class TeamPlanner:
                 new_member_list.append(team_member)
 
         return new_member_list
-
 
 
     def _handle_task_planning(self, context: Optional[str] = None, tools: Optional[str] = None) -> TaskOutput:

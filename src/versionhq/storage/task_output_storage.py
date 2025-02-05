@@ -7,7 +7,7 @@ from versionhq._utils.logger import Logger
 from versionhq.storage.utils import fetch_db_storage_path
 
 storage_path = fetch_db_storage_path()
-default_db_name = "task_outputs"
+default_db_name = "task_output"
 
 
 class TaskOutputSQLiteStorage:
@@ -31,7 +31,7 @@ class TaskOutputSQLiteStorage:
                 cursor = conn.cursor()
                 cursor.execute(
                     """
-                    CREATE TABLE IF NOT EXISTS task_outputs (
+                    CREATE TABLE IF NOT EXISTS task_output (
                         task_id TEXT PRIMARY KEY,
                         output JSON,
                         task_index INTEGER,
@@ -52,7 +52,7 @@ class TaskOutputSQLiteStorage:
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
                 cursor.execute(
-                        """INSERT OR REPLACE INTO task_outputs
+                        """INSERT OR REPLACE INTO task_output
                             (task_id, output, task_index, inputs, was_replayed, timestamp)
                             VALUES (?, ?, ?, ?, ?, ?)
                         """,
@@ -73,7 +73,7 @@ class TaskOutputSQLiteStorage:
                     fields.append(f"{k} = ?")
                     values.append(json.dumps(v) if isinstance(v, dict) else v)
 
-                query = f"UPDATE latest_kickoff_task_outputs SET {', '.join(fields)} WHERE task_index = ?"
+                query = f"UPDATE latest_kickoff_task_output SET {', '.join(fields)} WHERE task_index = ?"
                 values.append(task_index)
                 cursor.execute(query, tuple(values))
                 conn.commit()
@@ -93,7 +93,7 @@ class TaskOutputSQLiteStorage:
                 cursor = conn.cursor()
                 cursor.execute("""
                 SELECT *
-                FROM task_outputs
+                FROM task_output
                 ORDER BY task_index
                 """)
 
@@ -120,7 +120,7 @@ class TaskOutputSQLiteStorage:
         try:
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
-                cursor.execute("DELETE FROM task_outputs")
+                cursor.execute("DELETE FROM task_output")
                 conn.commit()
 
         except sqlite3.Error as e:

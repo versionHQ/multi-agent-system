@@ -7,7 +7,7 @@
 ![pyenv ver](https://img.shields.io/badge/pyenv-2.5.0-orange)
 
 
-LLM orchestration frameworks to deploy multi-agent systems and automate complex tasks with network formations.
+Agentic orchestration framework to deploy agent network and handle complex task automation.
 
 **Visit:**
 
@@ -83,8 +83,7 @@ You can specify a desired formation or allow the agents to determine it autonomo
 
    ```
    from pydantic import BaseModel
-   from versionhq.agent.model import Agent
-   from versionhq.task.model import Task
+   from versionhq import Agent, Task
 
    class CustomOutput(BaseModel):
       test1: str
@@ -124,9 +123,7 @@ This will return `TaskOutput` instance that stores a response in plane text, JSO
 ### Case 2. Supervising:
 
    ```
-   from versionhq.agent.model import Agent
-   from versionhq.task.model import Task, ResponseField
-   from versionhq.team.model import Team, TeamMember
+   from versionhq import Agent, Task, ResponseField, Team, TeamMember
 
    agent_a = Agent(role="agent a", goal="My amazing goals", llm="llm-of-your-choice")
    agent_b = Agent(role="agent b", goal="My amazing goals", llm="llm-of-your-choice")

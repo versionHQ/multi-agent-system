@@ -1,17 +1,16 @@
 import uuid
 import warnings
-import json
 from enum import Enum
 from dotenv import load_dotenv
 from concurrent.futures import Future
 from hashlib import md5
-from typing import Any, Dict, List, TYPE_CHECKING, Callable, Optional, Tuple
-from pydantic import UUID4, InstanceOf, Json, BaseModel, Field, PrivateAttr, field_validator, model_validator
+from typing import Any, Dict, List, Callable, Optional, Tuple
+from pydantic import UUID4, BaseModel, Field, PrivateAttr, field_validator, model_validator
 from pydantic._internal._generate_schema import GenerateSchema
 from pydantic_core import PydanticCustomError, core_schema
 
 from versionhq.agent.model import Agent
-from versionhq.task.model import Task, TaskOutput, ConditionalTask, TaskOutputFormat
+from versionhq.task.model import Task, TaskOutput, ConditionalTask
 from versionhq.task.formatter import create_raw_outputs
 from versionhq.team.team_planner import TeamPlanner
 from versionhq._utils.logger import Logger
@@ -38,6 +37,16 @@ load_dotenv(override=True)
 #         pass
 
 
+
+class Formation(str, Enum):
+    SOLO = 1
+    SUPERVISING = 2
+    NETWORK = 3
+    RANDOM = 4
+    HYBRID = 10
+    UNDEFINED = 0
+
+
 class TaskHandlingProcess(str, Enum):
     """
     Class representing the different processes that can be used to tackle multiple tasks.
@@ -47,24 +56,24 @@ class TaskHandlingProcess(str, Enum):
     consensual = "consensual"
 
 
-class TeamOutput(BaseModel):
+class TeamOutput(TaskOutput):
     """
-    Store outputs of the tasks handled by the team.
-    `json_dict` and `raw` store overall output of tasks that handled by the team,
-    while `task_output_list` stores each TaskOutput instance to the tasks handled by the team members.
-    Note that `raw` and `json_dict` will be prioritized as TeamOutput to refer over `task_output_list`.
+    A class to store output from the team, inherited from TaskOutput class.
     """
 
     team_id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True, description="store the team ID that generate the TeamOutput")
-    raw: str = Field(default="", description="raw output of the team lead task handled by the team leader")
-    pydantic: Optional[Any] = Field(default=None, description="`raw` converted to the abs. pydantic model")
-    json_dict: Dict[str, Any] = Field(default=None, description="`raw` converted to dictionary")
-    task_output_list: list[TaskOutput] = Field(default=list, description="store output of all the tasks that the team has executed")
+    task_description: str = Field(default=None, description="store initial request (task description) from the client")
+    task_outputs: list[TaskOutput] = Field(default=list, description="store outputs of all tasks that the team has executed")
     token_usage: UsageMetrics = Field(default=dict, description="processed token summary")
+
+
+    def return_all_task_outputs(self) -> List[Dict[str, Any]]:
+        res = [output.json_dict for output in self.task_outputs]
+        return res
+
 
     def __str__(self):
         return (str(self.pydantic) if self.pydantic else str(self.json_dict) if self.json_dict else self.raw)
-
 
     def __getitem__(self, key):
         if self.pydantic and hasattr(self.pydantic, key):
@@ -74,35 +83,6 @@ class TeamOutput(BaseModel):
         else:
             raise KeyError(f"Key '{key}' not found in the team output.")
 
-
-    @property
-    def json(self) -> Optional[str]:
-        if self.tasks_output[-1].output_format != TaskOutputFormat.JSON:
-            raise ValueError(
-                "No JSON output found in the final task. Please make sure to set the output_json property in the final task in your team."
-            )
-        return json.dumps(self.json_dict)
-
-
-    def to_dict(self) -> Dict[str, Any]:
-        """
-        Convert pydantic / raw output into dict and return the dict.
-        When we only have `raw` output, return `{ output: raw }` to avoid an error
-        """
-
-        output_dict = {}
-        if self.json_dict:
-            output_dict.update(self.json_dict)
-        elif self.pydantic:
-            output_dict.update(self.pydantic.model_dump())
-        else:
-            output_dict.upate({ "output": self.raw })
-        return output_dict
-
-
-    def return_all_task_outputs(self) -> List[Dict[str, Any]]:
-        res = [output.json_dict for output in self.task_output_list]
-        return res
 
 
 class TeamMember(BaseModel):
@@ -134,6 +114,7 @@ class Team(BaseModel):
     id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True)
     name: Optional[str] = Field(default=None)
     members: List[TeamMember] = Field(default_factory=list)
+    formation: Optional[Formation] = Field(default=None)
 
     # formation planning
     planning_llm: Optional[Any] = Field(default=None, description="llm to generate formation")
@@ -324,7 +305,7 @@ class Team(BaseModel):
             raw=final_task_output.raw,
             json_dict=final_task_output.json_dict,
             pydantic=final_task_output.pydantic,
-            task_output_list=task_outputs,
+            task_outputs=task_outputs,
             token_usage=token_usage,
         )
 

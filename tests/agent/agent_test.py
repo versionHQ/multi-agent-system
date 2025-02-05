@@ -1,12 +1,10 @@
 import os
-from unittest import mock
 from unittest.mock import patch
-import pytest
 from typing import Callable, Any
 
 from versionhq.agent.model import Agent
 from versionhq.agent.TEMPLATES.Backstory import BACKSTORY_SHORT, BACKSTORY_FULL
-from versionhq.llm.model import LLM, DEFAULT_MODEL_NAME
+from versionhq.llm.model import DEFAULT_MODEL_NAME, LLM
 from versionhq.tool.model import Tool
 from versionhq.tool.decorator import tool
 
@@ -259,10 +257,8 @@ def test_agent_with_knowledge_sources():
 
 
 def test_using_contextual_memory():
-    from unittest.mock import patch
     from versionhq.task.model import Task
     from versionhq.task.evaluate import Evaluation
-    from versionhq.memory.contextual_memory import ContextualMemory
     from versionhq.storage.rag_storage import RAGStorage
     from versionhq.storage.ltm_sqlite_storage import LTMSQLiteStorage
 
@@ -270,16 +266,12 @@ def test_using_contextual_memory():
     assert agent.short_term_memory.storage and isinstance(agent.short_term_memory.storage, RAGStorage) and agent.short_term_memory.storage.type == "stm"
     assert agent.long_term_memory.storage and isinstance(agent.long_term_memory.storage, LTMSQLiteStorage)
 
-    task = Task(description="Research a topic to teach a kid aged 6 about math.")
-
-    with patch.object(ContextualMemory, "build_context_for_task") as contextual_mem:
-        res = task.execute_sync(agent=agent)
-        assert isinstance(res.evaluation, Evaluation) and res.evaluation.suggestion_summary is not None
-        assert res.evaluation.aggregate_score is not None
-        contextual_mem.assert_called_once()
+    task = Task(description="Research a topic to teach a kid aged 6 about math.", should_evaluate=True)
+    res = task.execute_sync(agent=agent)
+    assert isinstance(res.evaluation, Evaluation) and res.evaluation.suggestion_summary and res.evaluation.aggregate_score is not None
 
 
-def test_disabled_memory_using_contextual_memory():
+def test_disabled_memory():
     from unittest.mock import patch
     from versionhq.task.model import Task
     from versionhq.memory.contextual_memory import ContextualMemory

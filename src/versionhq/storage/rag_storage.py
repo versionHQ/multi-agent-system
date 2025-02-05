@@ -163,11 +163,32 @@ class RAGStorage(BaseRAGStorage):
         return f"{base_path}/{file_name}"
 
 
-    def save(self, value: Any, metadata: Dict[str, Any]) -> None:
+    def _create_default_embedding_function(self):
+        from chromadb.utils.embedding_functions.openai_embedding_function import (
+            OpenAIEmbeddingFunction,
+        )
+
+        return OpenAIEmbeddingFunction(
+            api_key=os.getenv("OPENAI_API_KEY"), model_name="text-embedding-3-small"
+        )
+
+
+    def _generate_embedding(self, text: str, metadata: Optional[Dict[str, Any]]) -> None:
+        if not hasattr(self, "app") or not hasattr(self, "collection"):
+            self._initialize_app()
+
+        if metadata:
+            self.collection.add(documents=[text], metadatas=[metadata, ], ids=[str(uuid.uuid4())])
+
+        else:
+            self.collection.add(documents=[text], ids=[str(uuid.uuid4())])
+
+
+    def save(self, data: Dict[str, Any] | str, metadata: Optional[Dict[str, Any]] = dict()) -> None:
         if not hasattr(self, "app") or not hasattr(self, "collection"):
             self._initialize_app()
         try:
-            self._generate_embedding(value, metadata)
+            self._generate_embedding(text=str(data), metadata=metadata)
         except Exception as e:
             logging.error(f"Error during {self.type} save: {str(e)}")
 
@@ -197,17 +218,6 @@ class RAGStorage(BaseRAGStorage):
             return []
 
 
-    def _generate_embedding(self, text: str, metadata: Dict[str, Any]) -> None:
-        if not hasattr(self, "app") or not hasattr(self, "collection"):
-            self._initialize_app()
-
-        self.collection.add(
-            documents=[text],
-            metadatas=[metadata or {}],
-            ids=[str(uuid.uuid4())],
-        )
-
-
     def reset(self) -> None:
         try:
             if self.app:
@@ -220,12 +230,3 @@ class RAGStorage(BaseRAGStorage):
                 pass
             else:
                 raise Exception(f"An error occurred while resetting the {self.type} memory: {e}")
-
-    def _create_default_embedding_function(self):
-        from chromadb.utils.embedding_functions.openai_embedding_function import (
-            OpenAIEmbeddingFunction,
-        )
-
-        return OpenAIEmbeddingFunction(
-            api_key=os.getenv("OPENAI_API_KEY"), model_name="text-embedding-3-small"
-        )
