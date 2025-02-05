@@ -26,10 +26,10 @@ Agentic orchestration framework to deploy agent network and handle complex task 
 - [Key Features](#key-features)
   - [Agent formation](#agent-formation)
 - [Quick Start](#quick-start)
-  - [Generate and launch an agent network](#generate-and-launch-an-agent-network)
-  - [Case 1. Solo Agent:](#case-1-solo-agent)
+  - [Generate agent networks and launch task execution:](#generate-agent-networks-and-launch-task-execution)
+  - [Solo Agent:](#solo-agent)
     - [Return a structured output with a summary in string.](#return-a-structured-output-with-a-summary-in-string)
-  - [Case 2. Supervising:](#case-2-supervising)
+  - [Supervising:](#supervising)
 - [Technologies Used](#technologies-used)
 - [Project Structure](#project-structure)
 - [Setup](#setup)
@@ -77,7 +77,7 @@ You can specify a desired formation or allow the agents to determine it autonomo
 
 (Python 3.11 or higher)
 
-### Generate and launch an agent network
+### Generate agent networks and launch task execution:
 
    ```
    from versionhq import form_agent_network
@@ -92,7 +92,7 @@ You can specify a desired formation or allow the agents to determine it autonomo
    This will form a network with multiple agents on `Formation` and return `TaskOutput` object with output in JSON, plane text, Pydantic model format with evaluation.
 
 
-### Case 1. Solo Agent:
+### Solo Agent:
 
 #### Return a structured output with a summary in string.
 
@@ -135,7 +135,7 @@ This will return `TaskOutput` instance that stores a response in plane text, JSO
    )
    ```
 
-### Case 2. Supervising:
+### Supervising:
 
    ```
    from versionhq import Agent, Task, ResponseField, Team, TeamMember
