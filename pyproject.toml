@@ -60,7 +60,7 @@ classifiers = [
 
 [project.urls]
 Homepage = "https://versi0n.io"
-Documentation = "https://chief-oxygen-8a2.notion.site/Documentation-17e923685cf98001a5fad5c4b2acd79b?pvs=73"
+Documentation = "https://docs.versi0n.io"
 Repository = "https://github.com/versionHQ/multi-agent-system"
 Issues = "https://github.com/versionHQ/multi-agent-system/issues"
 
