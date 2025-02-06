@@ -1,7 +1,7 @@
 site_name: Docs - versionhq
 site_author: Version IO Sdn. Bhd.
 site_description: A Python framework for multi-agent systems that handle complex task automation.
-site_url: https://test.versi0n.io
+site_url: https://docs.versi0n.io
 repo_url: https://github.com/versionhq/multi-agent-system/
 repo_name: multi-agent-system
 edit_uri: edit/main/docs/

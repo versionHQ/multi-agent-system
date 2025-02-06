@@ -23,6 +23,7 @@ temp/*
 .vscode/*
 assets/*
 memo.txt
+site/
 
 __pycache__
 .ruff_cache/
