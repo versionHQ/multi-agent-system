@@ -15,7 +15,7 @@ exclude = ["test*", "__pycache__", "*.egg-info"]
 
 [project]
 name = "versionhq"
-version = "1.1.12.3"
+version = "1.1.12.4"
 authors = [{ name = "Kuriko Iwai", email = "kuriko@versi0n.io" }]
 description = "An agentic orchestration framework for multi-agent system that shares memory, knowledge base, and RAG tools."
 readme = "README.md"
@@ -89,9 +89,13 @@ dev-dependencies = [
   "pytest-vcr>=1.0.2",
   "black",
   "bandit",
-  "twine",
   "pytest>=8.3.4",
   "mkdocs>=1.6.1",
+  "mkdocs-material>=9.6.2",
+  "mkdocs-material-extensions>=1.3.1",
+  "mkdocstrings-python>=1.14.5",
+  "mkdocstrings>=0.28.0",
+  "pillow>=10.4.0"
 ]
 
 [tool.uv.workspace]

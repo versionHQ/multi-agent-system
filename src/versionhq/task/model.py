@@ -607,7 +607,7 @@ Ref. Output image: {output_formats_to_follow}
                     if len(peers) > 0:
                         agent_to_delegate = peers[0]
             else:
-                agent_to_delegate = Agent(role="delegated_agent", goal=agent.goal, llm=agent.llm)
+                agent_to_delegate = Agent(role="vhq-Delegated-Agent", goal=agent.goal, llm=agent.llm)
 
             agent = agent_to_delegate
             self.delegations += 1

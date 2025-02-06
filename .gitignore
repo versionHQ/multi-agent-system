@@ -5,8 +5,8 @@ entity_memory.py
 
 train.py
 
-mkdocs.yml
-docs/
+# mkdocs.yml
+# docs/
 
 dist/
 lib/

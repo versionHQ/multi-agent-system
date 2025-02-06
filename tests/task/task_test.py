@@ -158,7 +158,7 @@ def test_delegate():
     task.execute_sync(agent=agent)
 
     assert task.output is not None
-    assert "delegated_agent" in task.processed_by_agents
+    assert "vhq-Delegated-Agent" in task.processed_by_agents
     assert task.delegations != 0
 
 
@@ -362,15 +362,16 @@ def test_evaluation():
 
 
 
-def test_agent_formation():
-    from versionhq.team.model import Team, Formation
-    from versionhq.task.formation import form_agent_network
+## Covered in doc test
+# def test_agent_formation():
+#     from versionhq.team.model import Team, Formation
+#     from versionhq.task.formation import form_agent_network
 
-    created_team = form_agent_network(
-        task="Launch an outbound campaign to attract young male audience.",
-        expected_outcome="Best social media mix plan and key communication lines",
-        context="We sell luxuary sportswear targeting male in 30th, and are expanding our market to younger male.",
-    )
-    assert isinstance(created_team, Team) and created_team.id
-    assert created_team.members and created_team.formation in Formation and created_team.tasks
-    assert created_team.managers if created_team.formation == Formation.SUPERVISING else created_team.managers is None
+#     created_team = form_agent_network(
+#         task="Launch an outbound campaign to attract young male audience.",
+#         expected_outcome="Best social media mix plan and key communication lines",
+#         context="We sell luxuary sportswear targeting male in 30th, and are expanding our market to younger male.",
+#     )
+#     assert isinstance(created_team, Team) and created_team.id
+#     assert created_team.members and created_team.formation in Formation and created_team.tasks
+#     assert created_team.managers if created_team.formation == Formation.SUPERVISING else created_team.managers is None

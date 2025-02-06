@@ -53,7 +53,7 @@ MODELS = {
         "claude-3-haiku-20240307",
     ],
     "openrouter": [
-        "openrouter/deepseek/deepseek-r1:free",
+        "openrouter/deepseek/deepseek-r1",
         "openrouter/qwen/qwen-2.5-72b-instruct",
     ],
     "huggingface": [

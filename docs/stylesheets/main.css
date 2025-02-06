@@ -1,0 +1,26 @@
+:root>* {
+    --md-primary-fg-color: #191b1b;
+    --md-primary-fg-color--light: #91c3bb;
+    --md-primary-fg-color--dark: #169d87;
+}
+
+
+class {
+    background-color: #ededeb;
+    padding: 10px;
+    border-radius: 5px;
+    color: #ec5757;
+}
+
+variable {
+    font: 'Roboto Mono 400' !important;
+    background-color: #ededeb;
+    padding: 5px;
+    border-radius: .1rem;
+    color: #191b1b;
+    font-size: .85em
+}
+
+bold {
+    font-weight: 700;
+}

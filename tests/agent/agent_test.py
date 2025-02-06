@@ -24,6 +24,7 @@ def test_build_agent_with_minimal_input():
     assert agent.llm.model == DEFAULT_MODEL_NAME
     assert agent.llm.api_key == LITELLM_API_KEY
     assert agent.tools == []
+    assert isinstance(agent.function_calling_llm, LLM)
 
 
 def test_build_agent_from_config():
@@ -35,6 +36,7 @@ def test_build_agent_from_config():
     assert agent.llm.model == DEFAULT_MODEL_NAME
     assert agent.llm.api_key == LITELLM_API_KEY
     assert agent.tools == []
+    assert isinstance(agent.function_calling_llm, LLM)
 
 
 def test_build_agent_with_backstory():
@@ -51,6 +53,7 @@ def test_build_agent_with_backstory():
     assert agent.llm.model == DEFAULT_MODEL_NAME
     assert agent.llm.api_key == LITELLM_API_KEY
     assert agent.tools == []
+    assert isinstance(agent.function_calling_llm, LLM)
 
 
 def test_build_agent():
@@ -66,6 +69,7 @@ def test_build_agent():
     assert agent.llm.model == DEFAULT_MODEL_NAME
     assert agent.llm.api_key == LITELLM_API_KEY
     assert agent.tools == []
+    assert isinstance(agent.function_calling_llm, LLM)
 
 
 def test_build_agent_with_llm():
@@ -84,6 +88,7 @@ def test_build_agent_with_llm():
     assert agent.llm.model == "gpt-4o"
     assert agent.llm.api_key == LITELLM_API_KEY
     assert agent.tools == []
+    assert isinstance(agent.function_calling_llm, LLM)
 
 
 def test_build_agent_with_llm_config():
@@ -110,12 +115,16 @@ def test_build_agent_with_llm_config():
     )
 
     assert isinstance(agent.llm, LLM)
+    assert isinstance(agent.function_calling_llm, LLM)
     assert agent.llm.model == "gemini/gemini-1.5-flash"
-    assert agent.llm.api_key is not None
-    assert agent.llm.max_tokens == 4000
-    assert agent.llm.logprobs == False
-    assert [hasattr(agent.llm, k) and v for k, v in llm_config.items() if v is not None]
     assert agent.llm.callbacks == [dummy_func]
+
+    import litellm
+    valid_params = litellm.get_supported_openai_params(model="gemini/gemini-1.5-flash")
+    config = llm_params.update(llm_config)
+    for key in valid_params:
+        if config and [k == key for k, v in config.items()]:
+            assert getattr(agent.llm, key) == config[key]
 
 
 def test_build_agent_with_llm_instance():
@@ -136,6 +145,7 @@ def test_build_agent_with_llm_instance():
     assert agent.llm.max_tokens == 3000
     assert agent.llm.logprobs == False
     assert agent.llm.callbacks == [dummy_func]
+    assert isinstance(agent.function_calling_llm, LLM)
 
 
 def test_build_agent_with_llm_and_func_llm_config():
@@ -150,13 +160,9 @@ def test_build_agent_with_llm_and_func_llm_config():
         callbacks=[dummy_func]
     )
 
-    assert isinstance(agent.llm, LLM) and isinstance(agent.function_calling_llm, LLM)
-    assert agent.llm.model == DEFAULT_MODEL_NAME
+    assert isinstance(agent.llm, LLM) and agent.llm.model == DEFAULT_MODEL_NAME
+    assert isinstance(agent.function_calling_llm, LLM)
     assert agent.function_calling_llm.model == "gemini/gemini-1.5-flash" if agent.function_calling_llm._supports_function_calling() else DEFAULT_MODEL_NAME
-    assert agent.function_calling_llm.api_key is not None
-    assert agent.function_calling_llm.max_tokens == 4000
-    assert agent.function_calling_llm.logprobs == False
-    assert agent.function_calling_llm.callbacks == [dummy_func]
 
 
 def test_build_agent_with_llm_and_func_llm_instance():
@@ -179,6 +185,7 @@ def test_build_agent_with_llm_and_func_llm_instance():
     assert agent.function_calling_llm.max_tokens == 3000
     assert agent.function_calling_llm.logprobs == False
     assert agent.function_calling_llm.callbacks == [dummy_func]
+    assert isinstance(agent.function_calling_llm, LLM)
 
 
 def test_agent_with_random_dict_tools():

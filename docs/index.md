@@ -12,38 +12,10 @@ Agentic orchestration framework to deploy agent network and handle complex task 
 **Visit:**
 
 - [PyPI](https://pypi.org/project/versionhq/)
-- [Github (LLM orchestration framework)](https://github.com/versionHQ/multi-agent-system)
+- [Github (Orchestration framework)](https://github.com/versionHQ/multi-agent-system)
 - [Use case](https://versi0n.io/) / [Quick demo](https://res.cloudinary.com/dfeirxlea/video/upload/v1737732977/pj_m_home/pnsyh5mfvmilwgt0eusa.mov)
 - [Documentation](https://docs.versi0n.io)
 
-
-<hr />
-
-## Table of Content
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-
-- [Key Features](#key-features)
-  - [Agent formation](#agent-formation)
-- [Quick Start](#quick-start)
-  - [Generate agent networks and launch task execution:](#generate-agent-networks-and-launch-task-execution)
-  - [Solo Agent:](#solo-agent)
-    - [Return a structured output with a summary in string.](#return-a-structured-output-with-a-summary-in-string)
-  - [Supervising:](#supervising)
-- [Technologies Used](#technologies-used)
-- [Project Structure](#project-structure)
-- [Setup](#setup)
-- [Set up a project](#set-up-a-project)
-- [Contributing](#contributing)
-  - [Documentation](#documentation)
-  - [Customizing AI Agents](#customizing-ai-agents)
-  - [Modifying RAG Functionality](#modifying-rag-functionality)
-  - [Package Management with uv](#package-management-with-uv)
-  - [Pre-Commit Hooks](#pre-commit-hooks)
-- [Trouble Shooting](#trouble-shooting)
-- [Frequently Asked Questions (FAQ)](#frequently-asked-questions-faq)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 <hr />
 
@@ -69,6 +41,7 @@ You can specify a desired formation or allow the agents to determine it autonomo
 
 <hr />
 
+
 ## Quick Start
 
 **Install `versionhq` package:**
@@ -77,7 +50,7 @@ You can specify a desired formation or allow the agents to determine it autonomo
    pip install versionhq
    ```
 
-(Python 3.11 or higher)
+(Python 3.11 and higher)
 
 ### Generate agent networks and launch task execution:
 
@@ -231,10 +204,6 @@ src/
 
 ## Setup
 
-
-
-## Set up a project
-
 1. Install `uv` package manager:
 
       For MacOS:
@@ -270,8 +239,8 @@ src/
 3. Set up environment variables:
    Create a `.env` file in the project root and add the following:
    ```
-   LITELLM_API_KEY=your-litellm-api-key
    OPENAI_API_KEY=your-openai-api-key
+   LITELLM_API_KEY=your-litellm-api-key
    COMPOSIO_API_KEY=your-composio-api-key
    COMPOSIO_CLI_KEY=your-composio-cli-key
    [LLM_INTERFACE_PROVIDER_OF_YOUR_CHOICE]_API_KEY=your-api-key
@@ -308,12 +277,12 @@ src/
 **Optional**
 * Flag with `#! REFINEME` for any improvements needed and `#! FIXME` for any errors.
 
-<!-- * Run a React demo app: [React demo app](https://github.com/versionHQ/test-client-app) to check it on the client endpoint.
+* Run a React demo app: [React demo app](https://github.com/versionHQ/test-client-app) to check it on the client endpoint.
    ```
    npm i
    npm start
    ```
-   The frontend will be available at `http://localhost:3000`. -->
+   The frontend will be available at `http://localhost:3000`.
 
 * `production` use case is available at `https://versi0n.io`. Currently, we are running alpha test.
 

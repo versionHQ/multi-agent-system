@@ -128,7 +128,7 @@ class Agent(BaseModel):
     max_tokens: Optional[int] = Field(default=None, description="max. number of tokens for the agent's execution")
     max_execution_time: Optional[int] = Field(default=None, description="max. execution time for an agent to execute a task")
     max_rpm: Optional[int] = Field(default=None, description="max. number of requests per minute")
-    llm_config: Optional[Dict[str, Any]] = Field(default=None, description="other llm config cascaded to the model")
+    llm_config: Optional[Dict[str, Any]] = Field(default=None, description="other llm config cascaded to the LLM model")
 
     # cache, error, ops handling
     formatting_errors: int = Field(default=0, description="number of formatting errors.")
@@ -164,34 +164,43 @@ class Agent(BaseModel):
         Set up `llm` and `function_calling_llm` as valid LLM objects using the given values.
         """
         self.agent_ops_agent_name = self.role
-        self.llm = self._convert_to_llm_class(llm=self.llm)
+        self.llm = self._convert_to_llm_object(llm=self.llm)
 
         function_calling_llm = self.function_calling_llm if self.function_calling_llm else self.llm if self.llm else None
-        function_calling_llm = self._convert_to_llm_class(llm=function_calling_llm)
+        function_calling_llm = self._convert_to_llm_object(llm=function_calling_llm)
         if function_calling_llm._supports_function_calling():
             self.function_calling_llm = function_calling_llm
+        elif self.llm._supports_function_calling():
+            self.function_calling_llm = self.llm
+        else:
+            self.function_calling_llm = self._convert_to_llm_object(llm=LLM(model=DEFAULT_MODEL_NAME))
         return self
 
 
-    def _convert_to_llm_class(self, llm: Any | None) -> LLM:
+    def _convert_to_llm_object(self, llm: Any | None) -> LLM:
+        """
+        Convert the given value to LLM object.
+        When `llm` is dict or self.llm_config is not None, add these values to the LLM object after validating them.
+        """
         llm = llm if llm is not None else DEFAULT_MODEL_NAME
 
         match llm:
             case LLM():
-                return self._set_llm_params(llm=llm)
+                return self._set_llm_params(llm=llm, config=self.llm_config)
 
             case str():
                 llm_obj = LLM(model=llm)
-                return self._set_llm_params(llm=llm_obj)
+                return self._set_llm_params(llm=llm_obj, config=self.llm_config)
 
             case dict():
                 model_name = llm.pop("model_name", llm.pop("deployment_name", str(llm)))
                 llm_obj = LLM(model=model_name if model_name else DEFAULT_MODEL_NAME)
-                return self._set_llm_params(llm_obj, { k: v for k, v in llm.items() if v is not None })
+                config = llm.update(self.llm_config) if self.llm_config else llm
+                return self._set_llm_params(llm_obj, config=config)
 
             case _:
                 model_name = (getattr(self.llm, "model_name") or getattr(self.llm, "deployment_name") or str(self.llm))
-                llm_obj = LLM(model=model_name)
+                llm_obj = LLM(model=model_name if model_name else DEFAULT_MODEL_NAME)
                 llm_params = {
                     "max_tokens": (getattr(llm, "max_tokens") or self.max_tokens or 3000),
                     "timeout": getattr(llm, "timeout", self.max_execution_time),
@@ -201,14 +210,39 @@ class Agent(BaseModel):
                     "api_key": getattr(llm, "api_key", os.environ.get("LITELLM_API_KEY", None)),
                     "base_url": getattr(llm, "base_url", None),
                 }
-                return self._set_llm_params(llm=llm_obj, config=llm_params)
+                config = llm_params.update(self.llm_config) if self.llm_config else llm_params
+                return self._set_llm_params(llm=llm_obj, config=config)
 
 
     def _set_llm_params(self, llm: LLM, config: Dict[str, Any] = None) -> LLM:
         """
-        After setting up an LLM instance, add params to the instance.
-        Prioritize the agent's settings over the model's base setups.
+        Add valid params to the LLM object.
         """
+
+        import litellm
+        from versionhq.llm.llm_vars import PARAMS
+
+        valid_config = {k: v for k, v in config.items() if v} if config else {}
+
+        if valid_config:
+            valid_keys = list()
+            try:
+                valid_keys = litellm.get_supported_openai_params(model=llm.model, custom_llm_provider=self.endpoint_provider, request_type="chat_completion")
+                if not valid_keys:
+                    valid_keys = PARAMS.get("common")
+            except:
+                valid_keys = PARAMS.get("common")
+
+            valid_keys += PARAMS.get("litellm")
+
+            for key in valid_keys:
+                if key in valid_config and valid_config[key]:
+                    val = valid_config[key]
+                    if [key == k for k, v in LLM.model_fields.items()]:
+                        setattr(llm, key, val)
+                    else:
+                        llm.other_valid_config.update({ key: val})
+
 
         llm.timeout = self.max_execution_time if llm.timeout is None else llm.timeout
         llm.max_tokens = self.max_tokens if self.max_tokens else llm.max_tokens
@@ -225,15 +259,6 @@ class Agent(BaseModel):
         if self.respect_context_window == False:
             llm.context_window_size = DEFAULT_CONTEXT_WINDOW_SIZE
 
-        config = self.config.update(config) if self.config else config
-        if config:
-            valid_params = litellm.get_supported_openai_params(model=llm.model)
-            for k, v in config.items():
-                try:
-                    if k in valid_params and v is not None:
-                        setattr(llm, k, v)
-                except:
-                    pass
         return llm
 
 
@@ -407,9 +432,8 @@ class Agent(BaseModel):
             self._logger.log(level="info", message=f"Messages sent to the model: {messages}", color="blue")
 
             if tool_res_as_final:
-                func_llm = self.function_calling_llm if self.function_calling_llm and self.function_calling_llm._supports_function_calling() else self.llm if self.llm and self.llm._supports_function_calling() else LLM(model=DEFAULT_MODEL_NAME)
-                raw_response = func_llm.call(messages=messages, tools=tools, tool_res_as_final=True)
-                task.tokens = func_llm._tokens
+                raw_response = self.function_calling_llm.call(messages=messages, tools=tools, tool_res_as_final=True)
+                task.tokens = self.function_calling_llm._tokens
             else:
                 raw_response = self.llm.call(messages=messages, response_format=response_format, tools=tools)
                 task.tokens = self.llm._tokens

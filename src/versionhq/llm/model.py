@@ -95,6 +95,7 @@ class LLM(BaseModel):
     top_logprobs: Optional[int] = Field(default=None)
     tools: Optional[List[Dict[str, Any]]] = Field(default_factory=list, description="store a list of tool properties")
     callbacks: List[Any] = Field(default_factory=list)
+    other_valid_config: Optional[Dict[str, Any]] = Field(default_factory=dict, description="store other valid values in dict to cascade to the model")
 
     # LiteLLM specific fields
     api_base: Optional[str] = Field(default=None, description="litellm specific field - api base of the model provider")
@@ -201,7 +202,6 @@ class LLM(BaseModel):
         if api_key_name:
             self.api_key = os.environ.get(api_key_name, None)
 
-
         base_url_key_name = self.endpoint_provider.upper() + "_API_BASE" if self.endpoint_provider else None
 
         if base_url_key_name:
@@ -229,6 +229,8 @@ class LLM(BaseModel):
         for item in valid_keys:
             if hasattr(self, item) and getattr(self, item):
                 valid_params[item] = getattr(self, item)
+            elif item in self.other_valid_config and self.other_valid_config[item]:
+                valid_params[item] = self.other_valid_config[item]
             elif item in config and config[item]:
                 valid_params[item] = config[item]
 
