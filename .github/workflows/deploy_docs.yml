@@ -11,28 +11,20 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v4
+      - name: Configure Git Credentials
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+      - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
-
-      - name: Setup cache
-        run: echo "cache_id=$(date --utc '+%V')" >> $GITHUB_ENV
-        uses: actions/cache@v4
+          python-version: 3.12
+      - run: echo "cache_id=$(date +%s)" >> $GITHUB_ENV
+      - uses: actions/cache@v4
         with:
           key: mkdocs-material-${{ env.cache_id }}
           path: .cache
           restore-keys: |
             mkdocs-material-
-
-      - name: Install Requirements
-        run: |
-          pip install mkdocs-material mkdocs-material-extensions pillow
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-
-      - name: Build and deploy MkDocs
-        run: mkdocs gh-deploy --force
+      - run: pip install mkdocs-material 
+      - run: mkdocs gh-deploy --force
