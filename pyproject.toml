@@ -15,9 +15,9 @@ exclude = ["test*", "__pycache__", "*.egg-info"]
 
 [project]
 name = "versionhq"
-version = "1.1.12.4"
+version = "1.1.12.5"
 authors = [{ name = "Kuriko Iwai", email = "kuriko@versi0n.io" }]
-description = "An agentic orchestration framework for multi-agent system that shares memory, knowledge base, and RAG tools."
+description = "An agentic orchestration framework for building agent networks that handle task automation without human interaction."
 readme = "README.md"
 requires-python = ">=3.11"
 license = { file = "LICENSE" }
@@ -99,7 +99,7 @@ dev-dependencies = [
 ]
 
 [tool.uv.workspace]
-members = ["Kuriko", "krik8235"]
+members = ["Kuriko", "krik8235", "Kuriko IWAI"]
 
 [tool.mypy]
 ignore_missing_imports = true

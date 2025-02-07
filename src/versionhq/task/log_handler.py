@@ -45,7 +45,7 @@ class TaskOutputStorageHandler:
             output_to_store = dict(
                 description=str(task.description),
                 raw=str(task.output.raw),
-                responsible_agent=str(task.processed_by_agents),
+                responsible_agent=str(task.processed_agents),
             )
 
         self.storage.add(task=task, output=output_to_store, task_index=task_index, was_replayed=was_replayed, inputs=inputs)

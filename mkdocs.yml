@@ -117,8 +117,8 @@ nav:
   - Quick Start: 'quickstart.md'
   - Core Components:
     - Agent: 'core/agent.md'
+    - Tool: 'core/tool.md'
   #   - Task: 'core/task.md'
-  #   - Tool: 'core/tool.md'
   #   - Compoio Tools: 'core/composio-tool.md'
   # - How to Guides:
   #   - Form agent networks: 'guides/form-agent-network.md'

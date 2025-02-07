@@ -7,7 +7,7 @@ tags:
 
 # Agent
 
-<class><bold>class:</bold> versionhq.agent.model.<bold>Agent<bold></class>
+<class>`class` versionhq.agent.model.<bold>Agent<bold></class>
 
 Each agent has its unique knowledge and memory on the past task.
 
@@ -16,7 +16,7 @@ You can create one and assign the task or reassign another task to the existing 
 
 ## Core usage
 
-By defining its role and goal in a simple sentence, the AI agent will be set up to run on  <bold>`gpt-4o`</bold> by default.
+By defining its role and goal in a simple sentence, the AI agent will be set up to run on <bold>`gpt-4o`</bold> by default.
 
 ```python
 from versionhq import Agent
@@ -33,7 +33,7 @@ agent = Agent(
 
 ### Model optimization
 
-<variable>var: <bold>llm</bold>: Optional[str | LLM | Dict[str, Any]] = "gpt4o"</variable>
+`[var]`<bold>`llm: Optional[str | LLM | Dict[str, Any]] = "gpt-4o"`
 
 You can select a model or model provider that the agent will run on.
 
@@ -82,7 +82,7 @@ agent = Agent(
 ```
 
 
-We are testing some features on the following providers.
+Following models are under review.
 
 ```python
 "huggingface": [
@@ -143,7 +143,7 @@ We are testing some features on the following providers.
 
 ### Developer Prompt (System Prompt)
 
-<variable>var: <bold>backstory</bold>: Optional[str] = TEMPLATE_BACKSTORY</variable>
+`[var]`<bold>`backstory: Optional[str] = TEMPLATE_BACKSTORY`
 
 Backstory will be drafted automatically using the given role, goal and other values in the Agent model, and converted into the **developer prompt** when the agent executes the task.
 
@@ -183,8 +183,9 @@ print(agent.backstory)
 
 # You are a marketing analyst for a company in a saturated market. The market is becoming increasingly price-competitive, and your company's profit margins are shrinking. Your primary goal is to develop and implement strategies to help your company maintain its market share and profitability in this challenging environment.
 ```
+<hr />
 
-<variable>var: <bold>use_developer_prompt</bold>: [bool] = True</variable>
+`[var]`<bold>`use_developer_prompt: [bool] = True`</bold>
 
 You can turn off the system prompt by setting `use_developer_prompt` False. In this case, the backstory is ignored when the agent call the LLM.
 
@@ -202,7 +203,7 @@ agent = Agent(
 
 ### Delegation
 
-<variable>var: <bold>allow_delegation</bold>: [bool] = False</variable>
+`[var]`<bold>`allow_delegation: [bool] = False`</bold>
 
 When the agent is occupied with other tasks or not capable enough to the given task, you can delegate the task to another agent or ask another agent for additional information. The delegated agent will be selected based on nature of the given task and/or tool.
 
@@ -218,7 +219,7 @@ agent = Agent(
 
 ### Max Retry Limit
 
-<variable>var: <bold>max_retry_limit</bold>: Optional[int] = 2</variable>
+`[var]`<bold>`max_retry_limit: Optional[int] = 2`</bold>
 
 You can define how many times the agent can retry the execution under the same given conditions when it encounters an error.
 
@@ -234,7 +235,7 @@ agent = Agent(
 
 ### Maximum Number of Iterations (MaxIt)
 
-<variable>var: <bold>maxit</bold>: Optional[int] = 25</variable>
+`[var]`<bold>`maxit: Optional[int] = 25`</bold>
 
 You can also define the number of loops that the agent will run after it encounters an error.
 
@@ -252,7 +253,7 @@ agent = Agent(
 
 ### Callbacks
 
-<variable>var: <bold>callbacks</bold>: Optional[List[Callable]] = None</variable>
+`[var]`<bold>`callbacks: Optional[List[Callable]] = None`</bold>
 
 You can add callback functions that the agent will run after executing any task.
 
@@ -320,7 +321,7 @@ agent = Agent(
 
 ### Context Window
 
-<variable>var: <bold>respect_context_window</bold>: [bool] = True</variable>
+`[var]`<bold>`respect_context_window: [bool] = True`</bold>
 
 A context window determines the amount of text that the model takes into account when generating a response.
 
@@ -332,7 +333,7 @@ You can turn off this rule by setting `respect_context_window` False to have lar
 
 ### Max Tokens
 
-<variable>var: <bold>max_tokens</bold>: Optional[int] = None</variable>
+`[var]`<bold>`max_tokens: Optional[int] = None`</bold>
 
 Max tokens defines the maximum number of tokens in the generated response. Tokens can be thought of as the individual units of text, which can be words or characters.
 
@@ -340,7 +341,7 @@ By default, the agent will follow the default max_tokens of the model, but you c
 
 ### Maximum Execution Time
 
-<variable>var: <bold>max_execution_times</bold>: Optional[int] = None</variable>
+`[var]`<bold>`max_execution_times: Optional[int] = None`</bold>
 
 The maximum amount of wall clock time to spend in the execution loop.
 
@@ -348,7 +349,7 @@ By default, the agent will follow the default setting of the model.
 
 ### Maximum RPM (Requests Per Minute)
 
-<variable>var: <bold>max_rpm</bold>: Optional[int] = None</variable>
+`[var]`<bold>`max_rpm: Optional[int] = None`</bold>
 
 The maximum number of requests that the agent can send to the LLM.
 
@@ -356,7 +357,7 @@ By default, the agent will follow the default setting of the model. When the val
 
 ### Other LLM Configuration
 
-<variable>var: <bold>llm_xonfig</bold>: Optional[Dict[str, Any]] = None</variable>
+`[var]`<bold>`llm_config: Optional[Dict[str, Any]] = None`</bold>
 
 You can specify any other parameters that the agent needs to follow when they call the LLM. Else, the agent will follow the default settings given by the model provider.
 
@@ -385,17 +386,16 @@ agent = Agent(
     )
 
 print(agent.llm)
-
-*<class LLM(
-	max_tokens=3000,
-  temperature=1,
-  top_p=0.1,
-  n=1,
-  stream=False,
-  stream_options=None,
-  stop="test",
-  max_completion_tokens=10000,
-)>*
+# LLM(
+#     max_tokens=3000,
+#     temperature=1,
+#     top_p=0.1,
+#     n=1,
+#     stream=False,
+#     stream_options=None,
+#     stop="test",
+#     max_completion_tokens=10000,
+# )
 ```
 
 <hr />
@@ -404,7 +404,7 @@ print(agent.llm)
 
 ### Knowledge Sources
 
-<variable>var: <bold>knowledge_sources</bold>: Optional[List[KnowledgeSource]] = None</variable>
+`[var]`<bold>`knowledge_sources: Optional[List[KnowledgeSource]] = None`</bold>
 
 You can add knowledge sources to the agent in the following formats:
 
@@ -441,7 +441,7 @@ res = task.execute_sync(agent=agent)
 # "gold" in res.raw  == True
 ```
 
-Ref. Knowledge class
+* Reference: <bold>`Knowledge` class</bold>
 
 ---
 
@@ -449,7 +449,7 @@ Ref. Knowledge class
 
 ### Store task execution results in memory
 
-<variable>var: <bold>use_memory</bold>: bool = False</variable>
+`[var]`<bold>`use_memory: bool = False`</bold>
 
 By turning on the use_memory val True, the agent will create and store the task output and contextualize the memory when they execute the task.
 
@@ -484,7 +484,7 @@ RAGStorage(
 
 MEM0 Storage
 
-Ref. Memory class
+* Reference: <bold>`Memory`</bold> class
 
 <hr />
 
@@ -492,7 +492,7 @@ Ref. Memory class
 
 ### Model configuration
 
-<variable>var: <bold>config</bold>: Optional[Dict[str, Any]] = None</variable>
+`[var]`<bold>`config: Optional[Dict[str, Any]] = None`</bold>
 
 You can create an agent by using model config parameters instead.
 
@@ -522,5 +522,3 @@ agent = Agent(
 
 - Self-learning
 - Tool
-
-[LLM](https://www.notion.so/LLM-17e923685cf980999ac0e7f65cdb80b7?pvs=21)

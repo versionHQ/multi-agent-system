@@ -6,8 +6,7 @@
    pip install versionhq
    ```
 
-(Python 3.11 and higher)
-
+(Python 3.11, 3.12)
 
 
 ## Set up a project
@@ -71,3 +70,53 @@ Here is the snippet of quick launch.
    ```
 
    This will form a network with multiple agents on `Formation` and return `TaskOutput` object with output in JSON, plane text, and Pydantic model format with evaluation.
+
+
+## Use a solo agent
+
+You can simply build an agent using `Agent` model.
+
+By default, the agent prioritize JSON serializable output.
+
+But you can add a plane text summary of the structured output by using callbacks.
+
+   ```python
+   from pydantic import BaseModel
+   from versionhq import Agent, Task
+
+   class CustomOutput(BaseModel):
+      test1: str
+      test2: list[str]
+
+   def dummy_func(message: str, test1: str, test2: list[str]) -> str:
+      return f"{message}: {test1}, {", ".join(test2)}"
+
+
+   agent = Agent(role="demo", goal="amazing project goal")
+
+   task = Task(
+      description="Amazing task",
+      pydantic_output=CustomOutput,
+      callback=dummy_func,
+      callback_kwargs=dict(message="Hi! Here is the result: ")
+   )
+
+   res = task.execute_sync(agent=agent, context="amazing context to consider.")
+   print(res)
+   # TaskOutput object
+   ```
+
+
+This will return a `TaskOutput` object that stores response in plane text, JSON, and Pydantic model: `CustomOutput` formats with a callback result, tool output (if given), and evaluation results (if given).
+
+   ```python
+   res == TaskOutput(
+      task_id=UUID('<TASK UUID>'),
+      raw='{\"test1\":\"random str\", \"test2\":[\"str item 1\", \"str item 2\", \"str item 3\"]}',
+      json_dict={'test1': 'random str', 'test2': ['str item 1', 'str item 2', 'str item 3']},
+      pydantic=<class '__main__.CustomOutput'>,
+      tool_output=None,
+      callback_output='Hi! Here is the result: random str, str item 1, str item 2, str item 3', # returned a plain text summary
+      evaluation=None
+   )
+   ```

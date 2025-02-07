@@ -1,5 +1,6 @@
 # Overview
 
+![DL](https://img.shields.io/badge/Download-15K+-red)
 ![MIT license](https://img.shields.io/badge/License-MIT-green)
 [![Publisher](https://github.com/versionHQ/multi-agent-system/actions/workflows/publish.yml/badge.svg)](https://github.com/versionHQ/multi-agent-system/actions/workflows/publish.yml)
 ![PyPI](https://img.shields.io/badge/PyPI-v1.1.12+-blue)
@@ -12,10 +13,12 @@ Agentic orchestration framework to deploy agent network and handle complex task 
 **Visit:**
 
 - [PyPI](https://pypi.org/project/versionhq/)
-- [Github (Orchestration framework)](https://github.com/versionHQ/multi-agent-system)
-- [Use case](https://versi0n.io/) / [Quick demo](https://res.cloudinary.com/dfeirxlea/video/upload/v1737732977/pj_m_home/pnsyh5mfvmilwgt0eusa.mov)
-- [Documentation](https://docs.versi0n.io)
+- [Docs](https://docs.versi0n.io)
+- [Playground](https://versi0n.io/)
 
+**Contribute:**
+
+- [Github Repository](https://github.com/versionHQ/multi-agent-system)
 
 <hr />
 
@@ -50,7 +53,7 @@ You can specify a desired formation or allow the agents to determine it autonomo
    pip install versionhq
    ```
 
-(Python 3.11 and higher)
+(Python 3.11, 3.12)
 
 ### Generate agent networks and launch task execution:
 
@@ -69,9 +72,13 @@ You can specify a desired formation or allow the agents to determine it autonomo
 
 ### Solo Agent:
 
-#### Return a structured output with a summary in string.
+You can simply build an agent using `Agent` model.
 
-   ```
+By default, the agent prioritize JSON serializable output.
+
+But you can add a plane text summary of the structured output by using callbacks.
+
+   ```python
    from pydantic import BaseModel
    from versionhq import Agent, Task
 
@@ -96,16 +103,17 @@ You can specify a desired formation or allow the agents to determine it autonomo
    print(res)
    ```
 
-This will return `TaskOutput` instance that stores a response in plane text, JSON serializable dict, and Pydantic model: `CustomOutput` formats with a callback result, tool output (if given), and evaluation results (if given).
 
-   ```
+This will return a `TaskOutput` object that stores response in plane text, JSON, and Pydantic model: `CustomOutput` formats with a callback result, tool output (if given), and evaluation results (if given).
+
+   ```python
    res == TaskOutput(
-      task_id=UUID('<TASK UUID>')
+      task_id=UUID('<TASK UUID>'),
       raw='{\"test1\":\"random str\", \"test2\":[\"str item 1\", \"str item 2\", \"str item 3\"]}',
       json_dict={'test1': 'random str', 'test2': ['str item 1', 'str item 2', 'str item 3']},
-      pydantic=<class '__main__.CustomOutput'>
+      pydantic=<class '__main__.CustomOutput'>,
       tool_output=None,
-      callback_output='Hi! Here is the result: random str, str item 1, str item 2, str item 3',
+      callback_output='Hi! Here is the result: random str, str item 1, str item 2, str item 3', # returned a plain text summary
       evaluation=None
    )
    ```
@@ -177,26 +185,22 @@ Tasks can be delegated to a team manager, peers in the team, or completely new a
 .github
 └── workflows/                # Github actions
 │
+docs/                         # Documentation built by MkDocs
+│
 src/
-└── versionhq/                # Orchestration frameworks
-│     ├── agent/              # Components
+└── versionhq/                # Orchestration framework package
+│     ├── agent/              # Core components
 │     └── llm/
 │     └── task/
-│     └── team/
 │     └── tool/
-│     └── cli/
-│     └── ...
-│     │
-│     ├── db/                 # Storage
-│     ├── chroma.sqlite3
 │     └── ...
 │
-└──tests/                     # Pytest
+└──tests/                     # Pytest - by core component and use cases in the docs
 │     └── agent/
 │     └── llm/
 │     └── ...
 │
-└── uploads/                  # Local repo to store the uploaded files
+└── uploads/                  # Local directory that stores uloaded files
 
 ```
 
@@ -287,7 +291,9 @@ src/
 * `production` use case is available at `https://versi0n.io`. Currently, we are running alpha test.
 
 
+
 ### Documentation
+
 * To edit the documentation, see `docs` repository and edit the respective component.
 
 * We use `mkdocs` to update the docs. You can run the doc locally at http://127.0.0.1:8000/:
@@ -296,8 +302,10 @@ src/
    uv run python3 -m mkdocs serve --clean
    ```
 
+* To add a new page, update `mkdocs.yml` in the root. Refer to [MkDocs official docs](https://squidfunk.github.io/mkdocs-material/getting-started/) for more details.
 
-### Customizing AI Agents
+
+### Customizing AI Agent
 
 To add an agent, use `sample` directory to add new `project`. You can define an agent with a specific role, goal, and set of tools.
 
@@ -362,27 +370,10 @@ Common issues and solutions:
 ## Frequently Asked Questions (FAQ)
 **Q. Where can I see if the agent is working?**
 
-> A. You can find a frontend app [here](https://versi0n.io) with real-world outbound use cases.
-> You can also test features [here](https://github.com/versionHQ/test-client-app) using React app.
+A. Visit [playground](https://versi0n.io).
+
 
 **Q. How do you analyze the customer?**
 
-> A. We employ soft clustering for each customer.
-> <img width="200" src="https://res.cloudinary.com/dfeirxlea/image/upload/v1732732628/pj_m_agents/ito937s5d5x0so8isvw6.png">
-
-
-**Q. When should I use a team vs an agent?**
-
-> A. In essence, use a team for intricate, evolving projects, and agents for quick, straightforward tasks.
-
-> Use a team when:
-
-> **Complex tasks**: You need to complete multiple, interconnected tasks that require sequential or hierarchical processing.
-
-> **Iterative refinement**: You want to iteratively improve upon the output through multiple rounds of feedback and revision.
-
-> Use an agent when:
-
-> **Simple tasks**: You have a straightforward, one-off task that doesn't require significant complexity or iteration.
-
-> **Human input**: You need to provide initial input or guidance to the agent, or you expect to review and refine the output.
+A. We employ soft clustering for each customer.
+<img width="200" src="https://res.cloudinary.com/dfeirxlea/image/upload/v1732732628/pj_m_agents/ito937s5d5x0so8isvw6.png">

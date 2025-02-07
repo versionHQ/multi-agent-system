@@ -158,7 +158,7 @@ def test_delegate():
     task.execute_sync(agent=agent)
 
     assert task.output is not None
-    assert "vhq-Delegated-Agent" in task.processed_by_agents
+    assert "vhq-Delegated-Agent" in task.processed_agents
     assert task.delegations != 0
 
 

@@ -195,7 +195,7 @@ def test_delegate_in_team():
 
     assert res.raw is not None
     assert res.json_dict is not None
-    assert "agent b" in task_1.processed_by_agents
+    assert "agent b" in task_1.processed_agents
 
 
 def test_kickoff_with_leader():

@@ -274,7 +274,7 @@ class Agent(BaseModel):
             tool_list = []
 
             for item in self.tools:
-                if isinstance(item, Tool):
+                if isinstance(item, Tool) or isinstance(item, ToolSet):
                     tool_list.append(item)
 
                 elif isinstance(item, dict) and "func" in item:

@@ -282,7 +282,7 @@ class Task(BaseModel):
     eval_criteria: Optional[List[str]] = Field(default_factory=list, description="criteria to evaluate the outcome. i.e., fit to the brand tone")
 
     # recording
-    processed_by_agents: Set[str] = Field(default_factory=set, description="store responsible agents' roles")
+    processed_agents: Set[str] = Field(default_factory=set, description="store roles of the agents that executed the task")
     tools_errors: int = 0
     delegations: int = 0
     latency: int | float = 0 # job latency in sec
@@ -640,7 +640,7 @@ Ref. Output image: {output_formats_to_follow}
 
         self.latency = (ended_at - started_at).total_seconds()
         self.output = task_output
-        self.processed_by_agents.add(agent.role)
+        self.processed_agents.add(agent.role)
 
         if self.should_evaluate:
             task_output.evaluate(task=self, latency=self.latency, tokens=self.tokens)

@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from inspect import signature
 from typing import Any, Dict, Callable, Type, Optional, get_args, get_origin, get_type_hints
 from typing_extensions import Self
 from pydantic import InstanceOf, BaseModel, Field, field_validator, model_validator, PrivateAttr, create_model
@@ -223,7 +222,7 @@ class Tool(BaseTool):
                     {
                         name: {
                             "description": field.description if field.description else "",
-                            "type": SchemaType(self._get_arg_annotations(field.annotation)).convert(),
+                            "type": SchemaType(self._get_arg_annotations(field.annotation)).convert()
                         }
                     }
                 )
@@ -252,7 +251,6 @@ class Tool(BaseTool):
         Create a Pydantic schema from a function's signature
         """
         import inspect
-
         sig = inspect.signature(self.func)
         type_hints = get_type_hints(self.func)
         fields = {}
@@ -274,7 +272,6 @@ class Tool(BaseTool):
         """
 
         import inspect
-
         sig = inspect.signature(self.func)
         schema_fields = self.args_schema.model_fields
 

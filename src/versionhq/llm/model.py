@@ -100,7 +100,7 @@ class LLM(BaseModel):
     # LiteLLM specific fields
     api_base: Optional[str] = Field(default=None, description="litellm specific field - api base of the model provider")
     api_version: Optional[str] = Field(default=None)
-    num_retries: Optional[int] = Field(default=2)
+    num_retries: Optional[int] = Field(default=1)
     context_window_fallback_dict: Optional[Dict[str, Any]] = Field(default=None, description="A mapping of model to use if call fails due to context window error")
     fallbacks: Optional[List[Any]]= Field(default=None, description="A list of model names + params to be used, in case the initial call fails")
     metadata: Optional[Dict[str, Any]] = Field(default=None)
@@ -256,60 +256,86 @@ class LLM(BaseModel):
                 self._set_callbacks(self.callbacks) # passed by agent
 
             try:
-                self.response_format = { "type": "json_object" } if tool_res_as_final == True else response_format
+                res, tool_res = None, ""
 
                 if not tools:
+                    self.response_format = response_format
                     params = self._create_valid_params(config=config)
                     res = litellm.completion(model=self.model, messages=messages, stream=False, **params)
                     self._tokens += int(res["usage"]["total_tokens"])
                     return res["choices"][0]["message"]["content"]
 
                 else:
-                    self.tools = [item.tool.properties if isinstance(item, ToolSet) else item.properties for item in tools]
-                    params = self._create_valid_params(config=config)
-                    res = litellm.completion(model=self.model, messages=messages, **params)
-                    tool_calls = res.choices[0].message.tool_calls
-                    tool_res = ""
+                    try:
+                        self.response_format = { "type": "json_object" }  if tool_res_as_final and self.provider != "gemini" else response_format
+                        self.tools = [item.tool.properties if isinstance(item, ToolSet) else item.properties for item in tools]
+                        params = self._create_valid_params(config=config)
+                        res = litellm.completion(model=self.model, messages=messages, **params)
+                        tool_calls = res.choices[0].message.tool_calls
 
-                    for item in tool_calls:
-                        func_name = item.function.name
-                        func_args = item.function.arguments
+                        if tool_calls:
+                            for item in tool_calls:
+                                func_name = item.function.name
+                                func_args = item.function.arguments
+                                if not isinstance(func_args, dict):
+                                    try:
+                                        func_args = json.loads(json.dumps(eval(str(func_args))))
+                                    except:
+                                        pass
 
-                        if not isinstance(func_args, dict):
-                            try:
-                                func_args = json.loads(json.dumps(eval(str(func_args))))
-                            except:
-                                pass
+                                # find a tool whose name is matched with the retrieved func_name
+                                matches = []
+                                for tool in tools:
+                                    tool_name = tool.tool.name if isinstance(tool, ToolSet) else tool.name
+                                    tool_func_name = tool.tool.func.__name__ if isinstance(tool, ToolSet) else tool.func.__name__
+                                    if tool_name.replace(" ", "_") == func_name or tool_func_name == func_name or tool_name == "random_func":
+                                        matches.append(tool)
+                                    else:
+                                        pass
 
-                        for tool in tools:
-                            if isinstance(tool, ToolSet) and (tool.tool.name == func_name or tool.tool.func.__name__ == func_name or func_name == "random_func"):
-                                tool_instance = tool.tool
-                                args = tool.kwargs
-                                tool_res_to_add = tool_instance.run(params=args)
+                                if matches:
+                                    tool_to_execute = matches[0]
+                                    tool_instance = tool_to_execute.tool if isinstance(tool_to_execute, ToolSet) else tool_to_execute
+                                    params = tool_to_execute.kwargs if isinstance(tool_to_execute, ToolSet) else func_args
+                                    tool_res_to_add = tool_instance.run(params=params) if params else tool_instance.run()
 
-                                if tool_res_as_final:
-                                    tool_res += str(tool_res_to_add)
-                                else:
-                                    messages.append(res.choices[0].message)
-                                    messages.append({ "role": "tool", "tool_call_id": item.id, "content": str(tool_res_to_add) })
-
-                            else:
-                                try:
-                                    tool_res_to_add = tool.run(params=func_args)
                                     if tool_res_as_final:
-                                        tool_res += str(tool_res_to_add)
+                                        if tool_res_to_add not in tool_res:
+                                            tool_res += str(tool_res_to_add)
                                     else:
                                         messages.append(res.choices[0].message)
                                         messages.append({ "role": "tool", "tool_call_id": item.id, "content": str(tool_res_to_add) })
-                                except:
-                                    pass
 
-                    if tool_res_as_final:
-                        return tool_res
-                    else:
-                        res = litellm.completion(model=self.model, messages=messages, **params)
-                        self._tokens += int(res["usage"]["total_tokens"])
-                        return res.choices[0].message.content
+                        else:
+                            if tool_res_as_final and tools and not tool_res:
+                                for item in tools:
+                                    tool_res_to_add = item.tool.run(params=item.kwargs) if isinstance(item, ToolSet) else item.run()
+                                    if tool_res_to_add not in tool_res:
+                                        tool_res += str(tool_res_to_add)
+                                    else:
+                                        pass
+
+                    except:
+                        if tool_res_as_final and tools and not tool_res:
+                            for item in tools:
+                                tool_res_to_add = item.tool.run(params=item.kwargs) if isinstance(item, ToolSet) else item.run()
+                                if tool_res_to_add not in tool_res:
+                                    tool_res += str(tool_res_to_add)
+                                else:
+                                    pass
+                        elif tools and not tool_res:
+                                tool_res = res["choices"][0]["message"]["content"]
+                        else:
+                            pass
+
+
+                if tool_res_as_final:
+                    return tool_res
+                else:
+                    res = litellm.completion(model=self.model, messages=messages, **params)
+                    self._tokens += int(res["usage"]["total_tokens"])
+                    return res.choices[0].message.content
+
 
             except JSONSchemaValidationError as e:
                 self._logger.log(level="error", message="Raw Response: {}".format(e.raw_response), color="red")
