@@ -6,19 +6,19 @@
 
 
 class {
-    background-color: #ededeb;
-    padding: 10px;
+    background-color: #363636;
+    padding: 8px 10px;
     border-radius: 5px;
-    color: #ec5757;
+    color: #ededeb;
 }
 
 variable {
-    font: 'Roboto Mono 400' !important;
-    background-color: #ededeb;
+    font: 'Roboto Mono 400';
+    background-color: #363636;
     padding: 5px;
-    border-radius: .1rem;
-    color: #191b1b;
-    font-size: .85em
+    border-radius: .2rem;
+    color: #ededeb;
+    font-size: .85em;
 }
 
 bold {
