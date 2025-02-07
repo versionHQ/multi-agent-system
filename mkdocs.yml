@@ -126,7 +126,7 @@ nav:
   #   - Customize Agent: 'guides/customize-agent.md'
   #   - Connect to any LLM: 'guides/connect-to-any-llm.md'
   - Examples:
-    - Playground: https://versi0n.io
+    - Playground: https://mkversi0n.io
     - Experiment: https://github.com/versionHQ/exp-agent-performance
   - Change Log: https://github.com/versionHQ/multi-agent-system/releases
 
