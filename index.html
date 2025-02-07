@@ -920,15 +920,33 @@
 <hr />
 
 <h2 id="trouble-shooting">Trouble Shooting<a class="headerlink" href="#trouble-shooting" title="Permanent link">&para;</a></h2>
-<p>Common issues and solutions:
-- API key errors: Ensure all API keys in the <code>.env</code> file are correct and up to date. Make sure to add <code>load_dotenv()</code> on the top of the python file to apply the latest environment values.
-- Database connection issues: Check if the Chroma DB is properly initialized and accessible.
-- Memory errors: If processing large contracts, you may need to increase the available memory for the Python process.
-- Issues related to the Python version: Docling/Pytorch is not ready for Python 3.13 as of Jan 2025. Use Python 3.12.x as default by running <code>uv venv --python 3.12.8</code> and <code>uv python pin 3.12.8</code>.
-- Issues related to dependencies: <code>rm -rf uv.lock</code>, <code>uv cache clean</code>, <code>uv venv</code>, and run <code>uv pip install -r requirements.txt -v</code>.
-- Issues related to the AI agents or RAG system: Check the <code>output.log</code> file for detailed error messages and stack traces.
-- Issues related to <code>Python quit unexpectedly</code>: Check <a href="https://stackoverflow.com/questions/59888499/macos-catalina-python-quit-unexpectedly-error">this stackoverflow article</a>.
-- <code>reportMissingImports</code> error from pyright after installing the package: This might occur when installing new libraries while VSCode is running. Open the command pallete (ctrl + shift + p) and run the Python: Restart language server task.</p>
+<p>Common issues and solutions:</p>
+<ul>
+<li>
+<p>API key errors: Ensure all API keys in the <code>.env</code> file are correct and up to date. Make sure to add <code>load_dotenv()</code> on the top of the python file to apply the latest environment values.</p>
+</li>
+<li>
+<p>Database connection issues: Check if the Chroma DB is properly initialized and accessible.</p>
+</li>
+<li>
+<p>Memory errors: If processing large contracts, you may need to increase the available memory for the Python process.</p>
+</li>
+<li>
+<p>Issues related to the Python version: Docling/Pytorch is not ready for Python 3.13 as of Jan 2025. Use Python 3.12.x as default by running <code>uv venv --python 3.12.8</code> and <code>uv python pin 3.12.8</code>.</p>
+</li>
+<li>
+<p>Issues related to dependencies: <code>rm -rf uv.lock</code>, <code>uv cache clean</code>, <code>uv venv</code>, and run <code>uv pip install -r requirements.txt -v</code>.</p>
+</li>
+<li>
+<p>Issues related to the AI agents or RAG system: Check the <code>output.log</code> file for detailed error messages and stack traces.</p>
+</li>
+<li>
+<p>Issues related to <code>Python quit unexpectedly</code>: Check <a href="https://stackoverflow.com/questions/59888499/macos-catalina-python-quit-unexpectedly-error">this stackoverflow article</a>.</p>
+</li>
+<li>
+<p><code>reportMissingImports</code> error from pyright after installing the package: This might occur when installing new libraries while VSCode is running. Open the command pallete (ctrl + shift + p) and run the Python: Restart language server task.</p>
+</li>
+</ul>
 <hr />
 
 <h2 id="frequently-asked-questions-faq">Frequently Asked Questions (FAQ)<a class="headerlink" href="#frequently-asked-questions-faq" title="Permanent link">&para;</a></h2>
