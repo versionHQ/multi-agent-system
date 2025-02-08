@@ -653,7 +653,7 @@
 <h3 id="install-versionhq-package">Install <code>versionhq</code> package<a class="headerlink" href="#install-versionhq-package" title="Permanent link">&para;</a></h3>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>pip install versionhq
 </span></code></pre></div>
-<p>(Python 3.11 and higher)</p>
+<p>(Python 3.11 / 3.12)</p>
 <h3 id="form-a-agent-network">Form a agent network<a class="headerlink" href="#form-a-agent-network" title="Permanent link">&para;</a></h3>
 <p>You can generate a network of multiple agents depending on your task complexity.</p>
 <p>Here is a code snippet:</p>
@@ -668,17 +668,17 @@
 <p>This will form a network with multiple agents on <code>Formation</code> and return results as a <code>TaskOutput</code> object, storing outputs in JSON, plane text, Pydantic model formats along with evaluation.</p>
 <hr />
 
-<h2 id="setting-up-local-env">Setting Up Local Env<a class="headerlink" href="#setting-up-local-env" title="Permanent link">&para;</a></h2>
+<h2 id="setting-up-your-local-environment">Setting Up Your Local Environment<a class="headerlink" href="#setting-up-your-local-environment" title="Permanent link">&para;</a></h2>
 <ol>
-<li>
-<p>Install <code>uv</code> package manager:</p>
+<li>Install <code>uv</code> package manager:</li>
+</ol>
 <p>For MacOS:</p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>brew install uv
 </span></code></pre></div>
 <p>For Ubuntu/Debian:</p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>sudo apt-get install uv
 </span></code></pre></div>
-</li>
+<ol>
 <li>
 <p>Install dependencies:
    <div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>uv venv
@@ -696,7 +696,7 @@
 </span></code></pre></div></p>
 </li>
 <li>
-<p>Set up environment variables:
+<p>Set up secrets:
    Create a <code>.env</code> file in the project root and add the following:
    <div class="language-text highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>OPENAI_API_KEY=your-openai-api-key
 </span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>LITELLM_API_KEY=your-litellm-api-key
@@ -715,67 +715,42 @@
 <p>Create amazing features</p>
 </li>
 <li>
-<p>Test the features using the <code>tests</code> directory.</p>
+<p>Add a test funcition to the <code>tests</code> directory and run <strong>pytest</strong>.</p>
 </li>
 <li>
-<p>Add a test function to respective components in the <code>tests</code> directory.</p>
+<p>Add secret values defined in <code>.github/workflows/run_test.yml</code> to your Github <code>repository secrets</code> located at settings &gt; secrets &amp; variables &gt; Actions.</p>
 </li>
-<li>Add your <code>LITELLM_API_KEY</code>, <code>OPENAI_API_KEY</code>, <code>COMPOSIO_API_KEY</code>, <code>DEFAULT_USER_ID</code> to the Github <code>repository secrets</code> located at settings &gt; secrets &amp; variables &gt; Actions.</li>
-<li>Run a test.
+<li>Run a following command:
       <div class="language-text highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>uv run pytest tests -vv --cache-clear
 </span></code></pre></div></li>
 </ol>
-<p><strong>Pytest</strong></p>
+<p><strong>Building a new pytest function</strong></p>
 <ul>
-<li>When adding a new file to <code>tests</code>, name the file ended with <code>_test.py</code>.</li>
+<li>Files added to the <code>tests</code> directory must end in <code>_test.py</code>.</li>
 <li>
-<p>When adding a new feature to the file, name the feature started with <code>test_</code>.</p>
+<p>Test functions within the files must begin with <code>test_</code>.</p>
+</li>
+<li>
+<p>Update <code>docs</code> accordingly.</p>
 </li>
 <li>
 <p>Pull the latest version of source code from the main branch (<code>git pull origin main</code>) *Address conflicts if any.</p>
 </li>
-<li>Commit your changes (<code>git add .</code> / <code>git commit -m 'Add your-amazing-feature'</code>)</li>
-<li>Push to the branch (<code>git push origin feature/your-amazing-feature</code>)</li>
-<li>Open a pull request</li>
+<li>
+<p>Commit your changes (<code>git add .</code> / <code>git commit -m 'Add your-amazing-feature'</code>)</p>
+</li>
+<li>
+<p>Push to the branch (<code>git push origin feature/your-amazing-feature</code>)</p>
+</li>
+<li>
+<p>Open a pull request</p>
+</li>
 </ul>
 <p><strong>Optional</strong>
 * Flag with <code>REFINEME</code> for any improvements needed and <code>FIXME</code> for any errors.</p>
 <ul>
 <li><code>Playground</code> is available at <code>https://versi0n.io</code>.</li>
 </ul>
-<hr />
-
-<h3 id="documentation_1">Documentation<a class="headerlink" href="#documentation_1" title="Permanent link">&para;</a></h3>
-<ul>
-<li>
-<p>To edit the documentation, see <code>docs</code> repository and edit the respective component.</p>
-</li>
-<li>
-<p>We use <code>mkdocs</code> to update the docs. You can run the doc locally at http://127.0.0.1:8000/:</p>
-</li>
-</ul>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>uv run python3 -m mkdocs serve --clean
-</span></code></pre></div>
-<ul>
-<li>To add a new page, update <code>mkdocs.yml</code> in the root. Refer to <a href="https://squidfunk.github.io/mkdocs-material/getting-started/">MkDocs official docs</a> for more details.</li>
-</ul>
-<hr />
-
-<h3 id="customizing-ai-agent">Customizing AI Agent<a class="headerlink" href="#customizing-ai-agent" title="Permanent link">&para;</a></h3>
-<p>To add an agent, use <code>sample</code> directory to add new <code>project</code>. You can define an agent with a specific role, goal, and set of tools.</p>
-<p>Your new agent needs to follow the <code>Agent</code> model defined in the <code>verionhq.agent.model.py</code>.</p>
-<p>You can also add any fields and functions to the <code>Agent</code> model <strong>universally</strong> by modifying <code>verionhq.agent.model.py</code>.</p>
-<hr />
-
-<h3 id="modifying-rag-functionality">Modifying RAG Functionality<a class="headerlink" href="#modifying-rag-functionality" title="Permanent link">&para;</a></h3>
-<p>The RAG system uses Chroma DB to store and query past campaign dataset. To update the knowledge base:</p>
-<ol>
-<li>Add new files to the <code>uploads/</code> directory. (This will not be pushed to Github.)</li>
-<li>Modify the <code>tools.py</code> file to update the ingestion process if necessary.</li>
-<li>Run the ingestion process to update the Chroma DB.</li>
-</ol>
-<hr />
-
 <h3 id="package-management-with-uv">Package Management with uv<a class="headerlink" href="#package-management-with-uv" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Add a package: <code>uv add &lt;package&gt;</code></li>
@@ -787,47 +762,39 @@
 <p>After updating dependencies, update <code>requirements.txt</code> accordingly or run <code>uv pip freeze &gt; requirements.txt</code></p>
 </li>
 </ul>
-<hr />
-
 <h3 id="pre-commit-hooks">Pre-Commit Hooks<a class="headerlink" href="#pre-commit-hooks" title="Permanent link">&para;</a></h3>
 <ol>
 <li>
 <p>Install pre-commit hooks:
-   <div class="language-text highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>uv run pre-commit install
+   <div class="language-text highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>uv run pre-commit install
 </span></code></pre></div></p>
 </li>
 <li>
 <p>Run pre-commit checks manually:
-   <div class="language-text highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>uv run pre-commit run --all-files
+   <div class="language-text highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>uv run pre-commit run --all-files
 </span></code></pre></div></p>
 </li>
 </ol>
 <p>Pre-commit hooks help maintain code quality by running checks for formatting, linting, and other issues before each commit.</p>
 <ul>
 <li>To skip pre-commit hooks (NOT RECOMMENDED)
-   <div class="language-text highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>git commit --no-verify -m &quot;your-commit-message&quot;
+   <div class="language-text highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>git commit --no-verify -m &quot;your-commit-message&quot;
 </span></code></pre></div></li>
 </ul>
-<hr />
-
-<h2 id="technologies-used">Technologies Used<a class="headerlink" href="#technologies-used" title="Permanent link">&para;</a></h2>
-<p><strong>Schema, Data Validation</strong>
-   - <a href="https://docs.pydantic.dev/latest/">Pydantic</a>: Data validation and serialization library for Python.
-   - <a href="https://console.upstage.ai/docs/getting-started/overview">Upstage</a>: Document processer for ML tasks. (Use <code>Document Parser API</code> to extract data from documents)
-   - <a href="https://ds4sd.github.io/docling/">Docling</a>: Document parsing</p>
-<p><strong>Storage</strong>
-   - <a href="https://docs.mem0.ai/quickstart#install-package">mem0ai</a>: Agents' memory storage and management.
-   - <a href="https://docs.trychroma.com/">Chroma DB</a>: Vector database for storing and querying usage data.
-   - <a href="https://www.sqlite.org/docs.html">SQLite</a>: C-language library to implements a small SQL database engine.</p>
-<p><strong>LLM-curation</strong>
-   - <a href="https://docs.litellm.ai/docs/providers">LiteLLM</a>: Curation platform to access LLMs</p>
-<p><strong>Tools</strong>
-   - <a href="https://composio.dev/">Composio</a>: Conect RAG agents with external tools, Apps, and APIs to perform actions and receive triggers. We use <a href="https://composio.dev/tools">tools</a> and <a href="https://app.composio.dev/app/ragtool">RAG tools</a> from Composio toolset.</p>
-<p><strong>Deployment</strong>
-   - Python: Primary programming language. v3.13 is recommended.
-   - <a href="https://docs.astral.sh/uv/">uv</a>: Python package installer and resolver
-   - <a href="https://pre-commit.com/">pre-commit</a>: Manage and maintain pre-commit hooks
-   - <a href="https://pypi.org/project/setuptools/">setuptools</a>: Build python modules</p>
+<h3 id="documentation_1">Documentation<a class="headerlink" href="#documentation_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li>
+<p>To edit the documentation, see <code>docs</code> repository and edit the respective component.</p>
+</li>
+<li>
+<p>We use <code>mkdocs</code> to update the docs. You can run the doc locally at http://127.0.0.1:8000/:</p>
+</li>
+</ul>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>uv run python3 -m mkdocs serve --clean
+</span></code></pre></div>
+<ul>
+<li>To add a new page, update <code>mkdocs.yml</code> in the root. Refer to <a href="https://squidfunk.github.io/mkdocs-material/getting-started/">MkDocs official docs</a> for more details.</li>
+</ul>
 <hr />
 
 <h2 id="trouble-shooting">Trouble Shooting<a class="headerlink" href="#trouble-shooting" title="Permanent link">&para;</a></h2>
@@ -863,9 +830,6 @@
 <h2 id="frequently-asked-questions-faq">Frequently Asked Questions (FAQ)<a class="headerlink" href="#frequently-asked-questions-faq" title="Permanent link">&para;</a></h2>
 <p><strong>Q. Where can I see if the agent is working?</strong></p>
 <p>A. Visit <a href="https://versi0n.io">playground</a>.</p>
-<p><strong>Q. How do you analyze the customer?</strong></p>
-<p>A. We employ soft clustering for each customer.
-<img width="200" src="https://res.cloudinary.com/dfeirxlea/image/upload/v1732732628/pj_m_agents/ito937s5d5x0so8isvw6.png"></p>
 
 
 
