@@ -34,11 +34,10 @@ jobs:
 
       - name: Set up the project
         run: |
-          pip install --config-settings="--global-option=build_ext" --config-settings="--global-option=-I$(brew --prefix graphviz)/include/" --config-settings="--global-option=-L$(brew --prefix graphviz)/lib/" pygraphviz
           uv venv --python 3.12.8
           source .venv/bin/activate
           uv lock --upgrade
-          uv sync --all-extras
+          uv sync --all-extras --no-extra pygraphviz
 
       - name: Run tests
         run: uv run pytest tests -vv --cache-clear

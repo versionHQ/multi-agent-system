@@ -4018,6 +4018,9 @@ pandas = [
 pdfplumber = [
     { name = "pdfplumber" },
 ]
+pygraphviz = [
+    { name = "pygraphviz" },
+]
 
 [package.dev-dependencies]
 dev = [
@@ -4033,7 +4036,6 @@ dev = [
     { name = "networkx" },
     { name = "pillow" },
     { name = "pre-commit" },
-    { name = "pygraphviz" },
     { name = "pytest" },
     { name = "pytest-vcr" },
 ]
@@ -4058,6 +4060,7 @@ requires-dist = [
     { name = "pandas", marker = "extra == 'pandas'", specifier = ">=2.2.3" },
     { name = "pdfplumber", marker = "extra == 'pdfplumber'", specifier = ">=0.11.5" },
     { name = "pydantic", specifier = ">=2.10.6" },
+    { name = "pygraphviz", marker = "extra == 'pygraphviz'", specifier = ">=1.14" },
     { name = "python-dotenv", specifier = ">=1.0.0" },
     { name = "regex", specifier = "==2024.11.6" },
     { name = "requests", specifier = ">=2.32.3" },
@@ -4081,8 +4084,6 @@ dev = [
     { name = "networkx", specifier = ">=3.4.2" },
     { name = "pillow", specifier = ">=10.4.0" },
     { name = "pre-commit", specifier = ">=4.0.1" },
-    { name = "pygraphviz", specifier = ">=1.14" },
-    { name = "pytest", specifier = ">=8.0.0" },
     { name = "pytest", specifier = ">=8.3.4" },
     { name = "pytest-vcr", specifier = ">=1.0.2" },
 ]
