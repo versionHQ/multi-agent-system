@@ -668,19 +668,15 @@
 <p>This will form a network with multiple agents on <code>Formation</code> and return results as a <code>TaskOutput</code> object, storing outputs in JSON, plane text, Pydantic model formats along with evaluation.</p>
 <hr />
 
-<h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
-<ol>
-<li>
-<p>Install <code>uv</code> package manager:</p>
+<h2 id="setting-up-a-project">Setting up a project<a class="headerlink" href="#setting-up-a-project" title="Permanent link">&para;</a></h2>
+<h3 id="1-installing-uv-package-manager">1. Installing <code>uv</code> package manager<a class="headerlink" href="#1-installing-uv-package-manager" title="Permanent link">&para;</a></h3>
 <p>For MacOS:</p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>brew install uv
 </span></code></pre></div>
-<p>For Ubuntu/Debian:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>sudo apt-get install uv
-</span></code></pre></div>
-</li>
-<li>
-<p>Install dependencies:</p>
+<p>For Ubuntu/Debian:
+   <div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>sudo apt-get install uv
+</span></code></pre></div></p>
+<h3 id="2-installing-dependencies">2. Installing dependencies<a class="headerlink" href="#2-installing-dependencies" title="Permanent link">&para;</a></h3>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>uv venv
 </span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>source .venv/bin/activate
 </span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>uv lock --upgrade
@@ -688,8 +684,8 @@
 </span></code></pre></div>
 <ul>
 <li>
-<p>AssertionError/module mismatch error: Set up default Python version using <code>.pyenv</code>
-     <div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>pyenv install 3.12.8
+<p>AssertionError/module mismatch errors: Set up default Python version using <code>.pyenv</code>
+      <div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>pyenv install 3.12.8
 </span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>pyenv global 3.12.8  (optional: `pyenv global system` to get back to the system default ver.)
 </span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>uv python pin 3.12.8
 </span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>echo 3.12.8 &gt;&gt; .python-version
@@ -697,7 +693,7 @@
 </li>
 <li>
 <p><code>pygraphviz</code> related errors: Run the following commands:
-     <div class="language-text highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>brew install graphbiz
+      <div class="language-text highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>brew install graphbiz
 </span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>uv pip install --config-settings=&quot;--global-option=build_ext&quot; \
 </span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>--config-settings=&quot;--global-option=-I$(brew --prefix graphviz)/include/&quot; \
 </span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>--config-settings=&quot;--global-option=-L$(brew --prefix graphviz)/lib/&quot; \
@@ -708,17 +704,14 @@
 <p><code>torch</code>/<code>Docling</code> related errors: Set up default Python version either <code>3.11.x</code> or <code>3.12.x</code> (same as AssertionError)</p>
 </li>
 </ul>
-</li>
-<li>
-<p>Add secrets to <code>.env</code> file in the project root:
-      <div class="language-text highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>OPENAI_API_KEY=your-openai-api-key
+<h3 id="3-adding-secrets-to-env">3. Adding secrets to .env<a class="headerlink" href="#3-adding-secrets-to-env" title="Permanent link">&para;</a></h3>
+<p>Create <code>.env</code> file in the project root and add following:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>OPENAI_API_KEY=your-openai-api-key
 </span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>LITELLM_API_KEY=your-litellm-api-key
 </span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>COMPOSIO_API_KEY=your-composio-api-key
 </span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>COMPOSIO_CLI_KEY=your-composio-cli-key
 </span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>[LLM_INTERFACE_PROVIDER_OF_YOUR_CHOICE]_API_KEY=your-api-key
-</span></code></pre></div></p>
-</li>
-</ol>
+</span></code></pre></div>
 <hr />
 
 <h2 id="contributing">Contributing<a class="headerlink" href="#contributing" title="Permanent link">&para;</a></h2>
@@ -909,6 +902,9 @@
 
 
 
+
+  
+  
 
 
 

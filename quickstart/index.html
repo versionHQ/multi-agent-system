@@ -399,12 +399,45 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Setting up a project">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-installing-uv-package-manager" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Installing uv package manager
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-installing-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Installing dependencies
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-adding-secrets-to-env" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Adding secrets to .env
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
-  <a href="#forming-a-agent-network" class="md-nav__link">
+  <a href="#forming-agent-networks" class="md-nav__link">
     <span class="md-ellipsis">
-      Forming a agent network
+      Forming agent networks
     </span>
   </a>
   
@@ -681,116 +714,125 @@
 </span></code></pre></div>
 <p>(Python 3.11, 3.12 [Recommended])</p>
 <h2 id="setting-up-a-project">Setting up a project<a class="headerlink" href="#setting-up-a-project" title="Permanent link">&para;</a></h2>
-<ol>
-<li>
-<p>Install <code>uv</code> package manager:</p>
+<h3 id="1-installing-uv-package-manager">1. Installing <code>uv</code> package manager<a class="headerlink" href="#1-installing-uv-package-manager" title="Permanent link">&para;</a></h3>
 <p>For MacOS:</p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>brew install uv
 </span></code></pre></div>
-<p>For Ubuntu/Debian:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>sudo apt-get install uv
-</span></code></pre></div>
-</li>
-<li>
-<p>Install dependencies:
-   <div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>uv venv
+<p>For Ubuntu/Debian:
+   <div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>sudo apt-get install uv
+</span></code></pre></div></p>
+<h3 id="2-installing-dependencies">2. Installing dependencies<a class="headerlink" href="#2-installing-dependencies" title="Permanent link">&para;</a></h3>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>uv venv
 </span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>source .venv/bin/activate
 </span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>uv lock --upgrade
 </span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>uv sync --all-extras
-</span></code></pre></div></p>
-</li>
+</span></code></pre></div>
+<ul>
 <li>
-<p>In case of AssertionError/module mismatch, run Python version control using <code>.pyenv</code>
-   <div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>pyenv install 3.12.8
+<p>AssertionError/module mismatch errors: Set up default Python version using <code>.pyenv</code>
+      <div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>pyenv install 3.12.8
 </span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>pyenv global 3.12.8  (optional: `pyenv global system` to get back to the system default ver.)
 </span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>uv python pin 3.12.8
 </span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>echo 3.12.8 &gt;&gt; .python-version
 </span></code></pre></div></p>
 </li>
 <li>
-<p>Add secrets to <code>.env</code> file in the project root:</p>
+<p><code>pygraphviz</code> related errors: Run the following commands:
+      <div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>brew install graphbiz
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>uv pip install --config-settings=&quot;--global-option=build_ext&quot; \
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>--config-settings=&quot;--global-option=-I$(brew --prefix graphviz)/include/&quot; \
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>--config-settings=&quot;--global-option=-L$(brew --prefix graphviz)/lib/&quot; \
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>pygraphviz
+</span></code></pre></div></p>
 </li>
-</ol>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>OPENAI_API_KEY=your-openai-api-key
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>LITELLM_API_KEY=your-litellm-api-key
-</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>COMPOSIO_API_KEY=your-composio-api-key
-</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>COMPOSIO_CLI_KEY=your-composio-cli-key
-</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>[LLM_INTERFACE_PROVIDER_OF_YOUR_CHOICE]_API_KEY=your-api-key
+<li>
+<p><code>torch</code>/<code>Docling</code> related errors: Set up default Python version either <code>3.11.x</code> or <code>3.12.x</code> (same as AssertionError)</p>
+</li>
+</ul>
+<h3 id="3-adding-secrets-to-env">3. Adding secrets to .env<a class="headerlink" href="#3-adding-secrets-to-env" title="Permanent link">&para;</a></h3>
+<p>Create <code>.env</code> file in the project root and add following:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>OPENAI_API_KEY=your-openai-api-key
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>LITELLM_API_KEY=your-litellm-api-key
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>COMPOSIO_API_KEY=your-composio-api-key
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>COMPOSIO_CLI_KEY=your-composio-cli-key
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>[LLM_INTERFACE_PROVIDER_OF_YOUR_CHOICE]_API_KEY=your-api-key
 </span></code></pre></div>
-<h2 id="forming-a-agent-network">Forming a agent network<a class="headerlink" href="#forming-a-agent-network" title="Permanent link">&para;</a></h2>
+<hr />
+
+<h2 id="forming-agent-networks">Forming agent networks<a class="headerlink" href="#forming-agent-networks" title="Permanent link">&para;</a></h2>
 <p>You can generate a network of multiple agents depending on your task complexity.</p>
 <p>Here is a code snippet:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">versionhq</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">vhq</span>
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
-</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="n">network</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">form_agent_network</span><span class="p">(</span>
-</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>   <span class="n">task</span><span class="o">=</span><span class="s2">&quot;YOUR AMAZING TASK OVERVIEW&quot;</span><span class="p">,</span>
-</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>   <span class="n">expected_outcome</span><span class="o">=</span><span class="s2">&quot;YOUR OUTCOME EXPECTATION&quot;</span><span class="p">,</span>
-</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="p">)</span>
-</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="n">res</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">launch</span><span class="p">()</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">versionhq</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">vhq</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="n">network</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">form_agent_network</span><span class="p">(</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>   <span class="n">task</span><span class="o">=</span><span class="s2">&quot;YOUR AMAZING TASK OVERVIEW&quot;</span><span class="p">,</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>   <span class="n">expected_outcome</span><span class="o">=</span><span class="s2">&quot;YOUR OUTCOME EXPECTATION&quot;</span><span class="p">,</span>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="p">)</span>
+</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="n">res</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">launch</span><span class="p">()</span>
 </span></code></pre></div>
 <p>This will form a network with multiple agents on <code>Formation</code> and return results as a <code>TaskOutput</code> object, storing outputs in JSON, plane text, Pydantic model formats along with evaluation.</p>
 <h2 id="customizing-your-agent">Customizing your agent<a class="headerlink" href="#customizing-your-agent" title="Permanent link">&para;</a></h2>
 <p>If you don't need to form a network or assign a specific agent to the network, you can simply build an agent using <code>Agent</code> model.</p>
 <p>By default, the agent prioritize JSON serializable outputs over plane text.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">versionhq</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">vhq</span>
-</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span>
-</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>
-</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="k">class</span><span class="w"> </span><span class="nc">CustomOutput</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
-</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>   <span class="n">test1</span><span class="p">:</span> <span class="nb">str</span>
-</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>   <span class="n">test2</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
-</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>
-</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="k">def</span><span class="w"> </span><span class="nf">dummy_func</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">test1</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">test2</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>   <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span><span class="si">{</span><span class="n">message</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">test1</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">test2</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;&quot;&quot;</span>
-</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>
-</span><span id="__span-7-11"><a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a>
-</span><span id="__span-7-12"><a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a><span class="n">agent</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Agent</span><span class="p">(</span><span class="n">role</span><span class="o">=</span><span class="s2">&quot;demo&quot;</span><span class="p">,</span> <span class="n">goal</span><span class="o">=</span><span class="s2">&quot;amazing project goal&quot;</span><span class="p">)</span>
-</span><span id="__span-7-13"><a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a>
-</span><span id="__span-7-14"><a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a><span class="n">task</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Task</span><span class="p">(</span>
-</span><span id="__span-7-15"><a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a>   <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Amazing task&quot;</span><span class="p">,</span>
-</span><span id="__span-7-16"><a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a>   <span class="n">pydantic_output</span><span class="o">=</span><span class="n">CustomOutput</span><span class="p">,</span>
-</span><span id="__span-7-17"><a id="__codelineno-7-17" name="__codelineno-7-17" href="#__codelineno-7-17"></a>   <span class="n">callback</span><span class="o">=</span><span class="n">dummy_func</span><span class="p">,</span>
-</span><span id="__span-7-18"><a id="__codelineno-7-18" name="__codelineno-7-18" href="#__codelineno-7-18"></a>   <span class="n">callback_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">message</span><span class="o">=</span><span class="s2">&quot;Hi! Here is the result: &quot;</span><span class="p">)</span>
-</span><span id="__span-7-19"><a id="__codelineno-7-19" name="__codelineno-7-19" href="#__codelineno-7-19"></a><span class="p">)</span>
-</span><span id="__span-7-20"><a id="__codelineno-7-20" name="__codelineno-7-20" href="#__codelineno-7-20"></a>
-</span><span id="__span-7-21"><a id="__codelineno-7-21" name="__codelineno-7-21" href="#__codelineno-7-21"></a><span class="n">res</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">execute_sync</span><span class="p">(</span><span class="n">agent</span><span class="o">=</span><span class="n">agent</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="s2">&quot;amazing context to consider.&quot;</span><span class="p">)</span>
-</span><span id="__span-7-22"><a id="__codelineno-7-22" name="__codelineno-7-22" href="#__codelineno-7-22"></a><span class="nb">print</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">versionhq</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">vhq</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="k">class</span><span class="w"> </span><span class="nc">CustomOutput</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>   <span class="n">test1</span><span class="p">:</span> <span class="nb">str</span>
+</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>   <span class="n">test2</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>
+</span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="k">def</span><span class="w"> </span><span class="nf">dummy_func</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">test1</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">test2</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span id="__span-8-9"><a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>   <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span><span class="si">{</span><span class="n">message</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">test1</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">test2</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;&quot;&quot;</span>
+</span><span id="__span-8-10"><a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>
+</span><span id="__span-8-11"><a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a>
+</span><span id="__span-8-12"><a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a><span class="n">agent</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Agent</span><span class="p">(</span><span class="n">role</span><span class="o">=</span><span class="s2">&quot;demo&quot;</span><span class="p">,</span> <span class="n">goal</span><span class="o">=</span><span class="s2">&quot;amazing project goal&quot;</span><span class="p">)</span>
+</span><span id="__span-8-13"><a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a>
+</span><span id="__span-8-14"><a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a><span class="n">task</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Task</span><span class="p">(</span>
+</span><span id="__span-8-15"><a id="__codelineno-8-15" name="__codelineno-8-15" href="#__codelineno-8-15"></a>   <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Amazing task&quot;</span><span class="p">,</span>
+</span><span id="__span-8-16"><a id="__codelineno-8-16" name="__codelineno-8-16" href="#__codelineno-8-16"></a>   <span class="n">pydantic_output</span><span class="o">=</span><span class="n">CustomOutput</span><span class="p">,</span>
+</span><span id="__span-8-17"><a id="__codelineno-8-17" name="__codelineno-8-17" href="#__codelineno-8-17"></a>   <span class="n">callback</span><span class="o">=</span><span class="n">dummy_func</span><span class="p">,</span>
+</span><span id="__span-8-18"><a id="__codelineno-8-18" name="__codelineno-8-18" href="#__codelineno-8-18"></a>   <span class="n">callback_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">message</span><span class="o">=</span><span class="s2">&quot;Hi! Here is the result: &quot;</span><span class="p">)</span>
+</span><span id="__span-8-19"><a id="__codelineno-8-19" name="__codelineno-8-19" href="#__codelineno-8-19"></a><span class="p">)</span>
+</span><span id="__span-8-20"><a id="__codelineno-8-20" name="__codelineno-8-20" href="#__codelineno-8-20"></a>
+</span><span id="__span-8-21"><a id="__codelineno-8-21" name="__codelineno-8-21" href="#__codelineno-8-21"></a><span class="n">res</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">execute_sync</span><span class="p">(</span><span class="n">agent</span><span class="o">=</span><span class="n">agent</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="s2">&quot;amazing context to consider.&quot;</span><span class="p">)</span>
+</span><span id="__span-8-22"><a id="__codelineno-8-22" name="__codelineno-8-22" href="#__codelineno-8-22"></a><span class="nb">print</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
 </span></code></pre></div>
 <p>This will return a <code>TaskOutput</code> object that stores response in plane text, JSON, and Pydantic model: <code>CustomOutput</code> formats with a callback result, tool output (if given), and evaluation results (if given).</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="n">res</span> <span class="o">==</span> <span class="n">TaskOutput</span><span class="p">(</span>
-</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>   <span class="n">task_id</span><span class="o">=</span><span class="n">UUID</span><span class="p">(</span><span class="s1">&#39;&lt;TASK UUID&gt;&#39;</span><span class="p">),</span>
-</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>   <span class="n">raw</span><span class="o">=</span><span class="s1">&#39;{</span><span class="se">\&quot;</span><span class="s1">test1</span><span class="se">\&quot;</span><span class="s1">:</span><span class="se">\&quot;</span><span class="s1">random str</span><span class="se">\&quot;</span><span class="s1">, </span><span class="se">\&quot;</span><span class="s1">test2</span><span class="se">\&quot;</span><span class="s1">:[</span><span class="se">\&quot;</span><span class="s1">str item 1</span><span class="se">\&quot;</span><span class="s1">, </span><span class="se">\&quot;</span><span class="s1">str item 2</span><span class="se">\&quot;</span><span class="s1">, </span><span class="se">\&quot;</span><span class="s1">str item 3</span><span class="se">\&quot;</span><span class="s1">]}&#39;</span><span class="p">,</span>
-</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>   <span class="n">json_dict</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;test1&#39;</span><span class="p">:</span> <span class="s1">&#39;random str&#39;</span><span class="p">,</span> <span class="s1">&#39;test2&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;str item 1&#39;</span><span class="p">,</span> <span class="s1">&#39;str item 2&#39;</span><span class="p">,</span> <span class="s1">&#39;str item 3&#39;</span><span class="p">]},</span>
-</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>   <span class="n">pydantic</span><span class="o">=&lt;</span><span class="k">class</span><span class="w"> </span><span class="err">&#39;</span><span class="nc">__main__</span><span class="o">.</span><span class="n">CustomOutput</span><span class="s1">&#39;&gt;,</span>
-</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>   <span class="n">tool_output</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>   <span class="n">callback_output</span><span class="o">=</span><span class="s1">&#39;Hi! Here is the result: random str, str item 1, str item 2, str item 3&#39;</span><span class="p">,</span> <span class="c1"># returned a plain text summary</span>
-</span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>   <span class="n">evaluation</span><span class="o">=</span><span class="kc">None</span>
-</span><span id="__span-8-9"><a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="n">res</span> <span class="o">==</span> <span class="n">TaskOutput</span><span class="p">(</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>   <span class="n">task_id</span><span class="o">=</span><span class="n">UUID</span><span class="p">(</span><span class="s1">&#39;&lt;TASK UUID&gt;&#39;</span><span class="p">),</span>
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>   <span class="n">raw</span><span class="o">=</span><span class="s1">&#39;{</span><span class="se">\&quot;</span><span class="s1">test1</span><span class="se">\&quot;</span><span class="s1">:</span><span class="se">\&quot;</span><span class="s1">random str</span><span class="se">\&quot;</span><span class="s1">, </span><span class="se">\&quot;</span><span class="s1">test2</span><span class="se">\&quot;</span><span class="s1">:[</span><span class="se">\&quot;</span><span class="s1">str item 1</span><span class="se">\&quot;</span><span class="s1">, </span><span class="se">\&quot;</span><span class="s1">str item 2</span><span class="se">\&quot;</span><span class="s1">, </span><span class="se">\&quot;</span><span class="s1">str item 3</span><span class="se">\&quot;</span><span class="s1">]}&#39;</span><span class="p">,</span>
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>   <span class="n">json_dict</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;test1&#39;</span><span class="p">:</span> <span class="s1">&#39;random str&#39;</span><span class="p">,</span> <span class="s1">&#39;test2&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;str item 1&#39;</span><span class="p">,</span> <span class="s1">&#39;str item 2&#39;</span><span class="p">,</span> <span class="s1">&#39;str item 3&#39;</span><span class="p">]},</span>
+</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>   <span class="n">pydantic</span><span class="o">=&lt;</span><span class="k">class</span><span class="w"> </span><span class="err">&#39;</span><span class="nc">__main__</span><span class="o">.</span><span class="n">CustomOutput</span><span class="s1">&#39;&gt;,</span>
+</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>   <span class="n">tool_output</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+</span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>   <span class="n">callback_output</span><span class="o">=</span><span class="s1">&#39;Hi! Here is the result: random str, str item 1, str item 2, str item 3&#39;</span><span class="p">,</span> <span class="c1"># returned a plain text summary</span>
+</span><span id="__span-9-8"><a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>   <span class="n">evaluation</span><span class="o">=</span><span class="kc">None</span>
+</span><span id="__span-9-9"><a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="p">)</span>
 </span></code></pre></div>
 <h2 id="supervising">Supervising<a class="headerlink" href="#supervising" title="Permanent link">&para;</a></h2>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">versionhq</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">vhq</span>
-</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>
-</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="n">agent_a</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Agent</span><span class="p">(</span><span class="n">role</span><span class="o">=</span><span class="s2">&quot;agent a&quot;</span><span class="p">,</span> <span class="n">goal</span><span class="o">=</span><span class="s2">&quot;My amazing goals&quot;</span><span class="p">,</span> <span class="n">llm</span><span class="o">=</span><span class="s2">&quot;llm-of-your-choice&quot;</span><span class="p">)</span>
-</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="n">agent_b</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Agent</span><span class="p">(</span><span class="n">role</span><span class="o">=</span><span class="s2">&quot;agent b&quot;</span><span class="p">,</span> <span class="n">goal</span><span class="o">=</span><span class="s2">&quot;My amazing goals&quot;</span><span class="p">,</span> <span class="n">llm</span><span class="o">=</span><span class="s2">&quot;llm-of-your-choice&quot;</span><span class="p">)</span>
-</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>
-</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="n">task_1</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Task</span><span class="p">(</span>
-</span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>   <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Analyze the client&#39;s business model.&quot;</span><span class="p">,</span>
-</span><span id="__span-9-8"><a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>   <span class="n">response_fields</span><span class="o">=</span><span class="p">[</span><span class="n">vhq</span><span class="o">.</span><span class="n">ResponseField</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;test1&quot;</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">),],</span>
-</span><span id="__span-9-9"><a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>   <span class="n">allow_delegation</span><span class="o">=</span><span class="kc">True</span>
-</span><span id="__span-9-10"><a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a><span class="p">)</span>
-</span><span id="__span-9-11"><a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a>
-</span><span id="__span-9-12"><a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a> <span class="n">task_2</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Task</span><span class="p">(</span>
-</span><span id="__span-9-13"><a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a>   <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Define the cohort.&quot;</span><span class="p">,</span>
-</span><span id="__span-9-14"><a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a>   <span class="n">response_fields</span><span class="o">=</span><span class="p">[</span><span class="n">vhq</span><span class="o">.</span><span class="n">ResponseField</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;test1&quot;</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">),],</span>
-</span><span id="__span-9-15"><a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a>   <span class="n">allow_delegation</span><span class="o">=</span><span class="kc">False</span>
-</span><span id="__span-9-16"><a id="__codelineno-9-16" name="__codelineno-9-16" href="#__codelineno-9-16"></a><span class="p">)</span>
-</span><span id="__span-9-17"><a id="__codelineno-9-17" name="__codelineno-9-17" href="#__codelineno-9-17"></a>
-</span><span id="__span-9-18"><a id="__codelineno-9-18" name="__codelineno-9-18" href="#__codelineno-9-18"></a><span class="n">team</span> <span class="o">=</span><span class="n">vhq</span><span class="o">.</span><span class="n">Team</span><span class="p">(</span>
-</span><span id="__span-9-19"><a id="__codelineno-9-19" name="__codelineno-9-19" href="#__codelineno-9-19"></a>   <span class="n">members</span><span class="o">=</span><span class="p">[</span>
-</span><span id="__span-9-20"><a id="__codelineno-9-20" name="__codelineno-9-20" href="#__codelineno-9-20"></a>      <span class="n">vhq</span><span class="o">.</span><span class="n">Member</span><span class="p">(</span><span class="n">agent</span><span class="o">=</span><span class="n">agent_a</span><span class="p">,</span> <span class="n">is_manager</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">task</span><span class="o">=</span><span class="n">task_1</span><span class="p">),</span>
-</span><span id="__span-9-21"><a id="__codelineno-9-21" name="__codelineno-9-21" href="#__codelineno-9-21"></a>      <span class="n">vhq</span><span class="o">.</span><span class="n">Member</span><span class="p">(</span><span class="n">agent</span><span class="o">=</span><span class="n">agent_b</span><span class="p">,</span> <span class="n">is_manager</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">task</span><span class="o">=</span><span class="n">task_2</span><span class="p">),</span>
-</span><span id="__span-9-22"><a id="__codelineno-9-22" name="__codelineno-9-22" href="#__codelineno-9-22"></a>   <span class="p">],</span>
-</span><span id="__span-9-23"><a id="__codelineno-9-23" name="__codelineno-9-23" href="#__codelineno-9-23"></a><span class="p">)</span>
-</span><span id="__span-9-24"><a id="__codelineno-9-24" name="__codelineno-9-24" href="#__codelineno-9-24"></a><span class="n">res</span> <span class="o">=</span> <span class="n">team</span><span class="o">.</span><span class="n">launch</span><span class="p">()</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">versionhq</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">vhq</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="n">agent_a</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Agent</span><span class="p">(</span><span class="n">role</span><span class="o">=</span><span class="s2">&quot;agent a&quot;</span><span class="p">,</span> <span class="n">goal</span><span class="o">=</span><span class="s2">&quot;My amazing goals&quot;</span><span class="p">,</span> <span class="n">llm</span><span class="o">=</span><span class="s2">&quot;llm-of-your-choice&quot;</span><span class="p">)</span>
+</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="n">agent_b</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Agent</span><span class="p">(</span><span class="n">role</span><span class="o">=</span><span class="s2">&quot;agent b&quot;</span><span class="p">,</span> <span class="n">goal</span><span class="o">=</span><span class="s2">&quot;My amazing goals&quot;</span><span class="p">,</span> <span class="n">llm</span><span class="o">=</span><span class="s2">&quot;llm-of-your-choice&quot;</span><span class="p">)</span>
+</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>
+</span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="n">task_1</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Task</span><span class="p">(</span>
+</span><span id="__span-10-7"><a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>   <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Analyze the client&#39;s business model.&quot;</span><span class="p">,</span>
+</span><span id="__span-10-8"><a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>   <span class="n">response_fields</span><span class="o">=</span><span class="p">[</span><span class="n">vhq</span><span class="o">.</span><span class="n">ResponseField</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;test1&quot;</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">),],</span>
+</span><span id="__span-10-9"><a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a>   <span class="n">allow_delegation</span><span class="o">=</span><span class="kc">True</span>
+</span><span id="__span-10-10"><a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a><span class="p">)</span>
+</span><span id="__span-10-11"><a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a>
+</span><span id="__span-10-12"><a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a> <span class="n">task_2</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Task</span><span class="p">(</span>
+</span><span id="__span-10-13"><a id="__codelineno-10-13" name="__codelineno-10-13" href="#__codelineno-10-13"></a>   <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Define the cohort.&quot;</span><span class="p">,</span>
+</span><span id="__span-10-14"><a id="__codelineno-10-14" name="__codelineno-10-14" href="#__codelineno-10-14"></a>   <span class="n">response_fields</span><span class="o">=</span><span class="p">[</span><span class="n">vhq</span><span class="o">.</span><span class="n">ResponseField</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;test1&quot;</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">),],</span>
+</span><span id="__span-10-15"><a id="__codelineno-10-15" name="__codelineno-10-15" href="#__codelineno-10-15"></a>   <span class="n">allow_delegation</span><span class="o">=</span><span class="kc">False</span>
+</span><span id="__span-10-16"><a id="__codelineno-10-16" name="__codelineno-10-16" href="#__codelineno-10-16"></a><span class="p">)</span>
+</span><span id="__span-10-17"><a id="__codelineno-10-17" name="__codelineno-10-17" href="#__codelineno-10-17"></a>
+</span><span id="__span-10-18"><a id="__codelineno-10-18" name="__codelineno-10-18" href="#__codelineno-10-18"></a><span class="n">team</span> <span class="o">=</span><span class="n">vhq</span><span class="o">.</span><span class="n">Team</span><span class="p">(</span>
+</span><span id="__span-10-19"><a id="__codelineno-10-19" name="__codelineno-10-19" href="#__codelineno-10-19"></a>   <span class="n">members</span><span class="o">=</span><span class="p">[</span>
+</span><span id="__span-10-20"><a id="__codelineno-10-20" name="__codelineno-10-20" href="#__codelineno-10-20"></a>      <span class="n">vhq</span><span class="o">.</span><span class="n">Member</span><span class="p">(</span><span class="n">agent</span><span class="o">=</span><span class="n">agent_a</span><span class="p">,</span> <span class="n">is_manager</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">task</span><span class="o">=</span><span class="n">task_1</span><span class="p">),</span>
+</span><span id="__span-10-21"><a id="__codelineno-10-21" name="__codelineno-10-21" href="#__codelineno-10-21"></a>      <span class="n">vhq</span><span class="o">.</span><span class="n">Member</span><span class="p">(</span><span class="n">agent</span><span class="o">=</span><span class="n">agent_b</span><span class="p">,</span> <span class="n">is_manager</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">task</span><span class="o">=</span><span class="n">task_2</span><span class="p">),</span>
+</span><span id="__span-10-22"><a id="__codelineno-10-22" name="__codelineno-10-22" href="#__codelineno-10-22"></a>   <span class="p">],</span>
+</span><span id="__span-10-23"><a id="__codelineno-10-23" name="__codelineno-10-23" href="#__codelineno-10-23"></a><span class="p">)</span>
+</span><span id="__span-10-24"><a id="__codelineno-10-24" name="__codelineno-10-24" href="#__codelineno-10-24"></a><span class="n">res</span> <span class="o">=</span> <span class="n">team</span><span class="o">.</span><span class="n">launch</span><span class="p">()</span>
 </span></code></pre></div>
 <p>This will return a list with dictionaries with keys defined in the <code>ResponseField</code> of each task.</p>
 <p>Tasks can be delegated to a team manager, peers in the team, or completely new agent.</p>
@@ -800,6 +842,9 @@
 
 
 
+
+  
+  
 
 
 
