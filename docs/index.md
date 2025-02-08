@@ -1,3 +1,10 @@
+---
+tags:
+  - HTML5
+  - JavaScript
+  - CSS
+---
+
 # Documentation
 
 [![DL](https://img.shields.io/badge/Download-15K+-red)](https://clickpy.clickhouse.com/dashboard/versionhq)
@@ -76,9 +83,9 @@ This will form a network with multiple agents on `Formation` and return results 
 <hr />
 
 
-## Setup
+## Setting up a project
 
-1. Install `uv` package manager:
+### 1. Installing `uv` package manager
 
    For MacOS:
 
@@ -87,13 +94,13 @@ This will form a network with multiple agents on `Formation` and return results 
    ```
 
    For Ubuntu/Debian:
-
    ```
    sudo apt-get install uv
    ```
 
 
-2. Install dependencies:
+### 2. Installing dependencies
+
    ```
    uv venv
    source .venv/bin/activate
@@ -101,17 +108,29 @@ This will form a network with multiple agents on `Formation` and return results 
    uv sync --all-extras
    ```
 
-* In case of AssertionError/module mismatch, run Python version control using `.pyenv`
-   ```
-   pyenv install 3.12.8
-   pyenv global 3.12.8  (optional: `pyenv global system` to get back to the system default ver.)
-   uv python pin 3.12.8
-   echo 3.12.8 >> .python-version
-   ```
+   - AssertionError/module mismatch errors: Set up default Python version using `.pyenv`
+      ```
+      pyenv install 3.12.8
+      pyenv global 3.12.8  (optional: `pyenv global system` to get back to the system default ver.)
+      uv python pin 3.12.8
+      echo 3.12.8 >> .python-version
+      ```
 
+   - `pygraphviz` related errors: Run the following commands:
+      ```
+      brew install graphbiz
+      uv pip install --config-settings="--global-option=build_ext" \
+      --config-settings="--global-option=-I$(brew --prefix graphviz)/include/" \
+      --config-settings="--global-option=-L$(brew --prefix graphviz)/lib/" \
+      pygraphviz
+      ```
 
-3. Set up secrets:
-   Create a `.env` file in the project root and add the following:
+   - `torch`/`Docling` related errors: Set up default Python version either `3.11.x` or `3.12.x` (same as AssertionError)
+
+### 3. Adding secrets to .env
+
+Create `.env` file in the project root and add following:
+
    ```
    OPENAI_API_KEY=your-openai-api-key
    LITELLM_API_KEY=your-litellm-api-key

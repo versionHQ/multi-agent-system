@@ -33,7 +33,10 @@ A Python framework for agentic orchestration that handles complex task automatio
   - [Supervising](#supervising)
 - [Technologies Used](#technologies-used)
 - [Project Structure](#project-structure)
-- [Setting Up](#setting-up)
+- [Setting Up a Project](#setting-up-a-project)
+  - [1. Installing package manager `uv`](#1-installing-package-manager-uv)
+  - [2. Installing dependencies](#2-installing-dependencies)
+  - [3. Adding secrets to .env file](#3-adding-secrets-to-env-file)
 - [Contributing](#contributing)
   - [Package Management with uv](#package-management-with-uv)
   - [Pre-Commit Hooks](#pre-commit-hooks)
@@ -233,24 +236,24 @@ src/
 
 <hr />
 
-## Setting Up
+## Setting Up a Project
 
-1. Install `uv` package manager:
+### 1. Installing package manager `uv`
 
-      For MacOS:
+   For MacOS:
 
-      ```
-      brew install uv
-      ```
+   ```
+   brew install uv
+   ```
 
-      For Ubuntu/Debian:
+   For Ubuntu/Debian:
+   ```
+   sudo apt-get install uv
+   ```
 
-      ```
-      sudo apt-get install uv
-      ```
 
+### 2. Installing dependencies
 
-2. Install dependencies:
    ```
    uv venv
    source .venv/bin/activate
@@ -258,20 +261,32 @@ src/
    uv sync --all-extras
    ```
 
-* In case of AssertionError/module mismatch, run Python version control using `.pyenv`
-   ```
-   pyenv install 3.12.8
-   pyenv global 3.12.8  (optional: `pyenv global system` to get back to the system default ver.)
-   uv python pin 3.12.8
-   echo 3.12.8 >> .python-version
-   ```
+   - AssertionError/module mismatch errors: Set up default Python version using `.pyenv`
+      ```
+      pyenv install 3.12.8
+      pyenv global 3.12.8  (optional: `pyenv global system` to get back to the system default ver.)
+      uv python pin 3.12.8
+      echo 3.12.8 >> .python-version
+      ```
 
+   - `pygraphviz` related errors: Run the following commands:
+      ```
+      brew install graphbiz
+      uv pip install --config-settings="--global-option=build_ext" \
+      --config-settings="--global-option=-I$(brew --prefix graphviz)/include/" \
+      --config-settings="--global-option=-L$(brew --prefix graphviz)/lib/" \
+      pygraphviz
+      ```
 
-3. Add secrets to `.env` file in the project root:
+   - `torch`/`Docling` related errors: Set up default Python version either `3.11.x` or `3.12.x` (same as AssertionError)
+
+### 3. Adding secrets to .env file
+
+Create `.env` file in the project root and add following:
 
    ```
-   LITELLM_API_KEY=your-litellm-api-key
    OPENAI_API_KEY=your-openai-api-key
+   LITELLM_API_KEY=your-litellm-api-key
    COMPOSIO_API_KEY=your-composio-api-key
    COMPOSIO_CLI_KEY=your-composio-cli-key
    [LLM_INTERFACE_PROVIDER_OF_YOUR_CHOICE]_API_KEY=your-api-key

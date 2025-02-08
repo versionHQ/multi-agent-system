@@ -1,3 +1,10 @@
+---
+tags:
+  - HTML5
+  - JavaScript
+  - CSS
+---
+
 # Quick Start
 
 ## Package installation
@@ -11,22 +18,22 @@
 
 ## Setting up a project
 
-1. Install `uv` package manager:
+### 1. Installing `uv` package manager
 
-      For MacOS:
+   For MacOS:
 
-      ```
-      brew install uv
-      ```
+   ```
+   brew install uv
+   ```
 
-      For Ubuntu/Debian:
+   For Ubuntu/Debian:
+   ```
+   sudo apt-get install uv
+   ```
 
-      ```
-      sudo apt-get install uv
-      ```
 
+### 2. Installing dependencies
 
-2. Install dependencies:
    ```
    uv venv
    source .venv/bin/activate
@@ -34,16 +41,28 @@
    uv sync --all-extras
    ```
 
-* In case of AssertionError/module mismatch, run Python version control using `.pyenv`
-   ```
-   pyenv install 3.12.8
-   pyenv global 3.12.8  (optional: `pyenv global system` to get back to the system default ver.)
-   uv python pin 3.12.8
-   echo 3.12.8 >> .python-version
-   ```
+   - AssertionError/module mismatch errors: Set up default Python version using `.pyenv`
+      ```
+      pyenv install 3.12.8
+      pyenv global 3.12.8  (optional: `pyenv global system` to get back to the system default ver.)
+      uv python pin 3.12.8
+      echo 3.12.8 >> .python-version
+      ```
 
+   - `pygraphviz` related errors: Run the following commands:
+      ```
+      brew install graphbiz
+      uv pip install --config-settings="--global-option=build_ext" \
+      --config-settings="--global-option=-I$(brew --prefix graphviz)/include/" \
+      --config-settings="--global-option=-L$(brew --prefix graphviz)/lib/" \
+      pygraphviz
+      ```
 
-3. Add secrets to `.env` file in the project root:
+   - `torch`/`Docling` related errors: Set up default Python version either `3.11.x` or `3.12.x` (same as AssertionError)
+
+### 3. Adding secrets to .env
+
+Create `.env` file in the project root and add following:
 
    ```
    OPENAI_API_KEY=your-openai-api-key
@@ -53,8 +72,9 @@
    [LLM_INTERFACE_PROVIDER_OF_YOUR_CHOICE]_API_KEY=your-api-key
    ```
 
+<hr />
 
-## Forming a agent network
+## Forming agent networks
 
 You can generate a network of multiple agents depending on your task complexity.
 
@@ -73,7 +93,7 @@ Here is a code snippet:
 This will form a network with multiple agents on `Formation` and return results as a `TaskOutput` object, storing outputs in JSON, plane text, Pydantic model formats along with evaluation.
 
 
-## Customizing your agent
+## Customizing AI agents
 
 If you don't need to form a network or assign a specific agent to the network, you can simply build an agent using `Agent` model.
 
