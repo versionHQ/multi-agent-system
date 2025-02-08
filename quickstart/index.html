@@ -384,36 +384,36 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#install-versionhq-package" class="md-nav__link">
+  <a href="#installing-versionhq-package" class="md-nav__link">
     <span class="md-ellipsis">
-      Install versionhq package
+      Installing versionhq package
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#set-up-a-project" class="md-nav__link">
+  <a href="#setting-up-a-project" class="md-nav__link">
     <span class="md-ellipsis">
-      Set up a project
+      Setting up a project
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#form-a-agent-network" class="md-nav__link">
+  <a href="#forming-a-agent-network" class="md-nav__link">
     <span class="md-ellipsis">
-      Form a Agent Network
+      Forming a agent network
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#solo-agent" class="md-nav__link">
+  <a href="#customizing-your-agent" class="md-nav__link">
     <span class="md-ellipsis">
-      Solo Agent
+      Customizing your agent
     </span>
   </a>
   
@@ -422,7 +422,7 @@
         <li class="md-nav__item">
   <a href="#supervising" class="md-nav__link">
     <span class="md-ellipsis">
-      Supervising:
+      Supervising
     </span>
   </a>
   
@@ -676,11 +676,11 @@
 
 
 <h1 id="quick-start">Quick Start<a class="headerlink" href="#quick-start" title="Permanent link">&para;</a></h1>
-<h2 id="install-versionhq-package">Install <code>versionhq</code> package<a class="headerlink" href="#install-versionhq-package" title="Permanent link">&para;</a></h2>
+<h2 id="installing-versionhq-package">Installing <code>versionhq</code> package<a class="headerlink" href="#installing-versionhq-package" title="Permanent link">&para;</a></h2>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>pip install versionhq
 </span></code></pre></div>
 <p>(Python 3.11, 3.12)</p>
-<h2 id="set-up-a-project">Set up a project<a class="headerlink" href="#set-up-a-project" title="Permanent link">&para;</a></h2>
+<h2 id="setting-up-a-project">Setting up a project<a class="headerlink" href="#setting-up-a-project" title="Permanent link">&para;</a></h2>
 <ol>
 <li>
 <p>Install <code>uv</code> package manager:</p>
@@ -718,7 +718,7 @@
 </span></code></pre></div></p>
 </li>
 </ol>
-<h2 id="form-a-agent-network">Form a Agent Network<a class="headerlink" href="#form-a-agent-network" title="Permanent link">&para;</a></h2>
+<h2 id="forming-a-agent-network">Forming a agent network<a class="headerlink" href="#forming-a-agent-network" title="Permanent link">&para;</a></h2>
 <p>You can generate a network of multiple agents depending on your task complexity.</p>
 <p>Here is a code snippet:</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">versionhq</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">vhq</span>
@@ -730,7 +730,7 @@
 </span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="n">res</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">launch</span><span class="p">()</span>
 </span></code></pre></div>
 <p>This will form a network with multiple agents on <code>Formation</code> and return results as a <code>TaskOutput</code> object, storing outputs in JSON, plane text, Pydantic model formats along with evaluation.</p>
-<h2 id="solo-agent">Solo Agent<a class="headerlink" href="#solo-agent" title="Permanent link">&para;</a></h2>
+<h2 id="customizing-your-agent">Customizing your agent<a class="headerlink" href="#customizing-your-agent" title="Permanent link">&para;</a></h2>
 <p>If you don't need to form a network or assign a specific agent to the network, you can simply build an agent using <code>Agent</code> model.</p>
 <p>By default, the agent prioritize JSON serializable outputs over plane text.</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">versionhq</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">vhq</span>
@@ -767,7 +767,7 @@
 </span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>   <span class="n">evaluation</span><span class="o">=</span><span class="kc">None</span>
 </span><span id="__span-8-9"><a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="p">)</span>
 </span></code></pre></div>
-<h2 id="supervising">Supervising:<a class="headerlink" href="#supervising" title="Permanent link">&para;</a></h2>
+<h2 id="supervising">Supervising<a class="headerlink" href="#supervising" title="Permanent link">&para;</a></h2>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">versionhq</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">vhq</span>
 </span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>
 </span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="n">agent_a</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Agent</span><span class="p">(</span><span class="n">role</span><span class="o">=</span><span class="s2">&quot;agent a&quot;</span><span class="p">,</span> <span class="n">goal</span><span class="o">=</span><span class="s2">&quot;My amazing goals&quot;</span><span class="p">,</span> <span class="n">llm</span><span class="o">=</span><span class="s2">&quot;llm-of-your-choice&quot;</span><span class="p">)</span>
