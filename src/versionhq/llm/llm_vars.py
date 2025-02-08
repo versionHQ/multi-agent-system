@@ -58,6 +58,8 @@ MODELS = {
         "openrouter/google/gemini-2.0-flash-thinking-exp:free",
         "openrouter/google/gemini-2.0-flash-thinking-exp-1219:free",
         "openrouter/google/gemini-2.0-flash-001",
+        "openrouter/meta-llama/llama-3.3-70b-instruct",
+        "openrouter/mistralai/mistral-large-2411",
     ],
     "huggingface": [
         "huggingface/qwen/qwen2.5-VL-72B-Instruct",
