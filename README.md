@@ -27,12 +27,13 @@ A Python framework for agentic orchestration that handles complex task automatio
 - [Key Features](#key-features)
   - [Agent formation](#agent-formation)
 - [Quick Start](#quick-start)
-  - [Forming a Agent Network](#forming-a-agent-network)
-  - [Customizing Your Agent](#customizing-your-agent)
+  - [Package installation](#package-installation)
+  - [Forming a agent network](#forming-a-agent-network)
+  - [Customizing AI agents](#customizing-ai-agents)
   - [Supervising](#supervising)
 - [Technologies Used](#technologies-used)
 - [Project Structure](#project-structure)
-- [Setup](#setup)
+- [Setting Up](#setting-up)
 - [Contributing](#contributing)
   - [Package Management with uv](#package-management-with-uv)
   - [Pre-Commit Hooks](#pre-commit-hooks)
@@ -68,7 +69,7 @@ You can specify a desired formation or allow the agents to determine it autonomo
 
 ## Quick Start
 
-**Install `versionhq` package:**
+### Package installation
 
    ```
    pip install versionhq
@@ -76,7 +77,7 @@ You can specify a desired formation or allow the agents to determine it autonomo
 
 (Python 3.11 / 3.12)
 
-### Forming a Agent Network
+### Forming a agent network
 
    ```python
    import versionhq as vhq
@@ -91,7 +92,7 @@ You can specify a desired formation or allow the agents to determine it autonomo
    This will form a network with multiple agents on `Formation` and return `TaskOutput` object with output in JSON, plane text, Pydantic model format with evaluation.
 
 
-### Customizing Your Agent
+### Customizing AI agents
 
 You can simply build an agent using `Agent` model.
 
@@ -178,17 +179,13 @@ Tasks can be delegated to a team manager, peers in the team, or completely new a
 **Schema, Data Validation**
 
 * [Pydantic](https://docs.pydantic.dev/latest/): Data validation and serialization library for Python.
-
 * [Upstage](https://console.upstage.ai/docs/getting-started/overview): Document processer for ML tasks. (Use `Document Parser API` to extract data from documents)
-
 * [Docling](https://ds4sd.github.io/docling/): Document parsing
 
 **Storage**
 
 * [mem0ai](https://docs.mem0.ai/quickstart#install-package): Agents' memory storage and management.
-
 * [Chroma DB](https://docs.trychroma.com/): Vector database for storing and querying usage data.
-
 * [SQLite](https://www.sqlite.org/docs.html): C-language library to implements a small SQL database engine.
 
 **LLM-curation**
@@ -202,11 +199,8 @@ Tasks can be delegated to a team manager, peers in the team, or completely new a
 **Deployment**
 
 * **Python**: Primary programming language. v3.12.x is recommended
-
 * [uv](https://docs.astral.sh/uv/): Python package installer and resolver
-
 * [pre-commit](https://pre-commit.com/): Manage and maintain pre-commit hooks
-
 * [setuptools](https://pypi.org/project/setuptools/): Build python modules
 
 <hr />
@@ -239,7 +233,7 @@ src/
 
 <hr />
 
-## Setup
+## Setting Up
 
 1. Install `uv` package manager:
 
@@ -396,5 +390,5 @@ A. Visit [playground](https://versi0n.io).
 
 **Q. How do you analyze the customer?**
 
-> A. We employ soft clustering for each customer.
-> <img width="200" src="https://res.cloudinary.com/dfeirxlea/image/upload/v1732732628/pj_m_agents/ito937s5d5x0so8isvw6.png">
+A. We employ soft clustering for each customer.
+<img width="200" src="https://res.cloudinary.com/dfeirxlea/image/upload/v1732732628/pj_m_agents/ito937s5d5x0so8isvw6.png">
