@@ -43,8 +43,8 @@
    ```
 
 
-3. Set up environment variables:
-   Create a `.env` file in the project root and add the following:
+3. Add secrets to `.env` file in the project root:
+
    ```
    OPENAI_API_KEY=your-openai-api-key
    LITELLM_API_KEY=your-litellm-api-key

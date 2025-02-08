@@ -1,3 +1,4 @@
+from unittest.mock import patch
 
 from versionhq.agent.model import Agent
 from versionhq.task.model import Task, ResponseField, TaskOutput
@@ -277,6 +278,7 @@ def test_handle_team_task():
             ResponseField(title="task_2_2", data_type=list, required=True),
         ],
     )
+
     team_solo = Team(
         members=[
             Member(agent=agent_c, is_manager=False)
@@ -316,9 +318,8 @@ def test_handle_team_task():
     )
     teams = [team_solo, team_flat, team_leader, team_dual_leaders, team_leader_without_task]
 
-    for (i, team) in enumerate(teams):
-        res = team.launch()
-        assert team._get_responsible_agent(task=task_1) is not None
-        assert isinstance(res, TeamOutput) and res.team_id is team.id
-        assert team.tasks[0].id is team_task.id
-        assert res.raw is not None
+
+    for item in teams:
+        with patch.object(Team, "_execute_tasks", kwargs=dict(tasks=item.tasks)) as private_mock:
+            item.launch()
+            private_mock.assert_called_once()

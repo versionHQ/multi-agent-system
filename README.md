@@ -27,18 +27,16 @@ A Python framework for agentic orchestration that handles complex task automatio
 - [Key Features](#key-features)
   - [Agent formation](#agent-formation)
 - [Quick Start](#quick-start)
-  - [Generate agent networks and launch task execution:](#generate-agent-networks-and-launch-task-execution)
-  - [Solo Agent:](#solo-agent)
-  - [Supervising:](#supervising)
+  - [Forming a Agent Network](#forming-a-agent-network)
+  - [Customizing Your Agent](#customizing-your-agent)
+  - [Supervising](#supervising)
 - [Technologies Used](#technologies-used)
 - [Project Structure](#project-structure)
 - [Setup](#setup)
 - [Contributing](#contributing)
-  - [Documentation](#documentation)
-  - [Customizing AI Agent](#customizing-ai-agent)
-  - [Modifying RAG Functionality](#modifying-rag-functionality)
   - [Package Management with uv](#package-management-with-uv)
   - [Pre-Commit Hooks](#pre-commit-hooks)
+  - [Documentation](#documentation)
 - [Trouble Shooting](#trouble-shooting)
 - [Frequently Asked Questions (FAQ)](#frequently-asked-questions-faq)
 
@@ -78,7 +76,7 @@ You can specify a desired formation or allow the agents to determine it autonomo
 
 (Python 3.11 / 3.12)
 
-### Generate agent networks and launch task execution:
+### Forming a Agent Network
 
    ```python
    import versionhq as vhq
@@ -93,7 +91,7 @@ You can specify a desired formation or allow the agents to determine it autonomo
    This will form a network with multiple agents on `Formation` and return `TaskOutput` object with output in JSON, plane text, Pydantic model format with evaluation.
 
 
-### Solo Agent:
+### Customizing Your Agent
 
 You can simply build an agent using `Agent` model.
 
@@ -140,7 +138,7 @@ This will return a `TaskOutput` object that stores response in plane text, JSON,
    )
    ```
 
-### Supervising:
+### Supervising
 
    ```python
    import versionhq as vhq
@@ -178,26 +176,38 @@ Tasks can be delegated to a team manager, peers in the team, or completely new a
 ## Technologies Used
 
 **Schema, Data Validation**
-   - [Pydantic](https://docs.pydantic.dev/latest/): Data validation and serialization library for Python.
-   - [Upstage](https://console.upstage.ai/docs/getting-started/overview): Document processer for ML tasks. (Use `Document Parser API` to extract data from documents)
-   - [Docling](https://ds4sd.github.io/docling/): Document parsing
+
+* [Pydantic](https://docs.pydantic.dev/latest/): Data validation and serialization library for Python.
+
+* [Upstage](https://console.upstage.ai/docs/getting-started/overview): Document processer for ML tasks. (Use `Document Parser API` to extract data from documents)
+
+* [Docling](https://ds4sd.github.io/docling/): Document parsing
 
 **Storage**
-   - [mem0ai](https://docs.mem0.ai/quickstart#install-package): Agents' memory storage and management.
-   - [Chroma DB](https://docs.trychroma.com/): Vector database for storing and querying usage data.
-   - [SQLite](https://www.sqlite.org/docs.html): C-language library to implements a small SQL database engine.
+
+* [mem0ai](https://docs.mem0.ai/quickstart#install-package): Agents' memory storage and management.
+
+* [Chroma DB](https://docs.trychroma.com/): Vector database for storing and querying usage data.
+
+* [SQLite](https://www.sqlite.org/docs.html): C-language library to implements a small SQL database engine.
 
 **LLM-curation**
-   - [LiteLLM](https://docs.litellm.ai/docs/providers): Curation platform to access LLMs
+
+* [LiteLLM](https://docs.litellm.ai/docs/providers): Curation platform to access LLMs
 
 **Tools**
-   - [Composio](https://composio.dev/): Conect RAG agents with external tools, Apps, and APIs to perform actions and receive triggers. We use [tools](https://composio.dev/tools) and [RAG tools](https://app.composio.dev/app/ragtool) from Composio toolset.
+
+* [Composio](https://composio.dev/): Conect RAG agents with external tools, Apps, and APIs to perform actions and receive triggers. We use [tools](https://composio.dev/tools) and [RAG tools](https://app.composio.dev/app/ragtool) from Composio toolset.
 
 **Deployment**
-   - Python: Primary programming language. v3.13 is recommended.
-   - [uv](https://docs.astral.sh/uv/): Python package installer and resolver
-   - [pre-commit](https://pre-commit.com/): Manage and maintain pre-commit hooks
-   - [setuptools](https://pypi.org/project/setuptools/): Build python modules
+
+* **Python**: Primary programming language. v3.12.x is recommended
+
+* [uv](https://docs.astral.sh/uv/): Python package installer and resolver
+
+* [pre-commit](https://pre-commit.com/): Manage and maintain pre-commit hooks
+
+* [setuptools](https://pypi.org/project/setuptools/): Build python modules
 
 <hr />
 
@@ -263,8 +273,8 @@ src/
    ```
 
 
-3. Set up environment variables:
-   Create a `.env` file in the project root and add the following:
+3. Add secrets to `.env` file in the project root:
+
    ```
    LITELLM_API_KEY=your-litellm-api-key
    OPENAI_API_KEY=your-openai-api-key
@@ -281,61 +291,37 @@ src/
 
 2. Create amazing features
 
-3. Test the features using the `tests` directory.
+3. Add a test funcition to the `tests` directory and run **pytest**.
 
-   - Add a test function to respective components in the `tests` directory.
-   - Add your `LITELLM_API_KEY`, `OPENAI_API_KEY`, `COMPOSIO_API_KEY`, `DEFAULT_USER_ID` to the Github `repository secrets` located at settings > secrets & variables > Actions.
-   - Run a test.
+   - Add secret values defined in `.github/workflows/run_test.yml` to your Github `repository secrets` located at settings > secrets & variables > Actions.
+   - Run a following command:
       ```
       uv run pytest tests -vv --cache-clear
       ```
 
-   **Pytest**
+   **Building a new pytest function**
 
-   * When adding a new file to `tests`, name the file ended with `_test.py`.
-   * When adding a new feature to the file, name the feature started with `test_`.
+   * Files added to the `tests` directory must end in `_test.py`.
 
-4. Pull the latest version of source code from the main branch (`git pull origin main`) *Address conflicts if any.
-5. Commit your changes (`git add .` / `git commit -m 'Add your-amazing-feature'`)
-6. Push to the branch (`git push origin feature/your-amazing-feature`)
-7. Open a pull request
+   * Test functions within the files must begin with `test_`.
+
+
+4. Update `docs` accordingly.
+
+5. Pull the latest version of source code from the main branch (`git pull origin main`) *Address conflicts if any.
+
+6. Commit your changes (`git add .` / `git commit -m 'Add your-amazing-feature'`)
+
+7. Push to the branch (`git push origin feature/your-amazing-feature`)
+
+8. Open a pull request
 
 
 **Optional**
+
 * Flag with `#! REFINEME` for any improvements needed and `#! FIXME` for any errors.
 
 * `Playground` is available at `https://versi0n.io`.
-
-
-### Documentation
-
-* To edit the documentation, see `docs` repository and edit the respective component.
-
-* We use `mkdocs` to update the docs. You can run the doc locally at http://127.0.0.1:8000/:
-
-   ```
-   uv run python3 -m mkdocs serve --clean
-   ```
-
-* To add a new page, update `mkdocs.yml` in the root. Refer to [MkDocs official docs](https://squidfunk.github.io/mkdocs-material/getting-started/) for more details.
-
-
-### Customizing AI Agent
-
-To add an agent, use `sample` directory to add new `project`. You can define an agent with a specific role, goal, and set of tools.
-
-Your new agent needs to follow the `Agent` model defined in the `verionhq.agent.model.py`.
-
-You can also add any fields and functions to the `Agent` model **universally** by modifying `verionhq.agent.model.py`.
-
-
-### Modifying RAG Functionality
-
-The RAG system uses Chroma DB to store and query past campaign dataset. To update the knowledge base:
-
-1. Add new files to the `uploads/` directory. (This will not be pushed to Github.)
-2. Modify the `tools.py` file to update the ingestion process if necessary.
-3. Run the ingestion process to update the Chroma DB.
 
 
 ### Package Management with uv
@@ -365,6 +351,18 @@ Pre-commit hooks help maintain code quality by running checks for formatting, li
    ```
    git commit --no-verify -m "your-commit-message"
    ```
+
+### Documentation
+
+* To edit the documentation, see `docs` repository and edit the respective component.
+
+* We use `mkdocs` to update the docs. You can run the doc locally at http://127.0.0.1:8000/:
+
+   ```
+   uv run python3 -m mkdocs serve --clean
+   ```
+
+* To add a new page, update `mkdocs.yml` in the root. Refer to [MkDocs documentation](https://squidfunk.github.io/mkdocs-material/getting-started/) for more details.
 
 <hr />
 

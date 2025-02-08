@@ -236,7 +236,7 @@ class Team(BaseModel):
             return None
 
 
-    def _handle_agent_formation(self) -> None:
+    def _assign_tasks(self) -> None:
         """
         Form a team considering agents and tasks given, and update `self.members` field:
             1. Idling managers to take the team tasks.
@@ -245,35 +245,21 @@ class Team(BaseModel):
         """
 
         team_planner = TeamPlanner(tasks=self.tasks, planner_llm=self.planner_llm)
-        idling_managers: List[Member] = [member for member in self.members if member.is_idling and member.is_manager is True]
-        idling_members: List[Member] =  [member for member in self.members if member.is_idling and member.is_manager is False]
-        unassigned_tasks: List[Task] = self.member_tasks_without_agent
+        idling_managers: List[Member] = [member for member in self.members if member.is_idling and member.is_manager == True]
+        idling_members: List[Member] =  [member for member in self.members if member.is_idling and member.is_manager == False]
+        unassigned_tasks: List[Task] = self.team_tasks + self.member_tasks_without_agent if self.team_tasks else self.member_tasks_without_agent
         new_team_members: List[Member] = []
 
-        if self.team_tasks:
-            candidates = idling_managers + idling_members
-            if candidates:
-                i = 0
-                while i < len(candidates):
-                    if len(self.team_tasks) < i and self.team_tasks[i]:
-                        candidates[i].tasks.append(self.team_tasks[i])
-                        i += 1
+        if idling_managers:
+            idling_managers[0].tasks.extend(unassigned_tasks)
 
-                if len(self.team_tasks) > i:
-                    for item in self.team_tasks[i:]:
-                        if item not in unassigned_tasks:
-                            unassigned_tasks = [item, ] + unassigned_tasks
+        elif idling_members:
+            idling_members[0].tasks.extend(unassigned_tasks)
 
-            else:
-                for item in self.team_tasks:
-                    if item not in unassigned_tasks:
-                        unassigned_tasks = [item, ] + unassigned_tasks
-
-        if unassigned_tasks:
+        else:
             new_team_members = team_planner._handle_assign_agents(unassigned_tasks=unassigned_tasks)
-
-        if new_team_members:
-            self.members += new_team_members
+            if new_team_members:
+                self.members += new_team_members
 
 
     # task execution
@@ -364,7 +350,7 @@ class Team(BaseModel):
 
             responsible_agent = self._get_responsible_agent(task)
             if responsible_agent is None:
-                self._handle_agent_formation()
+                self._assign_tasks()
 
             if isinstance(task, ConditionalTask):
                 skipped_task_output = task._handle_conditional_task(task_outputs, futures, task_index, was_replayed)
@@ -406,7 +392,7 @@ class Team(BaseModel):
         metrics: List[UsageMetrics] = []
 
         if self.team_tasks or self.member_tasks_without_agent:
-            self._handle_agent_formation()
+            self._assign_tasks()
 
         if kwargs_pre is not None:
             for func in self.pre_launch_callbacks:

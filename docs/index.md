@@ -47,7 +47,7 @@ You can specify a desired formation or allow the agents to determine it autonomo
 
 ## Quick Start
 
-### Install `versionhq` package
+### Package Installation
 
    ```
    pip install versionhq
@@ -55,7 +55,7 @@ You can specify a desired formation or allow the agents to determine it autonomo
 
 (Python 3.11 / 3.12)
 
-### Form a agent network
+### Forming a Agent Network
 
 You can generate a network of multiple agents depending on your task complexity.
 
@@ -76,21 +76,21 @@ This will form a network with multiple agents on `Formation` and return results 
 <hr />
 
 
-## Setting Up Local Env
+## Setup
 
 1. Install `uv` package manager:
 
-      For MacOS:
+   For MacOS:
 
-      ```
-      brew install uv
-      ```
+   ```
+   brew install uv
+   ```
 
-      For Ubuntu/Debian:
+   For Ubuntu/Debian:
 
-      ```
-      sudo apt-get install uv
-      ```
+   ```
+   sudo apt-get install uv
+   ```
 
 
 2. Install dependencies:
@@ -110,7 +110,7 @@ This will form a network with multiple agents on `Formation` and return results 
    ```
 
 
-3. Set up environment variables:
+3. Set up secrets:
    Create a `.env` file in the project root and add the following:
    ```
    OPENAI_API_KEY=your-openai-api-key
@@ -120,84 +120,56 @@ This will form a network with multiple agents on `Formation` and return results 
    [LLM_INTERFACE_PROVIDER_OF_YOUR_CHOICE]_API_KEY=your-api-key
    ```
 
+<hr />
+
 ## Contributing
 
 1. Create your feature branch (`git checkout -b feature/your-amazing-feature`)
 
 2. Create amazing features
 
-3. Test the features using the `tests` directory.
+3. Add a test funcition to the `tests` directory and run **pytest**.
 
-   - Add a test function to respective components in the `tests` directory.
-   - Add your `LITELLM_API_KEY`, `OPENAI_API_KEY`, `COMPOSIO_API_KEY`, `DEFAULT_USER_ID` to the Github `repository secrets` located at settings > secrets & variables > Actions.
-   - Run a test.
+   - Add secret values defined in `.github/workflows/run_test.yml` to your Github `repository secrets` located at settings > secrets & variables > Actions.
+   - Run a following command:
       ```
       uv run pytest tests -vv --cache-clear
       ```
 
-   **Pytest**
+   **Building a new pytest function**
 
-   * When adding a new file to `tests`, name the file ended with `_test.py`.
-   * When adding a new feature to the file, name the feature started with `test_`.
+   * Files added to the `tests` directory must end in `_test.py`.
+   * Test functions within the files must begin with `test_`.
 
-4. Pull the latest version of source code from the main branch (`git pull origin main`) *Address conflicts if any.
-5. Commit your changes (`git add .` / `git commit -m 'Add your-amazing-feature'`)
-6. Push to the branch (`git push origin feature/your-amazing-feature`)
-7. Open a pull request
+
+4. Update `docs` accordingly.
+
+5. Pull the latest version of source code from the main branch (`git pull origin main`) *Address conflicts if any.
+
+6. Commit your changes (`git add .` / `git commit -m 'Add your-amazing-feature'`)
+
+7. Push to the branch (`git push origin feature/your-amazing-feature`)
+
+8. Open a pull request
 
 
 **Optional**
+
 * Flag with `#! REFINEME` for any improvements needed and `#! FIXME` for any errors.
 
 * `Playground` is available at `https://versi0n.io`.
 
 
-<hr />
-
-### Documentation
-
-* To edit the documentation, see `docs` repository and edit the respective component.
-
-* We use `mkdocs` to update the docs. You can run the doc locally at http://127.0.0.1:8000/:
-
-   ```
-   uv run python3 -m mkdocs serve --clean
-   ```
-
-* To add a new page, update `mkdocs.yml` in the root. Refer to [MkDocs official docs](https://squidfunk.github.io/mkdocs-material/getting-started/) for more details.
-
-
-<hr />
-
-### Customizing AI Agent
-
-To add an agent, use `sample` directory to add new `project`. You can define an agent with a specific role, goal, and set of tools.
-
-Your new agent needs to follow the `Agent` model defined in the `verionhq.agent.model.py`.
-
-You can also add any fields and functions to the `Agent` model **universally** by modifying `verionhq.agent.model.py`.
-
-<hr />
-
-### Modifying RAG Functionality
-
-The RAG system uses Chroma DB to store and query past campaign dataset. To update the knowledge base:
-
-1. Add new files to the `uploads/` directory. (This will not be pushed to Github.)
-2. Modify the `tools.py` file to update the ingestion process if necessary.
-3. Run the ingestion process to update the Chroma DB.
-
-<hr />
-
 ### Package Management with uv
 
 - Add a package: `uv add <package>`
+
 - Remove a package: `uv remove <package>`
+
 - Run a command in the virtual environment: `uv run <command>`
 
 * After updating dependencies, update `requirements.txt` accordingly or run `uv pip freeze > requirements.txt`
 
-<hr />
 
 ### Pre-Commit Hooks
 
@@ -218,31 +190,18 @@ Pre-commit hooks help maintain code quality by running checks for formatting, li
    git commit --no-verify -m "your-commit-message"
    ```
 
-<hr />
 
-## Technologies Used
+### Documentation
 
-**Schema, Data Validation**
-   - [Pydantic](https://docs.pydantic.dev/latest/): Data validation and serialization library for Python.
-   - [Upstage](https://console.upstage.ai/docs/getting-started/overview): Document processer for ML tasks. (Use `Document Parser API` to extract data from documents)
-   - [Docling](https://ds4sd.github.io/docling/): Document parsing
+* To edit the documentation, see `docs` repository and edit the respective component.
 
-**Storage**
-   - [mem0ai](https://docs.mem0.ai/quickstart#install-package): Agents' memory storage and management.
-   - [Chroma DB](https://docs.trychroma.com/): Vector database for storing and querying usage data.
-   - [SQLite](https://www.sqlite.org/docs.html): C-language library to implements a small SQL database engine.
+* We use `mkdocs` to update the docs. You can run the doc locally at http://127.0.0.1:8000/:
 
-**LLM-curation**
-   - [LiteLLM](https://docs.litellm.ai/docs/providers): Curation platform to access LLMs
+   ```
+   uv run python3 -m mkdocs serve --clean
+   ```
 
-**Tools**
-   - [Composio](https://composio.dev/): Conect RAG agents with external tools, Apps, and APIs to perform actions and receive triggers. We use [tools](https://composio.dev/tools) and [RAG tools](https://app.composio.dev/app/ragtool) from Composio toolset.
-
-**Deployment**
-   - Python: Primary programming language. v3.13 is recommended.
-   - [uv](https://docs.astral.sh/uv/): Python package installer and resolver
-   - [pre-commit](https://pre-commit.com/): Manage and maintain pre-commit hooks
-   - [setuptools](https://pypi.org/project/setuptools/): Build python modules
+* To add a new page, update `mkdocs.yml` in the root. Refer to [MkDocs documentation](https://squidfunk.github.io/mkdocs-material/getting-started/) for more details.
 
 <hr />
 
@@ -273,8 +232,40 @@ Common issues and solutions:
 
 A. Visit [playground](https://versi0n.io).
 
+<hr />
 
-**Q. How do you analyze the customer?**
+## Technologies Used
 
-A. We employ soft clustering for each customer.
-<img width="200" src="https://res.cloudinary.com/dfeirxlea/image/upload/v1732732628/pj_m_agents/ito937s5d5x0so8isvw6.png">
+**Schema, Data Validation**
+
+* [Pydantic](https://docs.pydantic.dev/latest/): Data validation and serialization library for Python.
+
+* [Upstage](https://console.upstage.ai/docs/getting-started/overview): Document processer for ML tasks. (Use `Document Parser API` to extract data from documents)
+
+* [Docling](https://ds4sd.github.io/docling/): Document parsing
+
+**Storage**
+
+* [mem0ai](https://docs.mem0.ai/quickstart#install-package): Agents' memory storage and management.
+
+* [Chroma DB](https://docs.trychroma.com/): Vector database for storing and querying usage data.
+
+* [SQLite](https://www.sqlite.org/docs.html): C-language library to implements a small SQL database engine.
+
+**LLM-curation**
+
+* [LiteLLM](https://docs.litellm.ai/docs/providers): Curation platform to access LLMs
+
+**Tools**
+
+* [Composio](https://composio.dev/): Conect RAG agents with external tools, Apps, and APIs to perform actions and receive triggers. We use [tools](https://composio.dev/tools) and [RAG tools](https://app.composio.dev/app/ragtool) from Composio toolset.
+
+**Deployment**
+
+* **Python**: Primary programming language. v3.12.x is recommended
+
+* [uv](https://docs.astral.sh/uv/): Python package installer and resolver
+
+* [pre-commit](https://pre-commit.com/): Manage and maintain pre-commit hooks
+
+* [setuptools](https://pypi.org/project/setuptools/): Build python modules
