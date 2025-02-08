@@ -650,11 +650,11 @@
 <hr />
 
 <h2 id="quick-start">Quick Start<a class="headerlink" href="#quick-start" title="Permanent link">&para;</a></h2>
-<h3 id="install-versionhq-package">Install <code>versionhq</code> package<a class="headerlink" href="#install-versionhq-package" title="Permanent link">&para;</a></h3>
+<h3 id="package-installation">Package Installation<a class="headerlink" href="#package-installation" title="Permanent link">&para;</a></h3>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>pip install versionhq
 </span></code></pre></div>
 <p>(Python 3.11 / 3.12)</p>
-<h3 id="form-a-agent-network">Form a agent network<a class="headerlink" href="#form-a-agent-network" title="Permanent link">&para;</a></h3>
+<h3 id="forming-a-agent-network">Forming a Agent Network<a class="headerlink" href="#forming-a-agent-network" title="Permanent link">&para;</a></h3>
 <p>You can generate a network of multiple agents depending on your task complexity.</p>
 <p>Here is a code snippet:</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">versionhq</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">vhq</span>
@@ -668,7 +668,7 @@
 <p>This will form a network with multiple agents on <code>Formation</code> and return results as a <code>TaskOutput</code> object, storing outputs in JSON, plane text, Pydantic model formats along with evaluation.</p>
 <hr />
 
-<h2 id="setting-up-local-environment">Setting Up Local Environment<a class="headerlink" href="#setting-up-local-environment" title="Permanent link">&para;</a></h2>
+<h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
 <ol>
 <li>Install <code>uv</code> package manager:</li>
 </ol>
@@ -845,9 +845,15 @@
 <h2 id="technologies-used">Technologies Used<a class="headerlink" href="#technologies-used" title="Permanent link">&para;</a></h2>
 <p><strong>Schema, Data Validation</strong></p>
 <ul>
-<li><a href="https://docs.pydantic.dev/latest/">Pydantic</a>: Data validation and serialization library for Python.</li>
-<li><a href="https://console.upstage.ai/docs/getting-started/overview">Upstage</a>: Document processer for ML tasks. (Use <code>Document Parser API</code> to extract data from documents)</li>
-<li><a href="https://ds4sd.github.io/docling/">Docling</a>: Document parsing</li>
+<li>
+<p><a href="https://docs.pydantic.dev/latest/">Pydantic</a>: Data validation and serialization library for Python.</p>
+</li>
+<li>
+<p><a href="https://console.upstage.ai/docs/getting-started/overview">Upstage</a>: Document processer for ML tasks. (Use <code>Document Parser API</code> to extract data from documents)</p>
+</li>
+<li>
+<p><a href="https://ds4sd.github.io/docling/">Docling</a>: Document parsing</p>
+</li>
 </ul>
 <p><strong>Storage</strong></p>
 <ul>
@@ -869,9 +875,11 @@
 <ul>
 <li><a href="https://composio.dev/">Composio</a>: Conect RAG agents with external tools, Apps, and APIs to perform actions and receive triggers. We use <a href="https://composio.dev/tools">tools</a> and <a href="https://app.composio.dev/app/ragtool">RAG tools</a> from Composio toolset.</li>
 </ul>
-<p><strong>Deployment</strong>
-* Python: Primary programming language. v3.12.x is recommended</p>
+<p><strong>Deployment</strong></p>
 <ul>
+<li>
+<p><strong>Python</strong>: Primary programming language. v3.12.x is recommended</p>
+</li>
 <li>
 <p><a href="https://docs.astral.sh/uv/">uv</a>: Python package installer and resolver</p>
 </li>
