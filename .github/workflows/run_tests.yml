@@ -34,9 +34,9 @@ jobs:
 
       - name: Set up the project
         run: |
+          pip install --config-settings="--global-option=build_ext" --config-settings="--global-option=-I$(brew --prefix graphviz)/include/" --config-settings="--global-option=-L$(brew --prefix graphviz)/lib/" pygraphviz
           uv venv --python 3.12.8
           source .venv/bin/activate
-          uv pip install --config-settings="--global-option=build_ext" --config-settings="--global-option=-I$(brew --prefix graphviz)/include/" --config-settings="--global-option=-L$(brew --prefix graphviz)/lib/" pygraphviz
           uv lock --upgrade
           uv sync --all-extras
 
