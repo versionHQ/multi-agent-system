@@ -668,7 +668,7 @@
 <p>This will form a network with multiple agents on <code>Formation</code> and return results as a <code>TaskOutput</code> object, storing outputs in JSON, plane text, Pydantic model formats along with evaluation.</p>
 <hr />
 
-<h2 id="setting-up-your-local-environment">Setting Up Your Local Environment<a class="headerlink" href="#setting-up-your-local-environment" title="Permanent link">&para;</a></h2>
+<h2 id="setting-up-local-environment">Setting Up Local Environment<a class="headerlink" href="#setting-up-local-environment" title="Permanent link">&para;</a></h2>
 <ol>
 <li>Install <code>uv</code> package manager:</li>
 </ol>
@@ -706,6 +706,8 @@
 </span></code></pre></div></p>
 </li>
 </ol>
+<hr />
+
 <h2 id="contributing">Contributing<a class="headerlink" href="#contributing" title="Permanent link">&para;</a></h2>
 <ol>
 <li>
@@ -746,15 +748,23 @@
 <p>Open a pull request</p>
 </li>
 </ul>
-<p><strong>Optional</strong>
-* Flag with <code>REFINEME</code> for any improvements needed and <code>FIXME</code> for any errors.</p>
+<p><strong>Optional</strong></p>
 <ul>
-<li><code>Playground</code> is available at <code>https://versi0n.io</code>.</li>
+<li>
+<p>Flag with <code>REFINEME</code> for any improvements needed and <code>FIXME</code> for any errors.</p>
+</li>
+<li>
+<p><code>Playground</code> is available at <code>https://versi0n.io</code>.</p>
+</li>
 </ul>
 <h3 id="package-management-with-uv">Package Management with uv<a class="headerlink" href="#package-management-with-uv" title="Permanent link">&para;</a></h3>
 <ul>
-<li>Add a package: <code>uv add &lt;package&gt;</code></li>
-<li>Remove a package: <code>uv remove &lt;package&gt;</code></li>
+<li>
+<p>Add a package: <code>uv add &lt;package&gt;</code></p>
+</li>
+<li>
+<p>Remove a package: <code>uv remove &lt;package&gt;</code></p>
+</li>
 <li>
 <p>Run a command in the virtual environment: <code>uv run &lt;command&gt;</code></p>
 </li>
@@ -793,7 +803,7 @@
 <div class="language-text highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>uv run python3 -m mkdocs serve --clean
 </span></code></pre></div>
 <ul>
-<li>To add a new page, update <code>mkdocs.yml</code> in the root. Refer to <a href="https://squidfunk.github.io/mkdocs-material/getting-started/">MkDocs official docs</a> for more details.</li>
+<li>To add a new page, update <code>mkdocs.yml</code> in the root. Refer to <a href="https://squidfunk.github.io/mkdocs-material/getting-started/">MkDocs documentation</a> for more details.</li>
 </ul>
 <hr />
 
@@ -830,6 +840,48 @@
 <h2 id="frequently-asked-questions-faq">Frequently Asked Questions (FAQ)<a class="headerlink" href="#frequently-asked-questions-faq" title="Permanent link">&para;</a></h2>
 <p><strong>Q. Where can I see if the agent is working?</strong></p>
 <p>A. Visit <a href="https://versi0n.io">playground</a>.</p>
+<hr />
+
+<h2 id="technologies-used">Technologies Used<a class="headerlink" href="#technologies-used" title="Permanent link">&para;</a></h2>
+<p><strong>Schema, Data Validation</strong></p>
+<ul>
+<li><a href="https://docs.pydantic.dev/latest/">Pydantic</a>: Data validation and serialization library for Python.</li>
+<li><a href="https://console.upstage.ai/docs/getting-started/overview">Upstage</a>: Document processer for ML tasks. (Use <code>Document Parser API</code> to extract data from documents)</li>
+<li><a href="https://ds4sd.github.io/docling/">Docling</a>: Document parsing</li>
+</ul>
+<p><strong>Storage</strong></p>
+<ul>
+<li>
+<p><a href="https://docs.mem0.ai/quickstart#install-package">mem0ai</a>: Agents' memory storage and management.</p>
+</li>
+<li>
+<p><a href="https://docs.trychroma.com/">Chroma DB</a>: Vector database for storing and querying usage data.</p>
+</li>
+<li>
+<p><a href="https://www.sqlite.org/docs.html">SQLite</a>: C-language library to implements a small SQL database engine.</p>
+</li>
+</ul>
+<p><strong>LLM-curation</strong></p>
+<ul>
+<li><a href="https://docs.litellm.ai/docs/providers">LiteLLM</a>: Curation platform to access LLMs</li>
+</ul>
+<p><strong>Tools</strong></p>
+<ul>
+<li><a href="https://composio.dev/">Composio</a>: Conect RAG agents with external tools, Apps, and APIs to perform actions and receive triggers. We use <a href="https://composio.dev/tools">tools</a> and <a href="https://app.composio.dev/app/ragtool">RAG tools</a> from Composio toolset.</li>
+</ul>
+<p><strong>Deployment</strong>
+* Python: Primary programming language. v3.12.x is recommended</p>
+<ul>
+<li>
+<p><a href="https://docs.astral.sh/uv/">uv</a>: Python package installer and resolver</p>
+</li>
+<li>
+<p><a href="https://pre-commit.com/">pre-commit</a>: Manage and maintain pre-commit hooks</p>
+</li>
+<li>
+<p><a href="https://pypi.org/project/setuptools/">setuptools</a>: Build python modules</p>
+</li>
+</ul>
 
 
 
