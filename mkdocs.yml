@@ -1,4 +1,4 @@
-site_name: Docs - versionhq
+site_name: versionHQ | Agentic orchestration framework
 site_author: Version IO Sdn. Bhd.
 site_description: A Python framework for multi-agent systems that handle complex task automation.
 site_url: https://docs.versi0n.io
@@ -54,7 +54,7 @@ theme:
   name: material
   language: en
   favicon: _logos/favicon.ico
-  # logo: _logos/logo192.png
+  logo: _logos/logo192.png
   font:
     code: Roboto Mono
   icon:
@@ -126,8 +126,8 @@ nav:
   #   - Customize Agent: 'guides/customize-agent.md'
   #   - Connect to any LLM: 'guides/connect-to-any-llm.md'
   - Examples:
-    - Playground: https://mkversi0n.io
-    - Experiment: https://github.com/versionHQ/exp-agent-performance
+    - Playground: https://versi0n.io
+    - Experiment - Agent Performance: https://github.com/versionHQ/exp-agent-performance
   - Change Log: https://github.com/versionHQ/multi-agent-system/releases
 
 extra_css:

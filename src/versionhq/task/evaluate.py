@@ -70,17 +70,16 @@ class EvaluationItem(BaseModel):
         else: return None
 
 
-
 class Evaluation(BaseModel):
     items: List[EvaluationItem] = []
-    latency: int = Field(default=None, description="seconds")
+    latency: int = Field(default=None, description="job execution latency in seconds")
     tokens: int = Field(default=None, description="tokens consumed")
-    responsible_agent: Any = Field(default=None, description="store agent instance that evaluates the outcome")
+    eval_by: Any = Field(default=None, description="stores agent object that evaluates the outcome")
 
     @model_validator(mode="after")
-    def set_up_responsible_agent(self) -> Self:
+    def set_up_evaluator(self) -> Self:
         from versionhq.agent.inhouse_agents import vhq_task_evaluator
-        self.responsible_agent = vhq_task_evaluator
+        self.eval_by = vhq_task_evaluator
         return self
 
 
@@ -88,7 +87,7 @@ class Evaluation(BaseModel):
         """
         Create and store evaluation results in the memory metadata
         """
-        eval_by = self.responsible_agent.role if self.responsible_agent else None
+        eval_by = self.eval_by.role if self.eval_by else None
         score = self.aggregate_score
         eval_criteria = ", ".join([item.criteria for item in self.items]) if self.items else None
         suggestion = self.suggestion_summary

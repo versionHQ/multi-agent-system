@@ -4,6 +4,9 @@ warnings.filterwarnings(action="ignore", message="Pydantic serializer warnings:"
 warnings.filterwarnings(action="ignore", category=UserWarning, module="pydantic._internal")
 warnings.filterwarnings(action="ignore", module="LiteLLM:utils")
 
+from dotenv import load_dotenv
+load_dotenv(override=True)
+
 from versionhq.agent.model import Agent
 from versionhq.clients.customer.model import Customer
 from versionhq.clients.product.model import Product, ProductProvider
@@ -13,7 +16,7 @@ from versionhq.knowledge.source import PDFKnowledgeSource, CSVKnowledgeSource, J
 from versionhq.knowledge.source_docling import DoclingSource
 from versionhq.task.model import Task, TaskOutput, ConditionalTask, ResponseField
 from versionhq.task.evaluate import Evaluation, EvaluationItem
-from versionhq.team.model import Team, TeamOutput, Formation, TeamMember, TaskHandlingProcess
+from versionhq.team.model import Team, TeamOutput, Formation, Member, TaskHandlingProcess
 from versionhq.tool.model import Tool, ToolSet
 from versionhq.tool.cache_handler import CacheHandler
 from versionhq.tool.tool_handler import ToolHandler
@@ -24,7 +27,7 @@ from versionhq.memory.model import ShortTermMemory,LongTermMemory, UserMemory, M
 from versionhq.task.formation import form_agent_network
 
 
-__version__ = "1.1.12.5"
+__version__ = "1.1.13.0"
 __all__ = [
     "Agent",
 
@@ -55,7 +58,7 @@ __all__ = [
     "Team",
     "TeamOutput",
     "Formation",
-    "TeamMember",
+    "Member",
     "TaskHandlingProcess",
 
     "Tool",

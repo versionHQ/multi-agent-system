@@ -55,6 +55,9 @@ MODELS = {
     "openrouter": [
         "openrouter/deepseek/deepseek-r1",
         "openrouter/qwen/qwen-2.5-72b-instruct",
+        "openrouter/google/gemini-2.0-flash-thinking-exp:free",
+        "openrouter/google/gemini-2.0-flash-thinking-exp-1219:free",
+        "openrouter/google/gemini-2.0-flash-001",
     ],
     "huggingface": [
         "huggingface/qwen/qwen2.5-VL-72B-Instruct",

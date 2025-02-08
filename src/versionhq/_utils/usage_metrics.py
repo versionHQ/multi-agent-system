@@ -3,14 +3,14 @@ from pydantic import BaseModel, Field
 
 class UsageMetrics(BaseModel):
     """
-    Model to track usage metrics for the agent/team's execution.
+    Model to track usage
     """
 
-    total_tokens: int = Field(default=0, description="Total number of tokens used")
-    prompt_tokens: int = Field(default=0, description="Number of tokens used in prompts")
-    cached_prompt_tokens: int = Field(default=0, description="Number of cached prompt tokens used")
-    completion_tokens: int = Field(default=0, description="Number of tokens used in completions")
-    successful_requests: int = Field(default=0, description="Number of successful requests made")
+    total_tokens: int = Field(default=0, description="total number of tokens used")
+    prompt_tokens: int = Field(default=0, description="number of tokens used in prompts")
+    cached_prompt_tokens: int = Field(default=0, description="number of cached prompt tokens used")
+    completion_tokens: int = Field(default=0, description="number of tokens used in completions")
+    successful_requests: int = Field(default=0, description="number of successful requests made")
 
     def add_usage_metrics(self, usage_metrics: "UsageMetrics") -> None:
         """

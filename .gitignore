@@ -1,12 +1,11 @@
 deploy.py
 destinations.py
 
-entity_memory.py
-
 train.py
 
-# mkdocs.yml
-# docs/
+_memo
+_idea.py
+
 
 dist/
 lib/

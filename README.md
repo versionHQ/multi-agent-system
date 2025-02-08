@@ -1,6 +1,6 @@
 # Overview
 
-![DL](https://img.shields.io/badge/Download-15K+-red)
+[![DL](https://img.shields.io/badge/Download-15K+-red)](https://clickpy.clickhouse.com/dashboard/versionhq)
 ![MIT license](https://img.shields.io/badge/License-MIT-green)
 [![Publisher](https://github.com/versionHQ/multi-agent-system/actions/workflows/publish.yml/badge.svg)](https://github.com/versionHQ/multi-agent-system/actions/workflows/publish.yml)
 ![PyPI](https://img.shields.io/badge/PyPI-v1.1.12+-blue)
@@ -8,7 +8,7 @@
 ![pyenv ver](https://img.shields.io/badge/pyenv-2.5.0-orange)
 
 
-Agentic orchestration framework to deploy agent network and handle complex task automation.
+A Python framework for agentic orchestration that handles complex task automation without human interaction.
 
 **Visit:**
 
@@ -29,7 +29,6 @@ Agentic orchestration framework to deploy agent network and handle complex task 
 - [Quick Start](#quick-start)
   - [Generate agent networks and launch task execution:](#generate-agent-networks-and-launch-task-execution)
   - [Solo Agent:](#solo-agent)
-  - [Solo Agent:](#solo-agent-1)
   - [Supervising:](#supervising)
 - [Technologies Used](#technologies-used)
 - [Project Structure](#project-structure)
@@ -77,14 +76,14 @@ You can specify a desired formation or allow the agents to determine it autonomo
    pip install versionhq
    ```
 
-(Python 3.11 or higher)
+(Python 3.11 / 3.12)
 
 ### Generate agent networks and launch task execution:
 
    ```python
-   from versionhq import form_agent_network
+   import versionhq as vhq
 
-   network = form_agent_network(
+   network = vhq.form_agent_network(
       task="YOUR AMAZING TASK OVERVIEW",
       expected_outcome="YOUR OUTCOME EXPECTATION",
    )
@@ -96,29 +95,26 @@ You can specify a desired formation or allow the agents to determine it autonomo
 
 ### Solo Agent:
 
-### Solo Agent:
-
 You can simply build an agent using `Agent` model.
 
-By default, the agent prioritize JSON serializable output.
+By default, the agent prioritize JSON serializable outputs over plane texts.
 
-But you can add a plane text summary of the structured output by using callbacks.
 
    ```python
+   import versionhq as vhq
    from pydantic import BaseModel
-   from versionhq import Agent, Task
 
    class CustomOutput(BaseModel):
       test1: str
       test2: list[str]
 
    def dummy_func(message: str, test1: str, test2: list[str]) -> str:
-      return f"{message}: {test1}, {", ".join(test2)}"
+      return f"""{message}: {test1}, {", ".join(test2)}"""
 
 
-   agent = Agent(role="demo", goal="amazing project goal")
+   agent = vhq.Agent(role="demo", goal="amazing project goal")
 
-   task = Task(
+   task = vhq.Task(
       description="Amazing task",
       pydantic_output=CustomOutput,
       callback=dummy_func,
@@ -147,30 +143,30 @@ This will return a `TaskOutput` object that stores response in plane text, JSON,
 ### Supervising:
 
    ```python
-   from versionhq import Agent, Task, ResponseField, Team, TeamMember
+   import versionhq as vhq
 
-   agent_a = Agent(role="agent a", goal="My amazing goals", llm="llm-of-your-choice")
-   agent_b = Agent(role="agent b", goal="My amazing goals", llm="llm-of-your-choice")
+   agent_a = vhq.Agent(role="agent a", goal="My amazing goals", llm="llm-of-your-choice")
+   agent_b = vhq.Agent(role="agent b", goal="My amazing goals", llm="llm-of-your-choice")
 
-   task_1 = Task(
+   task_1 = vhq.Task(
       description="Analyze the client's business model.",
-      response_fields=[ResponseField(title="test1", data_type=str, required=True),],
+      response_fields=[vhq.ResponseField(title="test1", data_type=str, required=True),],
       allow_delegation=True
    )
 
-    task_2 = Task(
+    task_2 = vhq.Task(
       description="Define the cohort.",
       response_fields=[ResponseField(title="test1", data_type=int, required=True),],
       allow_delegation=False
    )
 
-   team = Team(
+   team = vhq.Team(
       members=[
-         TeamMember(agent=agent_a, is_manager=False, task=task_1),
-         TeamMember(agent=agent_b, is_manager=True, task=task_2),
+         vhq.Member(agent=agent_a, is_manager=False, task=task_1),
+         vhq.Member(agent=agent_b, is_manager=True, task=task_2),
       ],
    )
-   res = team.kickoff()
+   res = team.launch()
    ```
 
 This will return a list with dictionaries with keys defined in the `ResponseField` of each task.
@@ -180,6 +176,7 @@ Tasks can be delegated to a team manager, peers in the team, or completely new a
 <hr />
 
 ## Technologies Used
+
 **Schema, Data Validation**
    - [Pydantic](https://docs.pydantic.dev/latest/): Data validation and serialization library for Python.
    - [Upstage](https://console.upstage.ai/docs/getting-started/overview): Document processer for ML tasks. (Use `Document Parser API` to extract data from documents)
@@ -262,7 +259,7 @@ src/
    pyenv install 3.12.8
    pyenv global 3.12.8  (optional: `pyenv global system` to get back to the system default ver.)
    uv python pin 3.12.8
-   echo 3.12.8 > .python-version
+   echo 3.12.8 >> .python-version
    ```
 
 
@@ -293,7 +290,7 @@ src/
       uv run pytest tests -vv --cache-clear
       ```
 
-   **pytest**
+   **Pytest**
 
    * When adding a new file to `tests`, name the file ended with `_test.py`.
    * When adding a new feature to the file, name the feature started with `test_`.
@@ -307,14 +304,7 @@ src/
 **Optional**
 * Flag with `#! REFINEME` for any improvements needed and `#! FIXME` for any errors.
 
-<!-- * Run a React demo app: [React demo app](https://github.com/versionHQ/test-client-app) to check it on the client endpoint.
-   ```
-   npm i
-   npm start
-   ```
-   The frontend will be available at `http://localhost:3000`. -->
-
-* `production` use case is available at `https://versi0n.io`. Currently, we are running alpha test.
+* `Playground` is available at `https://versi0n.io`.
 
 
 ### Documentation
@@ -381,14 +371,22 @@ Pre-commit hooks help maintain code quality by running checks for formatting, li
 ## Trouble Shooting
 
 Common issues and solutions:
-- API key errors: Ensure all API keys in the `.env` file are correct and up to date. Make sure to add `load_dotenv()` on the top of the python file to apply the latest environment values.
-- Database connection issues: Check if the Chroma DB is properly initialized and accessible.
-- Memory errors: If processing large contracts, you may need to increase the available memory for the Python process.
-- Issues related to the Python version: Docling/Pytorch is not ready for Python 3.13 as of Jan 2025. Use Python 3.12.x as default by running `uv venv --python 3.12.8` and `uv python pin 3.12.8`.
-- Issues related to dependencies: `rm -rf uv.lock`, `uv cache clean`, `uv venv`, and run `uv pip install -r requirements.txt -v`.
-- Issues related to the AI agents or RAG system: Check the `output.log` file for detailed error messages and stack traces.
-- Issues related to `Python quit unexpectedly`: Check [this stackoverflow article](https://stackoverflow.com/questions/59888499/macos-catalina-python-quit-unexpectedly-error).
-- `reportMissingImports` error from pyright after installing the package: This might occur when installing new libraries while VSCode is running. Open the command pallete (ctrl + shift + p) and run the Python: Restart language server task.
+
+* API key errors: Ensure all API keys in the `.env` file are correct and up to date. Make sure to add `load_dotenv()` on the top of the python file to apply the latest environment values.
+
+* Database connection issues: Check if the Chroma DB is properly initialized and accessible.
+
+* Memory errors: If processing large contracts, you may need to increase the available memory for the Python process.
+
+* Issues related to the Python version: Docling/Pytorch is not ready for Python 3.13 as of Jan 2025. Use Python 3.12.x as default by running `uv venv --python 3.12.8` and `uv python pin 3.12.8`.
+
+* Issues related to dependencies: `rm -rf uv.lock`, `uv cache clean`, `uv venv`, and run `uv pip install -r requirements.txt -v`.
+
+* Issues related to the AI agents or RAG system: Check the `output.log` file for detailed error messages and stack traces.
+
+* Issues related to `Python quit unexpectedly`: Check [this stackoverflow article](https://stackoverflow.com/questions/59888499/macos-catalina-python-quit-unexpectedly-error).
+
+* `reportMissingImports` error from pyright after installing the package: This might occur when installing new libraries while VSCode is running. Open the command pallete (ctrl + shift + p) and run the Python: Restart language server task.
 
 <hr />
 

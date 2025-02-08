@@ -203,7 +203,7 @@ class TaskOutput(BaseModel):
                 description=EVALUATE.format(task_description=task.description, task_output=self.raw, eval_criteria=str(item)),
                 pydantic_output=EvaluationItem
             )
-            res = task_eval.execute_sync(agent=self.evaluation.responsible_agent)
+            res = task_eval.execute_sync(agent=self.evaluation.eval_by)
 
             if res.pydantic:
                 item = EvaluationItem(score=res.pydantic.score, suggestion=res.pydantic.suggestion, criteria=res.pydantic.criteria)
@@ -241,10 +241,7 @@ class TaskOutput(BaseModel):
 
 class Task(BaseModel):
     """
-    Task to be executed by agents or teams.
-    Each task must have a description.
-    Default response is JSON string that strictly follows `response_fields` - and will be stored in TaskOuput.raw / json_dict.
-    When `pydantic_output` is provided, we prioritize them and store raw (json string), json_dict, pydantic in the TaskOutput class.
+    A class that stores independent task information.
     """
 
     __hash__ = object.__hash__

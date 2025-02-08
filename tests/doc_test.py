@@ -6,9 +6,9 @@ def test_quick_start():
     """index.md, quickstart.md"""
 
     def a():
-        from versionhq import form_agent_network
+        import versionhq as vhq
 
-        network = form_agent_network(
+        network = vhq.form_agent_network(
             task="YOUR AMAZING TASK OVERVIEW",
             expected_outcome="YOUR OUTCOME EXPECTATION",
         )
@@ -17,20 +17,20 @@ def test_quick_start():
 
 
     def b():
+        import versionhq as vhq
         from pydantic import BaseModel
-        from versionhq import Agent, Task
 
         class CustomOutput(BaseModel):
             test1: str
             test2: list[str]
 
         def dummy_func(message: str, test1: str, test2: list[str]) -> str:
-            return f"{message}: {test1}, {", ".join(test2)}"
+            return f"""{message}: {test1}, {", ".join(test2)}"""
 
 
-        agent = Agent(role="demo", goal="amazing project goal", maxit=1)
+        agent = vhq.Agent(role="demo", goal="amazing project goal", maxit=1)
 
-        task = Task(
+        task = vhq.Task(
             description="Amazing task",
             pydantic_output=CustomOutput,
             callback=dummy_func,

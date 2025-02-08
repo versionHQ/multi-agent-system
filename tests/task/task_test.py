@@ -280,7 +280,7 @@ def test_callback():
         test2: list[str]
 
     def dummy_func(message: str, test1: str, test2: list[str]) -> str:
-        return f"{message}: {test1}, {", ".join(test2)}"
+        return f"""{message}: {test1}, {", ".join(test2)}"""
 
     agent = Agent(role="demo", goal="amazing project goal", maxit=1, max_tokens=3000)
 
@@ -357,21 +357,5 @@ def test_evaluation():
 
     assert res.evaluation and isinstance(res.evaluation, Evaluation)
     assert [isinstance(item, EvaluationItem) and item.criteria in task.eval_criteria for item in res.evaluation.items]
-    assert res.evaluation.latency and res.evaluation.tokens and res.evaluation.responsible_agent == vhq_task_evaluator
+    assert res.evaluation.latency and res.evaluation.tokens and res.evaluation.eval_by == vhq_task_evaluator
     assert res.evaluation.aggregate_score is not None and res.evaluation.suggestion_summary
-
-
-
-## Covered in doc test
-# def test_agent_formation():
-#     from versionhq.team.model import Team, Formation
-#     from versionhq.task.formation import form_agent_network
-
-#     created_team = form_agent_network(
-#         task="Launch an outbound campaign to attract young male audience.",
-#         expected_outcome="Best social media mix plan and key communication lines",
-#         context="We sell luxuary sportswear targeting male in 30th, and are expanding our market to younger male.",
-#     )
-#     assert isinstance(created_team, Team) and created_team.id
-#     assert created_team.members and created_team.formation in Formation and created_team.tasks
-#     assert created_team.managers if created_team.formation == Formation.SUPERVISING else created_team.managers is None

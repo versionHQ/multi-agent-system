@@ -29,7 +29,7 @@ vhq_formation_planner = Agent(
     role="vhq-Formation Planner",
     goal="Plan a formation of agents based on the given task descirption.",
     llm="gemini/gemini-2.0-flash-exp",
-    llm_config=dict(top_p=0.8, top_k=30, temperature=0.9),
+    llm_config=dict(top_p=0.8, topK=40, temperature=0.9),
     maxit=1,
     max_retry_limit=1,
     knowledge_sources=[

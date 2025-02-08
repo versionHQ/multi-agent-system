@@ -39,12 +39,12 @@ load_dotenv(override=True)
 
 
 class Formation(str, Enum):
+    UNDEFINED = 0
     SOLO = 1
     SUPERVISING = 2
     NETWORK = 3
     RANDOM = 4
     HYBRID = 10
-    UNDEFINED = 0
 
 
 class TaskHandlingProcess(str, Enum):
@@ -75,6 +75,7 @@ class TeamOutput(TaskOutput):
     def __str__(self):
         return (str(self.pydantic) if self.pydantic else str(self.json_dict) if self.json_dict else self.raw)
 
+
     def __getitem__(self, key):
         if self.pydantic and hasattr(self.pydantic, key):
             return getattr(self.pydantic, key)
@@ -85,25 +86,24 @@ class TeamOutput(TaskOutput):
 
 
 
-class TeamMember(BaseModel):
+class Member(BaseModel):
     """
-    A class to store a team member
+    A class to store a member in the network and connect the agent as a member with tasks and sharable settings.
     """
     agent: Agent | None = Field(default=None)
     is_manager: bool = Field(default=False)
     can_share_knowledge: bool = Field(default=True, description="whether to share the agent's knowledge in the team")
     can_share_memory: bool = Field(default=True, description="whether to share the agent's memory in the team")
-    task: Optional[Task] = Field(default=None, description="task assigned to the agent")
+    tasks: Optional[List[Task]] = Field(default_factory=list, description="tasks explicitly assigned to the agent")
 
     @property
     def is_idling(self):
-        return bool(self.task is None)
+        return bool(self.tasks)
 
 
 class Team(BaseModel):
     """
-    A collaborative team of agents that handles complex, multiple tasks.
-    We define strategies for task executions and overall workflow.
+    A class to store agent network that shares knowledge, memory and tools among the members.
     """
 
     __hash__ = object.__hash__
@@ -113,31 +113,31 @@ class Team(BaseModel):
 
     id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True)
     name: Optional[str] = Field(default=None)
-    members: List[TeamMember] = Field(default_factory=list)
+    members: List[Member] = Field(default_factory=list)
     formation: Optional[Formation] = Field(default=None)
+    should_reform: bool = Field(default=False, description="True if task exe. failed or eval scores below threshold")
 
     # formation planning
-    planning_llm: Optional[Any] = Field(default=None, description="llm to generate formation")
-    team_tasks: Optional[List[Task]] = Field(default_factory=list, description="optional tasks for the team. can be assigned to team members later")
+    planner_llm: Optional[Any] = Field(default=None, description="llm to generate and evaluate formation")
+    team_tasks: Optional[List[Task]] = Field(default_factory=list, description="tasks without dedicated agents to handle")
 
     # task execution rules
-    prompt_file: str = Field(default="", description="path to the prompt json file to be used by the team.")
+    prompt_file: str = Field(default="", description="absolute path to the prompt json file")
     process: TaskHandlingProcess = Field(default=TaskHandlingProcess.sequential)
 
     # callbacks
-    before_kickoff_callbacks: List[Callable[[Optional[Dict[str, Any]]], Optional[Dict[str, Any]]]] = Field(
+    pre_launch_callbacks: List[Callable[[Optional[Dict[str, Any]]], Optional[Dict[str, Any]]]] = Field(
         default_factory=list,
-        description="list of callback functions to be executed before the team kickoff. i.e., adjust inputs"
+        description="list of callback functions to be executed before the team launch. i.e., adjust inputs"
     )
-    after_kickoff_callbacks: List[Callable[[TeamOutput], TeamOutput]] = Field(
+    post_launch_callbacks: List[Callable[[TeamOutput], TeamOutput]] = Field(
         default_factory=list,
-        description="list of callback functions to be executed after the team kickoff. i.e., store the result in repo"
+        description="list of callback functions to be executed after the team launch. i.e., store the result in repo"
     )
     step_callback: Optional[Any] = Field(default=None, description="callback to be executed after each step for all agents execution")
 
     cache: bool = Field(default=True)
-    memory: bool = Field(default=False, description="whether the team should use memory to store memories of its execution")
-    execution_logs: List[Dict[str, Any]] = Field(default=[], description="list of execution logs for tasks")
+    execution_logs: List[Dict[str, Any]] = Field(default_factory=list, description="list of execution logs of the tasks handled by members")
     usage_metrics: Optional[UsageMetrics] = Field(default=None, description="usage metrics for all the llm executions")
 
 
@@ -163,40 +163,45 @@ class Team(BaseModel):
             if all(task in self.tasks for task in self.team_tasks) == False:
                 raise PydanticCustomError("task_validation_error", "`team_tasks` needs to be recognized in the task.", {})
 
-            if len(self.tasks) != len(self.team_tasks) + len([member for member in self.members if member.task is not None]):
-                raise PydanticCustomError("task_validation_error", "Some tasks are missing.", {})
+
+            num_member_tasks = 0
+            for member in self.members:
+                num_member_tasks += len(member.tasks)
+
+            # if len(self.tasks) != len(self.team_tasks) + num_member_tasks:
+            #     raise PydanticCustomError("task_validation_error", "Some tasks are missing.", {})
         return self
 
 
     @model_validator(mode="after")
     def check_manager_llm(self):
         """
-        Validates that the language model is set when using hierarchical process.
+        Check if the team has a manager
         """
 
-        if self.process == TaskHandlingProcess.hierarchical:
-            if self.managers is None:
+        if self.process == TaskHandlingProcess.hierarchical or self.formation == Formation.SUPERVISING:
+            if not self.managers:
+                self._logger.log(level="error", message="The process or formation created needs at least 1 manager agent.", color="red")
                 raise PydanticCustomError(
-                    "missing_manager_llm_or_manager",
-                    "Attribute `manager_llm` or `manager` is required when using hierarchical process.",
-                    {},
-                )
+                    "missing_manager_llm_or_manager","Attribute `manager_llm` or `manager` is required when using hierarchical process.", {})
 
-            if self.managers and (self.manager_tasks is None or self.team_tasks is None):
-                raise PydanticCustomError("missing_manager_task", "manager needs to have at least one manager task or team task.", {})
+            ## comment out for the formation flexibilities
+            # if self.managers and (self.manager_tasks is None or self.team_tasks is None):
+            #     self._logger.log(level="error", message="The manager is idling. At least 1 task needs to be assigned to the manager.", color="red")
+            #     raise PydanticCustomError("missing_manager_task", "manager needs to have at least one manager task or team task.", {})
 
         return self
 
 
     @model_validator(mode="after")
-    def validate_tasks(self):
+    def validate_task_member_paring(self):
         """
         Sequential task processing without any team tasks require a task-agent pairing.
         """
-
         if self.process == TaskHandlingProcess.sequential and self.team_tasks is None:
-            for member in self.members:
-                if member.task is None:
+            for task in self.tasks:
+                if not [member.task == task for member in self.members]:
+                    self._logger.log(level="error", message=f"The following task needs a dedicated agent to be assinged: {task.description}", color="red")
                     raise PydanticCustomError("missing_agent_in_task", "Sequential process error: Agent is missing the task", {})
         return self
 
@@ -224,8 +229,11 @@ class Team(BaseModel):
         if task is None:
             return None
         else:
-            res = [member.agent for member in self.members if member.task and member.task.id == task.id]
-            return None if len(res) == 0 else res[0]
+            for member in self.members:
+                if member.tasks and [item for item in member.tasks if item.id == task.id]:
+                    return member.agent
+
+            return None
 
 
     def _handle_agent_formation(self) -> None:
@@ -236,19 +244,19 @@ class Team(BaseModel):
             3. Create agents to handle the rest tasks.
         """
 
-        team_planner = TeamPlanner(tasks=self.tasks, planner_llm=self.planning_llm)
-        idling_managers: List[TeamMember] = [member for member in self.members if member.is_idling and member.is_manager is True]
-        idling_members: List[TeamMember] =  [member for member in self.members if member.is_idling and member.is_manager is False]
+        team_planner = TeamPlanner(tasks=self.tasks, planner_llm=self.planner_llm)
+        idling_managers: List[Member] = [member for member in self.members if member.is_idling and member.is_manager is True]
+        idling_members: List[Member] =  [member for member in self.members if member.is_idling and member.is_manager is False]
         unassigned_tasks: List[Task] = self.member_tasks_without_agent
-        new_team_members: List[TeamMember] = []
+        new_team_members: List[Member] = []
 
         if self.team_tasks:
             candidates = idling_managers + idling_members
             if candidates:
                 i = 0
                 while i < len(candidates):
-                    if self.team_tasks[i]:
-                        candidates[i].task = self.team_tasks[i]
+                    if len(self.team_tasks) < i and self.team_tasks[i]:
+                        candidates[i].tasks.append(self.team_tasks[i])
                         i += 1
 
                 if len(self.team_tasks) > i:
@@ -269,9 +277,7 @@ class Team(BaseModel):
 
 
     # task execution
-    def _process_async_tasks(
-        self, futures: List[Tuple[Task, Future[TaskOutput], int]], was_replayed: bool = False
-    ) -> List[TaskOutput]:
+    def _process_async_tasks(self, futures: List[Tuple[Task, Future[TaskOutput], int]], was_replayed: bool = False) -> List[TaskOutput]:
         """
         When we have `Future` tasks, updated task outputs and task execution logs accordingly.
         """
@@ -292,10 +298,11 @@ class Team(BaseModel):
         Note that `tasks` are already sorted by the importance.
         """
 
-        if len(task_outputs) < 1:
-            raise ValueError("Something went wrong. Kickoff should return only one task output.")
+        if not task_outputs:
+            self._logger.log(level="error", message="Missing task outcomes. Failed to launch the task.", color="red")
+            raise ValueError("Failed to launch tasks")
 
-        final_task_output = lead_task_output if lead_task_output is not None else task_outputs[0]
+        final_task_output = lead_task_output if lead_task_output is not None else task_outputs[0] #! REFINEME
         # final_string_output = final_task_output.raw
         # self._finish_execution(final_string_output)
         token_usage = self._calculate_usage_metrics()
@@ -387,13 +394,13 @@ class Team(BaseModel):
         return self._create_team_output(task_outputs, lead_task_output)
 
 
-    def launch(self, kwargs_before: Optional[Dict[str, str]] = None, kwargs_after: Optional[Dict[str, Any]] = None) -> TeamOutput:
+    def launch(self, kwargs_pre: Optional[Dict[str, str]] = None, kwargs_post: Optional[Dict[str, Any]] = None) -> TeamOutput:
         """
         Confirm and launch the formation - execute tasks and record outputs.
-        0. Assign an agent to a task - using conditions (manager prioritizes team_tasks) and planning_llm.
-        1. Address `before_kickoff_callbacks` if any.
+        0. Assign an agent to a task - using conditions (manager prioritizes team_tasks) and planner_llm.
+        1. Address `pre_launch_callbacks` if any.
         2. Handle team members' tasks in accordance with the process.
-        3. Address `after_kickoff_callbacks` if any.
+        3. Address `post_launch_callbacks` if any.
         """
 
         metrics: List[UsageMetrics] = []
@@ -401,15 +408,13 @@ class Team(BaseModel):
         if self.team_tasks or self.member_tasks_without_agent:
             self._handle_agent_formation()
 
-        if kwargs_before is not None:
-            for before_callback in self.before_kickoff_callbacks:
-                before_callback(**kwargs_before)
+        if kwargs_pre is not None:
+            for func in self.pre_launch_callbacks:
+                func(**kwargs_pre)
 
         # self._execution_span = self._telemetry.team_execution_span(self, inputs)
         # self._task_output_handler.reset()
         # self._logging_color = "bold_purple"
-
-
         # i18n = I18N(prompt_file=self.prompt_file)
 
         for member in self.members:
@@ -424,8 +429,8 @@ class Team(BaseModel):
 
         result = self._execute_tasks(self.tasks)
 
-        for after_callback in self.after_kickoff_callbacks:
-            result = after_callback(result, **kwargs_after)
+        for func in self.post_launch_callbacks:
+            result = func(result, **kwargs_post)
 
         metrics += [member.agent._token_process.get_summary() for member in self.members]
 
@@ -443,25 +448,28 @@ class Team(BaseModel):
 
 
     @property
-    def managers(self) -> List[TeamMember] | None:
+    def managers(self) -> List[Member] | None:
         managers = [member for member in self.members if member.is_manager == True]
         return managers if len(managers) > 0 else None
 
 
     @property
-    def manager_tasks(self) -> List[Task] | None:
+    def manager_tasks(self) -> List[Task]:
         """
         Tasks (incl. team tasks) handled by managers in the team.
         """
-        if self.managers:
-            tasks = [manager.task for manager in self.managers if manager.task is not None]
-            return tasks if len(tasks) > 0 else None
+        res = list()
 
-        return None
+        if self.managers:
+            for manager in self.managers:
+                if manager.tasks:
+                    res.extend(manager.tasks)
+
+        return res
 
 
     @property
-    def tasks(self):
+    def tasks(self) -> List[Task]:
         """
         Return all the tasks that the team needs to handle in order of priority:
         1. team tasks, -> assigned to the member
@@ -470,15 +478,24 @@ class Team(BaseModel):
         """
 
         team_tasks = self.team_tasks
-        manager_tasks = [member.task for member in self.members if member.is_manager == True and member.task is not None and member.task not in team_tasks]
-        member_tasks = [member.task for member in self.members if member.is_manager == False and member.task is not None and member.task not in team_tasks]
+        manager_tasks = self.manager_tasks
+        member_tasks = []
+
+        for member in self.members:
+            if member.is_manager == False and member.tasks:
+                a = [item for item in member.tasks if item not in team_tasks and item not in manager_tasks]
+                member_tasks += a
 
         return team_tasks + manager_tasks + member_tasks
 
 
     @property
-    def member_tasks_without_agent(self) -> List[Task] | None:
-        if self.members:
-            return [member.task for member in self.members if member.agent is None]
+    def member_tasks_without_agent(self) -> List[Task]:
+        res = list()
 
-        return None
+        if self.members:
+            for member in self.members:
+                if member.agent is None and member.tasks:
+                    res.extend(member.tasks)
+
+        return res

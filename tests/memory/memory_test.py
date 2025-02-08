@@ -2,7 +2,6 @@ from unittest.mock import patch
 import pytest
 
 from versionhq.agent.model import Agent
-from versionhq.task.model import Task
 from versionhq.memory.model import ShortTermMemory, LongTermMemory, MemoryItem, MemoryMetadata, MemoryData
 
 
@@ -61,7 +60,3 @@ def test_save_and_search_ltm(long_term_memory):
     assert find["metadata"]["score"] == 0.5
     assert find["metadata"]["task"] == "test_task"
     assert find["metadata"]["quality"] == "0.5"
-
-
-if __name__ == "__main__":
-    test_save_and_search_ltm()

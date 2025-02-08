@@ -11,10 +11,13 @@ Test a connection to the llm platform (litellm or custom provider's interface).
 """
 
 llms_to_test = [
-    # "gpt-4o",
-    # "gemini/gemini-2.0-flash",
+    "gpt-4o",
+    "gemini/gemini-2.0-flash",
     "openrouter/deepseek/deepseek-r1:free",
     "claude-3-haiku",
+    "openrouter/google/gemini-2.0-flash-thinking-exp:free",
+    "openrouter/google/gemini-2.0-flash-thinking-exp-1219:free",
+    "openrouter/google/gemini-2.0-flash-001",
 ]
 
 def set_agent(llm: str) -> Agent:
@@ -58,11 +61,8 @@ def tool_task(agent: Agent):
 
 
 
+# comment out
 def _test_connection():
-    """
-    comment out
-    """
-
     agents = [set_agent(llm=llm) for llm in llms_to_test]
     for agent in agents:
         simple_task(agent=agent)

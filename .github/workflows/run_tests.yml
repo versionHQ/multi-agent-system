@@ -40,4 +40,4 @@ jobs:
           uv sync --all-extras
 
       - name: Run tests
-        run: uv run pytest tests -vv --cache-clear
+        run: uv run pytest tests -vv --cache-clea

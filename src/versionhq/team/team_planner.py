@@ -1,9 +1,8 @@
 import os
-from dotenv import load_dotenv
 from typing import Any, List, Optional, Dict
 from pydantic import BaseModel, Field
 
-load_dotenv(override=True)
+
 
 
 class TeamPlanner:
@@ -26,14 +25,14 @@ class TeamPlanner:
 
     def _handle_assign_agents(self, unassigned_tasks: List[Task]) -> List[Any]:
         """
-        Build an agent and assign it a task, then return a list of TeamMember connecting the agent created and the task given.
+        Build an agent and assign it a task, then return a list of Member connecting the agent created and the task given.
         """
 
         from versionhq.agent.model import Agent
         from versionhq.task.model import Task, ResponseField
-        from versionhq.team.model import TeamMember
+        from versionhq.team.model import Member
 
-        new_member_list: List[TeamMember] = []
+        new_member_list: List[Member] = []
         agent_creator = Agent(
             role="agent_creator",
             goal="build an ai agent that can competitively handle the task given",
@@ -57,7 +56,7 @@ class TeamPlanner:
                 goal=res.json_dict["goal"] if "goal" in res.json_dict else task.description
             )
             if agent.id:
-                team_member = TeamMember(agent=agent, task=unassgined_task, is_manager=False)
+                team_member = Member(agent=agent, tasks=[unassgined_task], is_manager=False)
                 new_member_list.append(team_member)
 
         return new_member_list

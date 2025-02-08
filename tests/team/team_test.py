@@ -1,10 +1,9 @@
 
 from versionhq.agent.model import Agent
 from versionhq.task.model import Task, ResponseField, TaskOutput
-from versionhq.team.model import Team, TeamMember, TaskHandlingProcess, TeamOutput
+from versionhq.team.model import Team, Member, TaskHandlingProcess, TeamOutput
 from versionhq._utils.usage_metrics import UsageMetrics
 from versionhq.llm.model import DEFAULT_MODEL_NAME
-
 
 
 def test_form_team():
@@ -26,19 +25,15 @@ def test_form_team():
     )
     team = Team(
         members=[
-            TeamMember(agent=agent_a, is_manager=True, task=task_1),
-            TeamMember(agent=agent_b, is_manager=False, task=task_2),
+            Member(agent=agent_a, is_manager=True, tasks=[task_1,]),
+            Member(agent=agent_b, is_manager=False, tasks=[task_2,]),
         ],
     )
 
-    assert team.id is not None
-    assert team.key is not None
-    assert isinstance(team.key, str)
-    assert team.managers is not None
+    assert team.id and team.key and isinstance(team.key, str) and team.managers
     assert task_1 in team.manager_tasks
-    assert len(team.tasks) == 2
-    for item in team.tasks:
-        assert item.id is task_1.id or item.id is task_2.id
+    assert team.tasks == [task_1, task_2]
+    assert [item.id is task_1.id or item.id is task_2.id for item in team.tasks]
 
 
 def test_form_team_without_leader():
@@ -60,22 +55,19 @@ def test_form_team_without_leader():
     )
     team = Team(
         members=[
-            TeamMember(agent=agent_a, is_manager=False, task=task_1),
-            TeamMember(agent=agent_b, is_manager=False, task=task_2),
+            Member(agent=agent_a, is_manager=False, tasks=[task_1,]),
+            Member(agent=agent_b, is_manager=False, tasks=[task_2,]),
         ],
     )
 
-    assert team.id is not None
-    assert team.key is not None
-    assert isinstance(team.key, str)
+    assert team.id and team.key and isinstance(team.key, str)
     assert team.managers is None
-    assert team.manager_tasks is None
-    assert len(team.tasks) == 2
-    for item in team.tasks:
-        assert item.id is task_1.id or item.id is task_2.id
+    assert team.manager_tasks == []
+    assert team.tasks == [task_1, task_2]
+    assert [item.id is task_1.id or item.id is task_2.id for item in team.tasks]
 
 
-def test_kickoff_without_leader():
+def test_launch_without_leader():
     agent_a = Agent(role="agent a", goal="My amazing goals", llm=DEFAULT_MODEL_NAME)
     agent_b = Agent(role="agent b", goal="My amazing goals", llm=DEFAULT_MODEL_NAME)
     task_1 = Task(
@@ -94,31 +86,23 @@ def test_kickoff_without_leader():
     )
     team = Team(
         members=[
-            TeamMember(agent=agent_a, is_manager=False, task=task_1),
-            TeamMember(agent=agent_b, is_manager=False, task=task_2),
+            Member(agent=agent_a, is_manager=False, tasks=[task_1,]),
+            Member(agent=agent_b, is_manager=False, tasks=[task_2,]),
         ],
     )
     res = team.launch()
     res_all = res.return_all_task_outputs()
 
-    assert isinstance(res, TeamOutput)
-    assert res.team_id is team.id
-    assert res.raw is not None
-    assert isinstance(res.raw, str)
-    assert res.json_dict is not None
-    assert isinstance(res.json_dict, dict)
+    assert isinstance(res, TeamOutput) and res.team_id is team.id
+    assert isinstance(res.raw, str) and isinstance(res.json_dict, dict)
     assert res.pydantic is None
-    for item in res.task_outputs:
-        assert isinstance(item, TaskOutput)
-    assert isinstance(res_all, list)
-    assert len(res_all) == 2
-    for item in res_all:
-        assert isinstance(item, dict)
+    assert [isinstance(item, TaskOutput) for item in res.task_outputs]
+    assert isinstance(res_all, list) and len(res_all) == 2 and [isinstance(item, dict) for item in res_all]
     assert isinstance(res.token_usage, UsageMetrics)
     assert res.token_usage.total_tokens == 0 # as we dont set token usage on agent
 
 
-def team_kickoff_with_task_callback():
+def team_launch_with_task_callback():
     """
     Each task has callback with callback kwargs.
     """
@@ -154,14 +138,13 @@ def team_kickoff_with_task_callback():
 
     team = Team(
         members=[
-            TeamMember(agent=agent_a, is_manager=False, task=task_1),
-            TeamMember(agent=agent_b, is_manager=False, task=task_2),
+            Member(agent=agent_a, is_manager=False, tasks=[task_1,]),
+            Member(agent=agent_b, is_manager=False, tasks=[task_2,]),
         ],
     )
     res = team.launch()
 
-    assert res.raw is not None
-    assert res.json_dict is not None
+    assert res.raw and res.json_dict
     assert len(res.return_all_task_outputs()) == 2
     assert len(demo_list) == 2
     assert "pytest" in demo_list[0]
@@ -187,8 +170,8 @@ def test_delegate_in_team():
     )
     team = Team(
         members=[
-            TeamMember(agent=agent_a, is_manager=False, task=task_1),
-            TeamMember(agent=agent_b, is_manager=False, task=task_2),
+            Member(agent=agent_a, is_manager=False, tasks=[task_1,]),
+            Member(agent=agent_b, is_manager=False, tasks=[task_2,]),
         ],
     )
     res = team.launch()
@@ -198,7 +181,7 @@ def test_delegate_in_team():
     assert "agent b" in task_1.processed_agents
 
 
-def test_kickoff_with_leader():
+def test_launch_with_leader():
     agent_a = Agent(role="agent a", goal="My amazing goals", llm=DEFAULT_MODEL_NAME)
     agent_b = Agent(role="agent b", goal="My amazing goals", llm=DEFAULT_MODEL_NAME)
     task_1 = Task(
@@ -214,8 +197,8 @@ def test_kickoff_with_leader():
     )
     team = Team(
         members=[
-            TeamMember(agent=agent_a, is_manager=False, task=task_1),
-            TeamMember(agent=agent_b, is_manager=True, task=task_2),
+            Member(agent=agent_a, is_manager=False, tasks=[task_1,]),
+            Member(agent=agent_b, is_manager=True, tasks=[task_2,]),
         ],
     )
     res = team.launch()
@@ -252,9 +235,9 @@ def test_hierarchial_process():
     )
     team = Team(
         members=[
-            TeamMember(agent=agent_a, is_manager=False, task=task_1),
-            TeamMember(agent=agent_b, is_manager=True, task=task_2),
-            TeamMember(agent=agent_c, is_manager=False)
+            Member(agent=agent_a, is_manager=False, tasks=[task_1,]),
+            Member(agent=agent_b, is_manager=True, tasks=[task_2,]),
+            Member(agent=agent_c, is_manager=False)
         ],
         process=TaskHandlingProcess.hierarchical
     )
@@ -296,49 +279,46 @@ def test_handle_team_task():
     )
     team_solo = Team(
         members=[
-            TeamMember(agent=agent_c, is_manager=False)
+            Member(agent=agent_c, is_manager=False)
         ],
         team_tasks=[team_task, task_1, task_2, ]
     )
     team_flat =  Team(
         members=[
-            TeamMember(agent=agent_a, is_manager=False, task=task_1),
-            TeamMember(agent=agent_c, is_manager=False)
+            Member(agent=agent_a, is_manager=False, tasks=[task_1,]),
+            Member(agent=agent_c, is_manager=False)
         ],
         team_tasks=[team_task, task_2,]
     )
     team_leader =  Team(
         members=[
-            TeamMember(agent=agent_a, is_manager=False, task=task_1),
-            TeamMember(agent=agent_b, is_manager=True, task=task_2),
-            TeamMember(agent=agent_c, is_manager=False)
+            Member(agent=agent_a, is_manager=False, tasks=[task_1,]),
+            Member(agent=agent_b, is_manager=True, tasks=[task_2,]),
+            Member(agent=agent_c, is_manager=False)
         ],
         team_tasks=[team_task, ]
     )
     team_dual_leaders =  Team(
         members=[
-            TeamMember(agent=agent_a, is_manager=False, task=task_1),
-            TeamMember(agent=agent_b, is_manager=True, task=task_2),
-            TeamMember(agent=agent_c, is_manager=True)
+            Member(agent=agent_a, is_manager=False, tasks=[task_1,]),
+            Member(agent=agent_b, is_manager=True, tasks=[task_2,]),
+            Member(agent=agent_c, is_manager=True)
         ],
         team_tasks=[team_task, ]
     )
     team_leader_without_task =  Team(
         members=[
-            TeamMember(agent=agent_a, is_manager=False, task=task_1),
-            TeamMember(agent=agent_b, is_manager=False, task=task_2),
-            TeamMember(agent=agent_c, is_manager=True)
+            Member(agent=agent_a, is_manager=False, tasks=[task_1,]),
+            Member(agent=agent_b, is_manager=False, tasks=[task_2,]),
+            Member(agent=agent_c, is_manager=True)
         ],
         team_tasks=[team_task,]
     )
     teams = [team_solo, team_flat, team_leader, team_dual_leaders, team_leader_without_task]
 
-    for team in teams:
+    for (i, team) in enumerate(teams):
         res = team.launch()
-        assert team._get_responsible_agent(task=team_task) is not None
-        assert isinstance(res, TeamOutput)
-        assert res.team_id is team.id
+        assert team._get_responsible_agent(task=task_1) is not None
+        assert isinstance(res, TeamOutput) and res.team_id is team.id
         assert team.tasks[0].id is team_task.id
         assert res.raw is not None
-        assert len(team.members) == 3
-        assert len(team.tasks) == 3

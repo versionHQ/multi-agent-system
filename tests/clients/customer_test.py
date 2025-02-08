@@ -1,11 +1,7 @@
-import os
-import pytest
-import datetime
 from typing import List, Dict, Any, Optional, Callable
 
 from versionhq import Product, ProductProvider, Customer
 from versionhq.clients.customer.model import  Status
-from versionhq.tool.composio_tool_vars import ComposioAppName
 
 
 def test_create_customer():

@@ -1,11 +1,11 @@
-from typing import List
+from typing import List, Type
 from enum import Enum
 
 from pydantic import BaseModel
 
 from versionhq.task.model import Task
 from versionhq.agent.model import Agent
-from versionhq.team.model import Team, TeamMember, Formation
+from versionhq.team.model import Team, Member, Formation
 from versionhq.agent.inhouse_agents  import vhq_formation_planner
 from versionhq._utils import Logger
 
@@ -15,10 +15,10 @@ def form_agent_network(
         expected_outcome: str,
         agents: List[Agent] = None,
         context: str = None,
-        formation: Formation = None
+        formation: Type[Formation] = None
     ) -> Team | None:
     """
-    Make a formation of agents from the given task description, agents (optional), context (optional), and expected outcome (optional).
+    Make a formation of agents from the given task description, expected outcome, agents (optional), and context (optional).
     """
 
     if not task:
@@ -29,8 +29,37 @@ def form_agent_network(
         Logger(verbose=True).log(level="error", message="Missing expected outcome.", color="red")
         return None
 
+    if formation:
+        try:
+            match formation:
+                case Formation():
+                    if formation == Formation.UNDEFINED:
+                        formation = None
+                    else:
+                        pass
+
+                case str():
+                    matched = [item for item in Formation._member_names_ if item == formation.upper()]
+                    if matched:
+                        formation = getattr(Formation, matched[0])
+                    else:
+                        # Formation._generate_next_value_(name=f"CUSTOM_{formation.upper()}", start=100, count=6, last_values=Formation.HYBRID.name)
+                        Logger(verbose=True).log(level="warning", message=f"The formation {formation} is invalid. We'll recreate a valid formation.", color="yellow")
+                        formation = None
+
+                case int() | float():
+                    formation = Formation(int(formation))
+
+                case _:
+                    Logger(verbose=True).log(level="warning", message=f"The formation {formation} is invalid. We'll recreate a valid formation.", color="yellow")
+                    formation = None
+
+        except Exception as e:
+            Logger(verbose=True).log(level="warning", message=f"The formation {formation} is invalid: {str(e)}. We'll recreate a formation.", color="yellow")
+            formation = None
 
     try:
+        prompt_formation = formation.name if formation and isinstance(formation, Formation) else f"Select the best formation to effectively execute the tasks from the given Enum sets: {str(Formation.__dict__)}."
         class Outcome(BaseModel):
             formation: Enum
             agent_roles: list[str]
@@ -42,73 +71,78 @@ def form_agent_network(
     Create a team of specialized agents designed to automate the following task and deliver the expected outcome. Consider the necessary roles for each agent with a clear task description. If you think we neeed a leader to handle the automation, return a leader_agent role as well, but if not, leave the a leader_agent role blank.
     Task: {str(task)}
     Expected outcome: {str(expected_outcome)}
+    Formation: {prompt_formation}
             """,
             pydantic_output=Outcome
         )
-
-        if formation:
-            vhq_task.description += f"Select 1 formation you think the best from the given Enum sets: {str(Formation.__dict__)}"
 
         if agents:
             vhq_task.description += "Consider adding following agents in the formation: " + ", ".join([agent.role for agent in agents if isinstance(agent, Agent)])
 
         res = vhq_task.execute_sync(agent=vhq_formation_planner, context=context)
-        formation_ = Formation.SUPERVISING
+        _formation = Formation.SUPERVISING
 
         if res.pydantic:
             formation_keys = [k for k, v in Formation._member_map_.items() if k == res.pydantic.formation.upper()]
 
             if formation_keys:
-                formation_ = Formation[formation_keys[0]]
+                _formation = Formation[formation_keys[0]]
 
             created_agents = [Agent(role=item, goal=item) for item in res.pydantic.agent_roles]
             created_tasks = [Task(description=item) for item in res.pydantic.task_descriptions]
+
             team_tasks = []
             members = []
             leader = str(res.pydantic.leader_agent)
 
             for i in range(len(created_agents)):
-                is_manager = bool(created_agents[i].role.lower() in leader.lower())
-                member = TeamMember(agent=created_agents[i], is_manager=is_manager)
+                is_manager = bool(created_agents[i].role.lower() == leader.lower())
+                member = Member(agent=created_agents[i], is_manager=is_manager)
 
-                if len(created_tasks) >= i:
-                    member.task = created_tasks[i]
-                    members.append(member)
+                if len(created_tasks) >= i and created_tasks[i]:
+                    member.tasks.append(created_tasks[i])
+
+                members.append(member)
+
 
             if len(created_agents) < len(created_tasks):
-                team_tasks.extend(created_tasks[len(created_agents) - 1:len(created_tasks)])
+                team_tasks.extend(created_tasks[len(created_agents):len(created_tasks)])
 
             members.sort(key=lambda x: x.is_manager == False)
-            team = Team(members=members, formation=formation_)
+            team = Team( members=members, formation=_formation,  team_tasks=team_tasks, planner_llm=vhq_formation_planner.llm)
             return team
 
         else:
-            formation_keys = [k for k, v in Formation._member_map_.items() if k == res.json_dict["formation"].upper()]
+            res = res.json_dict
+            formation_keys = [k for k, v in Formation._member_map_.items() if k == res["formation"].upper()]
 
             if formation_keys:
-                formation_ = Formation[formation_keys[0]]
+                _formation = Formation[formation_keys[0]]
 
-            created_agents = [Agent(role=item, goal=item) for item in res.json_dict["agent_roles"]]
-            created_tasks = [Task(description=item) for item in res.json_dict["task_descriptions"]]
+            created_agents = [Agent(role=item, goal=item) for item in res["agent_roles"]]
+            created_tasks = [Task(description=item) for item in res["task_descriptions"]]
+
             team_tasks = []
             members = []
-            leader = str(res.json_dict["leader_agent"])
+            leader = str(res["leader_agent"])
 
             for i in range(len(created_agents)):
-                is_manager = bool(created_agents[i].role.lower() in leader.lower())
-                member = TeamMember(agent=created_agents[i], is_manager=is_manager)
+                is_manager = bool(created_agents[i].role.lower() == leader.lower())
+                member = Member(agent=created_agents[i], is_manager=is_manager)
 
-                if len(created_tasks) >= i:
-                    member.task = created_tasks[i]
-                    members.append(member)
+                if len(created_tasks) >= i and created_tasks[i]:
+                    member.tasks.append(created_tasks[i])
+
+                members.append(member)
 
             if len(created_agents) < len(created_tasks):
-                team_tasks.extend(created_tasks[len(created_agents) - 1:len(created_tasks)])
+                team_tasks.extend(created_tasks[len(created_agents):len(created_tasks)])
 
-            members.sort(key=lambda x: x.is_manager == True)
-            team = Team(members=members, formation=formation_)
+            members.sort(key=lambda x: x.is_manager == False)
+            team = Team( members=members, formation=_formation,  team_tasks=team_tasks, planner_llm=vhq_formation_planner.llm)
             return team
 
+
     except Exception as e:
-        Logger(verbose=True).log(level="error", message=f"Failed to create an agent network - return None. You can try with solo agent. Error: {str(e)}", color="red")
+        Logger(verbose=True).log(level="error", message=f"Failed to create a agent network - return None. You can try with solo agent. Error: {str(e)}", color="red")
         return None

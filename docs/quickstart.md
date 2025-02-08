@@ -1,15 +1,15 @@
 # Quick Start
 
-## Install `versionhq` package
+## Package installation
 
    ```
    pip install versionhq
    ```
 
-(Python 3.11, 3.12)
+(Python 3.11, 3.12 [Recommended])
 
 
-## Set up a project
+## Setting up a project
 
 1. Install `uv` package manager:
 
@@ -39,7 +39,7 @@
    pyenv install 3.12.8
    pyenv global 3.12.8  (optional: `pyenv global system` to get back to the system default ver.)
    uv python pin 3.12.8
-   echo 3.12.8 > .python-version
+   echo 3.12.8 >> .python-version
    ```
 
 
@@ -54,47 +54,46 @@
    ```
 
 
-## Launch an agent network
+## Forming a agent network
 
-You can create a network of multiple agents depending on the task complexity.
-Here is the snippet of quick launch.
+You can generate a network of multiple agents depending on your task complexity.
 
-   ```
-   from versionhq import form_agent_network
+Here is a code snippet:
 
-   network = form_agent_network(
+   ```python
+   import versionhq as vhq
+
+   network = vhq.form_agent_network(
       task="YOUR AMAZING TASK OVERVIEW",
       expected_outcome="YOUR OUTCOME EXPECTATION",
    )
    res = network.launch()
    ```
 
-   This will form a network with multiple agents on `Formation` and return `TaskOutput` object with output in JSON, plane text, and Pydantic model format with evaluation.
+This will form a network with multiple agents on `Formation` and return results as a `TaskOutput` object, storing outputs in JSON, plane text, Pydantic model formats along with evaluation.
 
 
-## Use a solo agent
+## Customizing your agent
 
-You can simply build an agent using `Agent` model.
+If you don't need to form a network or assign a specific agent to the network, you can simply build an agent using `Agent` model.
 
-By default, the agent prioritize JSON serializable output.
-
-But you can add a plane text summary of the structured output by using callbacks.
+By default, the agent prioritize JSON serializable outputs over plane text.
 
    ```python
+   import versionhq as vhq
    from pydantic import BaseModel
-   from versionhq import Agent, Task
 
    class CustomOutput(BaseModel):
       test1: str
       test2: list[str]
 
    def dummy_func(message: str, test1: str, test2: list[str]) -> str:
-      return f"{message}: {test1}, {", ".join(test2)}"
+      return f"""{message}: {test1}, {", ".join(test2)}"""
 
 
-   agent = Agent(role="demo", goal="amazing project goal")
+   agent = vhq.Agent(role="demo", goal="amazing project goal")
 
-   task = Task(
+   task = vhq.Task(
       description="Amazing task",
       pydantic_output=CustomOutput,
       callback=dummy_func,
@@ -103,9 +102,7 @@ But you can add a plane text summary of the structured output by using callbacks
 
    res = task.execute_sync(agent=agent, context="amazing context to consider.")
    print(res)
-   # TaskOutput object
    ```
-
 
 This will return a `TaskOutput` object that stores response in plane text, JSON, and Pydantic model: `CustomOutput` formats with a callback result, tool output (if given), and evaluation results (if given).
 
@@ -120,3 +117,36 @@ This will return a `TaskOutput` object that stores response in plane text, JSON,
       evaluation=None
    )
    ```
+
+## Supervising
+
+   ```python
+   import versionhq as vhq
+
+   agent_a = vhq.Agent(role="agent a", goal="My amazing goals", llm="llm-of-your-choice")
+   agent_b = vhq.Agent(role="agent b", goal="My amazing goals", llm="llm-of-your-choice")
+
+   task_1 = vhq.Task(
+      description="Analyze the client's business model.",
+      response_fields=[vhq.ResponseField(title="test1", data_type=str, required=True),],
+      allow_delegation=True
+   )
+
+    task_2 = vhq.Task(
+      description="Define the cohort.",
+      response_fields=[vhq.ResponseField(title="test1", data_type=int, required=True),],
+      allow_delegation=False
+   )
+
+   team =vhq.Team(
+      members=[
+         vhq.Member(agent=agent_a, is_manager=False, task=task_1),
+         vhq.Member(agent=agent_b, is_manager=True, task=task_2),
+      ],
+   )
+   res = team.launch()
+   ```
+
+This will return a list with dictionaries with keys defined in the `ResponseField` of each task.
+
+Tasks can be delegated to a team manager, peers in the team, or completely new agent.

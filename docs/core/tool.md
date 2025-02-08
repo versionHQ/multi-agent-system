@@ -16,12 +16,12 @@ Tool is an unique function that the agent can utilize when they execute the task
 By defining the function, you can let the agent start to use it when they get an approval.
 
 ```python
-from versionhq import Tool
+import versionhq as vhq
 
 def demo_func(message: str) -> str:
 	return message + "_demo"
 
-my_tool = Tool(func=demo_func)
+my_tool = vhq.Tool(func=demo_func)
 res = my_tool.run(params=dict(message="Hi!"))
 
 print(res)
@@ -33,20 +33,19 @@ e.g. Build an agent with a simple tool
 The tool result will be considered in the context when the agent call LLM.
 
 ```python
-from versionhq import Tool, Agent
+import versionhq as vhq
 
 def demo_func() -> str:
 	return "demo"
 
-my_tool = Tool(func=demo_func)
+my_tool = vhq.Tool(func=demo_func)
 
-agent = Agent(
+agent = vhq.Agent(
 	role="Tool Handler",
 	goal="efficiently use the given tools",
 	tools=[my_tool, ]
 )
-print(agent.tools)
-# [my_tool,]
+assert agent.tools == [my_tool]
 ```
 
 ### ToolSet
@@ -69,8 +68,7 @@ agent = Agent(
 	goal="efficiently use the given tools",
 	tools=[toolset,]
 )
-print(agent.tools)
-# [toolset,]
+assert agent.tools == [toolset]
 ```
 
 <hr />
