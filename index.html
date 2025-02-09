@@ -699,6 +699,9 @@
 </span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>--config-settings=&quot;--global-option=-L$(brew --prefix graphviz)/lib/&quot; \
 </span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>pygraphviz
 </span></code></pre></div></p>
+<p>! If the error continues, skip pygraphviz installation by:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>uv sync --all-extras --no-extra pygraphviz
+</span></code></pre></div>
 </li>
 <li>
 <p><code>torch</code>/<code>Docling</code> related errors: Set up default Python version either <code>3.11.x</code> or <code>3.12.x</code> (same as AssertionError)</p>
@@ -706,11 +709,11 @@
 </ul>
 <h3 id="3-adding-secrets-to-env">3. Adding secrets to .env<a class="headerlink" href="#3-adding-secrets-to-env" title="Permanent link">&para;</a></h3>
 <p>Create <code>.env</code> file in the project root and add following:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>OPENAI_API_KEY=your-openai-api-key
-</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>LITELLM_API_KEY=your-litellm-api-key
-</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>COMPOSIO_API_KEY=your-composio-api-key
-</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>COMPOSIO_CLI_KEY=your-composio-cli-key
-</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>[LLM_INTERFACE_PROVIDER_OF_YOUR_CHOICE]_API_KEY=your-api-key
+<div class="language-text highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>OPENAI_API_KEY=your-openai-api-key
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>LITELLM_API_KEY=your-litellm-api-key
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>COMPOSIO_API_KEY=your-composio-api-key
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>COMPOSIO_CLI_KEY=your-composio-cli-key
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>[LLM_INTERFACE_PROVIDER_OF_YOUR_CHOICE]_API_KEY=your-api-key
 </span></code></pre></div>
 <hr />
 
@@ -729,7 +732,7 @@
 <p>Add secret values defined in <code>.github/workflows/run_test.yml</code> to your Github <code>repository secrets</code> located at settings &gt; secrets &amp; variables &gt; Actions.</p>
 </li>
 <li>Run a following command:
-      <div class="language-text highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>uv run pytest tests -vv --cache-clear
+      <div class="language-text highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>uv run pytest tests -vv --cache-clear
 </span></code></pre></div></li>
 </ol>
 <p><strong>Building a new pytest function</strong></p>
@@ -782,19 +785,19 @@
 <ol>
 <li>
 <p>Install pre-commit hooks:
-   <div class="language-text highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>uv run pre-commit install
+   <div class="language-text highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>uv run pre-commit install
 </span></code></pre></div></p>
 </li>
 <li>
 <p>Run pre-commit checks manually:
-   <div class="language-text highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>uv run pre-commit run --all-files
+   <div class="language-text highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>uv run pre-commit run --all-files
 </span></code></pre></div></p>
 </li>
 </ol>
 <p>Pre-commit hooks help maintain code quality by running checks for formatting, linting, and other issues before each commit.</p>
 <ul>
 <li>To skip pre-commit hooks (NOT RECOMMENDED)
-   <div class="language-text highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>git commit --no-verify -m &quot;your-commit-message&quot;
+   <div class="language-text highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>git commit --no-verify -m &quot;your-commit-message&quot;
 </span></code></pre></div></li>
 </ul>
 <h3 id="documentation_1">Documentation<a class="headerlink" href="#documentation_1" title="Permanent link">&para;</a></h3>
@@ -806,7 +809,7 @@
 <p>We use <code>mkdocs</code> to update the docs. You can run the doc locally at http://127.0.0.1:8000/:</p>
 </li>
 </ul>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>uv run python3 -m mkdocs serve --clean
+<div class="language-text highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>uv run python3 -m mkdocs serve --clean
 </span></code></pre></div>
 <ul>
 <li>To add a new page, update <code>mkdocs.yml</code> in the root. Refer to <a href="https://squidfunk.github.io/mkdocs-material/getting-started/">MkDocs documentation</a> for more details.</li>
