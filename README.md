@@ -1,15 +1,5 @@
 # Overview
 
-<div align="center">
-<img
-   src="https://res.cloudinary.com/dfeirxlea/image/upload/v1739196917/pj_m_home/f8gih1w8nmuqq26zfmey.png"
-   width="100" height="100"
-/>
-</div>
-
-<br>
-
-
 [![DL](https://img.shields.io/badge/Download-15K+-red)](https://clickpy.clickhouse.com/dashboard/versionhq)
 ![MIT license](https://img.shields.io/badge/License-MIT-green)
 [![Publisher](https://github.com/versionHQ/multi-agent-system/actions/workflows/publish.yml/badge.svg)](https://github.com/versionHQ/multi-agent-system/actions/workflows/publish.yml)
