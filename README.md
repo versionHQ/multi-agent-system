@@ -259,35 +259,29 @@ Tasks can be delegated to a team manager, peers in the team, or completely new a
 
 ## Technologies Used
 
-**Schema, Data Validation**
-
-* [Pydantic](https://docs.pydantic.dev/latest/): Data validation and serialization library for Python.
-
-* [Upstage](https://console.upstage.ai/docs/getting-started/overview): Document processer for ML tasks. (Use `Document Parser API` to extract data from documents)
-
-* [Docling](https://ds4sd.github.io/docling/): Document parsing
-
 **Graph Theory (Analysis and Visualization)**
 
 * [NetworkX](https://networkx.org/documentation/stable/reference/introduction.html): A Python package to analyze, create, and manipulate complex graph networks.
-
 * [Matplotlib](https://matplotlib.org/stable/index.html): Visualization library
-
 * [Graphviz](https://graphviz.org/about/): Graph visualization software
 
+
+**Schema, Data Validation**
+
+* [Pydantic](https://docs.pydantic.dev/latest/): Data validation and serialization library for Python.
+* [Upstage](https://console.upstage.ai/docs/getting-started/overview): Document processer for ML tasks. (Use `Document Parser API` to extract data from documents)
+* [Docling](https://ds4sd.github.io/docling/): Document parsing
 
 
 **Storage**
 
 * [mem0ai](https://docs.mem0.ai/quickstart#install-package): Agents' memory storage and management.
-
 * [Chroma DB](https://docs.trychroma.com/): Vector database for storing and querying usage data.
-
 * [SQLite](https://www.sqlite.org/docs.html): C-language library to implements a small SQL database engine.
 
-**LLM-curation**
+**LLM Integration**
 
-* [LiteLLM](https://docs.litellm.ai/docs/providers): Curation platform to access LLMs
+* [LiteLLM](https://docs.litellm.ai/docs/providers): Integration to diverse LLMs
 
 **Tools**
 
@@ -296,11 +290,8 @@ Tasks can be delegated to a team manager, peers in the team, or completely new a
 **Deployment**
 
 * **Python**: Primary programming language. v3.12.x is recommended
-
 * [uv](https://docs.astral.sh/uv/): Python package installer and resolver
-
 * [pre-commit](https://pre-commit.com/): Manage and maintain pre-commit hooks
-
 * [setuptools](https://pypi.org/project/setuptools/): Build python modules
 
 <hr />
