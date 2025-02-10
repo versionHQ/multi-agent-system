@@ -16,6 +16,7 @@ from versionhq.clients.workflow.model import MessagingWorkflow, MessagingCompone
 from versionhq.knowledge.model import Knowledge, KnowledgeStorage
 from versionhq.knowledge.source import PDFKnowledgeSource, CSVKnowledgeSource, JSONKnowledgeSource, TextFileKnowledgeSource, ExcelKnowledgeSource, StringKnowledgeSource
 from versionhq.knowledge.source_docling import DoclingSource
+from versionhq.network.model import TaskStatus, TaskGraph, Node, Edge, DependencyType
 from versionhq.task.model import Task, TaskOutput, ConditionalTask, ResponseField
 from versionhq.task.evaluate import Evaluation, EvaluationItem
 from versionhq.team.model import Team, TeamOutput, Formation, Member, TaskHandlingProcess
@@ -54,6 +55,12 @@ __all__ = [
     "ExcelKnowledgeSource",
     "StringKnowledgeSource",
     "DoclingSource",
+
+    "TaskStatus",
+    "TaskGraph",
+    "Node",
+    "Edge",
+    "DependencyType",
 
     "Task",
     "TaskOutput",

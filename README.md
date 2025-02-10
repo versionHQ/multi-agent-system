@@ -230,7 +230,7 @@ src/
 │     └── llm/
 │     └── ...
 │
-└── uploads/                  # Local directory that stores uloaded files
+└── uploads/    *.gitignore   # Local directory to store uploaded files (i.e. Graphbiz diagram from `Network` class)
 
 ```
 

@@ -1,0 +1,393 @@
+import enum
+import uuid
+from abc import ABC
+from typing import List, Any, Optional, Callable, Dict, Type
+
+from pydantic import BaseModel, InstanceOf, Field, UUID4, PrivateAttr, field_validator
+from pydantic_core import PydanticCustomError
+
+from versionhq.task.model import Task
+from versionhq.agent.model import Agent
+from versionhq._utils.logger import Logger
+
+
+try:
+   import networkx as ntx
+except ImportError:
+    try:
+        import os
+        os.system("uv add networkx --optional networkx")
+        import networkx as ntx
+    except:
+        raise ImportError("networkx is not installed. Please install it with: uv add networkx --optional networkx")
+
+
+try:
+    import matplotlib.pyplot as plt
+except ImportError:
+    try:
+        import os
+        os.system("uv add matplotlib --optional matplotlib")
+        import matplotlib.pyplot as plt
+    except:
+        raise ImportError("matplotlib is not installed. Please install it with: uv add matplotlib --optional matplotlib")
+
+import networkx as nx
+import matplotlib.pyplot as plt
+
+
+
+class TaskStatus(enum.Enum):
+    """
+    Enum to track the task execution status
+    """
+    NOT_STARTED = 1
+    IN_PROGRESS = 2
+    BLOCKED = 3      # task is waiting for its dependant tasks to complete. resumption set as AUTO.
+    COMPLETED = 4
+    DELAYED = 5      # task has begun - but is taking longer than expected duration and behind schedule.
+    ON_HOLD = 6      # task is temporarily & intentionally paused due to external factors and/or decisions. resumption set as DECISION.
+
+
+
+class DependencyType(enum.Enum):
+    """
+    Concise enumeration of the edge type.
+    """
+
+    FINISH_TO_START = "FS"  # Task B starts after Task A finishes
+    START_TO_START = "SS"  # Task B starts when Task A starts
+    FINISH_TO_FINISH = "FF"  # Task B finishes when Task A finishes
+    START_TO_FINISH = "SF"  # Task B finishes when Task A starts
+
+
+
+class TriggerEvent(enum.Enum):
+    """
+    Concise enumeration of key trigger events for task execution.
+    """
+    IMMEDIATE = 0 # execute immediately
+    DEPENDENCIES_MET = 1  # All/required dependencies are satisfied
+    RESOURCES_AVAILABLE = 2  # Necessary resources are available
+    SCHEDULED_TIME = 3  # Scheduled start time or time window reached
+    EXTERNAL_EVENT = 4  # Triggered by an external event/message
+    DATA_AVAILABLE = 5  # Required data  is available both internal/external
+    APPROVAL_RECEIVED = 6  # Necessary approvals have been granted
+    STATUS_CHANGED = 7  # Relevant task/system status has changed
+    RULE_MET = 8  # A predefined rule or condition has been met
+    MANUAL_TRIGGER = 9  # Manually initiated by a user
+    ERROR_HANDLED = 10  # A previous error/exception has been handled
+
+
+
+class Node(BaseModel):
+    """
+    A class to store a node object.
+    """
+    id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True)
+    task: InstanceOf[Task] = Field(default=None)
+    trigger_event: TriggerEvent = Field(default=TriggerEvent.IMMEDIATE, description="store trigger event to execute the task")
+    in_degree_nodes: List[Any] = Field(default=None, description="list of Node objects")
+    out_degree_nodes: List[Any] = Field(default=None, description="list of Node objects")
+    assigned_to: InstanceOf[Agent] = Field(default=None)
+    status: TaskStatus = Field(default=TaskStatus.NOT_STARTED)
+
+
+    @field_validator("id", mode="before")
+    @classmethod
+    def _deny_id(cls, v: Optional[UUID4]) -> None:
+        if v:
+            raise PydanticCustomError("may_not_set_field", "This field is not to be set by the user.", {})
+
+    def is_independent(self) -> bool:
+        return not self.in_degree_nodes and not self.out_degree_nodes
+
+    @property
+    def in_degrees(self) -> int:
+        return len(self.in_degree_nodes) if self.in_degree_nodes else 0
+
+    @property
+    def out_degrees(self) -> int:
+        return len(self.out_degree_nodes) if self.out_degree_nodes else 0
+
+    @property
+    def degrees(self) -> int:
+        return self.in_degrees + self.out_degrees
+
+    @property
+    def identifier(self) -> str:
+        """Unique identifier for the node"""
+        return f"{str(self.id)}"
+
+    def __str__(self):
+        return self.identifier
+
+
+class Edge(BaseModel):
+    """
+    A class to store an edge object that connects multiple nodes as dependencies.
+    """
+    description: Optional[str] = Field(default=None)
+
+    type: DependencyType = Field(default=DependencyType.FINISH_TO_START)
+    weight: Optional[float] = Field(default=None, description="duration or weight of the dependency: 1 light 10 heavy")
+    lag: Optional[float] = Field(default=None, description="lag time for the dependency to be executed")
+    constraint: Optional[str] = Field(default=None, description="constraint to consider executing the dependency")
+    priority: Optional[int] = Field(default=None, description="priority of the dependency if multiple depencencies are given")
+
+    data_transfer: bool = Field(True, description="whether the data transfer is required")
+    data_format: Optional[str] = Field(default=None, description="Format of data transfer")
+
+    # execution logic
+    required: bool = Field(True, description="whether the execution of the dependency is required - False = conditional, optional task")
+    condition: Optional[Callable] = Field(default=None, description="conditional function to start executing the dependency")
+
+
+    def is_dependency_met(self, predecessor_node: Node = None) -> bool:
+        """
+        Define if the dependency is ready to execute:
+
+        required	condition	Dependency Met?	Dependent Task Can Start?
+        True	Not Given	Predecessor task finished	Yes (if other deps met)
+        True	Given	Predecessor task finished and condition True	Yes (if other deps met)
+        False	Not Given	Always (regardless of predecessor status)	Yes (if other deps met)
+        False	Given	Condition True (predecessor status irrelevant)	Yes (if other deps met)
+        """
+
+        if self.required:
+            if predecessor_node.status == TaskStatus.COMPLETED:
+                return self.condition() if self.condtion else True
+            else:
+                return False
+        else:
+            return self.condition() if self.condition else True
+
+
+
+class Graph(ABC, BaseModel):
+    """
+    An abstract class to store G using NetworkX library.
+    """
+
+    _logger: Logger = PrivateAttr(default_factory=lambda: Logger(verbose=True))
+    directed: bool = Field(default=False, description="Whether the graph is directed")
+    graph: Type[nx.Graph] = Field(default=None)
+    nodes: Dict[str, InstanceOf[Node]] = Field(default_factory=dict, description="identifier: Node - for the sake of ")
+    edges: Dict[str, InstanceOf[Edge]] = Field(default_factory=dict)
+
+    def __init__(self, directed: bool = False, **kwargs):
+
+      super().__init__(directed=directed, **kwargs)
+      self.graph = nx.DiGraph() if self.directed else nx.Graph()
+
+    def add_node(self, node: Node) -> None:
+        self.graph.add_node(node.identifier, **node.model_dump())
+        self.nodes[node.identifier] = node
+
+    def add_edge(self, source: str, target: str, edge: Edge) -> None:
+        self.graph.add_edge(source, target, **edge.model_dump())
+        self.edges[(source, target)] = edge
+
+    def add_weighted_edges_from(self, edges):
+        self.graph.add_weighted_edges_from(edges)
+
+    def get_neighbors(self, node: Node) -> List[Node]:
+        return list(self.graph.neighbors(node))
+
+    def get_in_degree(self, node: Node) -> int:
+        return self.graph.in_degree(node)
+
+    def get_out_degree(self, node: Node) -> int:
+        return self.graph.out_degree(node)
+
+    def find_path(self, source: str, target: str, weight: Any) -> Any:
+        try:
+            return nx.shortest_path(self.graph, source=source, target=target, weight=weight)
+        except nx.NetworkXNoPath:
+            return None
+
+    def find_all_paths(self,  source: str, target: str) -> List[Any]:
+        return list(nx.all_simple_paths(self.graph, source=source, target=target))
+
+
+    def find_critical_path(self) -> tuple[List[Any], int, Dict[str, int]]:
+        """
+        Finds the critical path in the graph.
+        Returns:
+            A tuple containing:
+                - The critical path (a list of task names).
+                - The duration of the critical path.
+                - A dictionary of all paths and their durations.
+        """
+
+        all_paths = {}
+        for start_node in (v for k, v in self.nodes.items() if v.in_degrees == 0): # Start from nodes with 0 in-degree
+            for end_node in (v for k, v in self.nodes.items() if v.out_degrees == 0): # End at nodes with 0 out-degree
+                for edge in nx.all_simple_paths(self.graph, source=start_node.identifier, target=end_node.identifier):
+                    edge_weight = sum(self.edges.get(item).weight if self.edges.get(item) else 0 for item in edge)
+                    all_paths[tuple(edge)] = edge_weight
+
+        if not all_paths:
+            return [], 0, all_paths
+
+        critical_path = max(all_paths, key=all_paths.get)
+        critical_duration = all_paths[critical_path]
+
+        return list(critical_path), critical_duration, all_paths
+
+
+    def is_circled(self, node: Node) -> bool:
+        """Check if there's a path from the node to itself and return bool."""
+        try:
+            path = nx.shortest_path(self.graph, source=node, target=node)
+            return True if path else False
+        except nx.NetworkXNoPath:
+            return False
+
+
+    def visualize(self, title: str = "Graph Visualization", pos: Any = None, **graph_config):
+        pos = pos if pos else nx.spring_layout(self.graph, seed=42)
+        nx.draw(
+            self.graph,
+            pos,
+            with_labels=True, node_size=700, node_color="skyblue", font_size=10, font_color="black", arrowstyle='-|>', arrowsize=20, arrows=True,
+            **graph_config
+        )
+        edge_labels = {}
+        for u, v, data in self.graph.edges(data=True):
+            edge = self.edges.get((u,v))
+            if edge:
+                label_parts = []
+                if edge.type:
+                    label_parts.append(f"Type: {edge.type}")
+                if edge.duration is not None:
+                    label_parts.append(f"Duration: {edge.duration}")
+                if edge.lag is not None:
+                    label_parts.append(f"Lag: {edge.lag}")
+                edge_labels[(u, v)] = "\n".join(label_parts)  # Combine labels with newlines
+        nx.draw_networkx_edge_labels(self.graph, pos, edge_labels=edge_labels)
+        plt.title(title)
+        plt.show()
+
+
+
+class TaskGraph(Graph):
+    id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True)
+    status: Dict[str, TaskStatus] = Field(default_factory=dict, description="store identifier (str) and TaskStatus of all task_nodes")
+
+
+    def add_task(self, task: Node | Task) -> Node:
+        """Convert `task` to a Node object and add it to G"""
+        task_node = task if isinstance(task, Node) else Node(task=task)
+        self.add_node(task_node)
+        self.status[task_node.identifier] = TaskStatus.NOT_STARTED
+        return task_node
+
+
+    def add_dependency(
+            self, source_task_node_identifier: str, target_task_node_identifier: str, **edge_attributes
+        ) -> None:
+        """
+        Add an edge that connect task 1 (source) and task 2 (target) using task_node.name as an identifier
+        """
+
+        if not edge_attributes:
+            self._logger.log(level="error", message="Edge attributes are missing.", color="red")
+
+        edge = Edge()
+        for k in Edge.model_fields.keys():
+            v = edge_attributes.get(k, None)
+            if v:
+                setattr(edge, k, v)
+            else:
+                pass
+
+        self.add_edge(source_task_node_identifier, target_task_node_identifier, edge)
+
+
+    def set_task_status(self, identifier: str, status: TaskStatus) -> None:
+        if identifier in self.status:
+            self.status[identifier] = status
+        else:
+            self._logger.log(level="warning", message=f"Task '{identifier}' not found in the graph.", color="yellow")
+            pass
+
+    def get_task_status(self, identifier):
+        if identifier in self.status:
+            return self.status[identifier]
+        else:
+            self._logger.log(level="warning", message=f"Task '{identifier}' not found in the graph.", color="yellow")
+            return None
+
+
+    def visualize(self, layout: str = None):
+        try:
+            pos = nx.drawing.nx_agraph.graphviz_layout(self.graph, prog='dot') # 'dot', 'neato', 'fdp', 'sfdp'
+        except ImportError:
+            pos = nx.spring_layout(self.graph, seed=42) # REFINEME - layout
+
+        node_colors = list()
+        for k, v in self.graph.nodes.items():
+            status = self.get_task_status(identifier=k)
+            if status == TaskStatus.NOT_STARTED:
+                node_colors.append("skyblue")
+            elif status == TaskStatus.IN_PROGRESS:
+                node_colors.append("lightgreen")
+            elif status == TaskStatus.BLOCKED:
+                node_colors.append("lightcoral")
+            elif status == TaskStatus.COMPLETED:
+                node_colors.append("black")
+            elif status == TaskStatus.DELAYED:
+                node_colors.append("orange")
+            elif status == TaskStatus.ON_HOLD:
+                node_colors.append("yellow")
+            else:
+                node_colors.append("grey")
+
+        critical_paths, duration, paths = self.find_critical_path()
+        edge_colors = ['red' if (u, v) in zip(critical_paths, critical_paths[1:]) else 'black' for u, v in self.graph.edges()]
+        edge_widths = []
+
+        for k, v in self.edges.items():
+            # edge_weights = nx.get_edge_attributes(self.graph, 'weight')
+            # edge_colors.append(plt.cm.viridis(v.weight / max(edge_weights.values())))
+            edge_widths.append(v.weight * 0.5)  # Width proportional to weight (adjust scaling as needed)
+
+        nx.draw(
+            self.graph, pos,
+            with_labels=True,
+            node_size=700,
+            node_color=node_colors,
+            font_size=10,
+            font_color="black",
+            edge_color=edge_colors,
+            width=edge_widths,
+            arrows=True,
+            arrowsize=20,
+            arrowstyle='-|>'
+        )
+
+        edge_labels = nx.get_edge_attributes(G=self.graph, name="edges")
+        nx.draw_networkx_edge_labels(self.graph, pos, edge_labels=edge_labels)
+
+        plt.title("Project Network Diagram")
+        self._save()
+        plt.show()
+
+
+    def _save(self, abs_file_path: str = None) -> None:
+        """
+        Save the graph image in the local directory.
+        """
+
+        try:
+            import os
+            project_root = os.path.abspath(os.getcwd())
+            abs_file_path = abs_file_path if abs_file_path else f"{project_root}/uploads"
+
+            os.makedirs(abs_file_path, exist_ok=True)
+
+            plt.savefig(f"{abs_file_path}/{str(self.id)}.png")
+
+        except Exception as e:
+            self._logger.log(level="error", message=f"Failed to save the graph {str(self.id)}: {str(e)}", color="red")
