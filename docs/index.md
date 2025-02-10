@@ -118,6 +118,70 @@ agent.update(
 
 <hr />
 
+## Project Set Up
+
+### 1. Package manager
+
+   For MacOS:
+
+   ```
+   brew install uv
+   ```
+
+   For Ubuntu/Debian:
+   ```
+   sudo apt-get install uv
+   ```
+
+### 2. Dependencies
+
+   ```
+   uv venv
+   source .venv/bin/activate
+   uv lock --upgrade
+   uv sync --all-extras
+   ```
+
+   - AssertionError/module mismatch errors: Set up default Python version using `.pyenv`
+      ```
+      pyenv install 3.12.8
+      pyenv global 3.12.8  (optional: `pyenv global system` to get back to the system default ver.)
+      uv python pin 3.12.8
+      echo 3.12.8 >> .python-version
+      ```
+
+   - `pygraphviz` related errors: Run the following commands:
+      ```
+      brew install graphviz
+      uv pip install --config-settings="--global-option=build_ext" \
+      --config-settings="--global-option=-I$(brew --prefix graphviz)/include/" \
+      --config-settings="--global-option=-L$(brew --prefix graphviz)/lib/" \
+      pygraphviz
+      ```
+
+      * If the error continues, skip pygraphviz installation by:
+
+      ```
+      uv sync --all-extras --no-extra pygraphviz
+      ```
+
+   - `torch`/`Docling` related errors: Set up default Python version either `3.11.x` or `3.12.x` (same as AssertionError)
+
+### 3. Local .env
+
+Create `.env` file in the project root and add following:
+
+   ```
+   OPENAI_API_KEY=your-openai-api-key
+   GEMINI_API_KEY=your-gemini-api-key
+   LITELLM_API_KEY=your-litellm-api-key
+   COMPOSIO_API_KEY=your-composio-api-key
+   COMPOSIO_CLI_KEY=your-composio-cli-key
+   [OTHER_LLM_INTERFACE_PROVIDER_OF_YOUR_CHOICE]_API_KEY=your-api-key
+   ```
+
+<hr />
+
 
 ## Trouble Shooting
 
