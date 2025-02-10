@@ -34,7 +34,7 @@ A Python framework for agentic orchestration that handles complex task automatio
 - [Technologies Used](#technologies-used)
 - [Project Structure](#project-structure)
 - [Setting Up a Project](#setting-up-a-project)
-  - [1. Installing package manager `uv`](#1-installing-package-manager-uv)
+  - [1. Installing package manager: `uv`](#1-installing-package-manager-uv)
   - [2. Installing dependencies](#2-installing-dependencies)
   - [3. Adding secrets to .env file](#3-adding-secrets-to-env-file)
 - [Contributing](#contributing)
@@ -238,7 +238,7 @@ src/
 
 ## Setting Up a Project
 
-### 1. Installing package manager `uv`
+### 1. Installing package manager: `uv`
 
    For MacOS:
 
@@ -278,6 +278,11 @@ src/
       pygraphviz
       ```
 
+      ! If the error continues, skip pygraphviz installation by:
+      ```
+      uv sync --all-extras --no-extra pygraphviz
+      ```
+
    - `torch`/`Docling` related errors: Set up default Python version either `3.11.x` or `3.12.x` (same as AssertionError)
 
 ### 3. Adding secrets to .env file
@@ -286,10 +291,11 @@ Create `.env` file in the project root and add following:
 
    ```
    OPENAI_API_KEY=your-openai-api-key
+   GEMINI_API_KEY=your-gemini-api-key
    LITELLM_API_KEY=your-litellm-api-key
    COMPOSIO_API_KEY=your-composio-api-key
    COMPOSIO_CLI_KEY=your-composio-cli-key
-   [LLM_INTERFACE_PROVIDER_OF_YOUR_CHOICE]_API_KEY=your-api-key
+   [OTHER_LLM_INTERFACE_PROVIDER_OF_YOUR_CHOICE]_API_KEY=your-api-key
    ```
 
 <hr />
@@ -303,6 +309,7 @@ Create `.env` file in the project root and add following:
 3. Add a test funcition to the `tests` directory and run **pytest**.
 
    - Add secret values defined in `.github/workflows/run_test.yml` to your Github `repository secrets` located at settings > secrets & variables > Actions.
+
    - Run a following command:
       ```
       uv run pytest tests -vv --cache-clear
@@ -313,6 +320,8 @@ Create `.env` file in the project root and add following:
    * Files added to the `tests` directory must end in `_test.py`.
 
    * Test functions within the files must begin with `test_`.
+
+   * Pytest priorities are `1. playground demo > 2. docs use cases > 3. other features`
 
 
 4. Update `docs` accordingly.

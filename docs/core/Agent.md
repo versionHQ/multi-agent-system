@@ -33,7 +33,7 @@ agent = vhq.Agent(
 
 ### Model optimization
 
-`[var]`<bold>`llm: Optional[str | LLM | Dict[str, Any]] = "gpt-4o"`
+`[var]`<bold>`llm: Optional[str | LLM | Dict[str, Any]] = "gpt-4o"`</bold>
 
 You can select a model or model provider that the agent will run on.
 
@@ -49,10 +49,31 @@ agent = vhq.Agent(
 )
 ```
 
+### Switching models
+
+`[class method]`<bold>`update_llm(self, llm: Any = None, llm_config: Optional[Dict[str, Any]] = None) -> Self`<bold>
+
+You can update LLM model and its configuration of the existing agent.
+
+```python
+import versionhq as vhq
+
+agent = vhq.Agent(
+	role="Marketing Analyst",
+	goal="Coping with price competition in saturated markets",
+	llm="gemini-2.0"
+)
+
+agent.update_llm(llm="deepseek", llm_config=dict(max_tokens=3000))
+assert "deepseek-r1" in agent.llm.model
+assert agent.llm.max_tokens == 3000
+```
+
+<hr/>
 
 ### Developer Prompt (System Prompt)
 
-`[var]`<bold>`backstory: Optional[str] = TEMPLATE_BACKSTORY`
+`[var]`<bold>`backstory: Optional[str] = TEMPLATE_BACKSTORY`<bold>
 
 Backstory will be drafted automatically using the given role, goal and other values in the Agent model, and converted into the **developer prompt** when the agent executes the task.
 

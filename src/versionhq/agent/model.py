@@ -132,8 +132,6 @@ class Agent(BaseModel):
 
     # cache, error, ops handling
     formatting_errors: int = Field(default=0, description="number of formatting errors.")
-    agent_ops_agent_name: str = None
-    agent_ops_agent_id: str = None
 
 
     @field_validator("id", mode="before")
@@ -163,7 +161,6 @@ class Agent(BaseModel):
         """
         Set up `llm` and `function_calling_llm` as valid LLM objects using the given values.
         """
-        self.agent_ops_agent_name = self.role
         self.llm = self._convert_to_llm_object(llm=self.llm)
 
         function_calling_llm = self.function_calling_llm if self.function_calling_llm else self.llm if self.llm else None
@@ -177,12 +174,15 @@ class Agent(BaseModel):
         return self
 
 
-    def _convert_to_llm_object(self, llm: Any | None) -> LLM:
+    def _convert_to_llm_object(self, llm: Any = None) -> LLM:
         """
         Convert the given value to LLM object.
         When `llm` is dict or self.llm_config is not None, add these values to the LLM object after validating them.
         """
-        llm = llm if llm is not None else DEFAULT_MODEL_NAME
+        llm = llm if llm else self.llm if self.llm else DEFAULT_MODEL_NAME
+
+        if not llm:
+            pass
 
         match llm:
             case LLM():
@@ -400,6 +400,25 @@ class Agent(BaseModel):
         """
         if not isinstance(self.llm, LLM):
             pass
+
+
+    def update_llm(self, llm: Any = None, llm_config: Optional[Dict[str, Any]] = None) -> Self:
+        """
+        Update llm and llm_config of the exsiting agent. (Other conditions will remain the same.)
+        """
+
+        if not llm and not llm_config:
+            self._logger.log(level="error", message="Missing llm or llm_config values to update", color="red")
+            pass
+
+        self.llm = llm
+        if llm_config:
+            if self.llm_config:
+                self.llm_config.update(llm_config)
+            else:
+                self.llm_config = llm_config
+
+        return self.set_up_llm()
 
 
     def invoke(

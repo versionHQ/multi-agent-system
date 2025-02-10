@@ -111,7 +111,7 @@ class LLM(BaseModel):
 
 
     @model_validator(mode="after")
-    def validate_model_providers(self) -> Self:
+    def validate_model_and_provider(self) -> Self:
         """
         Validate the given model, provider, interface provider.
         """

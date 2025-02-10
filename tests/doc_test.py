@@ -68,6 +68,18 @@ def test_doc_agent():
         from versionhq.llm.model import LLM
         assert "gemini-2.0" in agent.llm.model and isinstance(agent.llm, LLM)
 
+    def b_2():
+        import versionhq as vhq
+
+        agent = vhq.Agent(
+            role="Marketing Analyst",
+            goal="Coping with price competition in saturated markets",
+            llm="gemini-2.0"
+        )
+
+        agent.update_llm(llm="deepseek", llm_config=dict(max_tokens=3000))
+        assert "deepseek-r1" in agent.llm.model
+        assert agent.llm.max_tokens == 3000
 
     def c_1():
         from versionhq import Agent
@@ -228,6 +240,7 @@ def test_doc_agent():
 
     a()
     b()
+    b_2()
     c_1()
     c_2()
     e_1()

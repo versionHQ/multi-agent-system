@@ -8,6 +8,8 @@ from dotenv import load_dotenv
 load_dotenv(override=True)
 
 from versionhq.agent.model import Agent
+from versionhq.llm.model import LLM
+from versionhq.llm.llm_vars import LLM_CONTEXT_WINDOW_SIZES, PARAMS, PROVIDERS, MODELS
 from versionhq.clients.customer.model import Customer
 from versionhq.clients.product.model import Product, ProductProvider
 from versionhq.clients.workflow.model import MessagingWorkflow, MessagingComponent
@@ -27,9 +29,15 @@ from versionhq.memory.model import ShortTermMemory,LongTermMemory, UserMemory, M
 from versionhq.task.formation import form_agent_network
 
 
-__version__ = "1.1.13.0"
+__version__ = "1.1.13.1"
 __all__ = [
     "Agent",
+
+    "LLM",
+    "LLM_CONTEXT_WINDOW_SIZES",
+    "PARAMS",
+    "PROVIDERS",
+    "MODELS",
 
     "Customer",
     "Product",

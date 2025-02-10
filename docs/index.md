@@ -125,6 +125,12 @@ This will form a network with multiple agents on `Formation` and return results 
       pygraphviz
       ```
 
+      ! If the error continues, skip pygraphviz installation by:
+
+      ```
+      uv sync --all-extras --no-extra pygraphviz
+      ```
+
    - `torch`/`Docling` related errors: Set up default Python version either `3.11.x` or `3.12.x` (same as AssertionError)
 
 ### 3. Adding secrets to .env
@@ -133,10 +139,11 @@ Create `.env` file in the project root and add following:
 
    ```
    OPENAI_API_KEY=your-openai-api-key
+   GEMINI_API_KEY=your-gemini-api-key
    LITELLM_API_KEY=your-litellm-api-key
    COMPOSIO_API_KEY=your-composio-api-key
    COMPOSIO_CLI_KEY=your-composio-cli-key
-   [LLM_INTERFACE_PROVIDER_OF_YOUR_CHOICE]_API_KEY=your-api-key
+   [OTHER_LLM_INTERFACE_PROVIDER_OF_YOUR_CHOICE]_API_KEY=your-api-key
    ```
 
 <hr />
