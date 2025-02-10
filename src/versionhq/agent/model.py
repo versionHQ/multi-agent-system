@@ -430,8 +430,6 @@ class Agent(BaseModel):
             return self
 
         for k, v in kwargs.items():
-            print(k)
-            print(v)
             match k:
                 case "tools":
                     self.tools = kwargs.get(k, self.tools)
@@ -466,8 +464,6 @@ class Agent(BaseModel):
 
                 case _:
                     try:
-                        print("sexond trt")
-                        print(k, v)
                         setattr(self, k, v)
                     except Exception as e:
                         self._logger.log(level="error", message=f"Failed to update the key: {k} We'll skip. Error: {str(e)}", color="red")
