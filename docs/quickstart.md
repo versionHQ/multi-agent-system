@@ -13,12 +13,13 @@ tags:
    pip install versionhq
    ```
 
-(Python 3.11, 3.12 [Recommended])
+(Python 3.11, 3.12)
 
+<hr />
 
-## Setting up a project
+## Project Set Up
 
-### 1. Installing `uv` package manager
+### 1. Package manager
 
    For MacOS:
 
@@ -31,8 +32,7 @@ tags:
    sudo apt-get install uv
    ```
 
-
-### 2. Installing dependencies
+### 2. Dependencies
 
    ```
    uv venv
@@ -51,21 +51,22 @@ tags:
 
    - `pygraphviz` related errors: Run the following commands:
       ```
-      brew install graphbiz
+      brew install graphviz
       uv pip install --config-settings="--global-option=build_ext" \
       --config-settings="--global-option=-I$(brew --prefix graphviz)/include/" \
       --config-settings="--global-option=-L$(brew --prefix graphviz)/lib/" \
       pygraphviz
       ```
 
-      ! If the error continues, skip pygraphviz installation by:
+      * If the error continues, skip pygraphviz installation by:
+
       ```
       uv sync --all-extras --no-extra pygraphviz
       ```
 
    - `torch`/`Docling` related errors: Set up default Python version either `3.11.x` or `3.12.x` (same as AssertionError)
 
-### 3. Adding secrets to .env
+### 3. Local .env
 
 Create `.env` file in the project root and add following:
 
@@ -99,11 +100,12 @@ Here is a code snippet:
 This will form a network with multiple agents on `Formation` and return results as a `TaskOutput` object, storing outputs in JSON, plane text, Pydantic model formats along with evaluation.
 
 
-## Customizing AI agents
+## Building AI agents
 
 If you don't need to form a network or assign a specific agent to the network, you can simply build an agent using `Agent` model.
 
-By default, the agent prioritize JSON serializable outputs over plane text.
+Agents can execute tasks using `Task` model and return JSON format by default with plane text and pydantic model formats as options.
+
 
    ```python
    import versionhq as vhq

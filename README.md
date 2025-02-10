@@ -1,5 +1,15 @@
 # Overview
 
+<div align="center">
+<img
+   src="https://res.cloudinary.com/dfeirxlea/image/upload/v1739196917/pj_m_home/f8gih1w8nmuqq26zfmey.png"
+   width="100" height="100"
+/>
+</div>
+
+<br>
+
+
 [![DL](https://img.shields.io/badge/Download-15K+-red)](https://clickpy.clickhouse.com/dashboard/versionhq)
 ![MIT license](https://img.shields.io/badge/License-MIT-green)
 [![Publisher](https://github.com/versionHQ/multi-agent-system/actions/workflows/publish.yml/badge.svg)](https://github.com/versionHQ/multi-agent-system/actions/workflows/publish.yml)
@@ -26,18 +36,21 @@ A Python framework for agentic orchestration that handles complex task automatio
 
 - [Key Features](#key-features)
   - [Agent formation](#agent-formation)
+  - [Graph Theory Concept](#graph-theory-concept)
+  - [Agent optimization](#agent-optimization)
 - [Quick Start](#quick-start)
   - [Package installation](#package-installation)
   - [Forming a agent network](#forming-a-agent-network)
-  - [Customizing AI agents](#customizing-ai-agents)
+  - [Executing tasks](#executing-tasks)
   - [Supervising](#supervising)
 - [Technologies Used](#technologies-used)
 - [Project Structure](#project-structure)
 - [Setting Up a Project](#setting-up-a-project)
-  - [1. Installing package manager: `uv`](#1-installing-package-manager-uv)
+  - [1. Installing package manager](#1-installing-package-manager)
   - [2. Installing dependencies](#2-installing-dependencies)
-  - [3. Adding secrets to .env file](#3-adding-secrets-to-env-file)
+  - [3. Adding env secrets to .env file](#3-adding-env-secrets-to-env-file)
 - [Contributing](#contributing)
+  - [Steps](#steps)
   - [Package Management with uv](#package-management-with-uv)
   - [Pre-Commit Hooks](#pre-commit-hooks)
   - [Documentation](#documentation)
@@ -70,6 +83,73 @@ You can specify a desired formation or allow the agents to determine it autonomo
 
 <hr />
 
+### Graph Theory Concept
+
+To completely automate task workflows, agents will build a `task-oriented network` by generating `nodes` that represent tasks and connecting them with dependency-defining `edges`.
+
+Each node is triggered by specific events and executed by an assigned agent once all dependencies are met.
+
+While the network automatically reconfigures itself, you retain the ability to direct the agents using `should_reform` variable.
+
+
+The following code snippet demonstrates the `TaskGraph` and its visualization, saving the diagram to the `uploads` directory.
+
+```python
+import versionhq as vhq
+
+task_graph = vhq.TaskGraph(directed=False, should_reform=True) # triggering auto formation
+
+task_a = vhq.Task(description="Research Topic")
+task_b = vhq.Task(description="Outline Post")
+task_c = vhq.Task(description="Write First Draft")
+
+node_a = task_graph.add_task(task=task_a)
+node_b = task_graph.add_task(task=task_b)
+node_c = task_graph.add_task(task=task_c)
+
+task_graph.add_dependency(
+   node_a.identifier, node_b.identifier,
+   type=vhq.DependencyType.FINISH_TO_START, weight=5, description="B depends on A"
+)
+task_graph.add_dependency(
+   node_a.identifier, node_c.identifier,
+   type=vhq.DependencyType.FINISH_TO_FINISH, lag=1, required=False, weight=3
+)
+
+task_graph.visualize()
+```
+
+<hr />
+
+### Agent optimization
+
+Agents are model-agnostic and can handle multiple tasks, leveraging their own and their peers' knowledge sources, memories, and tools.
+
+Agents are optimized during network formation, but customization is possible before or after.
+
+The following code snippet demonstrates agent customization:
+
+```python
+import versionhq as vhq
+
+agent = vhq.Agent(
+   role="Marketing Analyst",
+   goal="my amazing goal"
+) # assuming this agent was created during the network formation
+
+# update the agent
+agent.update(
+   llm="gemini-2.0", # updating LLM (Valid llm_config will be inherited to the new LLM.)
+   tools=[vhq.Tool(func=lambda x: x)], # adding tools
+   max_rpm=3,
+   knowledge_sources=["<KC1>", "<KS2>"], # adding knowledge sources. This will trigger the storage creation.
+   memory_config={"user_id": "0001"}, # adding memories
+   dummy="I am dummy" # <- invalid field will be automatically ignored
+)
+```
+
+<hr />
+
 ## Quick Start
 
 ### Package installation
@@ -95,11 +175,11 @@ You can specify a desired formation or allow the agents to determine it autonomo
    This will form a network with multiple agents on `Formation` and return `TaskOutput` object with output in JSON, plane text, Pydantic model format with evaluation.
 
 
-### Customizing AI agents
+### Executing tasks
 
-You can simply build an agent using `Agent` model.
+You can simply build an agent using `Agent` model and execute the task using `Task` class.
 
-By default, the agent prioritize JSON serializable outputs over plane texts.
+By default, agents prioritize JSON over plane text outputs.
 
 
    ```python
@@ -182,13 +262,27 @@ Tasks can be delegated to a team manager, peers in the team, or completely new a
 **Schema, Data Validation**
 
 * [Pydantic](https://docs.pydantic.dev/latest/): Data validation and serialization library for Python.
+
 * [Upstage](https://console.upstage.ai/docs/getting-started/overview): Document processer for ML tasks. (Use `Document Parser API` to extract data from documents)
+
 * [Docling](https://ds4sd.github.io/docling/): Document parsing
+
+**Graph Theory (Analysis and Visualization)**
+
+* [NetworkX](https://networkx.org/documentation/stable/reference/introduction.html): A Python package to analyze, create, and manipulate complex graph networks.
+
+* [Matplotlib](https://matplotlib.org/stable/index.html): Visualization library
+
+* [Graphviz](https://graphviz.org/about/): Graph visualization software
+
+
 
 **Storage**
 
 * [mem0ai](https://docs.mem0.ai/quickstart#install-package): Agents' memory storage and management.
+
 * [Chroma DB](https://docs.trychroma.com/): Vector database for storing and querying usage data.
+
 * [SQLite](https://www.sqlite.org/docs.html): C-language library to implements a small SQL database engine.
 
 **LLM-curation**
@@ -202,8 +296,11 @@ Tasks can be delegated to a team manager, peers in the team, or completely new a
 **Deployment**
 
 * **Python**: Primary programming language. v3.12.x is recommended
+
 * [uv](https://docs.astral.sh/uv/): Python package installer and resolver
+
 * [pre-commit](https://pre-commit.com/): Manage and maintain pre-commit hooks
+
 * [setuptools](https://pypi.org/project/setuptools/): Build python modules
 
 <hr />
@@ -230,7 +327,7 @@ src/
 │     └── llm/
 │     └── ...
 │
-└── uploads/    *.gitignore   # Local directory to store uploaded files (i.e. Graphbiz diagram from `Network` class)
+└── uploads/  [.gitignore]    # Local directory to store uploaded files such as graphviz diagrams generatd by `Network` class
 
 ```
 
@@ -238,7 +335,7 @@ src/
 
 ## Setting Up a Project
 
-### 1. Installing package manager: `uv`
+### 1. Installing package manager
 
    For MacOS:
 
@@ -271,21 +368,21 @@ src/
 
    - `pygraphviz` related errors: Run the following commands:
       ```
-      brew install graphbiz
+      brew install graphviz
       uv pip install --config-settings="--global-option=build_ext" \
       --config-settings="--global-option=-I$(brew --prefix graphviz)/include/" \
       --config-settings="--global-option=-L$(brew --prefix graphviz)/lib/" \
       pygraphviz
       ```
 
-      ! If the error continues, skip pygraphviz installation by:
+      * If the error continues, skip pygraphviz installation by:
       ```
       uv sync --all-extras --no-extra pygraphviz
       ```
 
    - `torch`/`Docling` related errors: Set up default Python version either `3.11.x` or `3.12.x` (same as AssertionError)
 
-### 3. Adding secrets to .env file
+### 3. Adding env secrets to .env file
 
 Create `.env` file in the project root and add following:
 
@@ -301,6 +398,10 @@ Create `.env` file in the project root and add following:
 <hr />
 
 ## Contributing
+
+`versionhq` is a open source project.
+
+### Steps
 
 1. Create your feature branch (`git checkout -b feature/your-amazing-feature`)
 
@@ -365,7 +466,7 @@ Create `.env` file in the project root and add following:
 
 Pre-commit hooks help maintain code quality by running checks for formatting, linting, and other issues before each commit.
 
-* To skip pre-commit hooks (NOT RECOMMENDED)
+* To skip pre-commit hooks
    ```
    git commit --no-verify -m "your-commit-message"
    ```
@@ -374,7 +475,7 @@ Pre-commit hooks help maintain code quality by running checks for formatting, li
 
 * To edit the documentation, see `docs` repository and edit the respective component.
 
-* We use `mkdocs` to update the docs. You can run the doc locally at http://127.0.0.1:8000/:
+* We use `mkdocs` to update the docs. You can run the docs locally at http://127.0.0.1:8000/.
 
    ```
    uv run python3 -m mkdocs serve --clean

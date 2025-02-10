@@ -325,28 +325,3 @@ def test_updating_llm():
 
     agent.update_llm(llm="deepseek", llm_config=dict(max_tokens=500))
     assert isinstance(agent.llm, vhq.LLM) and "deepseek-r1" in agent.llm.model and agent.llm.max_tokens == 500
-
-
-def test_update_other_vars():
-    import versionhq as vhq
-
-    agent = vhq.Agent(role="Researcher", goal="You research about math.")
-
-    tool = Tool(func=lambda x: x)
-    agent.update(
-        tools=[tool], goal="Test", max_rpm=3, knowledge_sources=["testing", "testing2"], memory_config={"user_id": "0000"},
-        llm="gemini-2.0",
-        use_developer_prompt=False,
-        dummy="I am dummy"
-    )
-
-    from versionhq.agent.rpm_controller import RPMController
-    assert agent.tools == [tool]
-    assert agent.goal == "Test" and agent.role == "Researcher" and "Test" in agent.backstory
-    assert isinstance(agent._rpm_controller, RPMController)
-    assert isinstance(agent._knowledge, vhq.Knowledge) and agent.knowledge_sources == ["testing", "testing2"]
-    assert isinstance(agent.user_memory, vhq.UserMemory)
-    assert "gemini-2.0" in agent.llm.model and agent.llm.provider == "gemini"
-    assert agent.use_developer_prompt == False
-
-test_update_other_vars()

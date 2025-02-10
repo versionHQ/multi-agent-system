@@ -51,185 +51,73 @@ You can specify a desired formation or allow the agents to determine it autonomo
 
 <hr />
 
+### Graph Theory Concept
 
-## Quick Start
+To completely automate task workflows, agents will build a `task-oriented network` by generating `nodes` that represent tasks and connecting them with dependency-defining `edges`.
 
-### Package Installation
+Each node is triggered by specific events and executed by an assigned agent once all dependencies are met.
 
-   ```
-   pip install versionhq
-   ```
-
-(Python 3.11 / 3.12)
-
-### Forming a Agent Network
-
-You can generate a network of multiple agents depending on your task complexity.
-
-Here is a code snippet:
-
-   ```python
-   import versionhq as vhq
-
-   network = vhq.form_agent_network(
-      task="YOUR AMAZING TASK OVERVIEW",
-      expected_outcome="YOUR OUTCOME EXPECTATION",
-   )
-   res = network.launch()
-   ```
-
-This will form a network with multiple agents on `Formation` and return results as a `TaskOutput` object, storing outputs in JSON, plane text, Pydantic model formats along with evaluation.
-
-<hr />
+While the network automatically reconfigures itself, you retain the ability to direct the agents using `should_reform` variable.
 
 
-## Setting up a project
+The following code snippet demonstrates the `TaskGraph` and its visualization, saving the diagram to the `uploads` directory.
 
-### 1. Installing `uv` package manager
+```python
+import versionhq as vhq
 
-   For MacOS:
+task_graph = vhq.TaskGraph(directed=False, should_reform=True) # triggering auto formation
 
-   ```
-   brew install uv
-   ```
+task_a = vhq.Task(description="Research Topic")
+task_b = vhq.Task(description="Outline Post")
+task_c = vhq.Task(description="Write First Draft")
 
-   For Ubuntu/Debian:
-   ```
-   sudo apt-get install uv
-   ```
+node_a = task_graph.add_task(task=task_a)
+node_b = task_graph.add_task(task=task_b)
+node_c = task_graph.add_task(task=task_c)
 
+task_graph.add_dependency(
+   node_a.identifier, node_b.identifier,
+   type=vhq.DependencyType.FINISH_TO_START, weight=5, description="B depends on A"
+)
+task_graph.add_dependency(
+   node_a.identifier, node_c.identifier,
+   type=vhq.DependencyType.FINISH_TO_FINISH, lag=1, required=False, weight=3
+)
 
-### 2. Installing dependencies
-
-   ```
-   uv venv
-   source .venv/bin/activate
-   uv lock --upgrade
-   uv sync --all-extras
-   ```
-
-   - AssertionError/module mismatch errors: Set up default Python version using `.pyenv`
-      ```
-      pyenv install 3.12.8
-      pyenv global 3.12.8  (optional: `pyenv global system` to get back to the system default ver.)
-      uv python pin 3.12.8
-      echo 3.12.8 >> .python-version
-      ```
-
-   - `pygraphviz` related errors: Run the following commands:
-      ```
-      brew install graphbiz
-      uv pip install --config-settings="--global-option=build_ext" \
-      --config-settings="--global-option=-I$(brew --prefix graphviz)/include/" \
-      --config-settings="--global-option=-L$(brew --prefix graphviz)/lib/" \
-      pygraphviz
-      ```
-
-      ! If the error continues, skip pygraphviz installation by:
-
-      ```
-      uv sync --all-extras --no-extra pygraphviz
-      ```
-
-   - `torch`/`Docling` related errors: Set up default Python version either `3.11.x` or `3.12.x` (same as AssertionError)
-
-### 3. Adding secrets to .env
-
-Create `.env` file in the project root and add following:
-
-   ```
-   OPENAI_API_KEY=your-openai-api-key
-   GEMINI_API_KEY=your-gemini-api-key
-   LITELLM_API_KEY=your-litellm-api-key
-   COMPOSIO_API_KEY=your-composio-api-key
-   COMPOSIO_CLI_KEY=your-composio-cli-key
-   [OTHER_LLM_INTERFACE_PROVIDER_OF_YOUR_CHOICE]_API_KEY=your-api-key
-   ```
+task_graph.visualize()
+```
 
 <hr />
 
-## Contributing
+### Agent optimization
 
-1. Create your feature branch (`git checkout -b feature/your-amazing-feature`)
+Agents are model-agnostic and can handle multiple tasks, leveraging their own and their peers' knowledge sources, memories, and tools.
 
-2. Create amazing features
+Agents are optimized during network formation, but customization is possible before or after.
 
-3. Add a test funcition to the `tests` directory and run **pytest**.
+The following code snippet demonstrates agent customization:
 
-   - Add secret values defined in `.github/workflows/run_test.yml` to your Github `repository secrets` located at settings > secrets & variables > Actions.
-   - Run a following command:
-      ```
-      uv run pytest tests -vv --cache-clear
-      ```
+```python
+import versionhq as vhq
 
-   **Building a new pytest function**
+agent = vhq.Agent(
+   role="Marketing Analyst",
+   goal="my amazing goal"
+) # assuming this agent was created during the network formation
 
-   * Files added to the `tests` directory must end in `_test.py`.
-   * Test functions within the files must begin with `test_`.
-
-
-4. Update `docs` accordingly.
-
-5. Pull the latest version of source code from the main branch (`git pull origin main`) *Address conflicts if any.
-
-6. Commit your changes (`git add .` / `git commit -m 'Add your-amazing-feature'`)
-
-7. Push to the branch (`git push origin feature/your-amazing-feature`)
-
-8. Open a pull request
-
-
-**Optional**
-
-* Flag with `#! REFINEME` for any improvements needed and `#! FIXME` for any errors.
-
-* `Playground` is available at `https://versi0n.io`.
-
-
-### Package Management with uv
-
-- Add a package: `uv add <package>`
-
-- Remove a package: `uv remove <package>`
-
-- Run a command in the virtual environment: `uv run <command>`
-
-* After updating dependencies, update `requirements.txt` accordingly or run `uv pip freeze > requirements.txt`
-
-
-### Pre-Commit Hooks
-
-1. Install pre-commit hooks:
-   ```
-   uv run pre-commit install
-   ```
-
-2. Run pre-commit checks manually:
-   ```
-   uv run pre-commit run --all-files
-   ```
-
-Pre-commit hooks help maintain code quality by running checks for formatting, linting, and other issues before each commit.
-
-* To skip pre-commit hooks (NOT RECOMMENDED)
-   ```
-   git commit --no-verify -m "your-commit-message"
-   ```
-
-
-### Documentation
-
-* To edit the documentation, see `docs` repository and edit the respective component.
-
-* We use `mkdocs` to update the docs. You can run the doc locally at http://127.0.0.1:8000/:
-
-   ```
-   uv run python3 -m mkdocs serve --clean
-   ```
-
-* To add a new page, update `mkdocs.yml` in the root. Refer to [MkDocs documentation](https://squidfunk.github.io/mkdocs-material/getting-started/) for more details.
+# update the agent
+agent.update(
+   llm="gemini-2.0", # updating LLM (Valid llm_config will be inherited to the new LLM.)
+   tools=[vhq.Tool(func=lambda x: x)], # adding tools
+   max_rpm=3,
+   knowledge_sources=["<KC1>", "<KS2>"], # adding knowledge sources. This will trigger the storage creation.
+   memory_config={"user_id": "0001"}, # adding memories
+   dummy="I am dummy" # <- invalid field will be automatically ignored
+)
+```
 
 <hr />
+
 
 ## Trouble Shooting
 
@@ -270,6 +158,15 @@ A. Visit [playground](https://versi0n.io).
 
 * [Docling](https://ds4sd.github.io/docling/): Document parsing
 
+**Graph Theory (Analysis and Visualization)**
+
+* [NetworkX](https://networkx.org/documentation/stable/reference/introduction.html): A Python package to analyze, create, and manipulate complex graph networks.
+
+* [Matplotlib](https://matplotlib.org/stable/index.html): Visualization library
+
+* [Graphviz](https://graphviz.org/about/): Graph visualization software
+
+
 **Storage**
 
 * [mem0ai](https://docs.mem0.ai/quickstart#install-package): Agents' memory storage and management.
@@ -280,9 +177,9 @@ A. Visit [playground](https://versi0n.io).
 
 **LLM-curation**
 
-* [LiteLLM](https://docs.litellm.ai/docs/providers): Curation platform to access LLMs
+* [LiteLLM](https://docs.litellm.ai/docs/providers): LLM orchestration platform
 
-**Tools**
+**Tool**
 
 * [Composio](https://composio.dev/): Conect RAG agents with external tools, Apps, and APIs to perform actions and receive triggers. We use [tools](https://composio.dev/tools) and [RAG tools](https://app.composio.dev/app/ragtool) from Composio toolset.
 
@@ -295,3 +192,91 @@ A. Visit [playground](https://versi0n.io).
 * [pre-commit](https://pre-commit.com/): Manage and maintain pre-commit hooks
 
 * [setuptools](https://pypi.org/project/setuptools/): Build python modules
+
+<hr />
+
+## Contributing
+
+`versionhq` is a open source project.
+
+
+### Steps
+
+1. Create your feature branch (`git checkout -b feature/your-amazing-feature`)
+
+2. Create amazing features
+
+3. Add a test funcition to the `tests` directory and run **pytest**.
+
+   - Add secret values defined in `.github/workflows/run_test.yml` to your Github `repository secrets` located at settings > secrets & variables > Actions.
+   - Run a following command:
+      ```
+      uv run pytest tests -vv --cache-clear
+      ```
+
+   **Building a new pytest function**
+
+   * Files added to the `tests` directory must end in `_test.py`.
+   * Test functions within the files must begin with `test_`.
+
+
+4. Update `docs` accordingly.
+
+5. Pull the latest version of source code from the main branch (`git pull origin main`) *Address conflicts if any.
+
+6. Commit your changes (`git add .` / `git commit -m 'Add your-amazing-feature'`)
+
+7. Push to the branch (`git push origin feature/your-amazing-feature`)
+
+8. Open a pull request
+
+
+**Optional**
+
+* Flag with `#! REFINEME` for any improvements needed and `#! FIXME` for any errors.
+
+* `Playground` is available at `https://versi0n.io`.
+
+
+### Package management
+
+- Add a package: `uv add <package>`
+
+- Remove a package: `uv remove <package>`
+
+- Run a command in the virtual environment: `uv run <command>`
+
+* After updating dependencies, update `requirements.txt` accordingly or run `uv pip freeze > requirements.txt`
+
+
+### Pre-Commit hooks
+
+1. Install pre-commit hooks:
+   ```
+   uv run pre-commit install
+   ```
+
+2. Run pre-commit checks manually:
+   ```
+   uv run pre-commit run --all-files
+   ```
+
+Pre-commit hooks help maintain code quality by running checks for formatting, linting, and other issues before each commit.
+
+* To skip pre-commit hooks
+   ```
+   git commit --no-verify -m "your-commit-message"
+   ```
+
+
+### Documentation
+
+* To edit the documentation, see `docs` repository and edit the respective component.
+
+* We use `mkdocs` to update the docs. You can run the doc locally at http://127.0.0.1:8000/:
+
+   ```
+   uv run python3 -m mkdocs serve --clean
+   ```
+
+* To add a new page, update `mkdocs.yml` in the root. Refer to [MkDocs documentation](https://squidfunk.github.io/mkdocs-material/getting-started/) for more details.

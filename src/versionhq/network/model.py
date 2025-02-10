@@ -273,6 +273,7 @@ class Graph(ABC, BaseModel):
 
 class TaskGraph(Graph):
     id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True)
+    should_reform: bool = Field(default=False)
     status: Dict[str, TaskStatus] = Field(default_factory=dict, description="store identifier (str) and TaskStatus of all task_nodes")
 
 

@@ -1,4 +1,4 @@
-site_name: versionHQ | Agentic orchestration framework
+site_name: versionHQ
 site_author: Version IO Sdn. Bhd.
 site_description: A Python framework for multi-agent systems that handle complex task automation.
 site_url: https://docs.versi0n.io/
@@ -92,21 +92,21 @@ theme:
     - content.tabs.link
     - content.tooltips
     - header.autohide
+    - navigation.path
+    - navigation.top
     - navigation.footer
     - navigation.indexes
-    - search.suggest
     - navigation.instant
     - navigation.instant.progress
     - navigation.instant.prefetch
     - navigation.tracking
-    - navigation.path
-    - navigation.top
     - toc.follow
     - toc.integrate
+    - search.suggest
     - search.highlight
     - search.share
 nav:
-  - Home: '/'
+  - Home: 'index.md'
   - Quick Start: 'quickstart.md'
   - Core Components:
     - Agent: 'core/agent.md'
