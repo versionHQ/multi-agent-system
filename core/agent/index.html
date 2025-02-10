@@ -673,6 +673,15 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#updating-model-values" class="md-nav__link">
+    <span class="md-ellipsis">
+      Updating model values
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -892,7 +901,7 @@
 </span></code></pre></div>
 <h3 id="switching-models">Switching models<a class="headerlink" href="#switching-models" title="Permanent link">&para;</a></h3>
 <p><code>[class method]</code><bold><code>update_llm(self, llm: Any = None, llm_config: Optional[Dict[str, Any]] = None) -&gt; Self</code><bold></p>
-<p>You can configure the model of the existing agent.</p>
+<p>You can update LLM model and its configuration of the existing agent.</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">versionhq</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">vhq</span>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
 </span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">agent</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Agent</span><span class="p">(</span>
@@ -1137,6 +1146,7 @@
 <li>Reference: <bold><code>Knowledge</code> class</bold></li>
 </ul>
 <hr />
+
 <h2 id="memory">Memory<a class="headerlink" href="#memory" title="Permanent link">&para;</a></h2>
 <h3 id="store-task-execution-results-in-memory">Store task execution results in memory<a class="headerlink" href="#store-task-execution-results-in-memory" title="Permanent link">&para;</a></h3>
 <p><code>[var]</code><bold><code>use_memory: bool = False</code></bold></p>
@@ -1189,94 +1199,119 @@
 </span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>
 </span><span id="__span-17-3"><a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="n">agent</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Agent</span><span class="p">(</span>
 </span><span id="__span-17-4"><a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a>    <span class="n">role</span><span class="o">=</span><span class="s2">&quot;Marketing Analyst&quot;</span><span class="p">,</span>
-</span><span id="__span-17-5"><a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a>    <span class="n">goal</span><span class="o">=</span><span class="s2">&quot;Coping with increased price competition in saturated markets.&quot;</span><span class="p">,</span>
+</span><span id="__span-17-5"><a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a>    <span class="n">goal</span><span class="o">=</span><span class="s2">&quot;Coping with price competition in saturated markets.&quot;</span><span class="p">,</span>
 </span><span id="__span-17-6"><a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a><span class="p">)</span>
 </span></code></pre></div>
 <hr />
 
-<p><strong>List of models to run the agent</strong></p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="s2">&quot;openai&quot;</span><span class="p">:</span> <span class="p">[</span>
-</span><span id="__span-18-2"><a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>    <span class="s2">&quot;gpt-4&quot;</span><span class="p">,</span>
-</span><span id="__span-18-3"><a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>    <span class="s2">&quot;gpt-4o&quot;</span><span class="p">,</span>
-</span><span id="__span-18-4"><a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a>    <span class="s2">&quot;gpt-4o-mini&quot;</span><span class="p">,</span>
-</span><span id="__span-18-5"><a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a>    <span class="s2">&quot;o1-mini&quot;</span><span class="p">,</span>
-</span><span id="__span-18-6"><a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a>    <span class="s2">&quot;o1-preview&quot;</span><span class="p">,</span>
-</span><span id="__span-18-7"><a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a><span class="p">]</span>
-</span><span id="__span-18-8"><a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a>
-</span><span id="__span-18-9"><a id="__codelineno-18-9" name="__codelineno-18-9" href="#__codelineno-18-9"></a><span class="s2">&quot;gemini&quot;</span><span class="p">:</span> <span class="p">[</span>
-</span><span id="__span-18-10"><a id="__codelineno-18-10" name="__codelineno-18-10" href="#__codelineno-18-10"></a>    <span class="s2">&quot;gemini/gemini-1.5-flash&quot;</span><span class="p">,</span>
-</span><span id="__span-18-11"><a id="__codelineno-18-11" name="__codelineno-18-11" href="#__codelineno-18-11"></a>    <span class="s2">&quot;gemini/gemini-1.5-pro&quot;</span><span class="p">,</span>
-</span><span id="__span-18-12"><a id="__codelineno-18-12" name="__codelineno-18-12" href="#__codelineno-18-12"></a>    <span class="s2">&quot;gemini/gemini-2.0-flash-exp&quot;</span><span class="p">,</span>
-</span><span id="__span-18-13"><a id="__codelineno-18-13" name="__codelineno-18-13" href="#__codelineno-18-13"></a><span class="p">]</span>
-</span><span id="__span-18-14"><a id="__codelineno-18-14" name="__codelineno-18-14" href="#__codelineno-18-14"></a>
-</span><span id="__span-18-15"><a id="__codelineno-18-15" name="__codelineno-18-15" href="#__codelineno-18-15"></a><span class="s2">&quot;anthropic&quot;</span><span class="p">:</span> <span class="p">[</span>
-</span><span id="__span-18-16"><a id="__codelineno-18-16" name="__codelineno-18-16" href="#__codelineno-18-16"></a>    <span class="s2">&quot;claude-3-5-sonnet-20241022&quot;</span><span class="p">,</span>
-</span><span id="__span-18-17"><a id="__codelineno-18-17" name="__codelineno-18-17" href="#__codelineno-18-17"></a>    <span class="s2">&quot;claude-3-5-sonnet-20240620&quot;</span><span class="p">,</span>
-</span><span id="__span-18-18"><a id="__codelineno-18-18" name="__codelineno-18-18" href="#__codelineno-18-18"></a>    <span class="s2">&quot;claude-3-sonnet-20240229&quot;</span><span class="p">,</span>
-</span><span id="__span-18-19"><a id="__codelineno-18-19" name="__codelineno-18-19" href="#__codelineno-18-19"></a>    <span class="s2">&quot;claude-3-opus-20240229&quot;</span><span class="p">,</span>
-</span><span id="__span-18-20"><a id="__codelineno-18-20" name="__codelineno-18-20" href="#__codelineno-18-20"></a>    <span class="s2">&quot;claude-3-haiku-20240307&quot;</span><span class="p">,</span>
-</span><span id="__span-18-21"><a id="__codelineno-18-21" name="__codelineno-18-21" href="#__codelineno-18-21"></a><span class="p">]</span>
-</span><span id="__span-18-22"><a id="__codelineno-18-22" name="__codelineno-18-22" href="#__codelineno-18-22"></a>
-</span><span id="__span-18-23"><a id="__codelineno-18-23" name="__codelineno-18-23" href="#__codelineno-18-23"></a><span class="s2">&quot;openrouter&quot;</span><span class="p">:</span> <span class="p">[</span>
-</span><span id="__span-18-24"><a id="__codelineno-18-24" name="__codelineno-18-24" href="#__codelineno-18-24"></a>    <span class="s2">&quot;openrouter/deepseek/deepseek-r1&quot;</span><span class="p">,</span>
-</span><span id="__span-18-25"><a id="__codelineno-18-25" name="__codelineno-18-25" href="#__codelineno-18-25"></a>    <span class="s2">&quot;openrouter/qwen/qwen-2.5-72b-instruct&quot;</span><span class="p">,</span>
-</span><span id="__span-18-26"><a id="__codelineno-18-26" name="__codelineno-18-26" href="#__codelineno-18-26"></a><span class="p">]</span>
+<h3 id="updating-model-values">Updating model values<a class="headerlink" href="#updating-model-values" title="Permanent link">&para;</a></h3>
+<p><code>[class method]</code><bold><code>update(self, **kwargs) -&gt; Self</code></bold></p>
+<p>You can update values of exsiting agents using <code>update</code> class method.</p>
+<p>This class method will safely trigger some setups that needs to be run before the agent start executing tasks.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">versionhq</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">vhq</span>
+</span><span id="__span-18-2"><a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>
+</span><span id="__span-18-3"><a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a><span class="n">agent</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Agent</span><span class="p">(</span>
+</span><span id="__span-18-4"><a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a>    <span class="n">role</span><span class="o">=</span><span class="s2">&quot;Marketing Analyst&quot;</span><span class="p">,</span>
+</span><span id="__span-18-5"><a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a>    <span class="n">goal</span><span class="o">=</span><span class="s2">&quot;Coping with price competition in saturated markets&quot;</span>
+</span><span id="__span-18-6"><a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a><span class="p">)</span>
+</span><span id="__span-18-7"><a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a>
+</span><span id="__span-18-8"><a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a><span class="n">tool</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Tool</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">)</span>
+</span><span id="__span-18-9"><a id="__codelineno-18-9" name="__codelineno-18-9" href="#__codelineno-18-9"></a><span class="n">agent</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+</span><span id="__span-18-10"><a id="__codelineno-18-10" name="__codelineno-18-10" href="#__codelineno-18-10"></a>    <span class="n">tools</span><span class="o">=</span><span class="p">[</span><span class="n">tool</span><span class="p">],</span>
+</span><span id="__span-18-11"><a id="__codelineno-18-11" name="__codelineno-18-11" href="#__codelineno-18-11"></a>    <span class="n">goal</span><span class="o">=</span><span class="s2">&quot;my new goal&quot;</span><span class="p">,</span> <span class="c1"># updating the goal (this will trigger updating the developer_prompt.)</span>
+</span><span id="__span-18-12"><a id="__codelineno-18-12" name="__codelineno-18-12" href="#__codelineno-18-12"></a>    <span class="n">max_rpm</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+</span><span id="__span-18-13"><a id="__codelineno-18-13" name="__codelineno-18-13" href="#__codelineno-18-13"></a>    <span class="n">knowledge_sources</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;testing&quot;</span><span class="p">,</span> <span class="s2">&quot;testing2&quot;</span><span class="p">],</span> <span class="c1"># adding knowledge sources (this will trigger the storage creation.)</span>
+</span><span id="__span-18-14"><a id="__codelineno-18-14" name="__codelineno-18-14" href="#__codelineno-18-14"></a>    <span class="n">memory_config</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;user_id&quot;</span><span class="p">:</span> <span class="s2">&quot;0000&quot;</span><span class="p">},</span>
+</span><span id="__span-18-15"><a id="__codelineno-18-15" name="__codelineno-18-15" href="#__codelineno-18-15"></a>    <span class="n">llm</span><span class="o">=</span><span class="s2">&quot;gemini-2.0&quot;</span><span class="p">,</span> <span class="c1"># Updating model (The valid llm_config for the new model will be inherited.)</span>
+</span><span id="__span-18-16"><a id="__codelineno-18-16" name="__codelineno-18-16" href="#__codelineno-18-16"></a>    <span class="n">use_developer_prompt</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+</span><span id="__span-18-17"><a id="__codelineno-18-17" name="__codelineno-18-17" href="#__codelineno-18-17"></a>    <span class="n">dummy</span><span class="o">=</span><span class="s2">&quot;I am dummy&quot;</span> <span class="c1"># &lt;- Invalid field will be automatically ignored.</span>
+</span><span id="__span-18-18"><a id="__codelineno-18-18" name="__codelineno-18-18" href="#__codelineno-18-18"></a><span class="p">)</span>
 </span></code></pre></div>
-<p>Following models are under review.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="s2">&quot;huggingface&quot;</span><span class="p">:</span> <span class="p">[</span>
-</span><span id="__span-19-2"><a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>    <span class="s2">&quot;huggingface/qwen/qwen2.5-VL-72B-Instruct&quot;</span><span class="p">,</span>
-</span><span id="__span-19-3"><a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a><span class="p">]</span>
-</span><span id="__span-19-4"><a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a>
-</span><span id="__span-19-5"><a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a><span class="s2">&quot;sagemaker&quot;</span><span class="p">:</span> <span class="p">[</span>
-</span><span id="__span-19-6"><a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a>    <span class="s2">&quot;sagemaker/huggingface-text2text-flan-t5-base&quot;</span><span class="p">,</span>
-</span><span id="__span-19-7"><a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a>    <span class="s2">&quot;sagemaker/huggingface-llm-gemma-7b&quot;</span><span class="p">,</span>
-</span><span id="__span-19-8"><a id="__codelineno-19-8" name="__codelineno-19-8" href="#__codelineno-19-8"></a>    <span class="s2">&quot;sagemaker/jumpstart-dft-meta-textgeneration-llama-2-13b&quot;</span><span class="p">,</span>
-</span><span id="__span-19-9"><a id="__codelineno-19-9" name="__codelineno-19-9" href="#__codelineno-19-9"></a>    <span class="s2">&quot;sagemaker/jumpstart-dft-meta-textgeneration-llama-2-70b&quot;</span><span class="p">,</span>
-</span><span id="__span-19-10"><a id="__codelineno-19-10" name="__codelineno-19-10" href="#__codelineno-19-10"></a>    <span class="s2">&quot;sagemaker/jumpstart-dft-meta-textgeneration-llama-3-8b&quot;</span><span class="p">,</span>
-</span><span id="__span-19-11"><a id="__codelineno-19-11" name="__codelineno-19-11" href="#__codelineno-19-11"></a>    <span class="s2">&quot;sagemaker/jumpstart-dft-meta-textgeneration-llama-3-70b&quot;</span><span class="p">,</span>
-</span><span id="__span-19-12"><a id="__codelineno-19-12" name="__codelineno-19-12" href="#__codelineno-19-12"></a>    <span class="s2">&quot;sagemaker/huggingface-llm-mistral-7b&quot;</span>
+<hr />
+
+<p><strong>List of models to run the agent</strong></p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="s2">&quot;openai&quot;</span><span class="p">:</span> <span class="p">[</span>
+</span><span id="__span-19-2"><a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>    <span class="s2">&quot;gpt-4&quot;</span><span class="p">,</span>
+</span><span id="__span-19-3"><a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>    <span class="s2">&quot;gpt-4o&quot;</span><span class="p">,</span>
+</span><span id="__span-19-4"><a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a>    <span class="s2">&quot;gpt-4o-mini&quot;</span><span class="p">,</span>
+</span><span id="__span-19-5"><a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a>    <span class="s2">&quot;o1-mini&quot;</span><span class="p">,</span>
+</span><span id="__span-19-6"><a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a>    <span class="s2">&quot;o1-preview&quot;</span><span class="p">,</span>
+</span><span id="__span-19-7"><a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a><span class="p">]</span>
+</span><span id="__span-19-8"><a id="__codelineno-19-8" name="__codelineno-19-8" href="#__codelineno-19-8"></a>
+</span><span id="__span-19-9"><a id="__codelineno-19-9" name="__codelineno-19-9" href="#__codelineno-19-9"></a><span class="s2">&quot;gemini&quot;</span><span class="p">:</span> <span class="p">[</span>
+</span><span id="__span-19-10"><a id="__codelineno-19-10" name="__codelineno-19-10" href="#__codelineno-19-10"></a>    <span class="s2">&quot;gemini/gemini-1.5-flash&quot;</span><span class="p">,</span>
+</span><span id="__span-19-11"><a id="__codelineno-19-11" name="__codelineno-19-11" href="#__codelineno-19-11"></a>    <span class="s2">&quot;gemini/gemini-1.5-pro&quot;</span><span class="p">,</span>
+</span><span id="__span-19-12"><a id="__codelineno-19-12" name="__codelineno-19-12" href="#__codelineno-19-12"></a>    <span class="s2">&quot;gemini/gemini-2.0-flash-exp&quot;</span><span class="p">,</span>
 </span><span id="__span-19-13"><a id="__codelineno-19-13" name="__codelineno-19-13" href="#__codelineno-19-13"></a><span class="p">]</span>
 </span><span id="__span-19-14"><a id="__codelineno-19-14" name="__codelineno-19-14" href="#__codelineno-19-14"></a>
-</span><span id="__span-19-15"><a id="__codelineno-19-15" name="__codelineno-19-15" href="#__codelineno-19-15"></a><span class="s2">&quot;ollama&quot;</span><span class="p">:</span> <span class="p">[</span>
-</span><span id="__span-19-16"><a id="__codelineno-19-16" name="__codelineno-19-16" href="#__codelineno-19-16"></a>    <span class="s2">&quot;ollama/llama3.1&quot;</span><span class="p">,</span>
-</span><span id="__span-19-17"><a id="__codelineno-19-17" name="__codelineno-19-17" href="#__codelineno-19-17"></a>    <span class="s2">&quot;ollama/mixtral&quot;</span><span class="p">,</span>
-</span><span id="__span-19-18"><a id="__codelineno-19-18" name="__codelineno-19-18" href="#__codelineno-19-18"></a>    <span class="s2">&quot;ollama/mixtral-8x22B-Instruct-v0.1&quot;</span><span class="p">,</span>
-</span><span id="__span-19-19"><a id="__codelineno-19-19" name="__codelineno-19-19" href="#__codelineno-19-19"></a><span class="p">]</span>
-</span><span id="__span-19-20"><a id="__codelineno-19-20" name="__codelineno-19-20" href="#__codelineno-19-20"></a>
-</span><span id="__span-19-21"><a id="__codelineno-19-21" name="__codelineno-19-21" href="#__codelineno-19-21"></a><span class="s2">&quot;watson&quot;</span><span class="p">:</span> <span class="p">[</span>
-</span><span id="__span-19-22"><a id="__codelineno-19-22" name="__codelineno-19-22" href="#__codelineno-19-22"></a>    <span class="s2">&quot;watsonx/meta-llama/llama-3-1-70b-instruct&quot;</span><span class="p">,</span>
-</span><span id="__span-19-23"><a id="__codelineno-19-23" name="__codelineno-19-23" href="#__codelineno-19-23"></a>    <span class="s2">&quot;watsonx/meta-llama/llama-3-1-8b-instruct&quot;</span><span class="p">,</span>
-</span><span id="__span-19-24"><a id="__codelineno-19-24" name="__codelineno-19-24" href="#__codelineno-19-24"></a>    <span class="s2">&quot;watsonx/meta-llama/llama-3-2-11b-vision-instruct&quot;</span><span class="p">,</span>
-</span><span id="__span-19-25"><a id="__codelineno-19-25" name="__codelineno-19-25" href="#__codelineno-19-25"></a>    <span class="s2">&quot;watsonx/meta-llama/llama-3-2-1b-instruct&quot;</span><span class="p">,</span>
-</span><span id="__span-19-26"><a id="__codelineno-19-26" name="__codelineno-19-26" href="#__codelineno-19-26"></a>    <span class="s2">&quot;watsonx/meta-llama/llama-3-2-90b-vision-instruct&quot;</span><span class="p">,</span>
-</span><span id="__span-19-27"><a id="__codelineno-19-27" name="__codelineno-19-27" href="#__codelineno-19-27"></a>    <span class="s2">&quot;watsonx/meta-llama/llama-3-405b-instruct&quot;</span><span class="p">,</span>
-</span><span id="__span-19-28"><a id="__codelineno-19-28" name="__codelineno-19-28" href="#__codelineno-19-28"></a>    <span class="s2">&quot;watsonx/mistral/mistral-large&quot;</span><span class="p">,</span>
-</span><span id="__span-19-29"><a id="__codelineno-19-29" name="__codelineno-19-29" href="#__codelineno-19-29"></a>    <span class="s2">&quot;watsonx/ibm/granite-3-8b-instruct&quot;</span><span class="p">,</span>
-</span><span id="__span-19-30"><a id="__codelineno-19-30" name="__codelineno-19-30" href="#__codelineno-19-30"></a><span class="p">]</span>
-</span><span id="__span-19-31"><a id="__codelineno-19-31" name="__codelineno-19-31" href="#__codelineno-19-31"></a>
-</span><span id="__span-19-32"><a id="__codelineno-19-32" name="__codelineno-19-32" href="#__codelineno-19-32"></a><span class="s2">&quot;bedrock&quot;</span><span class="p">:</span> <span class="p">[</span>
-</span><span id="__span-19-33"><a id="__codelineno-19-33" name="__codelineno-19-33" href="#__codelineno-19-33"></a>    <span class="s2">&quot;bedrock/anthropic.claude-3-5-sonnet-20240620-v1:0&quot;</span><span class="p">,</span>
-</span><span id="__span-19-34"><a id="__codelineno-19-34" name="__codelineno-19-34" href="#__codelineno-19-34"></a>    <span class="s2">&quot;bedrock/anthropic.claude-3-sonnet-20240229-v1:0&quot;</span><span class="p">,</span>
-</span><span id="__span-19-35"><a id="__codelineno-19-35" name="__codelineno-19-35" href="#__codelineno-19-35"></a>    <span class="s2">&quot;bedrock/anthropic.claude-3-haiku-20240307-v1:0&quot;</span><span class="p">,</span>
-</span><span id="__span-19-36"><a id="__codelineno-19-36" name="__codelineno-19-36" href="#__codelineno-19-36"></a>    <span class="s2">&quot;bedrock/anthropic.claude-3-opus-20240229-v1:0&quot;</span><span class="p">,</span>
-</span><span id="__span-19-37"><a id="__codelineno-19-37" name="__codelineno-19-37" href="#__codelineno-19-37"></a>    <span class="s2">&quot;bedrock/anthropic.claude-v2&quot;</span><span class="p">,</span>
-</span><span id="__span-19-38"><a id="__codelineno-19-38" name="__codelineno-19-38" href="#__codelineno-19-38"></a>    <span class="s2">&quot;bedrock/anthropic.claude-instant-v1&quot;</span><span class="p">,</span>
-</span><span id="__span-19-39"><a id="__codelineno-19-39" name="__codelineno-19-39" href="#__codelineno-19-39"></a>    <span class="s2">&quot;bedrock/meta.llama3-1-405b-instruct-v1:0&quot;</span><span class="p">,</span>
-</span><span id="__span-19-40"><a id="__codelineno-19-40" name="__codelineno-19-40" href="#__codelineno-19-40"></a>    <span class="s2">&quot;bedrock/meta.llama3-1-70b-instruct-v1:0&quot;</span><span class="p">,</span>
-</span><span id="__span-19-41"><a id="__codelineno-19-41" name="__codelineno-19-41" href="#__codelineno-19-41"></a>    <span class="s2">&quot;bedrock/meta.llama3-1-8b-instruct-v1:0&quot;</span><span class="p">,</span>
-</span><span id="__span-19-42"><a id="__codelineno-19-42" name="__codelineno-19-42" href="#__codelineno-19-42"></a>    <span class="s2">&quot;bedrock/meta.llama3-70b-instruct-v1:0&quot;</span><span class="p">,</span>
-</span><span id="__span-19-43"><a id="__codelineno-19-43" name="__codelineno-19-43" href="#__codelineno-19-43"></a>    <span class="s2">&quot;bedrock/meta.llama3-8b-instruct-v1:0&quot;</span><span class="p">,</span>
-</span><span id="__span-19-44"><a id="__codelineno-19-44" name="__codelineno-19-44" href="#__codelineno-19-44"></a>    <span class="s2">&quot;bedrock/amazon.titan-text-lite-v1&quot;</span><span class="p">,</span>
-</span><span id="__span-19-45"><a id="__codelineno-19-45" name="__codelineno-19-45" href="#__codelineno-19-45"></a>    <span class="s2">&quot;bedrock/amazon.titan-text-express-v1&quot;</span><span class="p">,</span>
-</span><span id="__span-19-46"><a id="__codelineno-19-46" name="__codelineno-19-46" href="#__codelineno-19-46"></a>    <span class="s2">&quot;bedrock/cohere.command-text-v14&quot;</span><span class="p">,</span>
-</span><span id="__span-19-47"><a id="__codelineno-19-47" name="__codelineno-19-47" href="#__codelineno-19-47"></a>    <span class="s2">&quot;bedrock/ai21.j2-mid-v1&quot;</span><span class="p">,</span>
-</span><span id="__span-19-48"><a id="__codelineno-19-48" name="__codelineno-19-48" href="#__codelineno-19-48"></a>    <span class="s2">&quot;bedrock/ai21.j2-ultra-v1&quot;</span><span class="p">,</span>
-</span><span id="__span-19-49"><a id="__codelineno-19-49" name="__codelineno-19-49" href="#__codelineno-19-49"></a>    <span class="s2">&quot;bedrock/ai21.jamba-instruct-v1:0&quot;</span><span class="p">,</span>
-</span><span id="__span-19-50"><a id="__codelineno-19-50" name="__codelineno-19-50" href="#__codelineno-19-50"></a>    <span class="s2">&quot;bedrock/meta.llama2-13b-chat-v1&quot;</span><span class="p">,</span>
-</span><span id="__span-19-51"><a id="__codelineno-19-51" name="__codelineno-19-51" href="#__codelineno-19-51"></a>    <span class="s2">&quot;bedrock/meta.llama2-70b-chat-v1&quot;</span><span class="p">,</span>
-</span><span id="__span-19-52"><a id="__codelineno-19-52" name="__codelineno-19-52" href="#__codelineno-19-52"></a>    <span class="s2">&quot;bedrock/mistral.mistral-7b-instruct-v0:2&quot;</span><span class="p">,</span>
-</span><span id="__span-19-53"><a id="__codelineno-19-53" name="__codelineno-19-53" href="#__codelineno-19-53"></a>    <span class="s2">&quot;bedrock/mistral.mixtral-8x7b-instruct-v0:1&quot;</span><span class="p">,</span>
-</span><span id="__span-19-54"><a id="__codelineno-19-54" name="__codelineno-19-54" href="#__codelineno-19-54"></a><span class="p">]</span>
+</span><span id="__span-19-15"><a id="__codelineno-19-15" name="__codelineno-19-15" href="#__codelineno-19-15"></a><span class="s2">&quot;anthropic&quot;</span><span class="p">:</span> <span class="p">[</span>
+</span><span id="__span-19-16"><a id="__codelineno-19-16" name="__codelineno-19-16" href="#__codelineno-19-16"></a>    <span class="s2">&quot;claude-3-5-sonnet-20241022&quot;</span><span class="p">,</span>
+</span><span id="__span-19-17"><a id="__codelineno-19-17" name="__codelineno-19-17" href="#__codelineno-19-17"></a>    <span class="s2">&quot;claude-3-5-sonnet-20240620&quot;</span><span class="p">,</span>
+</span><span id="__span-19-18"><a id="__codelineno-19-18" name="__codelineno-19-18" href="#__codelineno-19-18"></a>    <span class="s2">&quot;claude-3-sonnet-20240229&quot;</span><span class="p">,</span>
+</span><span id="__span-19-19"><a id="__codelineno-19-19" name="__codelineno-19-19" href="#__codelineno-19-19"></a>    <span class="s2">&quot;claude-3-opus-20240229&quot;</span><span class="p">,</span>
+</span><span id="__span-19-20"><a id="__codelineno-19-20" name="__codelineno-19-20" href="#__codelineno-19-20"></a>    <span class="s2">&quot;claude-3-haiku-20240307&quot;</span><span class="p">,</span>
+</span><span id="__span-19-21"><a id="__codelineno-19-21" name="__codelineno-19-21" href="#__codelineno-19-21"></a><span class="p">]</span>
+</span><span id="__span-19-22"><a id="__codelineno-19-22" name="__codelineno-19-22" href="#__codelineno-19-22"></a>
+</span><span id="__span-19-23"><a id="__codelineno-19-23" name="__codelineno-19-23" href="#__codelineno-19-23"></a><span class="s2">&quot;openrouter&quot;</span><span class="p">:</span> <span class="p">[</span>
+</span><span id="__span-19-24"><a id="__codelineno-19-24" name="__codelineno-19-24" href="#__codelineno-19-24"></a>    <span class="s2">&quot;openrouter/deepseek/deepseek-r1&quot;</span><span class="p">,</span>
+</span><span id="__span-19-25"><a id="__codelineno-19-25" name="__codelineno-19-25" href="#__codelineno-19-25"></a>    <span class="s2">&quot;openrouter/qwen/qwen-2.5-72b-instruct&quot;</span><span class="p">,</span>
+</span><span id="__span-19-26"><a id="__codelineno-19-26" name="__codelineno-19-26" href="#__codelineno-19-26"></a><span class="p">]</span>
+</span></code></pre></div>
+<p>Following models are under review.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="s2">&quot;huggingface&quot;</span><span class="p">:</span> <span class="p">[</span>
+</span><span id="__span-20-2"><a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>    <span class="s2">&quot;huggingface/qwen/qwen2.5-VL-72B-Instruct&quot;</span><span class="p">,</span>
+</span><span id="__span-20-3"><a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a><span class="p">]</span>
+</span><span id="__span-20-4"><a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a>
+</span><span id="__span-20-5"><a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a><span class="s2">&quot;sagemaker&quot;</span><span class="p">:</span> <span class="p">[</span>
+</span><span id="__span-20-6"><a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a>    <span class="s2">&quot;sagemaker/huggingface-text2text-flan-t5-base&quot;</span><span class="p">,</span>
+</span><span id="__span-20-7"><a id="__codelineno-20-7" name="__codelineno-20-7" href="#__codelineno-20-7"></a>    <span class="s2">&quot;sagemaker/huggingface-llm-gemma-7b&quot;</span><span class="p">,</span>
+</span><span id="__span-20-8"><a id="__codelineno-20-8" name="__codelineno-20-8" href="#__codelineno-20-8"></a>    <span class="s2">&quot;sagemaker/jumpstart-dft-meta-textgeneration-llama-2-13b&quot;</span><span class="p">,</span>
+</span><span id="__span-20-9"><a id="__codelineno-20-9" name="__codelineno-20-9" href="#__codelineno-20-9"></a>    <span class="s2">&quot;sagemaker/jumpstart-dft-meta-textgeneration-llama-2-70b&quot;</span><span class="p">,</span>
+</span><span id="__span-20-10"><a id="__codelineno-20-10" name="__codelineno-20-10" href="#__codelineno-20-10"></a>    <span class="s2">&quot;sagemaker/jumpstart-dft-meta-textgeneration-llama-3-8b&quot;</span><span class="p">,</span>
+</span><span id="__span-20-11"><a id="__codelineno-20-11" name="__codelineno-20-11" href="#__codelineno-20-11"></a>    <span class="s2">&quot;sagemaker/jumpstart-dft-meta-textgeneration-llama-3-70b&quot;</span><span class="p">,</span>
+</span><span id="__span-20-12"><a id="__codelineno-20-12" name="__codelineno-20-12" href="#__codelineno-20-12"></a>    <span class="s2">&quot;sagemaker/huggingface-llm-mistral-7b&quot;</span>
+</span><span id="__span-20-13"><a id="__codelineno-20-13" name="__codelineno-20-13" href="#__codelineno-20-13"></a><span class="p">]</span>
+</span><span id="__span-20-14"><a id="__codelineno-20-14" name="__codelineno-20-14" href="#__codelineno-20-14"></a>
+</span><span id="__span-20-15"><a id="__codelineno-20-15" name="__codelineno-20-15" href="#__codelineno-20-15"></a><span class="s2">&quot;ollama&quot;</span><span class="p">:</span> <span class="p">[</span>
+</span><span id="__span-20-16"><a id="__codelineno-20-16" name="__codelineno-20-16" href="#__codelineno-20-16"></a>    <span class="s2">&quot;ollama/llama3.1&quot;</span><span class="p">,</span>
+</span><span id="__span-20-17"><a id="__codelineno-20-17" name="__codelineno-20-17" href="#__codelineno-20-17"></a>    <span class="s2">&quot;ollama/mixtral&quot;</span><span class="p">,</span>
+</span><span id="__span-20-18"><a id="__codelineno-20-18" name="__codelineno-20-18" href="#__codelineno-20-18"></a>    <span class="s2">&quot;ollama/mixtral-8x22B-Instruct-v0.1&quot;</span><span class="p">,</span>
+</span><span id="__span-20-19"><a id="__codelineno-20-19" name="__codelineno-20-19" href="#__codelineno-20-19"></a><span class="p">]</span>
+</span><span id="__span-20-20"><a id="__codelineno-20-20" name="__codelineno-20-20" href="#__codelineno-20-20"></a>
+</span><span id="__span-20-21"><a id="__codelineno-20-21" name="__codelineno-20-21" href="#__codelineno-20-21"></a><span class="s2">&quot;watson&quot;</span><span class="p">:</span> <span class="p">[</span>
+</span><span id="__span-20-22"><a id="__codelineno-20-22" name="__codelineno-20-22" href="#__codelineno-20-22"></a>    <span class="s2">&quot;watsonx/meta-llama/llama-3-1-70b-instruct&quot;</span><span class="p">,</span>
+</span><span id="__span-20-23"><a id="__codelineno-20-23" name="__codelineno-20-23" href="#__codelineno-20-23"></a>    <span class="s2">&quot;watsonx/meta-llama/llama-3-1-8b-instruct&quot;</span><span class="p">,</span>
+</span><span id="__span-20-24"><a id="__codelineno-20-24" name="__codelineno-20-24" href="#__codelineno-20-24"></a>    <span class="s2">&quot;watsonx/meta-llama/llama-3-2-11b-vision-instruct&quot;</span><span class="p">,</span>
+</span><span id="__span-20-25"><a id="__codelineno-20-25" name="__codelineno-20-25" href="#__codelineno-20-25"></a>    <span class="s2">&quot;watsonx/meta-llama/llama-3-2-1b-instruct&quot;</span><span class="p">,</span>
+</span><span id="__span-20-26"><a id="__codelineno-20-26" name="__codelineno-20-26" href="#__codelineno-20-26"></a>    <span class="s2">&quot;watsonx/meta-llama/llama-3-2-90b-vision-instruct&quot;</span><span class="p">,</span>
+</span><span id="__span-20-27"><a id="__codelineno-20-27" name="__codelineno-20-27" href="#__codelineno-20-27"></a>    <span class="s2">&quot;watsonx/meta-llama/llama-3-405b-instruct&quot;</span><span class="p">,</span>
+</span><span id="__span-20-28"><a id="__codelineno-20-28" name="__codelineno-20-28" href="#__codelineno-20-28"></a>    <span class="s2">&quot;watsonx/mistral/mistral-large&quot;</span><span class="p">,</span>
+</span><span id="__span-20-29"><a id="__codelineno-20-29" name="__codelineno-20-29" href="#__codelineno-20-29"></a>    <span class="s2">&quot;watsonx/ibm/granite-3-8b-instruct&quot;</span><span class="p">,</span>
+</span><span id="__span-20-30"><a id="__codelineno-20-30" name="__codelineno-20-30" href="#__codelineno-20-30"></a><span class="p">]</span>
+</span><span id="__span-20-31"><a id="__codelineno-20-31" name="__codelineno-20-31" href="#__codelineno-20-31"></a>
+</span><span id="__span-20-32"><a id="__codelineno-20-32" name="__codelineno-20-32" href="#__codelineno-20-32"></a><span class="s2">&quot;bedrock&quot;</span><span class="p">:</span> <span class="p">[</span>
+</span><span id="__span-20-33"><a id="__codelineno-20-33" name="__codelineno-20-33" href="#__codelineno-20-33"></a>    <span class="s2">&quot;bedrock/anthropic.claude-3-5-sonnet-20240620-v1:0&quot;</span><span class="p">,</span>
+</span><span id="__span-20-34"><a id="__codelineno-20-34" name="__codelineno-20-34" href="#__codelineno-20-34"></a>    <span class="s2">&quot;bedrock/anthropic.claude-3-sonnet-20240229-v1:0&quot;</span><span class="p">,</span>
+</span><span id="__span-20-35"><a id="__codelineno-20-35" name="__codelineno-20-35" href="#__codelineno-20-35"></a>    <span class="s2">&quot;bedrock/anthropic.claude-3-haiku-20240307-v1:0&quot;</span><span class="p">,</span>
+</span><span id="__span-20-36"><a id="__codelineno-20-36" name="__codelineno-20-36" href="#__codelineno-20-36"></a>    <span class="s2">&quot;bedrock/anthropic.claude-3-opus-20240229-v1:0&quot;</span><span class="p">,</span>
+</span><span id="__span-20-37"><a id="__codelineno-20-37" name="__codelineno-20-37" href="#__codelineno-20-37"></a>    <span class="s2">&quot;bedrock/anthropic.claude-v2&quot;</span><span class="p">,</span>
+</span><span id="__span-20-38"><a id="__codelineno-20-38" name="__codelineno-20-38" href="#__codelineno-20-38"></a>    <span class="s2">&quot;bedrock/anthropic.claude-instant-v1&quot;</span><span class="p">,</span>
+</span><span id="__span-20-39"><a id="__codelineno-20-39" name="__codelineno-20-39" href="#__codelineno-20-39"></a>    <span class="s2">&quot;bedrock/meta.llama3-1-405b-instruct-v1:0&quot;</span><span class="p">,</span>
+</span><span id="__span-20-40"><a id="__codelineno-20-40" name="__codelineno-20-40" href="#__codelineno-20-40"></a>    <span class="s2">&quot;bedrock/meta.llama3-1-70b-instruct-v1:0&quot;</span><span class="p">,</span>
+</span><span id="__span-20-41"><a id="__codelineno-20-41" name="__codelineno-20-41" href="#__codelineno-20-41"></a>    <span class="s2">&quot;bedrock/meta.llama3-1-8b-instruct-v1:0&quot;</span><span class="p">,</span>
+</span><span id="__span-20-42"><a id="__codelineno-20-42" name="__codelineno-20-42" href="#__codelineno-20-42"></a>    <span class="s2">&quot;bedrock/meta.llama3-70b-instruct-v1:0&quot;</span><span class="p">,</span>
+</span><span id="__span-20-43"><a id="__codelineno-20-43" name="__codelineno-20-43" href="#__codelineno-20-43"></a>    <span class="s2">&quot;bedrock/meta.llama3-8b-instruct-v1:0&quot;</span><span class="p">,</span>
+</span><span id="__span-20-44"><a id="__codelineno-20-44" name="__codelineno-20-44" href="#__codelineno-20-44"></a>    <span class="s2">&quot;bedrock/amazon.titan-text-lite-v1&quot;</span><span class="p">,</span>
+</span><span id="__span-20-45"><a id="__codelineno-20-45" name="__codelineno-20-45" href="#__codelineno-20-45"></a>    <span class="s2">&quot;bedrock/amazon.titan-text-express-v1&quot;</span><span class="p">,</span>
+</span><span id="__span-20-46"><a id="__codelineno-20-46" name="__codelineno-20-46" href="#__codelineno-20-46"></a>    <span class="s2">&quot;bedrock/cohere.command-text-v14&quot;</span><span class="p">,</span>
+</span><span id="__span-20-47"><a id="__codelineno-20-47" name="__codelineno-20-47" href="#__codelineno-20-47"></a>    <span class="s2">&quot;bedrock/ai21.j2-mid-v1&quot;</span><span class="p">,</span>
+</span><span id="__span-20-48"><a id="__codelineno-20-48" name="__codelineno-20-48" href="#__codelineno-20-48"></a>    <span class="s2">&quot;bedrock/ai21.j2-ultra-v1&quot;</span><span class="p">,</span>
+</span><span id="__span-20-49"><a id="__codelineno-20-49" name="__codelineno-20-49" href="#__codelineno-20-49"></a>    <span class="s2">&quot;bedrock/ai21.jamba-instruct-v1:0&quot;</span><span class="p">,</span>
+</span><span id="__span-20-50"><a id="__codelineno-20-50" name="__codelineno-20-50" href="#__codelineno-20-50"></a>    <span class="s2">&quot;bedrock/meta.llama2-13b-chat-v1&quot;</span><span class="p">,</span>
+</span><span id="__span-20-51"><a id="__codelineno-20-51" name="__codelineno-20-51" href="#__codelineno-20-51"></a>    <span class="s2">&quot;bedrock/meta.llama2-70b-chat-v1&quot;</span><span class="p">,</span>
+</span><span id="__span-20-52"><a id="__codelineno-20-52" name="__codelineno-20-52" href="#__codelineno-20-52"></a>    <span class="s2">&quot;bedrock/mistral.mistral-7b-instruct-v0:2&quot;</span><span class="p">,</span>
+</span><span id="__span-20-53"><a id="__codelineno-20-53" name="__codelineno-20-53" href="#__codelineno-20-53"></a>    <span class="s2">&quot;bedrock/mistral.mixtral-8x7b-instruct-v0:1&quot;</span><span class="p">,</span>
+</span><span id="__span-20-54"><a id="__codelineno-20-54" name="__codelineno-20-54" href="#__codelineno-20-54"></a><span class="p">]</span>
 </span></code></pre></div>
 
 
