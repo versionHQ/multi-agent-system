@@ -892,8 +892,7 @@
 </span></code></pre></div>
 <h3 id="switching-models">Switching models<a class="headerlink" href="#switching-models" title="Permanent link">&para;</a></h3>
 <p><code>[class method]</code><bold><code>update_llm(self, llm: Any = None, llm_config: Optional[Dict[str, Any]] = None) -&gt; Self</code><bold></p>
-<p>You can select a model or model provider that the agent will run on.</p>
-<p>By default, when the model provider name is provided, we will select the most cost-efficient model from the given provider.</p>
+<p>You can configure the model of the existing agent.</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">versionhq</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">vhq</span>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
 </span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">agent</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Agent</span><span class="p">(</span>
