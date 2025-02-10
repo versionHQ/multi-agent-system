@@ -57,6 +57,7 @@ def test_doc_agent():
 
         assert agent.id and agent.role == "Marketing Analyst" and agent.goal == "Coping with price competition in saturated markets" and agent.backstory is not None
 
+
     def b():
         from versionhq import Agent
         agent = Agent(
@@ -67,6 +68,7 @@ def test_doc_agent():
 
         from versionhq.llm.model import LLM
         assert "gemini-2.0" in agent.llm.model and isinstance(agent.llm, LLM)
+
 
     def b_2():
         import versionhq as vhq
@@ -80,6 +82,38 @@ def test_doc_agent():
         agent.update_llm(llm="deepseek", llm_config=dict(max_tokens=3000))
         assert "deepseek-r1" in agent.llm.model
         assert agent.llm.max_tokens == 3000
+
+
+    def b_3():
+        import versionhq as vhq
+
+        agent = vhq.Agent(
+            role="Marketing Analyst",
+            goal="Coping with price competition in saturated markets"
+        )
+
+        tool = vhq.Tool(func=lambda x: x)
+        agent.update(
+            tools=[tool], # adding tools
+            goal="my new goal", # updating the goal (this will trigger the update of developer_prompt)
+            max_rpm=3, # default = 1
+            knowledge_sources=["testing", "testing2"], # adding knowledge sources (this will trigger the storage creation)
+            memory_config={"user_id": "0000"}, # adding memories
+            llm="gemini-2.0", # updating LLM (Valid llm_config will be inherited to the new model.)
+            use_developer_prompt=False,
+            dummy="I am dummy" # <- invalid field - automatically ignored
+        )
+
+        from versionhq.agent.rpm_controller import RPMController
+        assert agent.tools == [tool]
+        assert agent.goal == "my new goal" and agent.role == "Marketing Analyst" and "my new goal" in agent.backstory
+        assert isinstance(agent._rpm_controller, RPMController)
+        assert isinstance(agent._knowledge, vhq.Knowledge) and agent.knowledge_sources == ["testing", "testing2"]
+        assert isinstance(agent.user_memory, vhq.UserMemory)
+        assert "gemini-2.0" in agent.llm.model and agent.llm.provider == "gemini"
+        assert agent.use_developer_prompt == False
+
+
 
     def c_1():
         from versionhq import Agent
@@ -241,6 +275,7 @@ def test_doc_agent():
     a()
     b()
     b_2()
+    b_3()
     c_1()
     c_2()
     e_1()
@@ -250,6 +285,7 @@ def test_doc_agent():
     h()
     z()
 
+test_doc_agent()
 
 
 """core/tool.md"""

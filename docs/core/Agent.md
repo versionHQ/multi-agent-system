@@ -373,7 +373,7 @@ assert "gold" in res.raw  == True
 
 * Reference: <bold>`Knowledge` class</bold>
 
----
+<hr />
 
 ## Memory
 
@@ -446,7 +446,39 @@ import versionhq as vhq
 
 agent = vhq.Agent(
 	role="Marketing Analyst",
-	goal="Coping with increased price competition in saturated markets.",
+	goal="Coping with price competition in saturated markets.",
+)
+```
+
+<hr />
+
+### Updating model values
+
+`[class method]`<bold>`update(self, **kwargs) -> Self`</bold>
+
+You can update values of exsiting agents using `update` class method.
+
+This class method will safely trigger some setups that needs to be run before the agent start executing tasks.
+
+
+```python
+import versionhq as vhq
+
+agent = vhq.Agent(
+    role="Marketing Analyst",
+    goal="Coping with price competition in saturated markets"
+)
+
+tool = vhq.Tool(func=lambda x: x)
+agent.update(
+    tools=[tool],
+    goal="my new goal", # updating the goal (this will trigger updating the developer_prompt.)
+    max_rpm=3,
+    knowledge_sources=["testing", "testing2"], # adding knowledge sources (this will trigger the storage creation.)
+    memory_config={"user_id": "0000"},
+    llm="gemini-2.0", # Updating model (The valid llm_config for the new model will be inherited.)
+    use_developer_prompt=False,
+    dummy="I am dummy" # <- Invalid field will be automatically ignored.
 )
 ```
 

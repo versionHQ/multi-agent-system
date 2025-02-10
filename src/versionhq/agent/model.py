@@ -76,10 +76,9 @@ class TokenProcess:
 # @track_agent()
 class Agent(BaseModel):
     """
-    Agent class that run on LLM.
-    Agents execute tasks alone or in the team, using RAG tools and knowledge base if any.
-    Agents will prioritize team tasks when they belong to the team.
-    * (Temp) Comment out all the optional fields except for Team and LLM settings for convenience.
+    A class to store agent information.
+    Agents must have `role`, `goal`, and `llm` = DEFAULT_MODEL_NAME as default.
+    Then run validation on `backstory`, `llm`, `tools`, `rpm` (request per min), `knowledge`, and `memory`.
     """
 
     __hash__ = object.__hash__
@@ -159,7 +158,7 @@ class Agent(BaseModel):
     @model_validator(mode="after")
     def set_up_llm(self) -> Self:
         """
-        Set up `llm` and `function_calling_llm` as valid LLM objects using the given values.
+        Set up `llm` and `function_calling_llm` as valid LLM objects using the given kwargs.
         """
         self.llm = self._convert_to_llm_object(llm=self.llm)
 
@@ -380,16 +379,16 @@ class Agent(BaseModel):
         Set up memories: stm, ltm, and um
         """
 
-        if self.use_memory == True:
-            self.long_term_memory = self.long_term_memory if self.long_term_memory else LongTermMemory()
-            self.short_term_memory = self.short_term_memory if self.short_term_memory else ShortTermMemory(agent=self, embedder_config=self.embedder_config)
+        # if self.use_memory == True:
+        self.long_term_memory = self.long_term_memory if self.long_term_memory else LongTermMemory()
+        self.short_term_memory = self.short_term_memory if self.short_term_memory else ShortTermMemory(agent=self, embedder_config=self.embedder_config)
 
-            if hasattr(self, "memory_config") and self.memory_config is not None:
-                user_id = self.memory_config.get("user_id", None)
-                if user_id:
-                    self.user_memory = self.user_memory if self.user_memory else UserMemory(agent=self, user_id=user_id)
-            else:
-                self.user_memory = None
+        if hasattr(self, "memory_config") and self.memory_config is not None:
+            user_id = self.memory_config.get("user_id", None)
+            if user_id:
+                self.user_memory = self.user_memory if self.user_memory else UserMemory(agent=self, user_id=user_id)
+        else:
+            self.user_memory = None
 
         return self
 
@@ -419,6 +418,63 @@ class Agent(BaseModel):
                 self.llm_config = llm_config
 
         return self.set_up_llm()
+
+
+    def update(self, **kwargs) -> Self:
+        """
+        Update the existing agent. Address variables that require runnning set_up_x methods first, then update remaining variables.
+        """
+
+        if not kwargs:
+            self._logger.log(level="error", message="Missing values to update", color="red")
+            return self
+
+        for k, v in kwargs.items():
+            print(k)
+            print(v)
+            match k:
+                case "tools":
+                    self.tools = kwargs.get(k, self.tools)
+                    self.set_up_tools()
+
+                case "role" | "goal":
+                    self.role = kwargs.get("role", self.role)
+                    self.goal = kwargs.get("goal", self.goal)
+                    if not self.backstory:
+                        self.set_up_backstory()
+
+                    if self.backstory:
+                        self.backstory += f"new role: {self.role}, new goal: {self.goal}"
+
+                case "max_rpm":
+                    self.max_rpm = kwargs.get(k, self.max_rpm)
+                    self.set_up_rpm()
+
+                case "knowledge_sources":
+                    self.knowledge_sources = kwargs.get("knowledge_sources", self.knowledge_sources)
+                    self.set_up_knowledge()
+
+                case "use_memory" | "memory_config":
+                    self.use_memory = kwargs.get("use_memory", self.use_memory)
+                    self.memory_config = kwargs.get("memory_config", self.memory_config)
+                    self.set_up_memory()
+
+                case "llm" | "llm_config":
+                    self.llm = kwargs.get("llm", self.llm)
+                    self.llm_config = kwargs.get("llm_config", self.llm_config)
+                    self.update_llm(llm=self.llm, llm_config=self.llm_config)
+
+                case _:
+                    try:
+                        print("sexond trt")
+                        print(k, v)
+                        setattr(self, k, v)
+                    except Exception as e:
+                        self._logger.log(level="error", message=f"Failed to update the key: {k} We'll skip. Error: {str(e)}", color="red")
+                        pass
+
+        return self
+
 
 
     def invoke(
