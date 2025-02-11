@@ -72,7 +72,7 @@ class EvaluationItem(BaseModel):
 
 class Evaluation(BaseModel):
     items: List[EvaluationItem] = []
-    latency: int = Field(default=None, description="job execution latency in seconds")
+    latency: float = Field(default=None, description="job execution latency in seconds")
     tokens: int = Field(default=None, description="tokens consumed")
     eval_by: Any = Field(default=None, description="stores agent object that evaluates the outcome")
 

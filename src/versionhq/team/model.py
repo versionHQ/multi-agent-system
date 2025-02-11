@@ -10,7 +10,7 @@ from pydantic._internal._generate_schema import GenerateSchema
 from pydantic_core import PydanticCustomError, core_schema
 
 from versionhq.agent.model import Agent
-from versionhq.task.model import Task, TaskOutput, ConditionalTask
+from versionhq.task.model import Task, TaskOutput, TaskExecutionType
 from versionhq.task.formatter import create_raw_outputs
 from versionhq.team.team_planner import TeamPlanner
 from versionhq._utils.logger import Logger
@@ -215,7 +215,7 @@ class Team(BaseModel):
         for task in reversed(self.tasks):
             if not task:
                 break
-            elif task.async_execution:
+            elif task.execution_type == TaskExecutionType.ASYNC:
                 async_task_count += 1
             else:
                 break
@@ -341,7 +341,7 @@ class Team(BaseModel):
         for task_index, task in enumerate(tasks):
             if start_index is not None and task_index < start_index:
                 if task.output:
-                    if task.async_execution:
+                    if task.execution_type == TaskExecutionType.ASYNC:
                         task_outputs.append(task.output)
                     else:
                         task_outputs = [task.output]
@@ -352,20 +352,21 @@ class Team(BaseModel):
             if responsible_agent is None:
                 self._assign_tasks()
 
-            if isinstance(task, ConditionalTask):
-                skipped_task_output = task._handle_conditional_task(task_outputs, futures, task_index, was_replayed)
-                if skipped_task_output:
-                    continue
+            ## commented out - this will be handled by node objects
+            # if isinstance(task, ConditionalTask):
+            #     skipped_task_output = task._handle_conditional_task(task_outputs, futures, task_index, was_replayed)
+            #     if skipped_task_output:
+            #         continue
 
             # self._log_task_start(task, responsible_agent)
 
-            if task.async_execution:
+            if task.execution_type == TaskExecutionType.ASYNC:
                 context = create_raw_outputs(tasks=[task, ], task_outputs=([last_sync_output,] if last_sync_output else []))
-                future = task.execute_async(agent=responsible_agent, context=context)
+                future = task._execute_async(agent=responsible_agent, context=context)
                 futures.append((task, future, task_index))
             else:
                 context = create_raw_outputs(tasks=[task,], task_outputs=([last_sync_output,] if last_sync_output else [] ))
-                task_output = task.execute_sync(agent=responsible_agent, context=context)
+                task_output = task.execute(agent=responsible_agent, context=context)
                 if self.managers and responsible_agent in [manager.agent for manager in self.managers]:
                     lead_task_output = task_output
 

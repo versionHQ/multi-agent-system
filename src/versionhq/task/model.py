@@ -3,6 +3,7 @@ import threading
 import datetime
 import uuid
 import inspect
+import enum
 from concurrent.futures import Future
 from hashlib import md5
 from typing import Any, Dict, List, Set, Optional, Callable, Type
@@ -11,18 +12,25 @@ from typing_extensions import Annotated, Self
 from pydantic import UUID4, BaseModel, Field, PrivateAttr, field_validator, model_validator, InstanceOf, field_validator
 from pydantic_core import PydanticCustomError
 
-
+import versionhq as vhq
 from versionhq.task.log_handler import TaskOutputStorageHandler
 from versionhq.task.evaluate import Evaluation, EvaluationItem
 from versionhq.tool.model import Tool, ToolSet
 from versionhq._utils import process_config, Logger
 
 
+class TaskExecutionType(enum.Enum):
+    """
+    Enumeration to store task execution types of independent tasks without dependencies.
+    """
+    SYNC = 1
+    ASYNC = 2
+
+
 class ResponseField(BaseModel):
     """
-    A class to store the response format and schema that will cascade to the LLM.
-    The `config` field can store additional params:
-    https://community.openai.com/t/official-documentation-for-supported-schemas-for-response-format-parameter-in-calls-to-client-beta-chats-completions-parse/932422/3
+    A class to store a response format that will generate a JSON schema.
+    One layer of nested child is acceptable.
     """
 
     title: str = Field(default=None, description="title of the field")
@@ -31,7 +39,7 @@ class ResponseField(BaseModel):
     properties: Optional[List[BaseModel]] = Field(default=None, description="store dict items in ResponseField format")
     required: bool = Field(default=True)
     nullable: bool = Field(default=False)
-    config: Optional[Dict[str, Any]] = Field(default=None, description="additional rules")
+    config: Optional[Dict[str, Any]] = Field(default_factory=dict, description="additional rules")
 
 
     @model_validator(mode="after")
@@ -57,36 +65,44 @@ class ResponseField(BaseModel):
 
     def _format_props(self) -> Dict[str, Any]:
         """
-        Structure valid properties. We accept 2 nested objects.
+        Structure valid properties from the ResponseField object. 1 layer of nested child is accepted.
         """
         from versionhq.llm.llm_vars import SchemaType
 
         schema_type = SchemaType(type=self.data_type).convert()
         props: Dict[str, Any] = {}
 
-        if self.data_type is list and self.items is not dict:
-            props = {
-                "type": schema_type,
-                "items": { "type": SchemaType(type=self.items).convert() },
-            }
+        if self.data_type is list:
+            if self.items is dict:
+                nested_p, nested_r = dict(), list()
 
-        elif self.data_type is list and self.items is dict:
-            nested_p, nested_r = dict(), list()
+                if self.properties:
+                    for item in self.properties:
+                        nested_p.update(**item._format_props())
+                        nested_r.append(item.title)
 
-            if self.properties:
-                for item in self.properties:
-                    nested_p.update(**item._format_props())
-                    nested_r.append(item.title)
-
-            props = {
-                "type": schema_type,
-                "items": {
-                    "type": SchemaType(type=self.items).convert(),
-                    "properties": nested_p,
-                    "required": nested_r,
-                    "additionalProperties": False
+                props = {
+                    "type": schema_type,
+                    "items": {
+                        "type": SchemaType(type=self.items).convert(),
+                        "properties": nested_p,
+                        "required": nested_r,
+                        "additionalProperties": False
+                    }
                 }
-            }
+
+            elif self.items is list:
+                props = {
+                    "type": schema_type,
+                    "items": { "type": SchemaType(type=self.items).convert(), "items": { "type": SchemaType(type=str).convert() }},
+                }
+
+            else:
+                props = {
+                    "type": schema_type,
+                    "items": { "type": SchemaType(type=self.items).convert() },
+                }
+
 
         elif self.data_type is dict:
             p, r = dict(), list()
@@ -184,17 +200,16 @@ class TaskOutput(BaseModel):
         return json.dumps(self.json_dict) if self.json_dict else self.raw[0: 127]
 
 
-    def evaluate(self, task, latency: int | float = None, tokens: int = None) -> Evaluation:
+    def evaluate(self, task) -> Evaluation:
         """
         Evaluate the output based on the criteria, score each from 0 to 1 scale, and raise suggestions for future improvement.
         """
         from versionhq.task.TEMPLATES.Description import EVALUATE
 
-        if not self.evaluation:
-            self.evaluation = Evaluation()
+        self.evaluation = Evaluation() if not self.evaluation else self.evaluation
 
-        self.evaluation.latency = latency if latency is not None else task.latency
-        self.evaluation.tokens = tokens if tokens is not None else task.tokens
+        # self.evaluation.latency = latency if latency is not None else task.latency
+        # self.evaluation.tokens = tokens if tokens is not None else task.tokens
 
         eval_criteria = task.eval_criteria if task.eval_criteria else  ["Overall competitiveness", ]
 
@@ -203,7 +218,7 @@ class TaskOutput(BaseModel):
                 description=EVALUATE.format(task_description=task.description, task_output=self.raw, eval_criteria=str(item)),
                 pydantic_output=EvaluationItem
             )
-            res = task_eval.execute_sync(agent=self.evaluation.eval_by)
+            res = task_eval.execute(agent=self.evaluation.eval_by)
 
             if res.pydantic:
                 item = EvaluationItem(score=res.pydantic.score, suggestion=res.pydantic.suggestion, criteria=res.pydantic.criteria)
@@ -241,7 +256,7 @@ class TaskOutput(BaseModel):
 
 class Task(BaseModel):
     """
-    A class that stores independent task information.
+    A class that stores independent task information and handles task executions.
     """
 
     __hash__ = object.__hash__
@@ -255,8 +270,8 @@ class Task(BaseModel):
     description: str = Field(description="Description of the actual task")
 
     # output
-    pydantic_output: Optional[Any] = Field(default=None, description="store a custom Pydantic class as response format")
-    response_fields: List[ResponseField] = Field(default_factory=list, description="store the list of ResponseFields to create the response format")
+    pydantic_output: Optional[Type[BaseModel]] = Field(default=None, description="store Pydantic class as structured response format")
+    response_fields: Optional[List[ResponseField]] = Field(default_factory=list, description="store list of ResponseField as structured response format")
     output: Optional[TaskOutput] = Field(default=None, description="store the final task output in TaskOutput class")
 
     # task setup
@@ -269,8 +284,8 @@ class Task(BaseModel):
     tool_res_as_final: bool = Field(default=False, description="when set True, tools res will be stored in the `TaskOutput`")
 
     # execution rules
+    execution_type: TaskExecutionType = Field(default=TaskExecutionType.SYNC)
     allow_delegation: bool = Field(default=False, description="ask other agents for help and run the task instead")
-    async_execution: bool = Field(default=False,description="whether the task should be executed asynchronously or not")
     callback: Optional[Callable] = Field(default=None, description="callback to be executed after the task is completed.")
     callback_kwargs: Optional[Dict[str, Any]] = Field(default_factory=dict, description="kwargs for the callback when the callback is callable")
 
@@ -408,11 +423,7 @@ Ref. Output image: {output_formats_to_follow}
                 properties, required_fields = {}, []
                 for i, item in enumerate(self.response_fields):
                     if item:
-                        if item.data_type is dict:
-                            properties.update(item._format_props())
-                        else:
-                            properties.update(item._format_props())
-
+                        properties.update(item._format_props())
                         required_fields.append(item.title)
 
                 response_schema = {
@@ -421,7 +432,6 @@ Ref. Output image: {output_formats_to_follow}
                     "required": required_fields,
                     "additionalProperties": False,
                 }
-
                 response_format = {
                     "type": "json_schema",
                     "json_schema": { "name": "outcome", "schema": response_schema }
@@ -429,7 +439,7 @@ Ref. Output image: {output_formats_to_follow}
 
 
             elif self.pydantic_output:
-                response_format = StructuredOutput(response_format=self.pydantic_output)._format()
+                response_format = StructuredOutput(response_format=self.pydantic_output, provider=model_provider)._format()
 
             return response_format
 
@@ -481,7 +491,6 @@ Ref. Output image: {output_formats_to_follow}
 
             for k, v in json_dict.items():
                 setattr(output_pydantic, k, v)
-
         except:
             pass
 
@@ -536,9 +545,35 @@ Ref. Output image: {output_formats_to_follow}
             self._logger.log(level="error", message=f"Failed to add to the memory: {str(e)}", color="red")
             pass
 
+    def _build_agent_from_task(self, task_description: str = None) -> InstanceOf["vhq.Agent"]:
+        task_description = task_description if task_description else self.description
+        if not task_description:
+            self._logger.log(level="error", message="Task is missing the description.", color="red")
+            pass
+
+        agent = vhq.Agent(goal=task_description, role=task_description, maxit=1) #! REFINEME
+        return agent
+
 
     # task execution
-    def execute_sync(self, agent, context: Optional[str | List[Any]] = None) -> TaskOutput:
+    def execute(self, type: TaskExecutionType = None, agent: Optional[Any] = None, context: Optional[str] = None) -> TaskOutput | Future[TaskOutput]:
+        """
+        A main method to handle task execution. Build an agent when the agent is not given.
+        """
+        type = type if type else  self.execution_type if self.execution_type else TaskExecutionType.SYNC
+
+        if not agent:
+            agent = self._build_agent_from_task(task_description=self.description)
+
+        match type:
+            case TaskExecutionType.SYNC:
+                return self._execute_sync(agent=agent, context=context)
+
+            case TaskExecutionType.ASYNC:
+                return self._execute_async(agent=agent, context=context)
+
+
+    def _execute_sync(self, agent, context: Optional[str | List[Any]] = None) -> TaskOutput:
         """
         Execute the task synchronously.
         When the task has context, make sure we have executed all the tasks in the context first.
@@ -553,7 +588,7 @@ Ref. Output image: {output_formats_to_follow}
         return self._execute_core(agent, context)
 
 
-    def execute_async(self, agent, context: Optional[str] = None) -> Future[TaskOutput]:
+    def _execute_async(self, agent, context: Optional[str] = None) -> Future[TaskOutput]:
         """
         Execute the task asynchronously.
         """
@@ -565,7 +600,7 @@ Ref. Output image: {output_formats_to_follow}
 
     def _execute_task_async(self, agent, context: Optional[str], future: Future[TaskOutput]) -> None:
         """
-        Execute the task asynchronously with context handling.
+        Executes the task asynchronously with context handling.
         """
 
         result = self._execute_core(agent, context)
@@ -574,8 +609,8 @@ Ref. Output image: {output_formats_to_follow}
 
     def _execute_core(self, agent, context: Optional[str]) -> TaskOutput:
         """
-        Execute the given task with the given agent.
-        Handle 1. agent delegation, 2. tools, 3. context to consider, and 4. callbacks
+        A core method for task execution.
+        Handles 1. agent delegation, 2. tools, 3. context to add to the prompt, and 4. callbacks
         """
 
         from versionhq.agent.model import Agent
@@ -634,13 +669,13 @@ Ref. Output image: {output_formats_to_follow}
                 json_dict=json_dict_output
             )
 
-
         self.latency = (ended_at - started_at).total_seconds()
+        task_output.evaluation = Evaluation(latency=self.latency, tokens=self.tokens)
         self.output = task_output
         self.processed_agents.add(agent.role)
 
         if self.should_evaluate:
-            task_output.evaluate(task=self, latency=self.latency, tokens=self.tokens)
+            task_output.evaluate(task=self)
 
         self._create_short_and_long_term_memories(agent=agent, task_output=task_output)
 
@@ -648,7 +683,7 @@ Ref. Output image: {output_formats_to_follow}
             kwargs = { **self.callback_kwargs, **task_output.json_dict }
             sig = inspect.signature(self.callback)
             valid_keys = [param.name for param in sig.parameters.values() if param.kind == param.POSITIONAL_OR_KEYWORD]
-            valid_kwargs = { k: kwargs[k] for k in valid_keys }
+            valid_kwargs = { k: kwargs[k] if  k in kwargs else None for k in valid_keys }
             callback_res = self.callback(**valid_kwargs)
             task_output.callback_output = callback_res
 
@@ -687,50 +722,49 @@ Task ID: {str(self.id)}
 
 
 
-class ConditionalTask(Task):
-    """
-    A task that can be conditionally executed based on the output of another task.
-    When the `condition` return True, execute the task, else skipped with `skipped task output`.
-    """
+# class ConditionalTask(Task):
+#     """
+#     A task that can be conditionally executed based on the output of another task.
+#     When the `condition` return True, execute the task, else skipped with `skipped task output`.
+#     """
 
-    condition: Callable[[TaskOutput], bool] = Field(
-        default=None,
-        description="max. number of retries for an agent to execute a task when an error occurs",
-    )
-
-
-    def __init__(self, condition: Callable[[Any], bool], **kwargs):
-        super().__init__(**kwargs)
-        self.condition = condition
-        self._logger = Logger(verbose=True)
+#     condition: Callable[[TaskOutput], bool] = Field(
+#         default=None,
+#         description="max. number of retries for an agent to execute a task when an error occurs",
+#     )
 
 
-    def should_execute(self, context: TaskOutput) -> bool:
-        """
-        Decide whether the conditional task should be executed based on the provided context.
-        Return `True` if it should be executed.
-        """
-        return self.condition(context)
+#     def __init__(self, condition: Callable[[Any], bool], **kwargs):
+#         super().__init__(**kwargs)
+#         self.condition = condition
 
 
-    def get_skipped_task_output(self):
-        return TaskOutput(task_id=self.id, raw="", pydantic=None, json_dict={})
+#     def should_execute(self, context: TaskOutput) -> bool:
+#         """
+#         Decide whether the conditional task should be executed based on the provided context.
+#         Return `True` if it should be executed.
+#         """
+#         return self.condition(context)
 
 
-    def _handle_conditional_task(self, task_outputs: List[TaskOutput], task_index: int, was_replayed: bool) -> Optional[TaskOutput]:
-        """
-        When the conditional task should be skipped, return `skipped_task_output` as task_output else return None
-        """
+#     def get_skipped_task_output(self):
+#         return TaskOutput(task_id=self.id, raw="", pydantic=None, json_dict={})
 
-        previous_output = task_outputs[task_index - 1] if task_outputs and len(task_outputs) > 1  else None
 
-        if previous_output and not self.should_execute(previous_output):
-            self._logger.log(level="warning", message=f"Skipping conditional task: {self.description}", color="yellow")
-            skipped_task_output = self.get_skipped_task_output()
-            self.output = skipped_task_output
+#     def _handle_conditional_task(self, task_outputs: List[TaskOutput], task_index: int, was_replayed: bool) -> Optional[TaskOutput]:
+#         """
+#         When the conditional task should be skipped, return `skipped_task_output` as task_output else return None
+#         """
 
-            if not was_replayed:
-                self._store_execution_log(self, task_index=task_index, was_replayed=was_replayed, inputs={})
-            return skipped_task_output
+#         previous_output = task_outputs[task_index - 1] if task_outputs and len(task_outputs) > 1  else None
 
-        return None
+#         if previous_output and not self.should_execute(previous_output):
+#             self._logger.log(level="warning", message=f"Skipping conditional task: {self.description}", color="yellow")
+#             skipped_task_output = self.get_skipped_task_output()
+#             self.output = skipped_task_output
+
+#             if not was_replayed:
+#                 self._store_execution_log(self, task_index=task_index, was_replayed=was_replayed, inputs={})
+#             return skipped_task_output
+
+#         return None

@@ -1,10 +1,10 @@
 from typing import Any, Callable
 
-from versionhq.agent.model import Agent, LLM
-from versionhq.task.model import Task
-from versionhq.tool.model import Tool
+from pydantic import BaseModel
 
-from tests.task import DemoOutcomeNoNest, demo_response_fields
+from versionhq.agent.model import Agent, LLM
+from versionhq.task.model import Task, ResponseField
+from versionhq.tool.model import Tool
 
 """
 Test a connection to the llm platform (litellm or custom provider's interface).
@@ -20,6 +20,43 @@ llms_to_test = [
     "openrouter/google/gemini-2.0-flash-001",
 ]
 
+
+class Demo(BaseModel):
+    """
+    A demo pydantic class to validate the outcome with various nested data types.
+    """
+    demo_1: int
+    demo_2: float
+    demo_3: str
+    demo_4: bool
+    demo_5: list[str]
+    demo_6: dict[str, Any]
+    demo_nest_1: list[dict[str, Any]]
+    demo_nest_2: list[list[str]]
+    demo_nest_3: dict[str, list[str]]
+    demo_nest_4: dict[str, dict[str, Any]]
+
+
+demo_response_fields = [
+    ResponseField(title="demo_1", data_type=int),
+    ResponseField(title="demo_2", data_type=float),
+    ResponseField(title="demo_3", data_type=str),
+    ResponseField(title="demo_4", data_type=bool),
+    ResponseField(title="demo_5", data_type=list, items=str),
+    ResponseField(title="demo_6", data_type=dict, properties=[ResponseField(title="demo-item", data_type=str)]),
+    ResponseField(title="demo_nest_1", data_type=list, items=str, properties=([
+        ResponseField(title="nest1", data_type=dict, properties=[ResponseField(title="nest11", data_type=str)])
+    ])), # you can specify field title of nested items
+    ResponseField(title="demo_nest_2", data_type=list, items=list),
+    ResponseField(title="demo_nest_3", data_type=dict, properties=[
+        ResponseField(title="nest1", data_type=list, items=str)
+    ]),
+    ResponseField(title="demo_nest_4", data_type=dict, properties=[
+        ResponseField(title="nest1", data_type=dict, properties=[ResponseField(title="nest12", data_type=str)])
+    ])
+]
+
+
 def set_agent(llm: str) -> Agent:
     agent = Agent(role="demo", goal="demo", llm=llm, maxit=1, max_retry_limit=1, max_tokens=3000)
     assert isinstance(agent.llm, LLM)
@@ -29,21 +66,21 @@ def set_agent(llm: str) -> Agent:
 
 def simple_task(agent: Agent):
     task = Task(description="write a random poem.")
-    res = task.execute_sync(agent=agent, context="We are running a test.")
+    res = task.execute(agent=agent, context="We are running a test.")
 
     assert res.raw and res.tool_output is None and res.callback_output is None
 
 
 def schema_task(agent: Agent):
-    task = Task(description="return random values strictly following the given response format.", pydantic_output=DemoOutcomeNoNest)
-    res = task.execute_sync(agent=agent, context="We are running a test.")
+    task = Task(description="return random values strictly following the given response format.", pydantic_output=Demo)
+    res = task.execute(agent=agent, context="We are running a test.")
     assert [
-        getattr(res.pydantic, k) and type(getattr(res.pydantic, k)) == v for k, v in DemoOutcomeNoNest.__annotations__.items()
+        getattr(res.pydantic, k) and type(getattr(res.pydantic, k)) == v for k, v in Demo.__annotations__.items()
     ]
 
 def res_field_task(agent: Agent):
     task = Task(description="return random values strictly following the given response format.", response_fields=demo_response_fields)
-    res = task.execute_sync(agent=agent, context="We are running a test.")
+    res = task.execute(agent=agent, context="We are running a test.")
     assert [k in item.title for item in demo_response_fields for k, v in res.json_dict.items()]
 
 
@@ -56,7 +93,7 @@ def tool_task(agent: Agent):
         tools=[DemoTool,],
         tool_res_as_final=True
     )
-    res = task.execute_sync(agent=agent, context="We are running a test.")
+    res = task.execute(agent=agent, context="We are running a test.")
     assert res.tool_output and res.raw
 
 

@@ -3,11 +3,11 @@ from typing import Dict, Type, List, Any
 from pydantic import BaseModel, Field, InstanceOf
 
 from versionhq.llm.llm_vars import SchemaType
-from versionhq.llm.model import LLM
+from versionhq.llm.model import LLM, DEFAULT_MODEL_PROVIDER_NAME
 
 
 """
-Structure a response schema (json schema) from the given Pydantic model.
+Generate a JSON schema from the given Pydantic model.
 """
 
 
@@ -15,7 +15,7 @@ class StructuredObject:
     """
     A class to store the structured dictionary.
     """
-    provider: str = "openai"
+    provider: str = None
     field: Type[Field]
 
     title: str
@@ -24,20 +24,21 @@ class StructuredObject:
     required: List[str] = list()
     additionalProperties: bool = False
 
-    def __init__(self, name, field: Type[Field], provider: str | InstanceOf[LLM] = "openai"):
+    def __init__(self, name, field: Type[Field], provider: str | InstanceOf[LLM] = None):
         self.title = name
         self.field = field
         self.dtype = "object"
         self.additionalProperties = False
-        self.provider = provider if isinstance(provider, str) else provider.provider
+        self.provider = provider if isinstance(provider, str) else provider.provider if isinstance(provider, LLM) else DEFAULT_MODEL_PROVIDER_NAME
 
     def _format(self):
         if not self.field:
             pass
         else:
             description = self.field.description if hasattr(self.field, "description") and self.field.description is not None else ""
-            self.properties.update({"item": { "type": SchemaType(self.field.annotation.__args__).convert() }})
-            self.required.append("item")
+            field_name = self.field.__name__ if hasattr(self.field, "__name__") and self.field.__name__ else self.title
+            self.properties.update({ field_name : { "type": SchemaType(self.field.annotation.__args__).convert() }})
+            self.required.append(field_name)
 
             return {
                 self.title: {
@@ -55,13 +56,13 @@ class StructuredList:
     """
     A class to store a structured list with 1 nested object.
     """
-    provider: str = "openai"
+    provider: str = DEFAULT_MODEL_PROVIDER_NAME
     field: Type[Field]
     title: str = ""
     dtype: str = "array"
     items: Dict[str, Dict[str, str]] = dict()
 
-    def __init__(self, name, field: Type[Field], provider: str | LLM = "openai"):
+    def __init__(self, name, field: Type[Field], provider: str | LLM = DEFAULT_MODEL_PROVIDER_NAME):
         self.provider = provider if isinstance(provider, str) else provider.provider
         self.field = field
         self.title = name
@@ -77,15 +78,15 @@ class StructuredList:
             description = "" if field.description is None else field.description
             props = {}
 
-            for item in field.annotation.__args__:
+            for i, item in enumerate(field.annotation.__args__):
                 nested_object_type = item.__origin__ if hasattr(item, "__origin__") else item
 
                 if nested_object_type == dict:
                     props.update({
                         # "nest":  {
                             "type": "object",
-                            "properties": { "item": { "type": "string"} }, #! REFINEME - field title <>`item`
-                            "required": ["item",],
+                            "properties": { f"{str(i)}": { "type": "string"} },
+                            "required": [f"{str(i)}",],
                             "additionalProperties": False
                         # }
                         })
@@ -94,13 +95,14 @@ class StructuredList:
                     props.update({
                         # "nest":  {
                             "type": "array",
-                            "items": { "type": "string" } , #! REFINEME - field title <>`item`
+                            "items": { "type": "string" },
                         # }
                         })
                 else:
                     props.update({ "type": SchemaType(nested_object_type).convert() })
 
             self.items = { **props }
+
             return {
                  self.title: {
                     "type": self.dtype,
@@ -112,7 +114,7 @@ class StructuredList:
 
 class StructuredOutput(BaseModel):
     response_format: Any = None # pydantic base model
-    provider: str = "openai"
+    provider: str = None
     applicable_models: List[InstanceOf[LLM] | str] = list()
     name: str = ""
     schema: Dict[str, Any] = dict(type="object", additionalProperties=False, properties=dict(), required=list())

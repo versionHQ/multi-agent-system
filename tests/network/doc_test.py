@@ -25,7 +25,5 @@ def test_create_network():
     assert [type(k) == uuid.uuid4 and isinstance(v, vhq.Edge) for k, v in task_graph.edges.items()]
     assert critical_path is not None and duration is not None and paths is not None
 
-    task_graph.visualize()
-
-
-test_create_network()
+    ## comment out for the test
+    # task_graph.visualize()

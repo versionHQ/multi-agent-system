@@ -64,7 +64,7 @@ Agents can execute tasks using `Task` model and return JSON format by default wi
       callback_kwargs=dict(message="Hi! Here is the result: ")
    )
 
-   res = task.execute_sync(agent=agent, context="amazing context to consider.")
+   res = task.execute(agent=agent, context="amazing context to consider.")
    print(res)
    ```
 

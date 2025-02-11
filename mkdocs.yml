@@ -110,14 +110,12 @@ nav:
   - Quick Start: 'quickstart.md'
   - Core Components:
     - Agent: 'core/agent.md'
+    - Task:
+      - Overview: 'core/task.md'
+      - ResponseField: 'core/task/response-field.md'
+      - TaskOutput: 'core/task/task-output.md'
     - Tool: 'core/tool.md'
-  #   - Task: 'core/task.md'
   #   - Compoio Tools: 'core/composio-tool.md'
-  # - How to Guides:
-  #   - Form agent networks: 'guides/form-agent-network.md'
-  #   - Create custom tools: 'guides/create-custom-tool.md'
-  #   - Customize Agent: 'guides/customize-agent.md'
-  #   - Connect to any LLM: 'guides/connect-to-any-llm.md'
   - Examples:
     - Playground: https://versi0n.io
     - Experiment - Agent Performance: https://github.com/versionHQ/exp-agent-performance

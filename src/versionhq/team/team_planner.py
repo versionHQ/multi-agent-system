@@ -3,8 +3,6 @@ from typing import Any, List, Optional, Dict
 from pydantic import BaseModel, Field
 
 
-
-
 class TeamPlanner:
     """
     A class to handle agent formations based on the given task description.
@@ -50,7 +48,7 @@ class TeamPlanner:
                     ResponseField(title="role", data_type=str, required=True),
                 ],
             )
-            res = task.execute_sync(agent=agent_creator)
+            res = task.execute(agent=agent_creator)
             agent = Agent(
                 role=res.json_dict["role"] if "role" in res.json_dict else res.raw,
                 goal=res.json_dict["goal"] if "goal" in res.json_dict else task.description
@@ -90,5 +88,5 @@ class TeamPlanner:
             """,
             pydantic_output=TeamPlanIdea
         )
-        output = task.execute_sync(agent=team_planner, context=context, tools=tools)
+        output = task.execute(agent=team_planner, context=context, tools=tools)
         return output

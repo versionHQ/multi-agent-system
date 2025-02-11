@@ -258,7 +258,7 @@ def test_agent_with_knowledge_sources():
         isinstance(mock_knowledge_instance.sources[0], StringKnowledgeSource)
         mock_knowledge_instance.query.return_value = [{ "content": content }]
 
-        res = task.execute_sync(agent=agent)
+        res = task.execute(agent=agent)
         assert "gold" in res.raw.lower()
 
 
@@ -274,7 +274,7 @@ def test_using_contextual_memory():
     assert agent.long_term_memory.storage and isinstance(agent.long_term_memory.storage, LTMSQLiteStorage)
 
     task = Task(description="Research a topic to teach a kid aged 6 about math.", should_evaluate=True)
-    res = task.execute_sync(agent=agent)
+    res = task.execute(agent=agent)
     assert isinstance(res.evaluation, Evaluation) and res.evaluation.suggestion_summary and res.evaluation.aggregate_score is not None
 
 
@@ -291,7 +291,7 @@ def test_disabled_memory():
     task = Task(description="Research a topic to teach a kid aged 6 about math.")
 
     with patch.object(ContextualMemory, "build_context_for_task") as contextual_mem:
-        task.execute_sync(agent=agent)
+        task.execute(agent=agent)
         contextual_mem.assert_not_called()
 
 

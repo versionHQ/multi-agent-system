@@ -584,4 +584,4 @@ class Agent(BaseModel):
 
 
     def __repr__(self):
-        return f"Agent(role={self.role}, goal={self.goal}, backstory={self.backstory})"
+        return f"Agent(role={self.role}, goal={self.goal}"

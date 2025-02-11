@@ -253,7 +253,7 @@ task = Task(
 	tool_res_as_final=True
 )
 
-res = task.execute_sync(agent=agent)
+res = task.execute(agent=agent)
 print(res)
 # demo func
 ```
@@ -279,7 +279,7 @@ task = Task(
 	tool_res_as_final=True
 )
 
-res = task.execute_sync(agent=agent)
+res = task.execute(agent=agent)
 print(res.tool_output)
 # demo func
 ```
@@ -301,7 +301,7 @@ task = Task(
 	tool_res_as_final=True
 )
 
-res = task.execute_sync(agent=agent)
+res = task.execute(agent=agent)
 print(res.tool_output)
 # "demo func"
 
@@ -356,7 +356,7 @@ task = Task(
 	tool_res_as_final=True
 )
 
-res = task.execute_sync(agent=agent)
+res = task.execute(agent=agent)
 print(res)
 # empty func_demo
 ```

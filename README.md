@@ -3,7 +3,7 @@
 [![DL](https://img.shields.io/badge/Download-15K+-red)](https://clickpy.clickhouse.com/dashboard/versionhq)
 ![MIT license](https://img.shields.io/badge/License-MIT-green)
 [![Publisher](https://github.com/versionHQ/multi-agent-system/actions/workflows/publish.yml/badge.svg)](https://github.com/versionHQ/multi-agent-system/actions/workflows/publish.yml)
-![PyPI](https://img.shields.io/badge/PyPI-v1.1.12+-blue)
+![PyPI](https://img.shields.io/badge/PyPI-v1.2.0+-blue)
 ![python ver](https://img.shields.io/badge/Python-3.11+-purple)
 ![pyenv ver](https://img.shields.io/badge/pyenv-2.5.0-orange)
 
@@ -185,7 +185,6 @@ By default, agents prioritize JSON over plane text outputs.
 
 
    agent = vhq.Agent(role="demo", goal="amazing project goal")
-
    task = vhq.Task(
       description="Amazing task",
       pydantic_output=CustomOutput,
@@ -193,7 +192,7 @@ By default, agents prioritize JSON over plane text outputs.
       callback_kwargs=dict(message="Hi! Here is the result: ")
    )
 
-   res = task.execute_sync(agent=agent, context="amazing context to consider.")
+   res = task.execute(agent=agent, context="amazing context to consider.")
    print(res)
    ```
 
@@ -294,6 +293,7 @@ Tasks can be delegated to a team manager, peers in the team, or completely new a
 └── workflows/                # Github actions
 │
 docs/                         # Documentation built by MkDocs
+mkdocs.yml                    # MkDocs config
 │
 src/
 └── versionhq/                # Orchestration framework package
@@ -309,6 +309,8 @@ src/
 │     └── ...
 │
 └── uploads/  [.gitignore]    # Local directory to store uploaded files such as graphviz diagrams generatd by `Network` class
+|
+pyproject.toml                # Project config
 
 ```
 

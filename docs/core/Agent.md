@@ -367,7 +367,7 @@ task = Task(
 	description="Answer the following question: What is Kuriko's favorite color?"
 )
 
-res = task.execute_sync(agent=agent)
+res = task.execute(agent=agent)
 assert "gold" in res.raw  == True
 ```
 

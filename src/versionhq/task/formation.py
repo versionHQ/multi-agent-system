@@ -79,7 +79,7 @@ def form_agent_network(
         if agents:
             vhq_task.description += "Consider adding following agents in the formation: " + ", ".join([agent.role for agent in agents if isinstance(agent, Agent)])
 
-        res = vhq_task.execute_sync(agent=vhq_formation_planner, context=context)
+        res = vhq_task.execute(agent=vhq_formation_planner, context=context)
         _formation = Formation.SUPERVISING
 
         if res.pydantic:

@@ -1,6 +1,6 @@
 """Test use cases in docs/core/agent.md"""
 
-def test_doc_core_agent_a():
+def test_docs_core_agent_a():
     from versionhq import Agent
     agent = Agent(
         role="Marketing Analyst",
@@ -10,7 +10,7 @@ def test_doc_core_agent_a():
     assert agent.id and agent.role == "Marketing Analyst" and agent.goal == "Coping with price competition in saturated markets" and agent.backstory is not None
 
 
-def test_doc_core_agent_b1():
+def test_docs_core_agent_b1():
     from versionhq import Agent
     agent = Agent(
         role="Marketing Analyst",
@@ -22,7 +22,7 @@ def test_doc_core_agent_b1():
     assert "gemini-2.0" in agent.llm.model and isinstance(agent.llm, LLM)
 
 
-def test_doc_core_agent_b2():
+def test_docs_core_agent_b2():
     import versionhq as vhq
 
     agent = vhq.Agent(
@@ -36,7 +36,7 @@ def test_doc_core_agent_b2():
     assert agent.llm.max_tokens == 3000
 
 
-def test_doc_core_agent_b3():
+def test_docs_core_agent_b3():
     import versionhq as vhq
 
     agent = vhq.Agent(
@@ -67,7 +67,7 @@ def test_doc_core_agent_b3():
 
 
 
-def test_doc_core_agent_c1():
+def test_docs_core_agent_c1():
     from versionhq import Agent
     agent = Agent(
         role="Marketing Analyst",
@@ -77,7 +77,7 @@ def test_doc_core_agent_c1():
     assert agent.backstory == "You are an expert marketing analyst with relevant skillsets and abilities to query relevant information from the given knowledge sources. Leveraging these, you will identify competitive solutions to achieve the following goal: coping with price competition in saturated markets."
 
 
-def test_doc_core_agent_c2():
+def test_docs_core_agent_c2():
     from versionhq import Agent
 
     agent = Agent(
@@ -88,7 +88,7 @@ def test_doc_core_agent_c2():
     assert agent.backstory == "You are a marketing analyst for a company in a saturated market. The market is becoming increasingly price-competitive, and your company's profit margins are shrinking. Your primary goal is to develop and implement strategies to help your company maintain its market share and profitability in this challenging environment."
 
 
-def test_doc_core_agent_e1():
+def test_docs_core_agent_e1():
     import json
     from typing import Dict, Any
     import versionhq as vhq
@@ -111,7 +111,7 @@ def test_doc_core_agent_e1():
     assert litellm.callbacks == agent.callbacks
 
 
-def test_doc_core_agent_e2():
+def test_docs_core_agent_e2():
     import json
     from typing import Dict, Any
     import versionhq as vhq
@@ -148,7 +148,7 @@ def test_doc_core_agent_e2():
 
 
 
-def test_doc_core_agent_f():
+def test_docs_core_agent_f():
     from versionhq import Agent
 
     llm_config = dict(
@@ -179,7 +179,7 @@ def test_doc_core_agent_f():
     assert agent.llm.stop=="test"
 
 
-def test_doc_core_agent_g():
+def test_docs_core_agent_g():
     from versionhq import Agent
     from versionhq.task.model import Task
     from versionhq.knowledge.source import StringKnowledgeSource
@@ -197,11 +197,11 @@ def test_doc_core_agent_g():
         description="Answer the following question: What is Kuriko's favorite color?"
     )
 
-    res = task.execute_sync(agent=agent)
+    res = task.execute(agent=agent)
     assert "gold" in res.raw.lower()
 
 
-def test_doc_core_agent_h():
+def test_docs_core_agent_h():
     from versionhq import Agent
 
     agent = Agent(
@@ -214,7 +214,7 @@ def test_doc_core_agent_h():
     assert isinstance(agent.short_term_memory, ShortTermMemory) and isinstance(agent.long_term_memory, LongTermMemory)
 
 
-def test_doc_core_agent_z():
+def test_docs_core_agent_z():
     from versionhq import Agent
 
     agent = Agent(
