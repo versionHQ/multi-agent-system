@@ -265,7 +265,7 @@ class PDFKnowledgeSource(BaseFileKnowledgeSource):
                 import os
                 os.system("uv add pdfplumber --optional pdfplumber")
             except:
-                raise ImportError("pdfplumber is not installed. Please install it with: uv add pdfplumber")
+                raise ImportError("pdfplumber is not installed. Please install it with: uv add pdfplumber --optional pdfplumber")
 
 
     def add(self) -> None:

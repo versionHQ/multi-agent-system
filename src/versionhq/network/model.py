@@ -1,5 +1,7 @@
 import enum
 import uuid
+import networkx as nx
+import matplotlib.pyplot as plt
 from abc import ABC
 from typing import List, Any, Optional, Callable, Dict, Type, Tuple
 
@@ -9,42 +11,6 @@ from pydantic_core import PydanticCustomError
 from versionhq.task.model import Task, TaskOutput
 from versionhq.agent.model import Agent
 from versionhq._utils.logger import Logger
-
-try:
-   import networkx as nx
-except ImportError:
-    try:
-        import os
-        os.system("uv add networkx --optional networkx")
-        import networkx as nx
-    except:
-        try:
-            import os
-            os.system("pip install network --save")
-            import networkx as nx
-        except:
-            raise ImportError("networkx is not installed. Please install it with: uv add networkx --optional networkx")
-
-try:
-    import matplotlib.pyplot as plt
-except ImportError:
-    try:
-        import os
-        os.system("uv add matplotlib --optional matplotlib")
-        import matplotlib.pyplot as plt
-    except:
-        try:
-            import os
-            os.system("pip install matplotlib --save")
-            import matplotlib.pyplot as plt
-
-        except:
-            raise ImportError("matplotlib is not installed. Please install it with: uv add matplotlib --optional matplotlib")
-
-
-import networkx as nx
-import matplotlib.pyplot as plt
-
 
 
 class TaskStatus(enum.Enum):
@@ -239,6 +205,7 @@ class Graph(ABC, BaseModel):
     An abstract class to store G using NetworkX library.
     """
 
+
     _logger: Logger = PrivateAttr(default_factory=lambda: Logger(verbose=True))
     directed: bool = Field(default=False, description="Whether the graph is directed")
     graph: Type[nx.Graph] = Field(default=None)
@@ -246,8 +213,8 @@ class Graph(ABC, BaseModel):
     edges: Dict[str, InstanceOf[Edge]] = Field(default_factory=dict)
 
     def __init__(self, directed: bool = False, **kwargs):
-      super().__init__(directed=directed, **kwargs)
-      self.graph = nx.DiGraph() if self.directed else nx.Graph()
+        super().__init__(directed=directed, **kwargs)
+        self.graph = nx.DiGraph() if self.directed else nx.Graph()
 
     def _return_node_object(self, node_identifier) -> Node | None:
         return [v for k, v in self.nodes.items() if k == node_identifier][0] if [v for k, v in self.nodes.items() if k == node_identifier] else None
@@ -459,7 +426,6 @@ class TaskGraph(Graph):
             abs_file_path = abs_file_path if abs_file_path else f"{project_root}/uploads"
 
             os.makedirs(abs_file_path, exist_ok=True)
-
             plt.savefig(f"{abs_file_path}/{str(self.id)}.png")
 
         except Exception as e:

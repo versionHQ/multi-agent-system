@@ -15,7 +15,7 @@ exclude = ["test*", "__pycache__", "*.egg-info"]
 
 [project]
 name = "versionhq"
-version = "1.2.0.3"
+version = "1.2.0.4"
 authors = [{ name = "Kuriko Iwai", email = "kuriko@versi0n.io" }]
 description = "An agentic orchestration framework for building agent networks that handle task automation."
 readme = "README.md"
@@ -44,6 +44,8 @@ dependencies = [
   "wheel>=0.45.1",
   "envoy>=0.0.3",
   "composio-core==0.7.0",
+  "networkx>=3.4.2",
+  "matplotlib>=3.10.0",
 ]
 classifiers = [
   "Programming Language :: Python",
@@ -82,12 +84,6 @@ numpy = [
 ]
 pygraphviz = [
     "pygraphviz>=1.14",
-]
-networkx = [
-    "networkx>=3.4.2",
-]
-matplotlib = [
-    "matplotlib>=3.10.0",
 ]
 
 [tool.uv]
