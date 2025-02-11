@@ -18,8 +18,12 @@ except ImportError:
         os.system("uv add networkx --optional networkx")
         import networkx as nx
     except:
-        raise ImportError("networkx is not installed. Please install it with: uv add networkx --optional networkx")
-
+        try:
+            import os
+            os.system("pip install network --save")
+            import networkx as nx
+        except:
+            raise ImportError("networkx is not installed. Please install it with: uv add networkx --optional networkx")
 
 try:
     import matplotlib.pyplot as plt
@@ -29,7 +33,14 @@ except ImportError:
         os.system("uv add matplotlib --optional matplotlib")
         import matplotlib.pyplot as plt
     except:
-        raise ImportError("matplotlib is not installed. Please install it with: uv add matplotlib --optional matplotlib")
+        try:
+            import os
+            os.system("pip install matplotlib --save")
+            import matplotlib.pyplot as plt
+
+        except:
+            raise ImportError("matplotlib is not installed. Please install it with: uv add matplotlib --optional matplotlib")
+
 
 import networkx as nx
 import matplotlib.pyplot as plt
