@@ -11,12 +11,12 @@ from versionhq.agent.model import Agent
 from versionhq._utils.logger import Logger
 
 try:
-   import networkx as ntx
+   import networkx as nx
 except ImportError:
     try:
         import os
         os.system("uv add networkx --optional networkx")
-        import networkx as ntx
+        import networkx as nx
     except:
         raise ImportError("networkx is not installed. Please install it with: uv add networkx --optional networkx")
 

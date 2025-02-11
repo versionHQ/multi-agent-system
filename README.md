@@ -4,7 +4,7 @@
 ![MIT license](https://img.shields.io/badge/License-MIT-green)
 [![Publisher](https://github.com/versionHQ/multi-agent-system/actions/workflows/publish.yml/badge.svg)](https://github.com/versionHQ/multi-agent-system/actions/workflows/publish.yml)
 ![PyPI](https://img.shields.io/badge/PyPI-v1.2.0+-blue)
-![python ver](https://img.shields.io/badge/Python-3.11+-purple)
+![python ver](https://img.shields.io/badge/Python-3.11/3.12-purple)
 ![pyenv ver](https://img.shields.io/badge/pyenv-2.5.0-orange)
 
 
@@ -183,8 +183,6 @@ By default, agents prioritize JSON over plane text outputs.
    def dummy_func(message: str, test1: str, test2: list[str]) -> str:
       return f"""{message}: {test1}, {", ".join(test2)}"""
 
-
-   agent = vhq.Agent(role="demo", goal="amazing project goal")
    task = vhq.Task(
       description="Amazing task",
       pydantic_output=CustomOutput,
@@ -192,7 +190,7 @@ By default, agents prioritize JSON over plane text outputs.
       callback_kwargs=dict(message="Hi! Here is the result: ")
    )
 
-   res = task.execute(agent=agent, context="amazing context to consider.")
+   res = task.execute(context="amazing context to consider.")
    print(res)
    ```
 
