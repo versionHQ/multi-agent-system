@@ -38,7 +38,7 @@ class Printer:
 class Logger(BaseModel):
     """
     Control CLI messages.
-    Color: red = error, yellow = warning, blue = info (from vhq), green = info (from third party)
+    Color: red = error, yellow = warning, blue = info (from vhq), green = info (from third parties)
     """
 
     verbose: bool = Field(default=True)

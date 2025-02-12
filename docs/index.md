@@ -7,13 +7,12 @@ tags:
 
 # Overview
 
-[![DL](https://img.shields.io/badge/Download-15K+-red)](https://clickpy.clickhouse.com/dashboard/versionhq)
+[![DL](https://img.shields.io/badge/Download-17K+-red)](https://clickpy.clickhouse.com/dashboard/versionhq)
 ![MIT license](https://img.shields.io/badge/License-MIT-green)
 [![Publisher](https://github.com/versionHQ/multi-agent-system/actions/workflows/publish.yml/badge.svg)](https://github.com/versionHQ/multi-agent-system/actions/workflows/publish.yml)
-![PyPI](https://img.shields.io/badge/PyPI-v1.2.0+-blue)
+![PyPI](https://img.shields.io/badge/PyPI-v1.2.1+-blue)
 ![python ver](https://img.shields.io/badge/Python-3.11/3.12-purple)
 ![pyenv ver](https://img.shields.io/badge/pyenv-2.5.0-orange)
-
 
 A Python framework for agentic orchestration that handles complex task automation.
 
@@ -36,7 +35,7 @@ A Python framework for agentic orchestration that handles complex task automatio
 Agents are model-agnostic, and will improve task output, while oprimizing token cost and job latency, by sharing their memory, knowledge base, and RAG tools with other agents in the network.
 
 
-###  Agent formation
+###  Agent Network
 
 Agents adapt their formation based on task complexity.
 
@@ -84,12 +83,32 @@ task_graph.add_dependency(
    type=vhq.DependencyType.FINISH_TO_FINISH, lag=1, required=False, weight=3
 )
 
+# To viaualize:
 task_graph.visualize()
+
+# To start to execute nodes
+latest_output, outputs = task_graph.activate()
+
+assert
 ```
 
 <hr />
 
-### Agent optimization
+### Task Graph
+
+A `TaskGraph` represents tasks as `nodes` and their execution dependencies as `edges`, automating rule-based execution.
+
+`Agent Networks` can handle `TaskGraph` objects by optimizing their formations.
+
+The following example demonstrates a simple concept of a `supervising` agent network handling a task graph with three tasks and one critical edge.
+
+<img src="https://res.cloudinary.com/dfeirxlea/image/upload/v1739337639/pj_m_home/zfg4ccw1m1ww1tpnb0pa.png">
+
+* Ref: <a href="/core/task-graph">TaskGraph</a> class
+
+<hr />
+
+### Optimization
 
 Agents are model-agnostic and can handle multiple tasks, leveraging their own and their peers' knowledge sources, memories, and tools.
 

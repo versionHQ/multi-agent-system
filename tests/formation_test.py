@@ -11,7 +11,7 @@ def test_minimum_inputs():
     assert network.members
     assert network.tasks
     assert isinstance(network.formation, vhq.Formation)
-    assert network.managers is not None if network.formation == vhq.Formation.SUPERVISING else not network.manager_tasks
+    assert network.managers if network.formation in (vhq.Formation.SUPERVISING, vhq.Formation.HYBRID) else not network.managers
 
     from versionhq.agent.inhouse_agents import vhq_formation_planner
     assert network.planner_llm == vhq_formation_planner.llm

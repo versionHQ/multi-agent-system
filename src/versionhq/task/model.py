@@ -149,9 +149,16 @@ class ResponseField(BaseModel):
             return value
 
 
+    def _annotate(self, value: Any) -> Annotated:
+        """
+        Address Pydantic's `create_model`
+        """
+        return Annotated[self.type, value] if isinstance(value, self.type) else Annotated[str, str(value)]
+
+
     def create_pydantic_model(self, result: Dict, base_model: InstanceOf[BaseModel] | Any) -> Any:
         """
-        Create a Pydantic model from the given result
+        Create a Pydantic model from the given result.
         """
         for k, v in result.items():
             if k is not self.title:
@@ -162,14 +169,6 @@ class ResponseField(BaseModel):
             else:
                 setattr(base_model, k, v)
         return base_model
-
-
-    def _annotate(self, value: Any) -> Annotated:
-        """
-        Address Pydantic's `create_model`
-        """
-        return Annotated[self.type, value] if isinstance(value, self.type) else Annotated[str, str(value)]
-
 
 
 class TaskOutput(BaseModel):

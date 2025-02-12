@@ -27,33 +27,25 @@ def match_type(self, obj):
 
 GenerateSchema.match_type = match_type
 warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")
-load_dotenv(override=True)
-
-# agentops = None
-# if os.environ.get("AGENTOPS_API_KEY"):
-#     try:
-#         import agentops  # type: ignore
-#     except ImportError:
-#         pass
-
 
 
 class Formation(str, Enum):
     UNDEFINED = 0
     SOLO = 1
     SUPERVISING = 2
-    NETWORK = 3
+    SQUAD = 3
     RANDOM = 4
     HYBRID = 10
 
 
 class TaskHandlingProcess(str, Enum):
     """
-    Class representing the different processes that can be used to tackle multiple tasks.
+    A class representing task handling processes to tackle multiple tasks.
+    When the team has multiple tasks that connect with edges, follow the edge conditions.
     """
-    sequential = "sequential"
-    hierarchical = "hierarchical"
-    consensual = "consensual"
+    SEQUENT = 1
+    HIERARCHY = 2
+    CONSENSUAL = 3 # either from managers or peers or (human) - most likely controlled by edge
 
 
 class TeamOutput(TaskOutput):
@@ -63,18 +55,15 @@ class TeamOutput(TaskOutput):
 
     team_id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True, description="store the team ID that generate the TeamOutput")
     task_description: str = Field(default=None, description="store initial request (task description) from the client")
-    task_outputs: list[TaskOutput] = Field(default=list, description="store outputs of all tasks that the team has executed")
-    token_usage: UsageMetrics = Field(default=dict, description="processed token summary")
-
+    task_outputs: list[TaskOutput] = Field(default=list, description="store TaskOutput objects of all tasks that the team has executed")
+    # token_usage: UsageMetrics = Field(default=dict, description="processed token summary")
 
     def return_all_task_outputs(self) -> List[Dict[str, Any]]:
         res = [output.json_dict for output in self.task_outputs]
         return res
 
-
     def __str__(self):
         return (str(self.pydantic) if self.pydantic else str(self.json_dict) if self.json_dict else self.raw)
-
 
     def __getitem__(self, key):
         if self.pydantic and hasattr(self.pydantic, key):
@@ -88,7 +77,7 @@ class TeamOutput(TaskOutput):
 
 class Member(BaseModel):
     """
-    A class to store a member in the network and connect the agent as a member with tasks and sharable settings.
+    A class to store a member in the team and connect the agent as a member with tasks and memory/knowledge share settings.
     """
     agent: Agent | None = Field(default=None)
     is_manager: bool = Field(default=False)
@@ -103,7 +92,8 @@ class Member(BaseModel):
 
 class Team(BaseModel):
     """
-    A class to store agent network that shares knowledge, memory and tools among the members.
+    A class to store a team with members and tasks.
+    Tasks can be 1. multiple individual tasks, 2. multiple dependant tasks connected via Graph, and 3. hybrid.
     """
 
     __hash__ = object.__hash__
@@ -123,7 +113,7 @@ class Team(BaseModel):
 
     # task execution rules
     prompt_file: str = Field(default="", description="absolute path to the prompt json file")
-    process: TaskHandlingProcess = Field(default=TaskHandlingProcess.sequential)
+    process: TaskHandlingProcess = Field(default=TaskHandlingProcess.SEQUENT)
 
     # callbacks
     pre_launch_callbacks: List[Callable[[Optional[Dict[str, Any]]], Optional[Dict[str, Any]]]] = Field(
@@ -174,21 +164,19 @@ class Team(BaseModel):
 
 
     @model_validator(mode="after")
-    def check_manager_llm(self):
+    def check_manager(self):
         """
         Check if the team has a manager
         """
-
-        if self.process == TaskHandlingProcess.hierarchical or self.formation == Formation.SUPERVISING:
+        if self.process == TaskHandlingProcess.HIERARCHY or self.formation == Formation.SUPERVISING:
             if not self.managers:
                 self._logger.log(level="error", message="The process or formation created needs at least 1 manager agent.", color="red")
-                raise PydanticCustomError(
-                    "missing_manager_llm_or_manager","Attribute `manager_llm` or `manager` is required when using hierarchical process.", {})
+                raise PydanticCustomError("missing_manager", "`manager` is required when using hierarchical process.", {})
 
-            ## comment out for the formation flexibilities
-            # if self.managers and (self.manager_tasks is None or self.team_tasks is None):
-            #     self._logger.log(level="error", message="The manager is idling. At least 1 task needs to be assigned to the manager.", color="red")
-            #     raise PydanticCustomError("missing_manager_task", "manager needs to have at least one manager task or team task.", {})
+        ## comment out for the formation flexibilities
+        # if self.managers and (self.manager_tasks is None or self.team_tasks is None):
+        #     self._logger.log(level="error", message="The manager is idling. At least 1 task needs to be assigned to the manager.", color="red")
+        #     raise PydanticCustomError("missing_manager_task", "manager needs to have at least one manager task or team task.", {})
 
         return self
 
@@ -198,7 +186,7 @@ class Team(BaseModel):
         """
         Sequential task processing without any team tasks require a task-agent pairing.
         """
-        if self.process == TaskHandlingProcess.sequential and self.team_tasks is None:
+        if self.process == TaskHandlingProcess.SEQUENT and self.team_tasks is None:
             for task in self.tasks:
                 if not [member.task == task for member in self.members]:
                     self._logger.log(level="error", message=f"The following task needs a dedicated agent to be assinged: {task.description}", color="red")
@@ -278,31 +266,6 @@ class Team(BaseModel):
         return task_outputs
 
 
-    def _create_team_output(self, task_outputs: List[TaskOutput], lead_task_output: TaskOutput = None) -> TeamOutput:
-        """
-        Take the output of the first task or the lead task output as the team output `raw` value.
-        Note that `tasks` are already sorted by the importance.
-        """
-
-        if not task_outputs:
-            self._logger.log(level="error", message="Missing task outcomes. Failed to launch the task.", color="red")
-            raise ValueError("Failed to launch tasks")
-
-        final_task_output = lead_task_output if lead_task_output is not None else task_outputs[0] #! REFINEME
-        # final_string_output = final_task_output.raw
-        # self._finish_execution(final_string_output)
-        token_usage = self._calculate_usage_metrics()
-
-        return TeamOutput(
-            team_id=self.id,
-            raw=final_task_output.raw,
-            json_dict=final_task_output.json_dict,
-            pydantic=final_task_output.pydantic,
-            task_outputs=task_outputs,
-            token_usage=token_usage,
-        )
-
-
     def _calculate_usage_metrics(self) -> UsageMetrics:
         """
         Calculate and return the usage metrics that consumed by the team.
@@ -371,14 +334,29 @@ class Team(BaseModel):
                     lead_task_output = task_output
 
                 task_outputs.append(task_output)
-                # self._process_task_result(task, task_output)
                 task._store_execution_log(task_index, was_replayed, self._inputs)
 
 
         if futures:
             task_outputs = self._process_async_tasks(futures, was_replayed)
 
-        return self._create_team_output(task_outputs, lead_task_output)
+        if not task_outputs:
+            self._logger.log(level="error", message="Missing task outcomes. Failed to launch the task.", color="red")
+            raise ValueError("Failed to launch tasks")
+
+        final_task_output = lead_task_output if lead_task_output is not None else task_outputs[0] #! REFINEME
+
+        # token_usage = self._calculate_usage_metrics() #! combining with Eval
+
+        return TeamOutput(
+            team_id=self.id,
+            raw=final_task_output.raw,
+            json_dict=final_task_output.json_dict,
+            pydantic=final_task_output.pydantic,
+            task_outputs=task_outputs,
+            # token_usage=token_usage,
+        )
+
 
 
     def launch(self, kwargs_pre: Optional[Dict[str, str]] = None, kwargs_post: Optional[Dict[str, Any]] = None) -> TeamOutput:
@@ -412,7 +390,7 @@ class Team(BaseModel):
                 agent.callbacks.append(self.step_callback)
 
         if self.process is None:
-            self.process = TaskHandlingProcess.sequential
+            self.process = TaskHandlingProcess.SEQUENT
 
         result = self._execute_tasks(self.tasks)
 

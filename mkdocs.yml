@@ -110,6 +110,7 @@ nav:
   - Quick Start: 'quickstart.md'
   - Core Components:
     - Agent: 'core/agent.md'
+    - Task Graph: 'core/task-graph.md'
     - Task:
       - Overview: 'core/task.md'
       - ResponseField: 'core/task/response-field.md'

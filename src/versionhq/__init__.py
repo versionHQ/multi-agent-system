@@ -16,7 +16,7 @@ from versionhq.clients.workflow.model import MessagingWorkflow, MessagingCompone
 from versionhq.knowledge.model import Knowledge, KnowledgeStorage
 from versionhq.knowledge.source import PDFKnowledgeSource, CSVKnowledgeSource, JSONKnowledgeSource, TextFileKnowledgeSource, ExcelKnowledgeSource, StringKnowledgeSource
 from versionhq.knowledge.source_docling import DoclingSource
-from versionhq.network.model import TaskStatus, TaskGraph, Node, Edge, DependencyType
+from versionhq.graph.model import TaskStatus, TaskGraph, Node, Edge, DependencyType
 from versionhq.task.model import Task, TaskOutput, ResponseField, TaskExecutionType
 from versionhq.task.evaluate import Evaluation, EvaluationItem
 from versionhq.team.model import Team, TeamOutput, Formation, Member, TaskHandlingProcess
@@ -30,7 +30,7 @@ from versionhq.memory.model import ShortTermMemory,LongTermMemory, UserMemory, M
 from versionhq.task.formation import form_agent_network
 
 
-__version__ = "1.2.0.4"
+__version__ = "1.2.1.0"
 __all__ = [
     "Agent",
 

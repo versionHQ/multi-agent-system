@@ -73,7 +73,7 @@ def test_docs_core_task_d():
         vhq.ResponseField(title="demo_4", data_type=bool),
         vhq.ResponseField(title="demo_5", data_type=list, items=str),
         vhq.ResponseField(title="demo_6", data_type=dict, properties=[vhq.ResponseField(title="demo-item", data_type=str)]),
-        vhq.ResponseField(title="demo_nest_1", data_type=list, items=str, properties=([
+        vhq.ResponseField(title="demo_nest_1", data_type=list, items=dict, properties=([
             vhq.ResponseField(title="nest1", data_type=dict, properties=[vhq.ResponseField(title="nest11", data_type=str)])
         ])),
         vhq.ResponseField(title="demo_nest_2", data_type=list, items=list),

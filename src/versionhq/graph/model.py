@@ -5,13 +5,33 @@ import matplotlib.pyplot as plt
 from abc import ABC
 from typing import List, Any, Optional, Callable, Dict, Type, Tuple
 
-from pydantic import BaseModel, InstanceOf, Field, UUID4, PrivateAttr, field_validator, model_validator
+from pydantic import BaseModel, InstanceOf, Field, UUID4, PrivateAttr, field_validator
 from pydantic_core import PydanticCustomError
 
 from versionhq.task.model import Task, TaskOutput
 from versionhq.agent.model import Agent
 from versionhq._utils.logger import Logger
 
+
+def gen_network():
+    goal = "make a promo plan to increase gross sales of Temu, an ecommerce site with affordable items."
+    agent = Agent(
+        role="Network Generator", goal="draft a best graph with nodes (tasks) and edges", llm="gemini-2.0", maxit=1,
+        knowledge_sources=["https://en.wikipedia.org/wiki/Graph_theory", "https://www.temu.com", ]
+    )
+    class Outcome(BaseModel):
+        task_descriptions: list[str]
+
+
+    task = Task(
+        description="    Create a team of specialized agents designed to automate the following task and deliver the expected outcome. Consider the necessary roles for each agent with a clear task description. If you think we neeed a leader to handle the automation, return a leader_agent role as well, but if not, leave the a leader_agent role blank. ",
+        pydantic_output=Outcome
+    )
+    task = Task(
+        description="Form best network with nodes and edges for the task described as following: Draft a promo plan for the client.",
+        pydantic_output=Edge
+    )
+    res = task.execute(agent=agent)
 
 class TaskStatus(enum.Enum):
     """
@@ -37,21 +57,21 @@ class DependencyType(enum.Enum):
 
 
 
-class TriggerEvent(enum.Enum):
-    """
-    Concise enumeration of key trigger events for task execution.
-    """
-    IMMEDIATE = 0 # execute immediately
-    DEPENDENCIES_MET = 1  # All/required dependencies are satisfied
-    RESOURCES_AVAILABLE = 2  # Necessary resources are available
-    SCHEDULED_TIME = 3  # Scheduled start time or time window reached
-    EXTERNAL_EVENT = 4  # Triggered by an external event/message
-    DATA_AVAILABLE = 5  # Required data  is available both internal/external
-    APPROVAL_RECEIVED = 6  # Necessary approvals have been granted
-    STATUS_CHANGED = 7  # Relevant task/system status has changed
-    RULE_MET = 8  # A predefined rule or condition has been met
-    MANUAL_TRIGGER = 9  # Manually initiated by a user
-    ERROR_HANDLED = 10  # A previous error/exception has been handled
+# class TriggerEvent(enum.Enum):
+#     """
+#     Concise enumeration of key trigger events for task execution.
+#     """
+#     IMMEDIATE = 0 # execute immediately
+#     DEPENDENCIES_MET = 1  # All/required dependencies are satisfied
+#     RESOURCES_AVAILABLE = 2  # Necessary resources are available
+#     SCHEDULED_TIME = 3  # Scheduled start time or time window reached
+#     EXTERNAL_EVENT = 4  # Triggered by an external event/message
+#     DATA_AVAILABLE = 5  # Required data  is available both internal/external
+#     APPROVAL_RECEIVED = 6  # Necessary approvals have been granted
+#     STATUS_CHANGED = 7  # Relevant task/system status has changed
+#     RULE_MET = 8  # A predefined rule or condition has been met
+#     MANUAL_TRIGGER = 9  # Manually initiated by a user
+#     ERROR_HANDLED = 10  # A previous error/exception has been handled
 
 
 
@@ -62,8 +82,8 @@ class Node(BaseModel):
     id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True)
     task: InstanceOf[Task] = Field(default=None)
     # trigger_event: TriggerEvent = Field(default=TriggerEvent.IMMEDIATE, description="store trigger event for starting the task execution")
-    in_degree_nodes: List[Any] = Field(default=None, description="list of Node objects")
-    out_degree_nodes: List[Any] = Field(default=None, description="list of Node objects")
+    in_degree_nodes: List[Any] = Field(default_factory=list, description="list of Node objects")
+    out_degree_nodes: List[Any] = Field(default_factory=list, description="list of Node objects")
     assigned_to: InstanceOf[Agent] = Field(default=None)
     status: TaskStatus = Field(default=TaskStatus.NOT_STARTED)
 
@@ -76,6 +96,24 @@ class Node(BaseModel):
 
     def is_independent(self) -> bool:
         return not self.in_degree_nodes and not self.out_degree_nodes
+
+
+    def handle_task_execution(self, agent: Agent = None, context: str = None) -> TaskOutput | None:
+        """
+        Start task execution and update status accordingly.
+        """
+
+        self.status = TaskStatus.IN_PROGRESS
+
+        if not self.task:
+            Logger(verbose=True).log(level="error", message="Missing a task to execute. We'll return None.", color="red")
+            self.status = TaskStatus.ERROR
+            return None
+
+        res = self.task.execute(agent=agent, context=context)
+        self.status = TaskStatus.COMPLETED if res else TaskStatus.ERROR
+        return res
+
 
     @property
     def in_degrees(self) -> int:
@@ -94,31 +132,15 @@ class Node(BaseModel):
         """Unique identifier for the node"""
         return f"{str(self.id)}"
 
-    def handle_task_execution(self, agent: Agent = None, context: str = None) -> TaskOutput | None:
-        """
-        Start task execution and update status accordingly.
-        """
-
-        self.status = TaskStatus.IN_PROGRESS
-
-        if not self.task:
-            Logger(verbose=True).log(level="error", message="Missing a task to execute. We'll return None.", color="red")
-            self.status = TaskStatus.ERROR
-            return None
-
-        res = self.task.execute(agent=agent, context=context)
-        self.status = TaskStatus.COMPLETED if res else TaskStatus.ERROR
-        return res
-
     def __str__(self):
         return self.identifier
-
 
 
 class Edge(BaseModel):
     """
     A class to store an edge object that connects source and target nodes.
     """
+
     source: Node = Field(default=None)
     target: Node = Field(default=None)
 
@@ -152,28 +174,28 @@ class Edge(BaseModel):
             case DependencyType.FINISH_TO_START:
                 """target starts after source finishes"""
                 if self.source.status == TaskStatus.COMPLETED:
-                    return self.condition(**self.conditon_kwargs) if self.condtion else True
+                    return self.condition(**self.conditon_kwargs) if self.condition else True
                 else:
                     return False
 
             case DependencyType.START_TO_START:
                 """target starts when source starts"""
                 if self.source.status != TaskStatus.NOT_STARTED:
-                    return self.condition(**self.conditon_kwargs) if self.condtion else True
+                    return self.condition(**self.conditon_kwargs) if self.condition else True
                 else:
                     return False
 
             case DependencyType.FINISH_TO_FINISH:
                 """target finish when source start"""
                 if self.source.status != TaskStatus.COMPLETED:
-                    return self.condition(**self.conditon_kwargs) if self.condtion else True
+                    return self.condition(**self.conditon_kwargs) if self.condition else True
                 else:
                     return False
 
             case DependencyType.START_TO_FINISH:
                 """target finishes when source start"""
                 if self.source.status == TaskStatus.IN_PROGRESS:
-                    return self.condition(**self.conditon_kwargs) if self.condtion else True
+                    return self.condition(**self.conditon_kwargs) if self.condition else True
                 else:
                     return False
 
@@ -183,19 +205,20 @@ class Edge(BaseModel):
         Activates the edge to initiate task execution of the target node.
         """
 
-        if not self.dependency_met():
-            Logger(verbose=True).log(level="warning", message="Dependencies not met. We'll return None.", color="yellow")
-            return None
-
         if not self.source or not self.target:
             Logger(verbose=True).log(level="warning", message="Cannot find source or target nodes. We'll return None.", color="yellow")
             return None
+
+        if not self.dependency_met():
+            Logger(verbose=True).log(level="warning", message="Dependencies not met. We'll see the source node status.", color="yellow")
+            return None
+
 
         if self.lag:
             import time
             time.sleep(self.lag)
 
-        context = self.source.task.task_output.raw if self.data_transfer else None
+        context = self.source.task.output.raw if self.data_transfer else None
         res = self.target.handle_task_execution(context=context)
         return res
 
@@ -205,8 +228,6 @@ class Graph(ABC, BaseModel):
     An abstract class to store G using NetworkX library.
     """
 
-
-    _logger: Logger = PrivateAttr(default_factory=lambda: Logger(verbose=True))
     directed: bool = Field(default=False, description="Whether the graph is directed")
     graph: Type[nx.Graph] = Field(default=None)
     nodes: Dict[str, InstanceOf[Node]] = Field(default_factory=dict, description="identifier: Node - for the sake of ")
@@ -226,7 +247,9 @@ class Graph(ABC, BaseModel):
     def add_edge(self, source: str, target: str, edge: Edge) -> None:
         self.graph.add_edge(source, target, **edge.model_dump())
         edge.source = self._return_node_object(source)
+        edge.source.out_degree_nodes.append(target)
         edge.target = self._return_node_object(target)
+        edge.target.in_degree_nodes.append(source)
         self.edges[(source, target)] = edge
 
     def add_weighted_edges_from(self, edges):
@@ -240,6 +263,28 @@ class Graph(ABC, BaseModel):
 
     def get_out_degree(self, node: Node) -> int:
         return self.graph.out_degree(node)
+
+    def find_start_nodes(self) -> Tuple[Node]:
+        return [v for k, v in self.nodes.items() if v.in_degrees == 0 and v.out_degrees > 0]
+
+    def find_end_nodes(self) ->  Tuple[Node]:
+        return [v for k, v in self.nodes.items() if v.out_degrees == 0 and v.in_degrees > 0]
+
+    def find_critical_end_node(self) -> Node | None:
+        """
+        Find a critical end node from all the end nodes to lead a conclusion of the entire graph.
+        """
+        end_nodes = self.find_end_nodes()
+        if not end_nodes:
+            return None
+
+        if len(end_nodes) == 1:
+            return end_nodes[0]
+
+        edges = [v for k, v in self.edges if isinstance(v, Edge) and v.source in end_nodes]
+        critical_edge = max(edges, key=lambda item: item['weight']) if edges else None
+        return critical_edge.target if critical_edge else None
+
 
     def find_path(self, source: Optional[str] | None, target: str, weight: Optional[Any] | None) -> Any:
         try:
@@ -255,14 +300,14 @@ class Graph(ABC, BaseModel):
         Finds the critical path in the graph.
         Returns:
             A tuple containing:
-                - The critical path (a list of task names).
+                - The critical path (a list of edge identifiers).
                 - The duration of the critical path.
                 - A dictionary of all paths and their durations.
         """
 
         all_paths = {}
-        for start_node in (v for k, v in self.nodes.items() if v.in_degrees == 0): # Start from nodes with 0 in-degree
-            for end_node in (v for k, v in self.nodes.items() if v.out_degrees == 0): # End at nodes with 0 out-degree
+        for start_node in self.find_start_nodes():
+            for end_node in self.find_end_nodes(): # End at nodes with 0 out-degree
                 for edge in nx.all_simple_paths(self.graph, source=start_node.identifier, target=end_node.identifier):
                     edge_weight = sum(self.edges.get(item).weight if self.edges.get(item) else 0 for item in edge)
                     all_paths[tuple(edge)] = edge_weight
@@ -314,7 +359,26 @@ class TaskGraph(Graph):
     id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True)
     should_reform: bool = Field(default=False)
     status: Dict[str, TaskStatus] = Field(default_factory=dict, description="store identifier (str) and TaskStatus of all task_nodes")
-    outputs: Dict[str, TaskOutput] = Field(default_factory=dict, description="store identifire and TaskOutput")
+    outputs: Dict[str, TaskOutput] = Field(default_factory=dict, description="store node identifire and TaskOutput")
+    conclusion: Any = Field(default=None, description="store the final result of the entire task graph. critical path target/end node")
+
+
+    def _save(self, abs_file_path: str = None) -> None:
+        """
+        Save the graph image in the local directory.
+        """
+
+        try:
+            import os
+            project_root = os.path.abspath(os.getcwd())
+            abs_file_path = abs_file_path if abs_file_path else f"{project_root}/uploads"
+
+            os.makedirs(abs_file_path, exist_ok=True)
+            plt.savefig(f"{abs_file_path}/{str(self.id)}.png")
+
+        except Exception as e:
+            Logger().log(level="error", message=f"Failed to save the graph {str(self.id)}: {str(e)}", color="red")
+
 
     def add_task(self, task: Node | Task) -> Node:
         """Convert `task` to a Node object and add it to G"""
@@ -332,7 +396,7 @@ class TaskGraph(Graph):
         """
 
         if not edge_attributes:
-            self._logger.log(level="error", message="Edge attributes are missing.", color="red")
+            Logger(verbose=True).log(level="error", message="Edge attributes are missing.", color="red")
 
         edge = Edge()
         for k in Edge.model_fields.keys():
@@ -349,14 +413,15 @@ class TaskGraph(Graph):
         if identifier in self.status:
             self.status[identifier] = status
         else:
-            self._logger.log(level="warning", message=f"Task '{identifier}' not found in the graph.", color="yellow")
+            Logger().log(level="warning", message=f"Task '{identifier}' not found in the graph.", color="yellow")
             pass
+
 
     def get_task_status(self, identifier):
         if identifier in self.status:
             return self.status[identifier]
         else:
-            self._logger.log(level="warning", message=f"Task '{identifier}' not found in the graph.", color="yellow")
+            Logger().log(level="warning", message=f"Task '{identifier}' not found in the graph.", color="yellow")
             return None
 
 
@@ -415,23 +480,6 @@ class TaskGraph(Graph):
         plt.show()
 
 
-    def _save(self, abs_file_path: str = None) -> None:
-        """
-        Save the graph image in the local directory.
-        """
-
-        try:
-            import os
-            project_root = os.path.abspath(os.getcwd())
-            abs_file_path = abs_file_path if abs_file_path else f"{project_root}/uploads"
-
-            os.makedirs(abs_file_path, exist_ok=True)
-            plt.savefig(f"{abs_file_path}/{str(self.id)}.png")
-
-        except Exception as e:
-            self._logger.log(level="error", message=f"Failed to save the graph {str(self.id)}: {str(e)}", color="red")
-
-
     def activate(self, target_node_identifier: Optional[str] = None) -> Tuple[TaskOutput | None, Dict[str, TaskOutput]]:
         """
         Starts to execute all nodes in the graph or a specific node if the target is given, following the given conditons of the edge obeject.
@@ -439,7 +487,7 @@ class TaskGraph(Graph):
         """
         if target_node_identifier:
             if not [k for k in self.nodes.keys() if k == target_node_identifier]:
-                self._logger.log(level="error", message=f"The node {str(target_node_identifier)} is not in the graph.", color="red")
+                Logger().log(level="error", message=f"The node {str(target_node_identifier)} is not in the graph.", color="red")
                 return None
 
             # find a shortest path to each in-degree node of the node and see if dependency met.
@@ -460,18 +508,62 @@ class TaskGraph(Graph):
             return res, self.outputs
 
         else:
-            if not self.edges or self.nodes:
-                self._logger.log(level="error", message="Needs at least 2 nodes and 1 edge to activate the graph. We'll return None.", color="red")
+            if not self.edges or not self.nodes:
+                Logger().log(level="error", message="TaskGraph needs at least 2 nodes and 1 edge to activate. We'll return None.", color="red")
                 return None
 
-            for edge in self.edges:
-                res = edge.activate()
-                if not res:
-                    break
+            start_nodes = self.find_start_nodes()
+            end_nodes = self.find_end_nodes()
+            critical_end_node = self.find_critical_end_node()
+            critical_path, _, _ = self.find_critical_path()
+            res = None
 
-                node_identifier = edge.target.identifier
-                self.outputs.update({ node_identifier: res })
-                self.status.update({ node_identifier: edge.target.status })
+            # When all nodes are completed, return the output of the critical end node or end node.
+            if end_nodes and len([node for node in end_nodes if node.status == TaskStatus.COMPLETED]) == len(end_nodes):
+                if critical_end_node:
+                    return critical_end_node.task.output, self.outputs
 
-            last_task_output = [v for v in self.outputs.values()][len([v for v in self.outputs.values()]) - 1] if [v for v in self.outputs.values()] else None
-            return last_task_output, self.outputs
+                else:
+                    return [v.task.output.raw for k, v in end_nodes.items()][0], self.outputs
+
+            # Else, execute nodes connected with the critical_path
+            elif critical_path:
+                for item in critical_path:
+                    edge = [v for k, v in self.edges.items() if item in k]
+
+                    if edge:
+                        edge = edge[0]
+
+                        if edge.target.status == TaskStatus.COMPLETED:
+                            res = edge.target.output
+
+                        else:
+                            res = edge.activate()
+                            node_identifier = edge.target.identifier
+                            self.outputs.update({ node_identifier: res })
+                            self.status.update({ node_identifier: edge.target.status })
+
+                            if not res and start_nodes:
+                                for node in start_nodes:
+                                    res = node.handle_task_execution()
+                                    self.outputs.update({ node.identifier: res })
+                                    self.status.update({ node.identifier: node.status })
+
+            # if no critical paths in the graph, simply start from the start nodes.
+            elif start_nodes:
+                for node in start_nodes:
+                    res = node.handle_task_execution()
+                    self.outputs.update({ node.identifier: res })
+                    self.status.update({ node.identifier: node.status })
+
+
+            # if none of above is applicable, try to activate all the edges.
+            else:
+                for k, edge in self.edges.items():
+                    res = edge.activate()
+                    node_identifier = edge.target.identifier
+                    self.outputs.update({ node_identifier: res })
+                    self.status.update({ node_identifier: edge.target.status })
+
+            # last_task_output = [v for v in self.outputs.values()][len([v for v in self.outputs.values()]) - 1] if [v for v in self.outputs.values()] else None
+            return res, self.outputs

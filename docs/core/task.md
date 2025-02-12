@@ -7,7 +7,7 @@ tags:
 
 # Task
 
-<class>`class` versionhq.tasks.model.<bold>Task<bold></class>
+<class>`class` versionhq.task.model.<bold>Task<bold></class>
 
 A class to store and manage information for individual tasks, including their assignment to agents or teams, and dependencies via a node-based system that tracks conditions and status.
 
@@ -72,7 +72,7 @@ from pydantic import BaseModel
 from typing import Any
 
 
-# 1. Define Pydantic class using description (optional), annotation and field name.
+# 1. Define Pydantic class with a description (optional), annotations and field names.
 class Demo(BaseModel):
     """
     A demo pydantic class to validate the outcome with various nested data types.
@@ -89,7 +89,7 @@ class Demo(BaseModel):
     demo_nest_4: dict[str, dict[str, Any]]
     # error_1: list[list[dict[str, list[str]]]] # <- Trigger 400 error due to 2+ layers of nested child.
     # error_2: InstanceOf[AnotherPydanticClass] # <- Trigger 400 error due to non-typing annotation.
-    # error_3: list[InstanceOf[AnotherPydanticClass]] # <- Same as above
+    # error_3: list[InstanceOf[AnotherPydanticClass]] # <- Trigger 400 error due to non-typing annotation as a nested child.
 
 # 2. Define a task
 task = vhq.Task(
@@ -132,21 +132,40 @@ import versionhq as vhq
 
 # 1. Define a list of ResponseField objects.
 demo_response_fields = [
+    # no nesting
     vhq.ResponseField(title="demo_1", data_type=int),
     vhq.ResponseField(title="demo_2", data_type=float),
     vhq.ResponseField(title="demo_3", data_type=str),
     vhq.ResponseField(title="demo_4", data_type=bool),
     vhq.ResponseField(title="demo_5", data_type=list, items=str),
-    vhq.ResponseField(title="demo_6", data_type=dict, properties=[vhq.ResponseField(title="demo-item", data_type=str)]),
-    vhq.ResponseField(title="demo_nest_1", data_type=list, items=str, properties=([
-        vhq.ResponseField(title="nest1", data_type=dict, properties=[vhq.ResponseField(title="nest11", data_type=str)])
-    ])), # you can specify field title of nested items
+    vhq.ResponseField(
+        title="demo_6",
+        data_type=dict,
+        properties=[vhq.ResponseField(title="demo-item", data_type=str)]
+    ),
+    # nesting
+    vhq.ResponseField(
+        title="demo_nest_1",
+        data_type=list,
+        items=dict,
+        properties=([
+            vhq.ResponseField(
+                title="nest1",
+                data_type=dict,
+                properties=[vhq.ResponseField(title="nest11", data_type=str)]
+            )
+        ])
+    ),
     vhq.ResponseField(title="demo_nest_2", data_type=list, items=list),
     vhq.ResponseField(title="demo_nest_3", data_type=dict, properties=[
         vhq.ResponseField(title="nest1", data_type=list, items=str)
     ]),
     vhq.ResponseField(title="demo_nest_4", data_type=dict, properties=[
-        vhq.ResponseField(title="nest1", data_type=dict, properties=[vhq.ResponseField(title="nest12", data_type=str)])
+        vhq.ResponseField(
+            title="nest1",
+            data_type=dict,
+            properties=[vhq.ResponseField(title="nest12", data_type=str)]
+        )
     ])
 ]
 
@@ -227,7 +246,7 @@ res = main_task.execute(context=sub_res.raw) # [Optional] Adding sub_task's resp
 assert [item for item in res.callback_output.main1 if isinstance(item, Sub)]
 ```
 
-To skip these manual setups, refer to Node/Graph pages.
+To automate these manual setups, refer to <a href="/core/agent-network">AgentNetwork</a> class.
 
 
 <!-- ### Context
@@ -239,7 +258,6 @@ To skip these manual setups, refer to Node/Graph pages.
 ### Execution rules
 EXECUTION type
     allow_delegation: bool = Field(default=False, description="ask other agents for help and run the task instead")
-
     callback: Optional[Callable] = Field(default=None, description="callback to be executed after the task is completed.")
     callback_kwargs: Optional[Dict[str, Any]] = Field(default_factory=dict, description="kwargs for the callback when the callback is callable")
 

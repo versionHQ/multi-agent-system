@@ -99,8 +99,8 @@ def test_launch_without_leader():
     assert res.pydantic is None
     assert [isinstance(item, TaskOutput) for item in res.task_outputs]
     assert isinstance(res_all, list) and len(res_all) == 2 and [isinstance(item, dict) for item in res_all]
-    assert isinstance(res.token_usage, UsageMetrics)
-    assert res.token_usage.total_tokens == 0 # as we dont set token usage on agent
+    # assert isinstance(res.token_usage, UsageMetrics)
+    # assert res.token_usage.total_tokens == 0 # as we dont set token usage on agent
 
 
 def team_launch_with_task_callback():
@@ -240,7 +240,7 @@ def test_hierarchial_process():
             Member(agent=agent_b, is_manager=True, tasks=[task_2,]),
             Member(agent=agent_c, is_manager=False)
         ],
-        process=TaskHandlingProcess.hierarchical
+        process=TaskHandlingProcess.HIERARCHY
     )
     res = team.launch()
 

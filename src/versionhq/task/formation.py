@@ -68,7 +68,7 @@ def form_agent_network(
 
         vhq_task = Task(
             description=f"""
-    Create a team of specialized agents designed to automate the following task and deliver the expected outcome. Consider the necessary roles for each agent with a clear task description. If you think we neeed a leader to handle the automation, return a leader_agent role as well, but if not, leave the a leader_agent role blank.
+    Create a team of specialized agents designed to automate the following task and deliver the expected outcome. Consider the necessary roles for each agent with a clear task description. If you think we neeed a leader to handle the automation, return a leader_agent role as well, but if not, leave the a leader_agent role blank. When you have a leader_agent, the formation must be SUPERVISING or HYBRID.
     Task: {str(task)}
     Expected outcome: {str(expected_outcome)}
     Formation: {prompt_formation}
@@ -109,7 +109,7 @@ def form_agent_network(
                 team_tasks.extend(created_tasks[len(created_agents):len(created_tasks)])
 
             members.sort(key=lambda x: x.is_manager == False)
-            team = Team( members=members, formation=_formation,  team_tasks=team_tasks, planner_llm=vhq_formation_planner.llm)
+            team = Team(members=members, formation=_formation, team_tasks=team_tasks, planner_llm=vhq_formation_planner.llm)
             return team
 
         else:
