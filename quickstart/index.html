@@ -503,6 +503,28 @@
   
   
   
+    <li class="md-nav__item">
+      <a href="../core/task-graph/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Task Graph
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
     
     
       
@@ -519,10 +541,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" >
         
           
-          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -534,8 +556,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_2">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
             <span class="md-nav__icon md-icon"></span>
             Task
           </label>
@@ -610,28 +632,6 @@
           </ul>
         </nav>
       
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../core/network/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Network
-    
-  </span>
-  
-
-      </a>
     </li>
   
 
@@ -869,6 +869,7 @@
 </span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="p">)</span>
 </span></code></pre></div>
 <h2 id="supervising">Supervising<a class="headerlink" href="#supervising" title="Permanent link">&para;</a></h2>
+<p>To create an agent network with one or more manager agents, designate members using the <code>is_manager</code> tag.</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">versionhq</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">vhq</span>
 </span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
 </span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="n">agent_a</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Agent</span><span class="p">(</span><span class="n">role</span><span class="o">=</span><span class="s2">&quot;agent a&quot;</span><span class="p">,</span> <span class="n">goal</span><span class="o">=</span><span class="s2">&quot;My amazing goals&quot;</span><span class="p">,</span> <span class="n">llm</span><span class="o">=</span><span class="s2">&quot;llm-of-your-choice&quot;</span><span class="p">)</span>
@@ -880,22 +881,26 @@
 </span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>   <span class="n">allow_delegation</span><span class="o">=</span><span class="kc">True</span>
 </span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="p">)</span>
 </span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>
-</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a> <span class="n">task_2</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Task</span><span class="p">(</span>
-</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>   <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Define the cohort.&quot;</span><span class="p">,</span>
+</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="n">task_2</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Task</span><span class="p">(</span>
+</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>   <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Define a cohort.&quot;</span><span class="p">,</span>
 </span><span id="__span-4-14"><a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a>   <span class="n">response_fields</span><span class="o">=</span><span class="p">[</span><span class="n">vhq</span><span class="o">.</span><span class="n">ResponseField</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;test1&quot;</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">),],</span>
 </span><span id="__span-4-15"><a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a>   <span class="n">allow_delegation</span><span class="o">=</span><span class="kc">False</span>
 </span><span id="__span-4-16"><a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a><span class="p">)</span>
 </span><span id="__span-4-17"><a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a>
-</span><span id="__span-4-18"><a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a><span class="n">team</span> <span class="o">=</span><span class="n">vhq</span><span class="o">.</span><span class="n">Team</span><span class="p">(</span>
+</span><span id="__span-4-18"><a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a><span class="n">network</span> <span class="o">=</span><span class="n">vhq</span><span class="o">.</span><span class="n">AgentNetwork</span><span class="p">(</span>
 </span><span id="__span-4-19"><a id="__codelineno-4-19" name="__codelineno-4-19" href="#__codelineno-4-19"></a>   <span class="n">members</span><span class="o">=</span><span class="p">[</span>
-</span><span id="__span-4-20"><a id="__codelineno-4-20" name="__codelineno-4-20" href="#__codelineno-4-20"></a>      <span class="n">vhq</span><span class="o">.</span><span class="n">Member</span><span class="p">(</span><span class="n">agent</span><span class="o">=</span><span class="n">agent_a</span><span class="p">,</span> <span class="n">is_manager</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">task</span><span class="o">=</span><span class="n">task_1</span><span class="p">),</span>
-</span><span id="__span-4-21"><a id="__codelineno-4-21" name="__codelineno-4-21" href="#__codelineno-4-21"></a>      <span class="n">vhq</span><span class="o">.</span><span class="n">Member</span><span class="p">(</span><span class="n">agent</span><span class="o">=</span><span class="n">agent_b</span><span class="p">,</span> <span class="n">is_manager</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">task</span><span class="o">=</span><span class="n">task_2</span><span class="p">),</span>
+</span><span id="__span-4-20"><a id="__codelineno-4-20" name="__codelineno-4-20" href="#__codelineno-4-20"></a>      <span class="n">vhq</span><span class="o">.</span><span class="n">Member</span><span class="p">(</span><span class="n">agent</span><span class="o">=</span><span class="n">agent_a</span><span class="p">,</span> <span class="n">is_manager</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">tasks</span><span class="o">=</span><span class="p">[</span><span class="n">task_1</span><span class="p">]),</span>
+</span><span id="__span-4-21"><a id="__codelineno-4-21" name="__codelineno-4-21" href="#__codelineno-4-21"></a>      <span class="n">vhq</span><span class="o">.</span><span class="n">Member</span><span class="p">(</span><span class="n">agent</span><span class="o">=</span><span class="n">agent_b</span><span class="p">,</span> <span class="n">is_manager</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">tasks</span><span class="o">=</span><span class="p">[</span><span class="n">task_2</span><span class="p">]),</span> <span class="c1"># Agent B as a manager</span>
 </span><span id="__span-4-22"><a id="__codelineno-4-22" name="__codelineno-4-22" href="#__codelineno-4-22"></a>   <span class="p">],</span>
 </span><span id="__span-4-23"><a id="__codelineno-4-23" name="__codelineno-4-23" href="#__codelineno-4-23"></a><span class="p">)</span>
-</span><span id="__span-4-24"><a id="__codelineno-4-24" name="__codelineno-4-24" href="#__codelineno-4-24"></a><span class="n">res</span> <span class="o">=</span> <span class="n">team</span><span class="o">.</span><span class="n">launch</span><span class="p">()</span>
+</span><span id="__span-4-24"><a id="__codelineno-4-24" name="__codelineno-4-24" href="#__codelineno-4-24"></a><span class="n">res</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">launch</span><span class="p">()</span>
+</span><span id="__span-4-25"><a id="__codelineno-4-25" name="__codelineno-4-25" href="#__codelineno-4-25"></a>
+</span><span id="__span-4-26"><a id="__codelineno-4-26" name="__codelineno-4-26" href="#__codelineno-4-26"></a><span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">vhq</span><span class="o">.</span><span class="n">NetworkOutput</span><span class="p">)</span>
+</span><span id="__span-4-27"><a id="__codelineno-4-27" name="__codelineno-4-27" href="#__codelineno-4-27"></a><span class="k">assert</span> <span class="ow">not</span> <span class="p">[</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">task_1</span><span class="o">.</span><span class="n">processed_agents</span> <span class="k">if</span> <span class="s2">&quot;vhq-Delegated-Agent&quot;</span> <span class="o">==</span> <span class="n">item</span><span class="p">]</span>
+</span><span id="__span-4-28"><a id="__codelineno-4-28" name="__codelineno-4-28" href="#__codelineno-4-28"></a><span class="k">assert</span> <span class="p">[</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">task_1</span><span class="o">.</span><span class="n">processed_agents</span> <span class="k">if</span> <span class="s2">&quot;agent b&quot;</span> <span class="o">==</span> <span class="n">item</span><span class="p">]</span>
 </span></code></pre></div>
 <p>This will return a list with dictionaries with keys defined in the <code>ResponseField</code> of each task.</p>
-<p>Tasks can be delegated to a team manager, peers in the team, or completely new agent.</p>
+<p>Tasks can be delegated to a manager, peers within the agent network, or a completely new agent.</p>
 
 
 

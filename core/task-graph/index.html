@@ -12,13 +12,13 @@
         <meta name="author" content="Version IO Sdn. Bhd.">
       
       
-        <link rel="canonical" href="https://docs.versi0n.io/core/network/">
+        <link rel="canonical" href="https://docs.versi0n.io/core/task-graph/">
       
       
-        <link rel="prev" href="../task/task-output/">
+        <link rel="prev" href="../agent/">
       
       
-        <link rel="next" href="../tool/">
+        <link rel="next" href="../task/">
       
       
       <link rel="icon" href="../../_logos/favicon.ico">
@@ -26,7 +26,7 @@
     
     
       
-        <title>Network - versionHQ</title>
+        <title>Task Graph - versionHQ</title>
       
     
     
@@ -131,7 +131,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#network" class="md-skip">
+        <a href="#taskgraph" class="md-skip">
           Skip to content
         </a>
       
@@ -166,7 +166,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Network
+              Task Graph
             
           </span>
         </div>
@@ -426,6 +426,102 @@
                 
   
   
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Task Graph
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Task Graph
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#core-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Core Usage
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Core Usage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#generating-taskgraph" class="md-nav__link">
+    <span class="md-ellipsis">
+      Generating TaskGraph
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#activating-taskgraph" class="md-nav__link">
+    <span class="md-ellipsis">
+      Activating TaskGraph
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
   
   
     
@@ -444,10 +540,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" >
         
           
-          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -459,8 +555,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_2">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
             <span class="md-nav__icon md-icon"></span>
             Task
           </label>
@@ -534,38 +630,6 @@
             
           </ul>
         </nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-    
-  
-  
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
-        
-  
-  <span class="md-ellipsis">
-    Network
-    
-  </span>
-  
-
-      </a>
       
     </li>
   
@@ -731,7 +795,7 @@
 
 
   
-    <a href="https://github.com/versionhq/multi-agent-system/edit/main/docs/core/network.md" title="Edit this page" class="md-content__button md-icon">
+    <a href="https://github.com/versionhq/multi-agent-system/edit/main/docs/core/task-graph.md" title="Edit this page" class="md-content__button md-icon">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75z"/></svg>
     </a>
@@ -740,14 +804,72 @@
     
       
     
-    <a href="https://github.com/versionhq/multi-agent-system/raw/main/docs/core/network.md" title="View source of this page" class="md-content__button md-icon">
+    <a href="https://github.com/versionhq/multi-agent-system/raw/main/docs/core/task-graph.md" title="View source of this page" class="md-content__button md-icon">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0 8a5 5 0 0 1-5-5 5 5 0 0 1 5-5 5 5 0 0 1 5 5 5 5 0 0 1-5 5m0-12.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5"/></svg>
     </a>
   
 
 
-<h1 id="network">Network<a class="headerlink" href="#network" title="Permanent link">&para;</a></h1>
+<h1 id="taskgraph">TaskGraph<a class="headerlink" href="#taskgraph" title="Permanent link">&para;</a></h1>
+<p><class><code>class</code> versionhq.graph.model.<bold>TaskGraph<bold></class></p>
+<p>A <code>TaskGraph</code> represents tasks as <code>nodes</code> and their execution dependencies as <code>edges</code>, automating rule-based execution.</p>
+<p><code>Agent Networks</code> can handle <code>TaskGraph</code> objects by optimizing their formations.</p>
+<p>The following example demonstrates a simple concept of a <code>supervising</code> agent network handling a task graph with three tasks and one critical edge.</p>
+<p><img src="https://res.cloudinary.com/dfeirxlea/image/upload/v1739337639/pj_m_home/zfg4ccw1m1ww1tpnb0pa.png"></p>
+<h2 id="core-usage">Core Usage<a class="headerlink" href="#core-usage" title="Permanent link">&para;</a></h2>
+<p><code>TaskGraph</code> needs at least two <code>nodes</code> and one <code>edges</code> to connect the nodes to function.</p>
+<p>You can define nodes and edges mannually by creating nodes from tasks, and defining edges.</p>
+<h3 id="generating-taskgraph">Generating TaskGraph<a class="headerlink" href="#generating-taskgraph" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">versionhq</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">vhq</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="n">task_graph</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">TaskGraph</span><span class="p">(</span><span class="n">directed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">should_reform</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="n">task_a</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Task</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Research Topic&quot;</span><span class="p">)</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="n">task_b</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Task</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Outline Post&quot;</span><span class="p">)</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="n">task_c</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Task</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Write First Draft&quot;</span><span class="p">)</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="n">node_a</span> <span class="o">=</span> <span class="n">task_graph</span><span class="o">.</span><span class="n">add_task</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="n">task_a</span><span class="p">)</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="n">node_b</span> <span class="o">=</span> <span class="n">task_graph</span><span class="o">.</span><span class="n">add_task</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="n">task_b</span><span class="p">)</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="n">node_c</span> <span class="o">=</span> <span class="n">task_graph</span><span class="o">.</span><span class="n">add_task</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="n">task_c</span><span class="p">)</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="n">task_graph</span><span class="o">.</span><span class="n">add_dependency</span><span class="p">(</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>    <span class="n">node_a</span><span class="o">.</span><span class="n">identifier</span><span class="p">,</span> <span class="n">node_b</span><span class="o">.</span><span class="n">identifier</span><span class="p">,</span>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>    <span class="nb">type</span><span class="o">=</span><span class="n">vhq</span><span class="o">.</span><span class="n">DependencyType</span><span class="o">.</span><span class="n">FINISH_TO_START</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;B depends on A&quot;</span>
+</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="p">)</span>
+</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="n">task_graph</span><span class="o">.</span><span class="n">add_dependency</span><span class="p">(</span>
+</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>    <span class="n">node_a</span><span class="o">.</span><span class="n">identifier</span><span class="p">,</span> <span class="n">node_c</span><span class="o">.</span><span class="n">identifier</span><span class="p">,</span>
+</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>    <span class="nb">type</span><span class="o">=</span><span class="n">vhq</span><span class="o">.</span><span class="n">DependencyType</span><span class="o">.</span><span class="n">FINISH_TO_FINISH</span><span class="p">,</span> <span class="n">lag</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="mi">3</span>
+</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="p">)</span>
+</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>
+</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="n">critical_path</span><span class="p">,</span> <span class="n">duration</span><span class="p">,</span> <span class="n">paths</span> <span class="o">=</span> <span class="n">task_graph</span><span class="o">.</span><span class="n">find_critical_path</span><span class="p">()</span>
+</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>
+</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="kn">import</span><span class="w"> </span><span class="nn">uuid</span>
+</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a><span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">task_graph</span><span class="p">,</span> <span class="n">vhq</span><span class="o">.</span><span class="n">TaskGraph</span><span class="p">)</span>
+</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="k">assert</span> <span class="p">[</span><span class="nb">type</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="o">==</span> <span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Node</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">task</span><span class="p">,</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Task</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">task_graph</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
+</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="k">assert</span> <span class="p">[</span><span class="nb">type</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="o">==</span> <span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Edge</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">task_graph</span><span class="o">.</span><span class="n">edges</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
+</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a><span class="k">assert</span> <span class="n">critical_path</span>  <span class="ow">and</span> <span class="n">duration</span>  <span class="ow">and</span> <span class="n">paths</span>
+</span></code></pre></div>
+<h3 id="activating-taskgraph">Activating TaskGraph<a class="headerlink" href="#activating-taskgraph" title="Permanent link">&para;</a></h3>
+<p>Calling <code>.activate()</code> begins execution of the graph's nodes, respecting dependencies [<code>dependency-met</code>] and prioritizing the critical path.</p>
+<p><strong>[NOTES]</strong></p>
+<ul>
+<li>
+<p>If all nodes are already complete, outputs are returned without further execution.</p>
+</li>
+<li>
+<p>If no critical path is found, execution begins with any dependency-met start nodes.</p>
+</li>
+</ul>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">versionhq</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">vhq</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="c1"># Inherting the `task_graph` object in the previous code snippet,</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="n">last_task_output</span><span class="p">,</span> <span class="n">outputs</span> <span class="o">=</span> <span class="n">task_graph</span><span class="o">.</span><span class="n">activate</span><span class="p">()</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">last_task_output</span><span class="p">,</span> <span class="n">vhq</span><span class="o">.</span><span class="n">TaskOutput</span><span class="p">)</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="k">assert</span> <span class="p">[</span><span class="n">k</span> <span class="ow">in</span> <span class="n">task_graph</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="ow">and</span> <span class="n">v</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">vhq</span><span class="o">.</span><span class="n">TaskOutput</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">outputs</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
+</span></code></pre></div>
 
 
 
@@ -790,7 +912,7 @@
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../task/task-output/" class="md-footer__link md-footer__link--prev" aria-label="Previous: TaskOutput">
+          <a href="../agent/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Agent">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -800,20 +922,20 @@
                 Previous
               </span>
               <div class="md-ellipsis">
-                TaskOutput
+                Agent
               </div>
             </div>
           </a>
         
         
           
-          <a href="../tool/" class="md-footer__link md-footer__link--next" aria-label="Next: Tool">
+          <a href="../task/" class="md-footer__link md-footer__link--next" aria-label="Next: Overview">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Tool
+                Overview
               </div>
             </div>
             <div class="md-footer__button md-icon">

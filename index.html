@@ -420,39 +420,6 @@
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Project Set Up">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#1-package-manager" class="md-nav__link">
-    <span class="md-ellipsis">
-      1. Package manager
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#2-dependencies" class="md-nav__link">
-    <span class="md-ellipsis">
-      2. Dependencies
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#3-local-env" class="md-nav__link">
-    <span class="md-ellipsis">
-      3. Local .env
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
         <li class="md-nav__item">
@@ -636,6 +603,28 @@
   
   
   
+    <li class="md-nav__item">
+      <a href="core/task-graph/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Task Graph
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
     
     
       
@@ -652,10 +641,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" >
         
           
-          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -667,8 +656,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_2">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
             <span class="md-nav__icon md-icon"></span>
             Task
           </label>
@@ -743,28 +732,6 @@
           </ul>
         </nav>
       
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="core/network/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Network
-    
-  </span>
-  
-
-      </a>
     </li>
   
 
@@ -946,10 +913,10 @@
 
 
 <h1 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h1>
-<p><a href="https://clickpy.clickhouse.com/dashboard/versionhq"><img alt="DL" src="https://img.shields.io/badge/Download-15K+-red" /></a>
+<p><a href="https://clickpy.clickhouse.com/dashboard/versionhq"><img alt="DL" src="https://img.shields.io/badge/Download-17K+-red" /></a>
 <img alt="MIT license" src="https://img.shields.io/badge/License-MIT-green" />
 <a href="https://github.com/versionHQ/multi-agent-system/actions/workflows/publish.yml"><img alt="Publisher" src="https://github.com/versionHQ/multi-agent-system/actions/workflows/publish.yml/badge.svg" /></a>
-<img alt="PyPI" src="https://img.shields.io/badge/PyPI-v1.2.0+-blue" />
+<img alt="PyPI" src="https://img.shields.io/badge/PyPI-v1.2.1+-blue" />
 <img alt="python ver" src="https://img.shields.io/badge/Python-3.11/3.12-purple" />
 <img alt="pyenv ver" src="https://img.shields.io/badge/pyenv-2.5.0-orange" /></p>
 <p>A Python framework for agentic orchestration that handles complex task automation.</p>
@@ -1033,14 +1000,24 @@
 </span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>   <span class="nb">type</span><span class="o">=</span><span class="n">vhq</span><span class="o">.</span><span class="n">DependencyType</span><span class="o">.</span><span class="n">FINISH_TO_FINISH</span><span class="p">,</span> <span class="n">lag</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="mi">3</span>
 </span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="p">)</span>
 </span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>
-</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="n">task_graph</span><span class="o">.</span><span class="n">visualize</span><span class="p">()</span>
+</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="c1"># To viaualize:</span>
+</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="n">task_graph</span><span class="o">.</span><span class="n">visualize</span><span class="p">()</span>
+</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>
+</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a><span class="c1"># To start to execute nodes</span>
+</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="n">latest_output</span><span class="p">,</span> <span class="n">outputs</span> <span class="o">=</span> <span class="n">task_graph</span><span class="o">.</span><span class="n">activate</span><span class="p">()</span>
+</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a>
+</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a><span class="k">assert</span>
 </span></code></pre></div>
 <hr />
 
 <h3 id="task-graph">Task Graph<a class="headerlink" href="#task-graph" title="Permanent link">&para;</a></h3>
-<p><code>Agent networks</code> can handle <code>TaskGraph</code> objects by optimizing their formations.</p>
+<p>A <code>TaskGraph</code> represents tasks as <code>nodes</code> and their execution dependencies as <code>edges</code>, automating rule-based execution.</p>
+<p><code>Agent Networks</code> can handle <code>TaskGraph</code> objects by optimizing their formations.</p>
 <p>The following example demonstrates a simple concept of a <code>supervising</code> agent network handling a task graph with three tasks and one critical edge.</p>
 <p><img src="https://res.cloudinary.com/dfeirxlea/image/upload/v1739337639/pj_m_home/zfg4ccw1m1ww1tpnb0pa.png"></p>
+<ul>
+<li>Ref: <a href="/core/task-graph">TaskGraph</a> class</li>
+</ul>
 <hr />
 
 <h3 id="optimization">Optimization<a class="headerlink" href="#optimization" title="Permanent link">&para;</a></h3>
@@ -1067,14 +1044,14 @@
 <hr />
 
 <h2 id="project-set-up">Project Set Up<a class="headerlink" href="#project-set-up" title="Permanent link">&para;</a></h2>
-<h3 id="1-package-manager">1. Package manager<a class="headerlink" href="#1-package-manager" title="Permanent link">&para;</a></h3>
+<p><strong>Installing package manager</strong></p>
 <p>For MacOS:</p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>brew install uv
 </span></code></pre></div>
 <p>For Ubuntu/Debian:
    <div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>sudo apt-get install uv
 </span></code></pre></div></p>
-<h3 id="2-dependencies">2. Dependencies<a class="headerlink" href="#2-dependencies" title="Permanent link">&para;</a></h3>
+<p><strong>Installing dependencies</strong></p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>uv venv
 </span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>source .venv/bin/activate
 </span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>uv lock --upgrade
@@ -1107,7 +1084,7 @@
 <p><code>torch</code>/<code>Docling</code> related errors: Set up default Python version either <code>3.11.x</code> or <code>3.12.x</code> (same as AssertionError)</p>
 </li>
 </ul>
-<h3 id="3-local-env">3. Local .env<a class="headerlink" href="#3-local-env" title="Permanent link">&para;</a></h3>
+<p><strong>Setting up a local env file</strong></p>
 <p>Create <code>.env</code> file in the project root and add following:</p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>OPENAI_API_KEY=your-openai-api-key
 </span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>GEMINI_API_KEY=your-gemini-api-key

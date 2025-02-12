@@ -15,7 +15,7 @@
         <link rel="canonical" href="https://docs.versi0n.io/core/task/">
       
       
-        <link rel="prev" href="../agent/">
+        <link rel="prev" href="../task-graph/">
       
       
         <link rel="next" href="response-field/">
@@ -426,6 +426,28 @@
                 
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../task-graph/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Task Graph
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
     
   
   
@@ -446,10 +468,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" checked>
         
           
-          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -461,8 +483,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_3_2">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3_3">
             <span class="md-nav__icon md-icon"></span>
             Task
           </label>
@@ -692,28 +714,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../network/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Network
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../tool/" class="md-nav__link">
         
   
@@ -883,8 +883,8 @@
 
 
 <h1 id="task">Task<a class="headerlink" href="#task" title="Permanent link">&para;</a></h1>
-<p><class><code>class</code> versionhq.tasks.model.<bold>Task<bold></class></p>
-<p>A class to store and manage information for individual tasks, including their assignment to agents or teams, and dependencies via a node-based system that tracks conditions and status.</p>
+<p><class><code>class</code> versionhq.task.model.<bold>Task<bold></class></p>
+<p>A class to store and manage information for individual tasks, including their assignment to agents or agent networks, and dependencies via a node-based system that tracks conditions and status.</p>
 <p>Ref. Node / Edge / TaskGraph class</p>
 <hr />
 
@@ -1015,7 +1015,7 @@
 </span><span id="__span-3-32"><a id="__codelineno-3-32" name="__codelineno-3-32" href="#__codelineno-3-32"></a>    <span class="p">]),</span>
 </span><span id="__span-3-33"><a id="__codelineno-3-33" name="__codelineno-3-33" href="#__codelineno-3-33"></a>    <span class="n">vhq</span><span class="o">.</span><span class="n">ResponseField</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;demo_nest_4&quot;</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="nb">dict</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="p">[</span>
 </span><span id="__span-3-34"><a id="__codelineno-3-34" name="__codelineno-3-34" href="#__codelineno-3-34"></a>        <span class="n">vhq</span><span class="o">.</span><span class="n">ResponseField</span><span class="p">(</span>
-</span><span id="__span-3-35"><a id="__codelineno-3-35" name="__codelineno-3-35" href="#__codelineno-3-35"></a>            <span class="n">title</span><span class="o">=</span><span class="s2">&quot;nest1&quot;</span><span class="p">,</span> 
+</span><span id="__span-3-35"><a id="__codelineno-3-35" name="__codelineno-3-35" href="#__codelineno-3-35"></a>            <span class="n">title</span><span class="o">=</span><span class="s2">&quot;nest1&quot;</span><span class="p">,</span>
 </span><span id="__span-3-36"><a id="__codelineno-3-36" name="__codelineno-3-36" href="#__codelineno-3-36"></a>            <span class="n">data_type</span><span class="o">=</span><span class="nb">dict</span><span class="p">,</span>
 </span><span id="__span-3-37"><a id="__codelineno-3-37" name="__codelineno-3-37" href="#__codelineno-3-37"></a>            <span class="n">properties</span><span class="o">=</span><span class="p">[</span><span class="n">vhq</span><span class="o">.</span><span class="n">ResponseField</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;nest12&quot;</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="nb">str</span><span class="p">)]</span>
 </span><span id="__span-3-38"><a id="__codelineno-3-38" name="__codelineno-3-38" href="#__codelineno-3-38"></a>        <span class="p">)</span>
@@ -1102,7 +1102,7 @@
 </span><span id="__span-4-35"><a id="__codelineno-4-35" name="__codelineno-4-35" href="#__codelineno-4-35"></a>
 </span><span id="__span-4-36"><a id="__codelineno-4-36" name="__codelineno-4-36" href="#__codelineno-4-36"></a><span class="k">assert</span> <span class="p">[</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">res</span><span class="o">.</span><span class="n">callback_output</span><span class="o">.</span><span class="n">main1</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">Sub</span><span class="p">)]</span>
 </span></code></pre></div>
-<p>To automate these manual setups, refer to <a href="/core/network">Network</a> class.</p>
+<p>To automate these manual setups, refer to <a href="/core/agent-network">AgentNetwork</a> class.</p>
 <!-- ### Context
   # task setup
     context: Optional[List["Task"]] = Field(default=None, description="other tasks whose outputs should be used as context")
@@ -1184,7 +1184,7 @@ EXECUTION type
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../agent/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Agent">
+          <a href="../task-graph/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Task Graph">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -1194,7 +1194,7 @@ EXECUTION type
                 Previous
               </span>
               <div class="md-ellipsis">
-                Agent
+                Task Graph
               </div>
             </div>
           </a>
