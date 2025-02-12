@@ -613,7 +613,7 @@ Ref. Output image: {output_formats_to_follow}
         """
 
         from versionhq.agent.model import Agent
-        from versionhq.team.model import Team
+        from versionhq.agent_network.model import AgentNetwork
 
         self.prompt_context = context
         task_output: InstanceOf[TaskOutput] = None
@@ -626,15 +626,15 @@ Ref. Output image: {output_formats_to_follow}
                 if isinstance(item, ToolSet) or isinstance(item, Tool) or type(item) == Tool:
                     task_tools.append(item)
 
-        if self.allow_delegation:
+        if self.allow_delegation == True:
             agent_to_delegate = None
 
-            if hasattr(agent, "team") and isinstance(agent.team, Team):
-                if agent.team.managers:
-                    idling_manager_agents = [manager.agent for manager in agent.team.managers if manager.is_idling]
-                    agent_to_delegate = idling_manager_agents[0] if idling_manager_agents else agent.team.managers[0]
+            if hasattr(agent, "network") and isinstance(agent.network, AgentNetwork):
+                if agent.network.managers:
+                    idling_manager_agents = [manager.agent for manager in agent.network.managers if manager.is_idling]
+                    agent_to_delegate = idling_manager_agents[0] if idling_manager_agents else agent.network.managers[0]
                 else:
-                    peers = [member.agent for member in agent.team.members if member.is_manager == False and member.agent.id is not agent.id]
+                    peers = [member.agent for member in agent.network.members if member.is_manager == False and member.agent.id is not agent.id]
                     if len(peers) > 0:
                         agent_to_delegate = peers[0]
             else:

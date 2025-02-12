@@ -1,7 +1,7 @@
 import uuid
 from abc import ABC
-from datetime import date, datetime, time, timedelta
-from typing import Any, Dict, List, Callable, Type, Optional, get_args, get_origin
+from datetime import datetime
+from typing import Any, Dict, List, Optional
 from typing_extensions import Self
 from pydantic import UUID4, InstanceOf, BaseModel, ConfigDict, Field, field_validator, model_validator
 from pydantic_core import PydanticCustomError
@@ -9,7 +9,7 @@ from pydantic_core import PydanticCustomError
 from versionhq.clients.product.model import Product
 from versionhq.clients.customer.model import Customer
 from versionhq.agent.model import Agent
-from versionhq.team.model import Team
+from versionhq.agent_network.model import AgentNetwork
 from versionhq.tool.composio_tool_vars import ComposioAppName
 
 
@@ -102,8 +102,8 @@ class MessagingWorkflow(ABC, BaseModel):
     messaging_components: List[MessagingComponent] = Field(default_factory=list, description="store messaging components in the workflow")
 
     # responsible tean or agents
-    team: Optional[Team] = Field(default=None, description="store a responsibile team to autopilot the workflow")
-    agents: Optional[List[Agent]] = Field(default=None, description="store responsible agents. None when the team exists")
+    agent_network: Optional[AgentNetwork] = Field(default=None, description="store a responsibile agent network to autopilot the workflow")
+    agents: Optional[List[Agent]] = Field(default=None, description="store responsible agents. None when the `agent_network` fields has a value")
 
     # metrics
     destination: Optional[ComposioAppName | str] = Field(default=None, description="destination service to launch the workflow")
@@ -140,16 +140,16 @@ class MessagingWorkflow(ABC, BaseModel):
         return self
 
 
-    def reassign_agent_or_team(self, agents: List[Agent] = None, team: Team = None) -> None:
+    def reassign_agent(self, agents: List[Agent] = None, agent_network: AgentNetwork = None) -> None:
         """
-        Fire unresponsible agents/team and assign new one.
+        Switch agents
         """
 
-        if not agents and not team:
-            raise ValueError("Need to add at least 1 agent or team.")
+        if not agents and not agent_network:
+            raise ValueError("Missing agent or agent network to assign.")
 
         self.agents = agents
-        self.team = team
+        self.agent_network = agent_network
         self.updated_at = datetime.datetime.now()
 
 

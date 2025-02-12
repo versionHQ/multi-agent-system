@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 from versionhq.task.model import Task
 from versionhq.agent.model import Agent
-from versionhq.team.model import Team, Member, Formation
+from versionhq.agent_network.model import AgentNetwork, Member, Formation
 from versionhq.agent.inhouse_agents  import vhq_formation_planner
 from versionhq._utils import Logger
 
@@ -16,7 +16,7 @@ def form_agent_network(
         agents: List[Agent] = None,
         context: str = None,
         formation: Type[Formation] = None
-    ) -> Team | None:
+    ) -> AgentNetwork | None:
     """
     Make a formation of agents from the given task description, expected outcome, agents (optional), and context (optional).
     """
@@ -91,7 +91,7 @@ def form_agent_network(
             created_agents = [Agent(role=item, goal=item) for item in res.pydantic.agent_roles]
             created_tasks = [Task(description=item) for item in res.pydantic.task_descriptions]
 
-            team_tasks = []
+            network_tasks = []
             members = []
             leader = str(res.pydantic.leader_agent)
 
@@ -106,11 +106,11 @@ def form_agent_network(
 
 
             if len(created_agents) < len(created_tasks):
-                team_tasks.extend(created_tasks[len(created_agents):len(created_tasks)])
+                network_tasks.extend(created_tasks[len(created_agents):len(created_tasks)])
 
             members.sort(key=lambda x: x.is_manager == False)
-            team = Team(members=members, formation=_formation, team_tasks=team_tasks, planner_llm=vhq_formation_planner.llm)
-            return team
+            network = AgentNetwork(members=members, formation=_formation, network_tasks=network_tasks)
+            return network
 
         else:
             res = res.json_dict
@@ -122,7 +122,7 @@ def form_agent_network(
             created_agents = [Agent(role=item, goal=item) for item in res["agent_roles"]]
             created_tasks = [Task(description=item) for item in res["task_descriptions"]]
 
-            team_tasks = []
+            network_tasks = []
             members = []
             leader = str(res["leader_agent"])
 
@@ -136,11 +136,11 @@ def form_agent_network(
                 members.append(member)
 
             if len(created_agents) < len(created_tasks):
-                team_tasks.extend(created_tasks[len(created_agents):len(created_tasks)])
+                network_tasks.extend(created_tasks[len(created_agents):len(created_tasks)])
 
             members.sort(key=lambda x: x.is_manager == False)
-            team = Team( members=members, formation=_formation,  team_tasks=team_tasks, planner_llm=vhq_formation_planner.llm)
-            return team
+            network = AgentNetwork(members=members, formation=_formation,  network_tasks=network_tasks)
+            return network
 
 
     except Exception as e:

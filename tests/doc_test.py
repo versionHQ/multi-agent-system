@@ -37,3 +37,34 @@ def test_doc_index_b():
     res = task.execute(agent=agent, context="amazing context to consider.")
     assert "Hi! Here is the result:" in res.callback_output
     assert [getattr(res.pydantic, k) for k, v in CustomOutput.model_fields.items()]
+
+
+def test_doc_index_c():
+    import versionhq as vhq
+
+    agent_a = vhq.Agent(role="agent a", goal="My amazing goals", llm="llm-of-your-choice")
+    agent_b = vhq.Agent(role="agent b", goal="My amazing goals", llm="llm-of-your-choice")
+
+    task_1 = vhq.Task(
+        description="Analyze the client's business model.",
+        response_fields=[vhq.ResponseField(title="test1", data_type=str, required=True),],
+        allow_delegation=True
+    )
+
+    task_2 = vhq.Task(
+        description="Define a cohort.",
+        response_fields=[vhq.ResponseField(title="test1", data_type=int, required=True),],
+        allow_delegation=False
+    )
+
+    network =vhq.AgentNetwork(
+        members=[
+            vhq.Member(agent=agent_a, is_manager=False, tasks=[task_1]),
+            vhq.Member(agent=agent_b, is_manager=True, tasks=[task_2]),
+        ],
+    )
+    res = network.launch()
+
+    assert isinstance(res, vhq.NetworkOutput)
+    assert not [item for item in task_1.processed_agents if "vhq-Delegated-Agent" == item]
+    assert [item for item in task_1.processed_agents if "agent b" == item]

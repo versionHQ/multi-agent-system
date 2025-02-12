@@ -39,3 +39,10 @@ vhq_formation_planner = Agent(
         "Random is a formation where a single agent handles tasks, asking help from other agents without sharing its memory or knowledge. Typical usecase is that an email agent drafts promo message for the given audience, asking insights on tones from other email agents which oversee other customer clusters, or an agent calls the external, third party agent to deploy the campaign. ",
     ]
 )
+
+
+vhq_agent_creator = Agent(
+    role="vhq-Agent Creator",
+    goal="build an agent that can handle the given task",
+    llm="gemini/gemini-2.0-flash-exp",
+)

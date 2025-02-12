@@ -125,7 +125,7 @@ class ShortTermMemory(Memory):
 
                     from versionhq.storage.mem0_storage import Mem0Storage
                 except:
-                    raise ImportError("Mem0 is not installed. Please install it with `uv pip install mem0ai`.")
+                    raise ImportError("Mem0 is not installed. Please install it with `$ uv add versionhq[mem0ai]`.")
 
             storage = Mem0Storage(type="stm", agent=agent)
         else:

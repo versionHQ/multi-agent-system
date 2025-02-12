@@ -84,33 +84,39 @@ This will return a `TaskOutput` object that stores response in plane text, JSON,
 
 ## Supervising
 
-   ```python
-   import versionhq as vhq
+To create an agent network with one or more manager agents, designate members using the `is_manager` tag.
 
-   agent_a = vhq.Agent(role="agent a", goal="My amazing goals", llm="llm-of-your-choice")
-   agent_b = vhq.Agent(role="agent b", goal="My amazing goals", llm="llm-of-your-choice")
+```python
+import versionhq as vhq
 
-   task_1 = vhq.Task(
-      description="Analyze the client's business model.",
-      response_fields=[vhq.ResponseField(title="test1", data_type=str, required=True),],
-      allow_delegation=True
-   )
+agent_a = vhq.Agent(role="agent a", goal="My amazing goals", llm="llm-of-your-choice")
+agent_b = vhq.Agent(role="agent b", goal="My amazing goals", llm="llm-of-your-choice")
 
-    task_2 = vhq.Task(
-      description="Define the cohort.",
-      response_fields=[vhq.ResponseField(title="test1", data_type=int, required=True),],
-      allow_delegation=False
-   )
+task_1 = vhq.Task(
+   description="Analyze the client's business model.",
+   response_fields=[vhq.ResponseField(title="test1", data_type=str, required=True),],
+   allow_delegation=True
+)
 
-   team =vhq.Team(
-      members=[
-         vhq.Member(agent=agent_a, is_manager=False, task=task_1),
-         vhq.Member(agent=agent_b, is_manager=True, task=task_2),
-      ],
-   )
-   res = team.launch()
-   ```
+task_2 = vhq.Task(
+   description="Define a cohort.",
+   response_fields=[vhq.ResponseField(title="test1", data_type=int, required=True),],
+   allow_delegation=False
+)
+
+network =vhq.AgentNetwork(
+   members=[
+      vhq.Member(agent=agent_a, is_manager=False, tasks=[task_1]),
+      vhq.Member(agent=agent_b, is_manager=True, tasks=[task_2]), # Agent B as a manager
+   ],
+)
+res = network.launch()
+
+assert isinstance(res, vhq.NetworkOutput)
+assert not [item for item in task_1.processed_agents if "vhq-Delegated-Agent" == item]
+assert [item for item in task_1.processed_agents if "agent b" == item]
+```
 
 This will return a list with dictionaries with keys defined in the `ResponseField` of each task.
 
-Tasks can be delegated to a team manager, peers in the team, or completely new agent.
+Tasks can be delegated to a manager, peers within the agent network, or a completely new agent.

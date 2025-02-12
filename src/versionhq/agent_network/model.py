@@ -1,7 +1,6 @@
 import uuid
 import warnings
 from enum import Enum
-from dotenv import load_dotenv
 from concurrent.futures import Future
 from hashlib import md5
 from typing import Any, Dict, List, Callable, Optional, Tuple
@@ -10,9 +9,8 @@ from pydantic._internal._generate_schema import GenerateSchema
 from pydantic_core import PydanticCustomError, core_schema
 
 from versionhq.agent.model import Agent
-from versionhq.task.model import Task, TaskOutput, TaskExecutionType
+from versionhq.task.model import Task, TaskOutput, TaskExecutionType, ResponseField
 from versionhq.task.formatter import create_raw_outputs
-from versionhq.team.team_planner import TeamPlanner
 from versionhq._utils.logger import Logger
 from versionhq._utils.usage_metrics import UsageMetrics
 
@@ -41,21 +39,21 @@ class Formation(str, Enum):
 class TaskHandlingProcess(str, Enum):
     """
     A class representing task handling processes to tackle multiple tasks.
-    When the team has multiple tasks that connect with edges, follow the edge conditions.
+    When the agent network has multiple tasks that connect with edges, follow the edge conditions.
     """
     SEQUENT = 1
     HIERARCHY = 2
     CONSENSUAL = 3 # either from managers or peers or (human) - most likely controlled by edge
 
 
-class TeamOutput(TaskOutput):
+class NetworkOutput(TaskOutput):
     """
-    A class to store output from the team, inherited from TaskOutput class.
+    A class to store output from the network, inherited from TaskOutput class.
     """
 
-    team_id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True, description="store the team ID that generate the TeamOutput")
+    network_id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True, description="store the network ID as an identifier that generate the output")
     task_description: str = Field(default=None, description="store initial request (task description) from the client")
-    task_outputs: list[TaskOutput] = Field(default=list, description="store TaskOutput objects of all tasks that the team has executed")
+    task_outputs: list[TaskOutput] = Field(default=list, description="store TaskOutput objects of all tasks that the network has executed")
     # token_usage: UsageMetrics = Field(default=dict, description="processed token summary")
 
     def return_all_task_outputs(self) -> List[Dict[str, Any]]:
@@ -71,18 +69,18 @@ class TeamOutput(TaskOutput):
         elif self.json_dict and key in self.json_dict:
             return self.json_dict[key]
         else:
-            raise KeyError(f"Key '{key}' not found in the team output.")
+            raise KeyError(f"Key '{key}' not found in the output.")
 
 
 
 class Member(BaseModel):
     """
-    A class to store a member in the team and connect the agent as a member with tasks and memory/knowledge share settings.
+    A class to store a member (agent) in the network, with its tasks and memory/knowledge share settings.
     """
     agent: Agent | None = Field(default=None)
     is_manager: bool = Field(default=False)
-    can_share_knowledge: bool = Field(default=True, description="whether to share the agent's knowledge in the team")
-    can_share_memory: bool = Field(default=True, description="whether to share the agent's memory in the team")
+    can_share_knowledge: bool = Field(default=True, description="whether to share the agent's knowledge in the network")
+    can_share_memory: bool = Field(default=True, description="whether to share the agent's memory in the network")
     tasks: Optional[List[Task]] = Field(default_factory=list, description="tasks explicitly assigned to the agent")
 
     @property
@@ -90,10 +88,10 @@ class Member(BaseModel):
         return bool(self.tasks)
 
 
-class Team(BaseModel):
+class AgentNetwork(BaseModel):
     """
-    A class to store a team with members and tasks.
-    Tasks can be 1. multiple individual tasks, 2. multiple dependant tasks connected via Graph, and 3. hybrid.
+    A class to store a agent network with agent members and their tasks.
+    Tasks can be 1. multiple individual tasks, 2. multiple dependant tasks connected via TaskGraph, and 3. hybrid.
     """
 
     __hash__ = object.__hash__
@@ -108,8 +106,7 @@ class Team(BaseModel):
     should_reform: bool = Field(default=False, description="True if task exe. failed or eval scores below threshold")
 
     # formation planning
-    planner_llm: Optional[Any] = Field(default=None, description="llm to generate and evaluate formation")
-    team_tasks: Optional[List[Task]] = Field(default_factory=list, description="tasks without dedicated agents to handle")
+    network_tasks: Optional[List[Task]] = Field(default_factory=list, description="tasks without dedicated agents")
 
     # task execution rules
     prompt_file: str = Field(default="", description="absolute path to the prompt json file")
@@ -118,11 +115,11 @@ class Team(BaseModel):
     # callbacks
     pre_launch_callbacks: List[Callable[[Optional[Dict[str, Any]]], Optional[Dict[str, Any]]]] = Field(
         default_factory=list,
-        description="list of callback functions to be executed before the team launch. i.e., adjust inputs"
+        description="list of callback functions to be executed before the network launch. i.e., adjust inputs"
     )
-    post_launch_callbacks: List[Callable[[TeamOutput], TeamOutput]] = Field(
+    post_launch_callbacks: List[Callable[[NetworkOutput], NetworkOutput]] = Field(
         default_factory=list,
-        description="list of callback functions to be executed after the team launch. i.e., store the result in repo"
+        description="list of callback functions to be executed after the network launch. i.e., store the result in repo"
     )
     step_callback: Optional[Any] = Field(default=None, description="callback to be executed after each step for all agents execution")
 
@@ -146,19 +143,19 @@ class Team(BaseModel):
     @model_validator(mode="after")
     def assess_tasks(self):
         """
-        Validates if the model recognize all tasks that the team needs to handle.
+        Validates if the model recognize all tasks that the network needs to handle.
         """
 
         if self.tasks:
-            if all(task in self.tasks for task in self.team_tasks) == False:
-                raise PydanticCustomError("task_validation_error", "`team_tasks` needs to be recognized in the task.", {})
+            if all(task in self.tasks for task in self.network_tasks) == False:
+                raise PydanticCustomError("task_validation_error", "`network_tasks` needs to be recognized in the task.", {})
 
 
             num_member_tasks = 0
             for member in self.members:
                 num_member_tasks += len(member.tasks)
 
-            # if len(self.tasks) != len(self.team_tasks) + num_member_tasks:
+            # if len(self.tasks) != len(self.network_tasks) + num_member_tasks:
             #     raise PydanticCustomError("task_validation_error", "Some tasks are missing.", {})
         return self
 
@@ -166,7 +163,7 @@ class Team(BaseModel):
     @model_validator(mode="after")
     def check_manager(self):
         """
-        Check if the team has a manager
+        Check if the agent network has a manager
         """
         if self.process == TaskHandlingProcess.HIERARCHY or self.formation == Formation.SUPERVISING:
             if not self.managers:
@@ -174,9 +171,9 @@ class Team(BaseModel):
                 raise PydanticCustomError("missing_manager", "`manager` is required when using hierarchical process.", {})
 
         ## comment out for the formation flexibilities
-        # if self.managers and (self.manager_tasks is None or self.team_tasks is None):
+        # if self.managers and (self.manager_tasks is None or self.network_tasks is None):
         #     self._logger.log(level="error", message="The manager is idling. At least 1 task needs to be assigned to the manager.", color="red")
-        #     raise PydanticCustomError("missing_manager_task", "manager needs to have at least one manager task or team task.", {})
+        #     raise PydanticCustomError("missing_manager_task", "manager needs to have at least one manager task or network task.", {})
 
         return self
 
@@ -184,9 +181,9 @@ class Team(BaseModel):
     @model_validator(mode="after")
     def validate_task_member_paring(self):
         """
-        Sequential task processing without any team tasks require a task-agent pairing.
+        Sequential task processing without any network_tasks require a task-agent pairing.
         """
-        if self.process == TaskHandlingProcess.SEQUENT and self.team_tasks is None:
+        if self.process == TaskHandlingProcess.SEQUENT and self.network_tasks is None:
             for task in self.tasks:
                 if not [member.task == task for member in self.members]:
                     self._logger.log(level="error", message=f"The following task needs a dedicated agent to be assinged: {task.description}", color="red")
@@ -196,7 +193,7 @@ class Team(BaseModel):
     @model_validator(mode="after")
     def validate_end_with_at_most_one_async_task(self):
         """
-        Validates that the team completes max. one asynchronous task by counting tasks traversed backward
+        Validates that the agent network completes max. one asynchronous task by counting tasks traversed backward
         """
 
         async_task_count = 0
@@ -209,8 +206,41 @@ class Team(BaseModel):
                 break
 
         if async_task_count > 1:
-            raise PydanticCustomError("async_task_count", "The team must end with max. one asynchronous task.", {})
+            raise PydanticCustomError("async_task_count", "The agent network must end with at maximum one asynchronous task.", {})
         return self
+
+
+    @staticmethod
+    def handle_assigning_agents(unassigned_tasks: List[Task]) -> List[Member]:
+        """
+        Build an agent and assign it with a task. Return a list of Member connecting the agent created and the task given.
+        """
+
+        from versionhq.agent.inhouse_agents import vhq_agent_creator
+
+        new_member_list: List[Member] = []
+
+        for unassgined_task in unassigned_tasks:
+            task = Task(
+                description=f"""
+                    Based on the following task summary, draft a AI agent's role and goal in concise manner.
+                    Task summary: {unassgined_task.summary}
+                """,
+                response_fields=[
+                    ResponseField(title="goal", data_type=str, required=True),
+                    ResponseField(title="role", data_type=str, required=True),
+                ],
+            )
+            res = task.execute(agent=vhq_agent_creator)
+            agent = Agent(
+                role=res.json_dict["role"] if "role" in res.json_dict else res.raw,
+                goal=res.json_dict["goal"] if "goal" in res.json_dict else task.description
+            )
+            if agent.id:
+                member = Member(agent=agent, tasks=[unassgined_task], is_manager=False)
+                new_member_list.append(member)
+
+        return new_member_list
 
 
     def _get_responsible_agent(self, task: Task) -> Agent | None:
@@ -226,17 +256,16 @@ class Team(BaseModel):
 
     def _assign_tasks(self) -> None:
         """
-        Form a team considering agents and tasks given, and update `self.members` field:
-            1. Idling managers to take the team tasks.
-            2. Idling members to take the remaining tasks starting from the team tasks to member tasks.
+        Form a agent network considering given agents and tasks, and update `self.members` field:
+            1. Idling managers to take the network tasks.
+            2. Idling members to take the remaining tasks starting from the network tasks to member tasks.
             3. Create agents to handle the rest tasks.
         """
 
-        team_planner = TeamPlanner(tasks=self.tasks, planner_llm=self.planner_llm)
         idling_managers: List[Member] = [member for member in self.members if member.is_idling and member.is_manager == True]
         idling_members: List[Member] =  [member for member in self.members if member.is_idling and member.is_manager == False]
-        unassigned_tasks: List[Task] = self.team_tasks + self.member_tasks_without_agent if self.team_tasks else self.member_tasks_without_agent
-        new_team_members: List[Member] = []
+        unassigned_tasks: List[Task] = self.network_tasks + self.member_tasks_without_agent if self.network_tasks else self.member_tasks_without_agent
+        new_members: List[Member] = []
 
         if idling_managers:
             idling_managers[0].tasks.extend(unassigned_tasks)
@@ -245,9 +274,9 @@ class Team(BaseModel):
             idling_members[0].tasks.extend(unassigned_tasks)
 
         else:
-            new_team_members = team_planner._handle_assign_agents(unassigned_tasks=unassigned_tasks)
-            if new_team_members:
-                self.members += new_team_members
+            new_members = self.handle_assigning_agents(unassigned_tasks=unassigned_tasks)
+            if new_members:
+                self.members += new_members
 
 
     # task execution
@@ -268,7 +297,7 @@ class Team(BaseModel):
 
     def _calculate_usage_metrics(self) -> UsageMetrics:
         """
-        Calculate and return the usage metrics that consumed by the team.
+        Calculate and return the usage metrics that consumed by the agent network.
         """
         total_usage_metrics = UsageMetrics()
 
@@ -288,12 +317,12 @@ class Team(BaseModel):
         return total_usage_metrics
 
 
-    def _execute_tasks(self, tasks: List[Task], start_index: Optional[int] = 0, was_replayed: bool = False) -> TeamOutput:
+    def _execute_tasks(self, tasks: List[Task], start_index: Optional[int] = 0, was_replayed: bool = False) -> NetworkOutput:
         """
-        Executes tasks sequentially and returns the final output in TeamOutput class.
+        Executes tasks sequentially and returns the final output in NetworkOutput class.
         When we have a manager agent, we will start from executing manager agent's tasks.
         Priority:
-        1. Team tasks > 2. Manager task > 3. Member tasks (in order of index)
+        1. Network tasks > 2. Manager task > 3. Member tasks (in order of index)
         """
 
         task_outputs: List[TaskOutput] = []
@@ -330,6 +359,7 @@ class Team(BaseModel):
             else:
                 context = create_raw_outputs(tasks=[task,], task_outputs=([last_sync_output,] if last_sync_output else [] ))
                 task_output = task.execute(agent=responsible_agent, context=context)
+
                 if self.managers and responsible_agent in [manager.agent for manager in self.managers]:
                     lead_task_output = task_output
 
@@ -341,15 +371,15 @@ class Team(BaseModel):
             task_outputs = self._process_async_tasks(futures, was_replayed)
 
         if not task_outputs:
-            self._logger.log(level="error", message="Missing task outcomes. Failed to launch the task.", color="red")
-            raise ValueError("Failed to launch tasks")
+            self._logger.log(level="error", message="Missing task outputs.", color="red")
+            raise ValueError("Missing task outputs")
 
         final_task_output = lead_task_output if lead_task_output is not None else task_outputs[0] #! REFINEME
 
         # token_usage = self._calculate_usage_metrics() #! combining with Eval
 
-        return TeamOutput(
-            team_id=self.id,
+        return NetworkOutput(
+            network_id=self.id,
             raw=final_task_output.raw,
             json_dict=final_task_output.json_dict,
             pydantic=final_task_output.pydantic,
@@ -358,33 +388,23 @@ class Team(BaseModel):
         )
 
 
-
-    def launch(self, kwargs_pre: Optional[Dict[str, str]] = None, kwargs_post: Optional[Dict[str, Any]] = None) -> TeamOutput:
+    def launch(self, kwargs_pre: Optional[Dict[str, str]] = None, kwargs_post: Optional[Dict[str, Any]] = None) -> NetworkOutput:
         """
-        Confirm and launch the formation - execute tasks and record outputs.
-        0. Assign an agent to a task - using conditions (manager prioritizes team_tasks) and planner_llm.
-        1. Address `pre_launch_callbacks` if any.
-        2. Handle team members' tasks in accordance with the process.
-        3. Address `post_launch_callbacks` if any.
+        Launch the agent network - executing tasks and recording their outputs.
         """
 
         metrics: List[UsageMetrics] = []
 
-        if self.team_tasks or self.member_tasks_without_agent:
+        if self.network_tasks or self.member_tasks_without_agent:
             self._assign_tasks()
 
         if kwargs_pre is not None:
             for func in self.pre_launch_callbacks:
                 func(**kwargs_pre)
 
-        # self._execution_span = self._telemetry.team_execution_span(self, inputs)
-        # self._task_output_handler.reset()
-        # self._logging_color = "bold_purple"
-        # i18n = I18N(prompt_file=self.prompt_file)
-
         for member in self.members:
             agent = member.agent
-            agent.team = self
+            agent.network = self
 
             if self.step_callback:
                 agent.callbacks.append(self.step_callback)
@@ -421,7 +441,7 @@ class Team(BaseModel):
     @property
     def manager_tasks(self) -> List[Task]:
         """
-        Tasks (incl. team tasks) handled by managers in the team.
+        Tasks (incl. network tasks) handled by managers in the agent network.
         """
         res = list()
 
@@ -436,22 +456,22 @@ class Team(BaseModel):
     @property
     def tasks(self) -> List[Task]:
         """
-        Return all the tasks that the team needs to handle in order of priority:
-        1. team tasks, -> assigned to the member
+        Return all the tasks that the agent network needs to handle in order of priority:
+        1. network_tasks, -> assigned to the member
         2. manager_task,
         3. members' tasks
         """
 
-        team_tasks = self.team_tasks
+        network_tasks = self.network_tasks
         manager_tasks = self.manager_tasks
         member_tasks = []
 
         for member in self.members:
             if member.is_manager == False and member.tasks:
-                a = [item for item in member.tasks if item not in team_tasks and item not in manager_tasks]
+                a = [item for item in member.tasks if item not in network_tasks and item not in manager_tasks]
                 member_tasks += a
 
-        return team_tasks + manager_tasks + member_tasks
+        return network_tasks + manager_tasks + member_tasks
 
 
     @property

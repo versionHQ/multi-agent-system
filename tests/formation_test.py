@@ -1,5 +1,3 @@
-from unittest.mock import patch
-
 def test_minimum_inputs():
     import versionhq as vhq
 
@@ -7,14 +5,11 @@ def test_minimum_inputs():
         task="Describe the color of the sky by weather condition",
         expected_outcome="Dict that pairs color of the sky with specific weather condition"
     )
-    assert isinstance(network, vhq.Team)
+    assert isinstance(network, vhq.AgentNetwork)
     assert network.members
     assert network.tasks
     assert isinstance(network.formation, vhq.Formation)
     assert network.managers if network.formation in (vhq.Formation.SUPERVISING, vhq.Formation.HYBRID) else not network.managers
-
-    from versionhq.agent.inhouse_agents import vhq_formation_planner
-    assert network.planner_llm == vhq_formation_planner.llm
 
 
 def _test_specific_formation():
@@ -41,7 +36,7 @@ def _test_specific_formation():
 
         )
 
-        assert isinstance(network, vhq.Team)
+        assert isinstance(network, vhq.AgentNetwork)
         assert network.formation == item if isinstance(item, vhq.Formation) and item != vhq.Formation.UNDEFINED else isinstance(network.formation, vhq.Formation)
         assert network.members
         assert network.tasks

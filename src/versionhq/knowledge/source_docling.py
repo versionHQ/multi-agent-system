@@ -56,7 +56,7 @@ class DoclingSource(BaseKnowledgeSource):
             super().__init__(*args, **kwargs)
 
         else:
-            raise ImportError("The docling package is required. Please install the package using: $ uv add docling.")
+            raise ImportError("The docling package is required. Please install the package using: $ uv add versionhq[docling]")
         # else:
         #     super().__init__(*args, **kwargs)
 

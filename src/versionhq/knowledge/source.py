@@ -265,7 +265,7 @@ class PDFKnowledgeSource(BaseFileKnowledgeSource):
                 import os
                 os.system("uv add pdfplumber --optional pdfplumber")
             except:
-                raise ImportError("pdfplumber is not installed. Please install it with: uv add pdfplumber --optional pdfplumber")
+                raise ImportError("pdfplumber is not installed. Please install it with: $ uv add versionhq[pdfplumber]")
 
 
     def add(self) -> None:
@@ -394,7 +394,7 @@ class ExcelKnowledgeSource(BaseFileKnowledgeSource):
             except:
                 missing_package = str(e).split()[-1]
                 raise ImportError(
-                    f"{missing_package} is not installed. Please install it with: pip install {missing_package}"
+                    f"{missing_package} is not installed. Please install it with: $ uv add versionhq[{missing_package}]"
                 )
 
 

@@ -2,12 +2,12 @@ from unittest.mock import patch
 
 from versionhq.agent.model import Agent
 from versionhq.task.model import Task, ResponseField, TaskOutput
-from versionhq.team.model import Team, Member, TaskHandlingProcess, TeamOutput
+from versionhq.agent_network.model import AgentNetwork, Member, TaskHandlingProcess, NetworkOutput
 from versionhq._utils.usage_metrics import UsageMetrics
 from versionhq.llm.model import DEFAULT_MODEL_NAME
 
 
-def test_form_team():
+def test_form_agent_network():
     agent_a = Agent(role="agent a", goal="My amazing goals", backstory="My amazing backstory", llm=DEFAULT_MODEL_NAME, max_tokens=3000)
     agent_b = Agent(role="agent b", goal="My amazing goals", llm=DEFAULT_MODEL_NAME, max_tokens=3000)
     task_1 = Task(
@@ -24,20 +24,20 @@ def test_form_team():
             ResponseField(title="test2", data_type=list, required=True),
         ],
     )
-    team = Team(
+    network = AgentNetwork(
         members=[
             Member(agent=agent_a, is_manager=True, tasks=[task_1,]),
             Member(agent=agent_b, is_manager=False, tasks=[task_2,]),
         ],
     )
 
-    assert team.id and team.key and isinstance(team.key, str) and team.managers
-    assert task_1 in team.manager_tasks
-    assert team.tasks == [task_1, task_2]
-    assert [item.id is task_1.id or item.id is task_2.id for item in team.tasks]
+    assert network.id and network.key and isinstance(network.key, str) and network.managers
+    assert task_1 in network.manager_tasks
+    assert network.tasks == [task_1, task_2]
+    assert [item.id is task_1.id or item.id is task_2.id for item in network.tasks]
 
 
-def test_form_team_without_leader():
+def test_form_network_without_leader():
     agent_a = Agent(role="agent a", goal="My amazing goals", backstory="My amazing backstory", llm=DEFAULT_MODEL_NAME, max_tokens=3000)
     agent_b = Agent(role="agent b", goal="My amazing goals", llm=DEFAULT_MODEL_NAME, max_tokens=3000)
     task_1 = Task(
@@ -54,18 +54,18 @@ def test_form_team_without_leader():
             ResponseField(title="test2", data_type=list, required=True),
         ],
     )
-    team = Team(
+    network = AgentNetwork(
         members=[
             Member(agent=agent_a, is_manager=False, tasks=[task_1,]),
             Member(agent=agent_b, is_manager=False, tasks=[task_2,]),
         ],
     )
 
-    assert team.id and team.key and isinstance(team.key, str)
-    assert team.managers is None
-    assert team.manager_tasks == []
-    assert team.tasks == [task_1, task_2]
-    assert [item.id is task_1.id or item.id is task_2.id for item in team.tasks]
+    assert network.id and network.key and isinstance(network.key, str)
+    assert network.managers is None
+    assert network.manager_tasks == []
+    assert network.tasks == [task_1, task_2]
+    assert [item.id is task_1.id or item.id is task_2.id for item in network.tasks]
 
 
 def test_launch_without_leader():
@@ -85,16 +85,16 @@ def test_launch_without_leader():
             ResponseField(title="test2", data_type=list, required=True),
         ],
     )
-    team = Team(
+    network = AgentNetwork(
         members=[
             Member(agent=agent_a, is_manager=False, tasks=[task_1,]),
             Member(agent=agent_b, is_manager=False, tasks=[task_2,]),
         ],
     )
-    res = team.launch()
+    res = network.launch()
     res_all = res.return_all_task_outputs()
 
-    assert isinstance(res, TeamOutput) and res.team_id is team.id
+    assert isinstance(res, NetworkOutput) and res.network_id is network.id
     assert isinstance(res.raw, str) and isinstance(res.json_dict, dict)
     assert res.pydantic is None
     assert [isinstance(item, TaskOutput) for item in res.task_outputs]
@@ -103,7 +103,7 @@ def test_launch_without_leader():
     # assert res.token_usage.total_tokens == 0 # as we dont set token usage on agent
 
 
-def team_launch_with_task_callback():
+def test_launch_with_task_callback():
     """
     Each task has callback with callback kwargs.
     """
@@ -137,13 +137,13 @@ def team_launch_with_task_callback():
         callback_kwargs=dict(item="pytest demo 2")
     )
 
-    team = Team(
+    network = AgentNetwork(
         members=[
             Member(agent=agent_a, is_manager=False, tasks=[task_1,]),
             Member(agent=agent_b, is_manager=False, tasks=[task_2,]),
         ],
     )
-    res = team.launch()
+    res = network.launch()
 
     assert res.raw and res.json_dict
     assert len(res.return_all_task_outputs()) == 2
@@ -152,9 +152,9 @@ def team_launch_with_task_callback():
     assert "pytest" in demo_list[1]
 
 
-def test_delegate_in_team():
+def test_delegate_in_network():
     """
-    When the agent belongs to the team, the team manager or peers are prioritized to delegete the task.
+    When the agent belongs to the agent network, its manager or peers are prioritized to delegete the task.
     """
 
     agent_a = Agent(role="agent a", goal="My amazing goals", llm=DEFAULT_MODEL_NAME)
@@ -169,13 +169,13 @@ def test_delegate_in_team():
         response_fields=[ResponseField(title="test1", data_type=int, required=True),],
         allow_delegation=False
     )
-    team = Team(
+    network = AgentNetwork(
         members=[
             Member(agent=agent_a, is_manager=False, tasks=[task_1,]),
             Member(agent=agent_b, is_manager=False, tasks=[task_2,]),
         ],
     )
-    res = team.launch()
+    res = network.launch()
 
     assert res.raw is not None
     assert res.json_dict is not None
@@ -196,23 +196,23 @@ def test_launch_with_leader():
             ResponseField(title="task_2_2", data_type=list, required=True),
         ],
     )
-    team = Team(
+    network = AgentNetwork(
         members=[
             Member(agent=agent_a, is_manager=False, tasks=[task_1,]),
             Member(agent=agent_b, is_manager=True, tasks=[task_2,]),
         ],
     )
-    res = team.launch()
+    res = network.launch()
 
-    assert isinstance(res, TeamOutput)
-    assert res.team_id is team.id
+    assert isinstance(res, NetworkOutput)
+    assert res.network_id is network.id
     assert res.raw is not None
     assert res.json_dict is not None
-    assert team.managers[0].agent.id is agent_b.id
+    assert network.managers[0].agent.id is agent_b.id
     assert len(res.task_outputs) == 2
     assert [item.raw is not None for item in res.task_outputs]
-    assert len(team.tasks) == 2
-    assert team.tasks[0].output.raw == res.raw
+    assert len(network.tasks) == 2
+    assert network.tasks[0].output.raw == res.raw
 
 
 def test_hierarchial_process():
@@ -234,7 +234,7 @@ def test_hierarchial_process():
             ResponseField(title="task_2_2", data_type=list, required=True),
         ],
     )
-    team = Team(
+    network = AgentNetwork(
         members=[
             Member(agent=agent_a, is_manager=False, tasks=[task_1,]),
             Member(agent=agent_b, is_manager=True, tasks=[task_2,]),
@@ -242,30 +242,30 @@ def test_hierarchial_process():
         ],
         process=TaskHandlingProcess.HIERARCHY
     )
-    res = team.launch()
+    res = network.launch()
 
-    assert isinstance(res, TeamOutput)
-    assert res.team_id is team.id
+    assert isinstance(res, NetworkOutput)
+    assert res.network_id is network.id
     assert res.raw is not None
     assert res.json_dict is not None
-    assert team.managers[0].agent.id is agent_b.id
+    assert network.managers[0].agent.id is agent_b.id
     assert len(res.task_outputs) == 2
     assert [item.raw is not None for item in res.task_outputs]
-    assert len(team.tasks) == 2
-    assert team.tasks[0].output.raw == res.raw
+    assert len(network.tasks) == 2
+    assert network.tasks[0].output.raw == res.raw
 
 
-def test_handle_team_task():
+def test_handle_network_task():
     """
-    Make the best team formation with agents and tasks given.
+    Make the best network formation with agents and tasks given.
     """
 
     agent_a = Agent(role="agent a", goal="My amazing goals", llm=DEFAULT_MODEL_NAME)
     agent_b = Agent(role="agent b", goal="My amazing goals", llm=DEFAULT_MODEL_NAME)
     agent_c = Agent(role="agent c", goal="My amazing goals", llm=DEFAULT_MODEL_NAME)
-    team_task = Task(
+    network_task = Task(
         description="Define outbound strategies.",
-        response_fields=[ResponseField(title="team_task_1", data_type=str, required=True),],
+        response_fields=[ResponseField(title="network_task_1", data_type=str, required=True),],
     )
     task_1 = Task(
         description="Analyze the client's business model.",
@@ -279,47 +279,47 @@ def test_handle_team_task():
         ],
     )
 
-    team_solo = Team(
+    network_solo = AgentNetwork(
         members=[
             Member(agent=agent_c, is_manager=False)
         ],
-        team_tasks=[team_task, task_1, task_2, ]
+        network_tasks=[network_task, task_1, task_2, ]
     )
-    team_flat =  Team(
+    network_flat =  AgentNetwork(
         members=[
             Member(agent=agent_a, is_manager=False, tasks=[task_1,]),
             Member(agent=agent_c, is_manager=False)
         ],
-        team_tasks=[team_task, task_2,]
+        network_tasks=[network_task, task_2,]
     )
-    team_leader =  Team(
+    network_leader =  AgentNetwork(
         members=[
             Member(agent=agent_a, is_manager=False, tasks=[task_1,]),
             Member(agent=agent_b, is_manager=True, tasks=[task_2,]),
             Member(agent=agent_c, is_manager=False)
         ],
-        team_tasks=[team_task, ]
+        network_tasks=[network_task, ]
     )
-    team_dual_leaders =  Team(
+    network_dual_leaders =  AgentNetwork(
         members=[
             Member(agent=agent_a, is_manager=False, tasks=[task_1,]),
             Member(agent=agent_b, is_manager=True, tasks=[task_2,]),
             Member(agent=agent_c, is_manager=True)
         ],
-        team_tasks=[team_task, ]
+        network_tasks=[network_task, ]
     )
-    team_leader_without_task =  Team(
+    network_leader_without_task =  AgentNetwork(
         members=[
             Member(agent=agent_a, is_manager=False, tasks=[task_1,]),
             Member(agent=agent_b, is_manager=False, tasks=[task_2,]),
             Member(agent=agent_c, is_manager=True)
         ],
-        team_tasks=[team_task,]
+        network_tasks=[network_task,]
     )
-    teams = [team_solo, team_flat, team_leader, team_dual_leaders, team_leader_without_task]
+    networks = [network_solo, network_flat, network_leader, network_dual_leaders, network_leader_without_task]
 
 
-    for item in teams:
-        with patch.object(Team, "_execute_tasks", kwargs=dict(tasks=item.tasks)) as private_mock:
+    for item in networks:
+        with patch.object(AgentNetwork, "_execute_tasks", kwargs=dict(tasks=item.tasks)) as private_mock:
             item.launch()
             private_mock.assert_called_once()

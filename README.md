@@ -34,6 +34,7 @@ A Python framework for agentic orchestration that handles complex task automatio
   - [Forming a agent network](#forming-a-agent-network)
   - [Executing tasks](#executing-tasks)
   - [Supervising](#supervising)
+- [Supervising](#supervising-1)
 - [Technologies Used](#technologies-used)
 - [Project Structure](#project-structure)
 - [Setting Up a Project](#setting-up-a-project)
@@ -224,42 +225,50 @@ This will return a `TaskOutput` object that stores response in plane text, JSON,
 
 ### Supervising
 
-   ```python
-   import versionhq as vhq
+## Supervising
 
-   agent_a = vhq.Agent(role="agent a", goal="My amazing goals", llm="llm-of-your-choice")
-   agent_b = vhq.Agent(role="agent b", goal="My amazing goals", llm="llm-of-your-choice")
+To create an agent network with one or more manager agents, designate members using the `is_manager` tag.
 
-   task_1 = vhq.Task(
-      description="Analyze the client's business model.",
-      response_fields=[vhq.ResponseField(title="test1", data_type=str, required=True),],
-      allow_delegation=True
-   )
+```python
+import versionhq as vhq
 
-    task_2 = vhq.Task(
-      description="Define the cohort.",
-      response_fields=[ResponseField(title="test1", data_type=int, required=True),],
-      allow_delegation=False
-   )
+agent_a = vhq.Agent(role="agent a", goal="My amazing goals", llm="llm-of-your-choice")
+agent_b = vhq.Agent(role="agent b", goal="My amazing goals", llm="llm-of-your-choice")
 
-   team = vhq.Team(
-      members=[
-         vhq.Member(agent=agent_a, is_manager=False, task=task_1),
-         vhq.Member(agent=agent_b, is_manager=True, task=task_2),
-      ],
-   )
-   res = team.launch()
-   ```
+task_1 = vhq.Task(
+   description="Analyze the client's business model.",
+   response_fields=[vhq.ResponseField(title="test1", data_type=str, required=True),],
+   allow_delegation=True
+)
+
+task_2 = vhq.Task(
+   description="Define a cohort.",
+   response_fields=[vhq.ResponseField(title="test1", data_type=int, required=True),],
+   allow_delegation=False
+)
+
+network =vhq.AgentNetwork(
+   members=[
+      vhq.Member(agent=agent_a, is_manager=False, tasks=[task_1]),
+      vhq.Member(agent=agent_b, is_manager=True, tasks=[task_2]), # Agent B as a manager
+   ],
+)
+res = network.launch()
+
+assert isinstance(res, vhq.NetworkOutput)
+assert not [item for item in task_1.processed_agents if "vhq-Delegated-Agent" == item]
+assert [item for item in task_1.processed_agents if "agent b" == item]
+```
 
 This will return a list with dictionaries with keys defined in the `ResponseField` of each task.
 
-Tasks can be delegated to a team manager, peers in the team, or completely new agent.
+Tasks can be delegated to a manager, peers within the agent network, or a completely new agent.
 
 <hr />
 
 ## Technologies Used
 
-**Graph Theory (Analysis and Visualization)**
+**Task Graph**
 
 * [NetworkX](https://networkx.org/documentation/stable/reference/introduction.html): A Python package to analyze, create, and manipulate complex graph networks.
 * [Matplotlib](https://matplotlib.org/stable/index.html): Visualization library

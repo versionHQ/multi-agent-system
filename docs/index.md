@@ -35,7 +35,7 @@ A Python framework for agentic orchestration that handles complex task automatio
 Agents are model-agnostic, and will improve task output, while oprimizing token cost and job latency, by sharing their memory, knowledge base, and RAG tools with other agents in the network.
 
 
-###  Agent Network
+### Agent Network
 
 Agents adapt their formation based on task complexity.
 
@@ -139,7 +139,7 @@ agent.update(
 
 ## Project Set Up
 
-### 1. Package manager
+**Installing package manager**
 
    For MacOS:
 
@@ -152,7 +152,7 @@ agent.update(
    sudo apt-get install uv
    ```
 
-### 2. Dependencies
+**Installing dependencies**
 
    ```
    uv venv
@@ -186,7 +186,7 @@ agent.update(
 
    - `torch`/`Docling` related errors: Set up default Python version either `3.11.x` or `3.12.x` (same as AssertionError)
 
-### 3. Local .env
+**Setting up a local env file**
 
 Create `.env` file in the project root and add following:
 

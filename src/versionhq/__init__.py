@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 load_dotenv(override=True)
 
 from versionhq.agent.model import Agent
+from versionhq.agent_network.model import AgentNetwork, NetworkOutput, Formation, Member, TaskHandlingProcess
 from versionhq.llm.model import LLM
 from versionhq.llm.llm_vars import LLM_CONTEXT_WINDOW_SIZES, PARAMS, PROVIDERS, MODELS
 from versionhq.clients.customer.model import Customer
@@ -16,10 +17,9 @@ from versionhq.clients.workflow.model import MessagingWorkflow, MessagingCompone
 from versionhq.knowledge.model import Knowledge, KnowledgeStorage
 from versionhq.knowledge.source import PDFKnowledgeSource, CSVKnowledgeSource, JSONKnowledgeSource, TextFileKnowledgeSource, ExcelKnowledgeSource, StringKnowledgeSource
 from versionhq.knowledge.source_docling import DoclingSource
-from versionhq.graph.model import TaskStatus, TaskGraph, Node, Edge, DependencyType
+from versionhq.task_graph.model import TaskStatus, TaskGraph, Node, Edge, DependencyType
 from versionhq.task.model import Task, TaskOutput, ResponseField, TaskExecutionType
 from versionhq.task.evaluate import Evaluation, EvaluationItem
-from versionhq.team.model import Team, TeamOutput, Formation, Member, TaskHandlingProcess
 from versionhq.tool.model import Tool, ToolSet
 from versionhq.tool.cache_handler import CacheHandler
 from versionhq.tool.tool_handler import ToolHandler
@@ -30,9 +30,15 @@ from versionhq.memory.model import ShortTermMemory,LongTermMemory, UserMemory, M
 from versionhq.task.formation import form_agent_network
 
 
-__version__ = "1.2.1.0"
+__version__ = "1.2.1.1"
 __all__ = [
     "Agent",
+
+    "AgentNetwork",
+    "NetworkOutput",
+    "Formation",
+    "Member",
+    "TaskHandlingProcess",
 
     "LLM",
     "LLM_CONTEXT_WINDOW_SIZES",
@@ -69,12 +75,6 @@ __all__ = [
 
     "Evaluation",
     "EvaluationItem",
-
-    "Team",
-    "TeamOutput",
-    "Formation",
-    "Member",
-    "TaskHandlingProcess",
 
     "Tool",
     "ToolSet",

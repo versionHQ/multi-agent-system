@@ -5,33 +5,13 @@ import matplotlib.pyplot as plt
 from abc import ABC
 from typing import List, Any, Optional, Callable, Dict, Type, Tuple
 
-from pydantic import BaseModel, InstanceOf, Field, UUID4, PrivateAttr, field_validator
+from pydantic import BaseModel, InstanceOf, Field, UUID4, field_validator
 from pydantic_core import PydanticCustomError
 
 from versionhq.task.model import Task, TaskOutput
 from versionhq.agent.model import Agent
 from versionhq._utils.logger import Logger
 
-
-def gen_network():
-    goal = "make a promo plan to increase gross sales of Temu, an ecommerce site with affordable items."
-    agent = Agent(
-        role="Network Generator", goal="draft a best graph with nodes (tasks) and edges", llm="gemini-2.0", maxit=1,
-        knowledge_sources=["https://en.wikipedia.org/wiki/Graph_theory", "https://www.temu.com", ]
-    )
-    class Outcome(BaseModel):
-        task_descriptions: list[str]
-
-
-    task = Task(
-        description="    Create a team of specialized agents designed to automate the following task and deliver the expected outcome. Consider the necessary roles for each agent with a clear task description. If you think we neeed a leader to handle the automation, return a leader_agent role as well, but if not, leave the a leader_agent role blank. ",
-        pydantic_output=Outcome
-    )
-    task = Task(
-        description="Form best network with nodes and edges for the task described as following: Draft a promo plan for the client.",
-        pydantic_output=Edge
-    )
-    res = task.execute(agent=agent)
 
 class TaskStatus(enum.Enum):
     """

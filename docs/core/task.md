@@ -9,7 +9,7 @@ tags:
 
 <class>`class` versionhq.task.model.<bold>Task<bold></class>
 
-A class to store and manage information for individual tasks, including their assignment to agents or teams, and dependencies via a node-based system that tracks conditions and status.
+A class to store and manage information for individual tasks, including their assignment to agents or agent networks, and dependencies via a node-based system that tracks conditions and status.
 
 Ref. Node / Edge / TaskGraph class
 

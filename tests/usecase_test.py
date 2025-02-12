@@ -15,7 +15,7 @@ def test_demo_network():
         expected_outcome='email subject and body in string',
         context="use email_subject and email_body as keys in your response."
     )
-    assert isinstance(network, vhq.Team) and isinstance(network.formation, vhq.Formation)
+    assert isinstance(network, vhq.AgentNetwork) and isinstance(network.formation, vhq.Formation)
 
     # res = network.launch()
 

@@ -95,7 +95,7 @@ class Agent(BaseModel):
     user_prompt_template: Optional[str] = Field(default=None, description="user prompt template")
 
     # task execution rules
-    team: Optional[List[Any]] = Field(default=None, description="Team to which the agent belongs")
+    network: Optional[List[Any]] = Field(default=None, description="store a list of agent networks that the agent belong as a member")
     allow_delegation: bool = Field(default=False,description="if the agent can delegate the task to another agent or ask some help")
     max_retry_limit: int = Field(default=2 ,description="max. number of retry for the task execution when an error occurs")
     maxit: Optional[int] = Field(default=25,description="max. number of total optimization loops conducted when an error occurs")
@@ -553,7 +553,7 @@ class Agent(BaseModel):
 
 
         ## comment out for now
-        # if self.team and self.team._train:
+        # if self.network and self.network._train:
         #     task_prompt = self._training_handler(task_prompt=task_prompt)
         # else:
         #     task_prompt = self._use_trained_data(task_prompt=task_prompt)
