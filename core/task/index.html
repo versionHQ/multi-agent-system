@@ -1112,7 +1112,6 @@
 ### Execution rules
 EXECUTION type
     allow_delegation: bool = Field(default=False, description="ask other agents for help and run the task instead")
-
     callback: Optional[Callable] = Field(default=None, description="callback to be executed after the task is completed.")
     callback_kwargs: Optional[Dict[str, Any]] = Field(default_factory=dict, description="kwargs for the callback when the callback is callable")
 
