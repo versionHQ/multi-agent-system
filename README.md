@@ -34,7 +34,6 @@ A Python framework for agentic orchestration that handles complex task automatio
   - [Forming a agent network](#forming-a-agent-network)
   - [Executing tasks](#executing-tasks)
   - [Supervising](#supervising)
-- [Supervising](#supervising-1)
 - [Technologies Used](#technologies-used)
 - [Project Structure](#project-structure)
 - [Setting Up a Project](#setting-up-a-project)
@@ -176,7 +175,7 @@ agent.update(
    res = network.launch()
    ```
 
-   This will form a network with multiple agents on `Formation` and return `TaskOutput` object with output in JSON, plane text, Pydantic model format with evaluation.
+This will form a network with multiple agents on `Formation` and return `TaskOutput` object with output in JSON, plane text, Pydantic model format with evaluation.
 
 
 ### Executing tasks
@@ -224,8 +223,6 @@ This will return a `TaskOutput` object that stores response in plane text, JSON,
    ```
 
 ### Supervising
-
-## Supervising
 
 To create an agent network with one or more manager agents, designate members using the `is_manager` tag.
 
