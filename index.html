@@ -373,9 +373,9 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#agent-formation" class="md-nav__link">
+  <a href="#agent-network" class="md-nav__link">
     <span class="md-ellipsis">
-      Agent formation
+      Agent Network
     </span>
   </a>
   
@@ -391,9 +391,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#agent-optimization" class="md-nav__link">
+  <a href="#optimization" class="md-nav__link">
     <span class="md-ellipsis">
-      Agent optimization
+      Optimization
     </span>
   </a>
   
@@ -566,6 +566,10 @@
       
         
       
+        
+      
+        
+      
     
     
     
@@ -607,6 +611,146 @@
   
   <span class="md-ellipsis">
     Agent
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Task
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_2">
+            <span class="md-nav__icon md-icon"></span>
+            Task
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="core/task/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="core/task/response-field/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ResponseField
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="core/task/task-output/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    TaskOutput
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="core/network/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Network
     
   </span>
   
@@ -796,7 +940,7 @@
 <p><a href="https://clickpy.clickhouse.com/dashboard/versionhq"><img alt="DL" src="https://img.shields.io/badge/Download-15K+-red" /></a>
 <img alt="MIT license" src="https://img.shields.io/badge/License-MIT-green" />
 <a href="https://github.com/versionHQ/multi-agent-system/actions/workflows/publish.yml"><img alt="Publisher" src="https://github.com/versionHQ/multi-agent-system/actions/workflows/publish.yml/badge.svg" /></a>
-<img alt="PyPI" src="https://img.shields.io/badge/PyPI-v1.1.12+-blue" />
+<img alt="PyPI" src="https://img.shields.io/badge/PyPI-v1.2.0+-blue" />
 <img alt="python ver" src="https://img.shields.io/badge/Python-3.11/3.12-purple" />
 <img alt="pyenv ver" src="https://img.shields.io/badge/pyenv-2.5.0-orange" /></p>
 <p>A Python framework for agentic orchestration that handles complex task automation.</p>
@@ -815,7 +959,7 @@
 <h2 id="key-features">Key Features<a class="headerlink" href="#key-features" title="Permanent link">&para;</a></h2>
 <p><code>versionhq</code> is a Python framework for agent networks that handle complex task automation without human interaction.</p>
 <p>Agents are model-agnostic, and will improve task output, while oprimizing token cost and job latency, by sharing their memory, knowledge base, and RAG tools with other agents in the network.</p>
-<h3 id="agent-formation">Agent formation<a class="headerlink" href="#agent-formation" title="Permanent link">&para;</a></h3>
+<h3 id="agent-network">Agent Network<a class="headerlink" href="#agent-network" title="Permanent link">&para;</a></h3>
 <p>Agents adapt their formation based on task complexity.</p>
 <p>You can specify a desired formation or allow the agents to determine it autonomously (default).</p>
 <table>
@@ -884,7 +1028,7 @@
 </span></code></pre></div>
 <hr />
 
-<h3 id="agent-optimization">Agent optimization<a class="headerlink" href="#agent-optimization" title="Permanent link">&para;</a></h3>
+<h3 id="optimization">Optimization<a class="headerlink" href="#optimization" title="Permanent link">&para;</a></h3>
 <p>Agents are model-agnostic and can handle multiple tasks, leveraging their own and their peers' knowledge sources, memories, and tools.</p>
 <p>Agents are optimized during network formation, but customization is possible before or after.</p>
 <p>The following code snippet demonstrates agent customization:</p>
