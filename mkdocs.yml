@@ -108,7 +108,7 @@ theme:
 nav:
   - Home: 'index.md'
   - Quick Start: 'quickstart.md'
-  - Core Components:
+  - Core:
     - Agent: 'core/agent.md'
     - Task Graph: 'core/task-graph.md'
     - Task:
