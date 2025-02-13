@@ -423,6 +423,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#technologies-used" class="md-nav__link">
+    <span class="md-ellipsis">
+      Technologies Used
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#trouble-shooting" class="md-nav__link">
     <span class="md-ellipsis">
       Trouble Shooting
@@ -432,18 +441,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#frequently-asked-questions-faq" class="md-nav__link">
+  <a href="#faq" class="md-nav__link">
     <span class="md-ellipsis">
-      Frequently Asked Questions (FAQ)
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#technologies-used" class="md-nav__link">
-    <span class="md-ellipsis">
-      Technologies Used
+      FAQ
     </span>
   </a>
   
@@ -455,48 +455,6 @@
       Contributing
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="Contributing">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#steps" class="md-nav__link">
-    <span class="md-ellipsis">
-      Steps
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#package-management" class="md-nav__link">
-    <span class="md-ellipsis">
-      Package management
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#pre-commit-hooks" class="md-nav__link">
-    <span class="md-ellipsis">
-      Pre-Commit hooks
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#documentation" class="md-nav__link">
-    <span class="md-ellipsis">
-      Documentation
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -582,7 +540,7 @@
   
   
     <li class="md-nav__item">
-      <a href="core/agent/" class="md-nav__link">
+      <a href="core/agent" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -674,7 +632,7 @@
         
   
   <span class="md-ellipsis">
-    Overview
+    Task
     
   </span>
   
@@ -1095,6 +1053,68 @@
 </span></code></pre></div>
 <hr />
 
+<h2 id="technologies-used">Technologies Used<a class="headerlink" href="#technologies-used" title="Permanent link">&para;</a></h2>
+<p><strong>Schema, Data Validation</strong></p>
+<ul>
+<li>
+<p><a href="https://docs.pydantic.dev/latest/">Pydantic</a>: Data validation and serialization library for Python.</p>
+</li>
+<li>
+<p><a href="https://console.upstage.ai/docs/getting-started/overview">Upstage</a>: Document processer for ML tasks. (Use <code>Document Parser API</code> to extract data from documents)</p>
+</li>
+<li>
+<p><a href="https://ds4sd.github.io/docling/">Docling</a>: Document parsing</p>
+</li>
+</ul>
+<p><strong>Workflow, Task Graph</strong></p>
+<ul>
+<li>
+<p><a href="https://networkx.org/documentation/stable/reference/introduction.html">NetworkX</a>: A Python package to analyze, create, and manipulate complex graph networks.</p>
+</li>
+<li>
+<p><a href="https://matplotlib.org/stable/index.html">Matplotlib</a>: For graph visualization.</p>
+</li>
+<li>
+<p><a href="https://graphviz.org/about/">Graphviz</a>: For graph visualization.</p>
+</li>
+</ul>
+<p><strong>LLM Curation</strong></p>
+<ul>
+<li><a href="https://docs.litellm.ai/docs/providers">LiteLLM</a>: LLM orchestration platform</li>
+</ul>
+<p><strong>Tools</strong></p>
+<ul>
+<li><a href="https://composio.dev/">Composio</a>: Conect RAG agents with external tools, Apps, and APIs to perform actions and receive triggers. We use <a href="https://composio.dev/tools">tools</a> and <a href="https://app.composio.dev/app/ragtool">RAG tools</a> from Composio toolset.</li>
+</ul>
+<p><strong>Storage</strong></p>
+<ul>
+<li>
+<p><a href="https://docs.mem0.ai/quickstart#install-package">mem0ai</a>: Agents' memory storage and management.</p>
+</li>
+<li>
+<p><a href="https://docs.trychroma.com/">Chroma DB</a>: Vector database for storing and querying usage data.</p>
+</li>
+<li>
+<p><a href="https://www.sqlite.org/docs.html">SQLite</a>: C-language library to implements a small SQL database engine.</p>
+</li>
+</ul>
+<p><strong>Deployment</strong></p>
+<ul>
+<li>
+<p><strong>Python</strong>: Primary programming language. v3.12.x is recommended</p>
+</li>
+<li>
+<p><a href="https://docs.astral.sh/uv/">uv</a>: Python package installer and resolver</p>
+</li>
+<li>
+<p><a href="https://pre-commit.com/">pre-commit</a>: Manage and maintain pre-commit hooks</p>
+</li>
+<li>
+<p><a href="https://pypi.org/project/setuptools/">setuptools</a>: Build python modules</p>
+</li>
+</ul>
+<hr />
+
 <h2 id="trouble-shooting">Trouble Shooting<a class="headerlink" href="#trouble-shooting" title="Permanent link">&para;</a></h2>
 <p>Common issues and solutions:</p>
 <ul>
@@ -1125,76 +1145,14 @@
 </ul>
 <hr />
 
-<h2 id="frequently-asked-questions-faq">Frequently Asked Questions (FAQ)<a class="headerlink" href="#frequently-asked-questions-faq" title="Permanent link">&para;</a></h2>
+<h2 id="faq">FAQ<a class="headerlink" href="#faq" title="Permanent link">&para;</a></h2>
 <p><strong>Q. Where can I see if the agent is working?</strong></p>
 <p>A. Visit <a href="https://versi0n.io">playground</a>.</p>
 <hr />
 
-<h2 id="technologies-used">Technologies Used<a class="headerlink" href="#technologies-used" title="Permanent link">&para;</a></h2>
-<p><strong>Schema, Data Validation</strong></p>
-<ul>
-<li>
-<p><a href="https://docs.pydantic.dev/latest/">Pydantic</a>: Data validation and serialization library for Python.</p>
-</li>
-<li>
-<p><a href="https://console.upstage.ai/docs/getting-started/overview">Upstage</a>: Document processer for ML tasks. (Use <code>Document Parser API</code> to extract data from documents)</p>
-</li>
-<li>
-<p><a href="https://ds4sd.github.io/docling/">Docling</a>: Document parsing</p>
-</li>
-</ul>
-<p><strong>Graph Theory (Analysis and Visualization)</strong></p>
-<ul>
-<li>
-<p><a href="https://networkx.org/documentation/stable/reference/introduction.html">NetworkX</a>: A Python package to analyze, create, and manipulate complex graph networks.</p>
-</li>
-<li>
-<p><a href="https://matplotlib.org/stable/index.html">Matplotlib</a>: Visualization library</p>
-</li>
-<li>
-<p><a href="https://graphviz.org/about/">Graphviz</a>: Graph visualization software</p>
-</li>
-</ul>
-<p><strong>Storage</strong></p>
-<ul>
-<li>
-<p><a href="https://docs.mem0.ai/quickstart#install-package">mem0ai</a>: Agents' memory storage and management.</p>
-</li>
-<li>
-<p><a href="https://docs.trychroma.com/">Chroma DB</a>: Vector database for storing and querying usage data.</p>
-</li>
-<li>
-<p><a href="https://www.sqlite.org/docs.html">SQLite</a>: C-language library to implements a small SQL database engine.</p>
-</li>
-</ul>
-<p><strong>LLM-curation</strong></p>
-<ul>
-<li><a href="https://docs.litellm.ai/docs/providers">LiteLLM</a>: LLM orchestration platform</li>
-</ul>
-<p><strong>Tool</strong></p>
-<ul>
-<li><a href="https://composio.dev/">Composio</a>: Conect RAG agents with external tools, Apps, and APIs to perform actions and receive triggers. We use <a href="https://composio.dev/tools">tools</a> and <a href="https://app.composio.dev/app/ragtool">RAG tools</a> from Composio toolset.</li>
-</ul>
-<p><strong>Deployment</strong></p>
-<ul>
-<li>
-<p><strong>Python</strong>: Primary programming language. v3.12.x is recommended</p>
-</li>
-<li>
-<p><a href="https://docs.astral.sh/uv/">uv</a>: Python package installer and resolver</p>
-</li>
-<li>
-<p><a href="https://pre-commit.com/">pre-commit</a>: Manage and maintain pre-commit hooks</p>
-</li>
-<li>
-<p><a href="https://pypi.org/project/setuptools/">setuptools</a>: Build python modules</p>
-</li>
-</ul>
-<hr />
-
 <h2 id="contributing">Contributing<a class="headerlink" href="#contributing" title="Permanent link">&para;</a></h2>
 <p><code>versionhq</code> is a open source project.</p>
-<h3 id="steps">Steps<a class="headerlink" href="#steps" title="Permanent link">&para;</a></h3>
+<p><strong>Steps</strong></p>
 <ol>
 <li>
 <p>Create your feature branch (<code>git checkout -b feature/your-amazing-feature</code>)</p>
@@ -1243,7 +1201,7 @@
 <p><code>Playground</code> is available at <code>https://versi0n.io</code>.</p>
 </li>
 </ul>
-<h3 id="package-management">Package management<a class="headerlink" href="#package-management" title="Permanent link">&para;</a></h3>
+<p><strong>Package Management with UV</strong></p>
 <ul>
 <li>
 <p>Add a package: <code>uv add &lt;package&gt;</code></p>
@@ -1258,7 +1216,7 @@
 <p>After updating dependencies, update <code>requirements.txt</code> accordingly or run <code>uv pip freeze &gt; requirements.txt</code></p>
 </li>
 </ul>
-<h3 id="pre-commit-hooks">Pre-Commit hooks<a class="headerlink" href="#pre-commit-hooks" title="Permanent link">&para;</a></h3>
+<p><strong>Pre-commit Hooks</strong></p>
 <ol>
 <li>
 <p>Install pre-commit hooks:
@@ -1277,7 +1235,7 @@
    <div class="language-text highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>git commit --no-verify -m &quot;your-commit-message&quot;
 </span></code></pre></div></li>
 </ul>
-<h3 id="documentation">Documentation<a class="headerlink" href="#documentation" title="Permanent link">&para;</a></h3>
+<p><strong>Documentation</strong></p>
 <ul>
 <li>
 <p>To edit the documentation, see <code>docs</code> repository and edit the respective component.</p>

@@ -15,10 +15,6 @@
         <link rel="canonical" href="https://docs.versi0n.io/core/agent/">
       
       
-        <link rel="prev" href="../../quickstart/">
-      
-      
-        <link rel="next" href="../task-graph/">
       
       
       <link rel="icon" href="../../_logos/favicon.ico">
@@ -356,10 +352,8 @@
       
   
   
-    
   
   
-  
     
     
       
@@ -374,11 +368,11 @@
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
         
           
           <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
@@ -393,7 +387,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             Core Components
@@ -404,31 +398,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    Agent
-    
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="." class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -438,263 +411,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#core-usage" class="md-nav__link">
-    <span class="md-ellipsis">
-      Core usage
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#customization" class="md-nav__link">
-    <span class="md-ellipsis">
-      Customization
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Customization">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#model-optimization" class="md-nav__link">
-    <span class="md-ellipsis">
-      Model optimization
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#switching-models" class="md-nav__link">
-    <span class="md-ellipsis">
-      Switching models
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#developer-prompt-system-prompt" class="md-nav__link">
-    <span class="md-ellipsis">
-      Developer Prompt (System Prompt)
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#task-execution-rules" class="md-nav__link">
-    <span class="md-ellipsis">
-      Task Execution Rules
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Task Execution Rules">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#delegation" class="md-nav__link">
-    <span class="md-ellipsis">
-      Delegation
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#max-retry-limit" class="md-nav__link">
-    <span class="md-ellipsis">
-      Max Retry Limit
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#maximum-number-of-iterations-maxit" class="md-nav__link">
-    <span class="md-ellipsis">
-      Maximum Number of Iterations (MaxIt)
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#callbacks" class="md-nav__link">
-    <span class="md-ellipsis">
-      Callbacks
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#context-window" class="md-nav__link">
-    <span class="md-ellipsis">
-      Context Window
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#max-tokens" class="md-nav__link">
-    <span class="md-ellipsis">
-      Max Tokens
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#maximum-execution-time" class="md-nav__link">
-    <span class="md-ellipsis">
-      Maximum Execution Time
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#maximum-rpm-requests-per-minute" class="md-nav__link">
-    <span class="md-ellipsis">
-      Maximum RPM (Requests Per Minute)
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#other-llm-configuration" class="md-nav__link">
-    <span class="md-ellipsis">
-      Other LLM Configuration
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#knowledge" class="md-nav__link">
-    <span class="md-ellipsis">
-      Knowledge
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Knowledge">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#knowledge-sources" class="md-nav__link">
-    <span class="md-ellipsis">
-      Knowledge Sources
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#memory" class="md-nav__link">
-    <span class="md-ellipsis">
-      Memory
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Memory">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#store-task-execution-results-in-memory" class="md-nav__link">
-    <span class="md-ellipsis">
-      Store task execution results in memory
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#rag-storage" class="md-nav__link">
-    <span class="md-ellipsis">
-      RAG Storage
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#utilities" class="md-nav__link">
-    <span class="md-ellipsis">
-      Utilities
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Utilities">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#model-configuration" class="md-nav__link">
-    <span class="md-ellipsis">
-      Model configuration
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#updating-model-values" class="md-nav__link">
-    <span class="md-ellipsis">
-      Updating model values
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -777,7 +493,7 @@
         
   
   <span class="md-ellipsis">
-    Overview
+    Task
     
   </span>
   
@@ -1019,7 +735,7 @@
 <p><class><code>class</code> versionhq.agent.model.<bold>Agent<bold></class></p>
 <p>Each agent has its unique knowledge and memory on the past task.</p>
 <p>You can create one and assign the task or reassign another task to the existing agent after fine-tuning.</p>
-<h2 id="core-usage">Core usage<a class="headerlink" href="#core-usage" title="Permanent link">&para;</a></h2>
+<h2 id="quick-start">Quick Start<a class="headerlink" href="#quick-start" title="Permanent link">&para;</a></h2>
 <p>By defining its role and goal in a simple sentence, the AI agent will be set up to run on <bold><code>gpt-4o</code></bold> by default.</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">versionhq</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">vhq</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
@@ -1494,44 +1210,6 @@
       
         <footer class="md-footer">
   
-    
-      
-      <nav class="md-footer__inner md-grid" aria-label="Footer" >
-        
-          
-          <a href="../../quickstart/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Quick Start">
-            <div class="md-footer__button md-icon">
-              
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
-            </div>
-            <div class="md-footer__title">
-              <span class="md-footer__direction">
-                Previous
-              </span>
-              <div class="md-ellipsis">
-                Quick Start
-              </div>
-            </div>
-          </a>
-        
-        
-          
-          <a href="../task-graph/" class="md-footer__link md-footer__link--next" aria-label="Next: Task Graph">
-            <div class="md-footer__title">
-              <span class="md-footer__direction">
-                Next
-              </span>
-              <div class="md-ellipsis">
-                Task Graph
-              </div>
-            </div>
-            <div class="md-footer__button md-icon">
-              
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
-            </div>
-          </a>
-        
-      </nav>
     
   
   <div class="md-footer-meta md-typeset">
