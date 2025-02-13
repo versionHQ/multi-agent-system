@@ -617,6 +617,7 @@ Ref. Output image: {output_formats_to_follow}
 
         self.prompt_context = context
         task_output: InstanceOf[TaskOutput] = None
+        raw_output: str = None
         tool_output: str | list = None
         task_tools: List[List[InstanceOf[Tool]| InstanceOf[ToolSet] | Type[Tool]]] = []
         started_at, ended_at = datetime.datetime.now(), datetime.datetime.now()
@@ -673,7 +674,7 @@ Ref. Output image: {output_formats_to_follow}
         self.output = task_output
         self.processed_agents.add(agent.role)
 
-        if self.should_evaluate:
+        if self.should_evaluate and raw_output: # eval only when raw output exsits
             task_output.evaluate(task=self)
 
         self._create_short_and_long_term_memories(agent=agent, task_output=task_output)

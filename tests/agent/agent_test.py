@@ -262,7 +262,6 @@ def test_agent_with_knowledge_sources():
         assert "gold" in res.raw.lower()
 
 
-
 def test_using_contextual_memory():
     from versionhq.task.model import Task
     from versionhq.task.evaluate import Evaluation

@@ -19,3 +19,5 @@ chromadb>=0.6.3
 wheel>=0.45.1
 envoy>=0.0.3
 composio-core==0.7.0
+networkx>=3.4.2
+matplotlib>=3.10.0
