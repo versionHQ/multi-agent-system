@@ -185,18 +185,20 @@ class TaskOutput(BaseModel):
     evaluation: Optional[InstanceOf[Evaluation]] = Field(default=None, description="store overall evaluation of the task output. passed to ltm")
 
 
-    def to_dict(self) -> Dict[str, Any] | None:
+    def to_context_prompt(self) -> str:
         """
-        Convert pydantic / raw output into dict and return the dict.
+        Returns response in string as a prompt context.
         """
-        return self.json_dict if self.json_dict is not None else self.pydantic.model_dump() if self.pydantic else None
-
-
-    def context_prompting(self) -> str:
-        """
-        When the task is called as context, return its output in concise string to add it to the prompt
-        """
-        return json.dumps(self.json_dict) if self.json_dict else self.raw[0: 1024]
+        context = ""
+        try:
+            context = json.dumps(self.json_dict)
+        except:
+            try:
+                if self.pydantic:
+                    context = self.pydantic.model_dump()
+            except:
+                context = self.raw
+        return context
 
 
     def evaluate(self, task) -> Evaluation:
@@ -267,13 +269,9 @@ class Task(BaseModel):
     name: Optional[str] = Field(default=None)
     description: str = Field(description="Description of the actual task")
 
-    # output
+    # response format
     pydantic_output: Optional[Type[BaseModel]] = Field(default=None, description="store Pydantic class as structured response format")
     response_fields: Optional[List[ResponseField]] = Field(default_factory=list, description="store list of ResponseField as structured response format")
-
-    # task setup
-    # context: Optional[List["Task"]] = Field(default=None, description="other tasks whose outputs should be used as context")
-    # prompt_context: Optional[str] = Field(default=None)
 
     # tool usage
     tools: Optional[List[ToolSet | Tool | Any]] = Field(default_factory=list, description="tools that the agent can use aside from their tools")
@@ -386,13 +384,14 @@ Ref. Output image: {output_formats_to_follow}
             case Task():
                 if not context.output:
                     res = context.execute()
-                    context_to_add = res.raw
+                    context_to_add = res.to_context_prompt()
 
                 else:
                     context_to_add = context.output.raw
 
             case TaskOutput():
-                context_to_add = context.raw
+                context_to_add = context.to_context_prompt()
+
 
             case dict():
                 context_to_add = str(context)
@@ -412,10 +411,10 @@ Ref. Output image: {output_formats_to_follow}
         Format the task prompt and cascade it to the agent.
         """
         output_prompt = self._draft_output_prompt(model_provider=model_provider)
-        context_prompt = self._draft_context_prompt(context=context) if context else None
         task_slices = [self.description, output_prompt, ]
 
-        if context_prompt:
+        if context:
+            context_prompt = self._draft_context_prompt(context=context)
             task_slices.insert(len(task_slices), f"Consider the following context when responding: {context_prompt}")
 
         return "\n".join(task_slices)

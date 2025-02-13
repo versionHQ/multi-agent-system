@@ -263,17 +263,20 @@ import versionhq as vhq
 
 sub_task_1 = vhq.Task(description="Run a sub demo part 1")
 sub_res = sub_task_1.execute()
+
 sub_task_2 = vhq.Task(description="Run a sub demo part 2")
+
 task = vhq.Task(description="Run a main demo")
+
 context = [sub_res, sub_task_2, "context to add in string"]
 res = task.execute(context=context)
 
 # Explicitly mentioned. `task.execute()` will trigger the following:
 task_prompt = task._prompt(context=context)
 
-assert sub_res.raw in  task_prompt
-assert sub_task_2.output.raw in task_prompt
-assert "context to add in string" in task_prompt
+assert sub_res.to_context_prompt() in task_prompt
+assert sub_task_2.output and sub_task_2.output.to_context_prompt() in task_prompt  # sub tasks' outputs are included in the task prompt.
+assert "context to add in string" in task_promp
 assert res
 ```
 

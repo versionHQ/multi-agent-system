@@ -109,15 +109,15 @@ nav:
   - Home: 'index.md'
   - Quick Start: 'quickstart.md'
   - Core Components:
-    - Agent: 'core/agent'
-    - Task Graph: 'core/task-graph.md'
-    - Task:
-      - Task: 'core/task.md'
-      - ResponseField: 'core/task/response-field.md'
-      - TaskOutput: 'core/task/task-output.md'
-      - Evaluation: 'core/task/evaluation.md'
-    - Tool: 'core/tool.md'
-  #   - Compoio Tools: 'core/composio-tool.md'
+      - Agent: 'core/agent.md'
+      - Task Graph: 'core/task-graph.md'
+      - Task:
+        - Task: 'core/task.md'
+        - ResponseField: 'core/task/response-field.md'
+        - TaskOutput: 'core/task/task-output.md'
+        - Evaluation: 'core/task/evaluation.md'
+      - Tool: 'core/tool.md'
+    #   - Compoio Tools: 'core/composio-tool.md'
   - Tags: 'tags.md'
   - Examples:
     - Playground: https://versi0n.io

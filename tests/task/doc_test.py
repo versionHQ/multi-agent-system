@@ -143,8 +143,8 @@ def test_docs_core_task_f():
     # res = task.execute(context=[sub_res, sub_task_2, "context to add in string",])
     task_prompt = task._prompt(context=[sub_res, sub_task_2, "context to add in string"])
 
-    assert sub_res.raw in  task_prompt
-    assert sub_task_2.output.raw in task_prompt
+    assert sub_res.to_context_prompt() in task_prompt
+    assert sub_task_2.output and sub_task_2.output.to_context_prompt() in task_prompt
     assert "context to add in string" in task_prompt
 
 
