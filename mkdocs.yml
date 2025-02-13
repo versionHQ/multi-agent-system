@@ -1,6 +1,6 @@
 site_name: versionHQ
 site_author: Version IO Sdn. Bhd.
-site_description: A Python framework for multi-agent systems that handle complex task automation.
+site_description: Documentation | Agentic orchestration framework for multi-agent networks and task graph for complex task automation
 site_url: https://docs.versi0n.io/
 repo_url: https://github.com/versionhq/multi-agent-system/
 repo_name: multi-agent-system
@@ -115,8 +115,10 @@ nav:
       - Task: 'core/task.md'
       - ResponseField: 'core/task/response-field.md'
       - TaskOutput: 'core/task/task-output.md'
+      - Evaluation: 'core/task/evaluation.md'
     - Tool: 'core/tool.md'
   #   - Compoio Tools: 'core/composio-tool.md'
+  - Tags: 'tags.md'
   - Examples:
     - Playground: https://versi0n.io
     - Experiment - Agent Performance: https://github.com/versionHQ/exp-agent-performance
@@ -128,6 +130,8 @@ extra_css:
 plugins:
   # - social
   - search
+  - tags:
+      tags: true
 
 extra:
   analytics:

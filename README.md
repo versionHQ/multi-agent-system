@@ -8,7 +8,7 @@
 ![pyenv ver](https://img.shields.io/badge/pyenv-2.5.0-orange)
 
 
-A Python framework for agentic orchestration that handles complex task automation without human interaction.
+Agentic orchestration framework for multi-agent networks and task graph for complex task automation.
 
 **Visit:**
 
@@ -107,7 +107,14 @@ task_graph.add_dependency(
    type=vhq.DependencyType.FINISH_TO_FINISH, lag=1, required=False, weight=3
 )
 
+# To visualize the graph:
 task_graph.visualize()
+
+# To start executing nodes:
+latest_output, outputs = task_graph.activate()
+
+assert isinstance(last_task_output, vhq.TaskOutput)
+assert [k in task_graph.nodes.keys() and v and isinstance(v, vhq.TaskOutput) for k, v in outputs.items()]
 ```
 
 <hr />

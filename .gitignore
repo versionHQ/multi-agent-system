@@ -7,25 +7,28 @@ _memo
 _idea.py
 
 
-
 dist/
 lib/
 build/
 .pypirc
+*egg-info/
+
 uploads/
 sample_dataset/
 chroma.sqlite3
-*egg-info/
+
 test/
 db/
 rc-tests/*
 temp/*
 .vscode/*
 assets/*
+
 memo.txt
 site/
-_logs/
 
+_logs/
+.cache
 __pycache__
 .ruff_cache/
 .pytest_cache/

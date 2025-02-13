@@ -1,10 +1,3 @@
----
-tags:
-  - HTML5
-  - JavaScript
-  - CSS
----
-
 # Quick Start
 
 ## Package installation

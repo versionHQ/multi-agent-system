@@ -1,10 +1,3 @@
----
-tags:
-  - HTML5
-  - JavaScript
-  - CSS
----
-
 # Overview
 
 [![DL](https://img.shields.io/badge/Download-17K+-red)](https://clickpy.clickhouse.com/dashboard/versionhq)
@@ -83,13 +76,14 @@ task_graph.add_dependency(
    type=vhq.DependencyType.FINISH_TO_FINISH, lag=1, required=False, weight=3
 )
 
-# To viaualize:
+# To visualize the graph:
 task_graph.visualize()
 
-# To start to execute nodes
+# To start executing nodes:
 latest_output, outputs = task_graph.activate()
 
-assert
+assert isinstance(last_task_output, vhq.TaskOutput)
+assert [k in task_graph.nodes.keys() and v and isinstance(v, vhq.TaskOutput) for k, v in outputs.items()]
 ```
 
 <hr />

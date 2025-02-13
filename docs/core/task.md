@@ -1,8 +1,6 @@
 ---
 tags:
-  - HTML5
-  - JavaScript
-  - CSS
+  - Task Graph
 ---
 
 # Task
@@ -46,9 +44,7 @@ assert task.processed_agents is not None # Agents will be automatically assigned
 
 <hr />
 
-## Customizing tasks
-
-### Structured outputs
+## Structured Response
 
 By default, agents will generate plane text and JSON outputs, and store them in the `TaskOutput` object.
 
@@ -60,7 +56,7 @@ But you can choose to generate Pydantic class or specifig JSON object as respons
 
 **1. Pydantic**
 
-`[var]`<bold>`pydantic_output: Optional[Type[BaseModel]] = "None"`</bold>
+`[var]`<bold>`pydantic_output: Optional[Type[BaseModel]] = None`</bold>
 
 Create and add a `custom Pydantic class` as a structured response format to the `pydantic_output` field.
 
@@ -111,7 +107,7 @@ assert [
 
 **2. JSON**
 
-`[var]`<bold>`response_fields: List[InstanceOf[ResponseField]] = "None"`</bold>
+`[var]`<bold>`response_fields: List[InstanceOf[ResponseField]] = None`</bold>
 
 Similar to Pydantic, JSON output structure can be defined by using a list of `ResponseField` objects.
 
@@ -187,6 +183,7 @@ assert [v and type(v) == task.response_fields[i].data_type for i, (k, v) in enum
 
 * Ref. <a href="/core/task/response-field">`ResponseField`</a> class
 
+<hr />
 
 **Structuring reponse format**
 
@@ -236,28 +233,82 @@ def format_response(sub: InstanceOf[Sub], main1: list[Any], main2: dict[str, Any
 
 # 3. Execute
 main_task = vhq.Task(
-    description="generate random values that strictly follows the given format.",
+    description="generate random values that strictly follows the given format",
     pydantic_output=Main,
     callback=format_response,
     callback_kwargs=dict(sub=Sub(sub1=sub_res.pydantic.sub1, sub2=sub_res.pydantic.sub2)),
 )
-res = main_task.execute(context=sub_res.raw) # [Optional] Adding sub_task's response as context.
+res = main_task.execute(context=sub_res.raw) # [Optional] Adding sub_task as a context.
 
 assert [item for item in res.callback_output.main1 if isinstance(item, Sub)]
 ```
 
 To automate these manual setups, refer to <a href="/core/agent-network">AgentNetwork</a> class.
 
+<hr />
 
-<!-- ### Context
-  # task setup
-    context: Optional[List["Task"]] = Field(default=None, description="other tasks whose outputs should be used as context")
-    prompt_context: Optional[str] = Field(default=None)
+## Prompting
+
+`[class method]`<bold>`prompt(self, model_provider: str = None, context: Optional[Any] = None) -> str`</bold>
+
+Prompts are generated automatically based on the task `description`, response format, context, agent `role`, and `goal`.
 
 
-### Execution rules
-EXECUTION type
-    allow_delegation: bool = Field(default=False, description="ask other agents for help and run the task instead")
+**Context**
+
+The following snippet demonstrates how to add `context` to the prompt.
+
+```python
+import versionhq as vhq
+
+sub_task_1 = vhq.Task(description="Run a sub demo part 1")
+sub_res = sub_task_1.execute()
+sub_task_2 = vhq.Task(description="Run a sub demo part 2")
+task = vhq.Task(description="Run a main demo")
+context = [sub_res, sub_task_2, "context to add in string"]
+res = task.execute(context=context)
+
+# Explicitly mentioned. `task.execute()` will trigger the following:
+task_prompt = task._prompt(context=context)
+
+assert sub_res.raw in  task_prompt
+assert sub_task_2.output.raw in task_prompt
+assert "context to add in string" in task_prompt
+assert res
+```
+
+Context can consist of `Task` objects, `TaskOutput` objects, plain text `strings`, or `lists` containing any of these.
+
+In this scenario, `sub_task_2` executes before the main task. Its string output is then incorporated into the main task's context prompt on top of other context before the main task is executed.
+
+
+## Executing
+
+**Agent delegation**
+
+`[var]`<bold>`allow_delegation: bool = False`</bold>
+
+You can assign another agent to complete the task:
+
+```python
+import versionhq as vhq
+
+task = vhq.Task(
+    description="return the output following the given prompt.",
+    response_fields=[vhq.ResponseField(title="test1", data_type=str, required=True)],
+    allow_delegation=True
+)
+task.execute()
+
+assert task.output is not None
+assert "vhq-Delegated-Agent" in task.processed_agents # delegated agent
+assert task.delegations ==1
+```
+
+
+<!--
+
+## Callbacks
     callback: Optional[Callable] = Field(default=None, description="callback to be executed after the task is completed.")
     callback_kwargs: Optional[Dict[str, Any]] = Field(default_factory=dict, description="kwargs for the callback when the callback is callable")
 
@@ -265,12 +316,13 @@ EXECUTION type
 ### tools
     tools: Optional[List[ToolSet | Tool | Any]] = Field(default_factory=list, description="tools that the agent can use aside from their tools")
     can_use_agent_tools: bool = Field(default=False, description="whether the agent can use their own tools when executing the task")
-    tool_res_as_final: bool = Field(default=False, description="when set True, tools res will be stored in the `TaskOutput`") -->
+    tool_res_as_final: bool = Field(default=False, description="when set True, tools res will be stored in the `TaskOutput`")
 
 
-<hr />
+
 
 ## Executing tasks
+ EXECUTION type
 
 ### Sync
 
@@ -288,13 +340,12 @@ EXECUTION type
 
 
 
-## Evaluating task outputs
-<!--
-    # evaluation
+## Evaluating
+
     should_evaluate: bool = Field(default=False, description="True to run the evaluation flow")
-    eval_criteria: Optional[List[str]] = Field(default_factory=list, description="criteria to evaluate the outcome. i.e., fit to the brand tone") -->
+    eval_criteria: Optional[List[str]] = Field(default_factory=list, description="criteria to evaluate the outcome. i.e., fit to the brand tone")
 
 
 ## Recording
 
-<!-- output: Optional[TaskOutput] = Field(default=None, description="store the final task output in TaskOutput class") -->
+output: Optional[TaskOutput] = Field(default=None, description="store the final task output in TaskOutput class") -->

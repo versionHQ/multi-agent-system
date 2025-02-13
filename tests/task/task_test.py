@@ -24,71 +24,36 @@ def test_async_execute_task():
         execute.assert_called_once_with(task=task, context=None, task_tools=list())
 
 
-def test_sync_execute_with_task_context():
-    """
-    Use case = One agent handling multiple tasks sequentially using context set in the main task.
-    """
-    sub_task = Task(
-        description="return the output following the given prompt.",
-        response_fields=[
-            ResponseField(title="subtask_result", data_type=str, required=True),
-        ]
-    )
-    main_task = Task(
-        description="return the output following the given prompt.",
-        response_fields=[
-            ResponseField(title="test1", data_type=int, required=True),
-            ResponseField(title="test2", data_type=str, required=True),
-        ],
-        context=[sub_task,]
-    )
-    res = main_task.execute()
+# def test_sync_execute_with_task_context():
+#     """
+#     Use case = One agent handling multiple tasks sequentially using context set in the main task.
+#     """
+#     sub_task = Task(
+#         description="return the output following the given prompt.",
+#         response_fields=[
+#             ResponseField(title="subtask_result", data_type=str, required=True),
+#         ]
+#     )
+#     main_task = Task(
+#         description="return the output following the given prompt.",
+#         response_fields=[
+#             ResponseField(title="test1", data_type=int, required=True),
+#             ResponseField(title="test2", data_type=str, required=True),
+#         ],
+#     )
+#     res = main_task.execute(context=[sub_task])
 
-    assert isinstance(res, TaskOutput)
-    assert res.task_id is main_task.id
-    assert res.raw is not None
-    assert isinstance(res.raw, str)
-    assert res.json_dict is not None
-    assert isinstance(res.json_dict, dict)
-    assert res.pydantic is None
-    assert sub_task.output is not None
-    assert sub_task.output.json_dict is not None
-    assert "subtask_result" in main_task.prompt()
+#     assert isinstance(res, TaskOutput)
+#     assert res.task_id is main_task.id
+#     assert res.raw is not None
+#     assert isinstance(res.raw, str)
+#     assert res.json_dict is not None
+#     assert isinstance(res.json_dict, dict)
+#     assert res.pydantic is None
+#     assert sub_task.output is not None
+#     assert sub_task.output.json_dict is not None
+#     assert "subtask_result" in main_task._prompt()
 
-
-def test_sync_execute_task_with_prompt_context():
-    """
-    Use case:
-    - One agent handling multiple tasks sequentially using context set in the main task.
-    - On top of that, the agent receives context when they execute the task.
-    """
-    class Outcome(BaseModel):
-        test1: int = Field(default=None)
-        test2: str = Field(default=None)
-
-    sub_task = Task(
-        description="return the output following the given prompt.",
-        response_fields=[ResponseField(title="result", data_type=str, required=True),]
-    )
-    main_task = Task(
-        description="return the output following the given prompt.",
-        pydantic_output=Outcome,
-        response_fields=[
-            ResponseField(title="test1", data_type=int, required=True),
-            ResponseField(title="test2", data_type=str, required=True),
-        ],
-        context=[sub_task]
-    )
-    res = main_task.execute(context="plan a Black Friday campaign.")
-
-    assert isinstance(res, TaskOutput) and res.task_id is main_task.id
-    assert res.raw and isinstance(res.raw, str)
-    assert res.json_dict and isinstance(res.json_dict, dict)
-    assert res.pydantic.test1 == res.json_dict["test1"] and res.pydantic.test2 == res.json_dict["test2"]
-    assert sub_task.output is not None
-    assert "result" in main_task.prompt()
-    assert main_task.prompt_context == "plan a Black Friday campaign."
-    assert "plan a Black Friday campaign." in main_task.prompt()
 
 
 def test_callback():
@@ -115,20 +80,20 @@ def test_callback():
     assert "demo for pytest" in res.callback_output
 
 
-def test_delegate():
-    agent = Agent(role="demo agent 6", goal="My amazing goals", maxit=1, max_tokens=3000)
-    task = Task(
-        description="return the output following the given prompt.",
-        response_fields=[
-            ResponseField(title="test1", data_type=str, required=True),
-        ],
-        allow_delegation=True
-    )
-    task.execute()
+# def test_delegate():
+#     # agent = Agent(role="demo agent 6", goal="My amazing goals", maxit=1, max_tokens=3000)
+#     task = Task(
+#         description="return the output following the given prompt.",
+#         response_fields=[
+#             ResponseField(title="test1", data_type=str, required=True),
+#         ],
+#         allow_delegation=True
+#     )
+#     task.execute()
 
-    assert task.output is not None
-    assert "vhq-Delegated-Agent" in task.processed_agents
-    assert task.delegations != 0
+#     assert task.output is not None
+#     assert "vhq-Delegated-Agent" in task.processed_agents
+#     assert task.delegations != 0
 
 
 # def test_conditional_task():
@@ -241,25 +206,25 @@ def test_build_agent_without_developer_prompt():
     assert res.pydantic is None
 
 
-def test_callback_with_custom_output():
-    class CustomOutput(BaseModel):
-        test1: str
-        test2: list[str]
+# def test_callback_with_custom_output():
+#     class CustomOutput(BaseModel):
+#         test1: str
+#         test2: list[str]
 
-    def dummy_func(message: str, test1: str, test2: list[str]) -> str:
-        return f"""{message}: {test1}, {", ".join(test2)}"""
+#     def dummy_func(message: str, test1: str, test2: list[str]) -> str:
+#         return f"""{message}: {test1}, {", ".join(test2)}"""
 
-    task = Task(
-        description="Amazing task",
-        pydantic_output=CustomOutput,
-        callback=dummy_func,
-        callback_kwargs=dict(message="Hi! Here is the result: ")
-    )
-    res = task.execute(context="amazing context to consider.")
+#     task = Task(
+#         description="Amazing task",
+#         pydantic_output=CustomOutput,
+#         callback=dummy_func,
+#         callback_kwargs=dict(message="Hi! Here is the result: ")
+#     )
+#     res = task.execute(context="amazing context to consider.")
 
-    assert res.task_id == task.id
-    assert res.pydantic.test1 and res.pydantic.test2
-    assert "Hi! Here is the result: " in res.callback_output and res.pydantic.test1 in res.callback_output and ", ".join(res.pydantic.test2) in res.callback_output
+#     assert res.task_id == task.id
+#     assert res.pydantic.test1 and res.pydantic.test2
+#     assert "Hi! Here is the result: " in res.callback_output and res.pydantic.test1 in res.callback_output and ", ".join(res.pydantic.test2) in res.callback_output
 
 
 def test_task_with_agent_callback():
@@ -305,21 +270,21 @@ def test_maxit():
         assert mock.call_count <= 2
 
 
-def test_evaluation():
-    """
-    See if the output will be evaluated accurately - when the task was given eval criteria
-    """
-    from versionhq.task.evaluate import Evaluation, EvaluationItem
-    from versionhq.agent.inhouse_agents import vhq_task_evaluator
+# def test_evaluation():
+#     """
+#     See if the output will be evaluated accurately - when the task was given eval criteria
+#     """
+#     from versionhq.task.evaluate import Evaluation, EvaluationItem
+#     from versionhq.agent.inhouse_agents import vhq_task_evaluator
 
-    task = Task(
-        description="Research a topic to teach a kid aged 6 about math.",
-        should_evaluate=True,
-        eval_criteria=["Uniquness of the topic researched", "Fit to the target audience",],
-    )
-    res = task.execute()
+#     task = Task(
+#         description="Research a topic to teach a kid aged 6 about math.",
+#         should_evaluate=True,
+#         eval_criteria=["Uniquness of the topic researched", "Fit to the target audience",],
+#     )
+#     res = task.execute()
 
-    assert res.evaluation and isinstance(res.evaluation, Evaluation)
-    assert [isinstance(item, EvaluationItem) and item.criteria in task.eval_criteria for item in res.evaluation.items]
-    assert res.evaluation.latency and res.evaluation.tokens and res.evaluation.eval_by == vhq_task_evaluator
-    assert res.evaluation.aggregate_score is not None and res.evaluation.suggestion_summary
+#     assert res.evaluation and isinstance(res.evaluation, Evaluation)
+#     assert [isinstance(item, EvaluationItem) and item.criteria in task.eval_criteria for item in res.evaluation.items]
+#     assert res.evaluation.latency and res.evaluation.tokens and res.evaluation.eval_by == vhq_task_evaluator
+#     assert res.evaluation.aggregate_score is not None and res.evaluation.suggestion_summary

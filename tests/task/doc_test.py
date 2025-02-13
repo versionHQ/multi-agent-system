@@ -21,7 +21,6 @@ def test_docs_core_task_b():
     assert task.processed_agents is not None
 
 
-
 def test_docs_core_task_c():
     from pydantic import BaseModel
     from typing import Any
@@ -61,7 +60,6 @@ def test_docs_core_task_c():
     ]
 
 
-
 def test_docs_core_task_d():
     import versionhq as vhq
 
@@ -97,8 +95,7 @@ def test_docs_core_task_d():
     assert [v and type(v) == task.response_fields[i].data_type for i, (k, v) in enumerate(res.json_dict.items())]
 
 
-
-def test_docs_core_task_d():
+def test_docs_core_task_e():
     import versionhq as vhq
     from pydantic import BaseModel
     from typing import Any
@@ -134,3 +131,34 @@ def test_docs_core_task_d():
     res = main_task.execute(context=sub_res.raw) # [Optional] Adding sub_task's response as context.
 
     assert [item for item in res.callback_output.main1 if isinstance(item, Sub)]
+
+
+def test_docs_core_task_f():
+    import versionhq as vhq
+
+    sub_task_1 = vhq.Task(description="Run a sub demo part 1")
+    sub_res = sub_task_1.execute()
+    sub_task_2 = vhq.Task(description="Run a sub demo part 2")
+    task = vhq.Task(description="Run a main demo")
+    # res = task.execute(context=[sub_res, sub_task_2, "context to add in string",])
+    task_prompt = task._prompt(context=[sub_res, sub_task_2, "context to add in string"])
+
+    assert sub_res.raw in  task_prompt
+    assert sub_task_2.output.raw in task_prompt
+    assert "context to add in string" in task_prompt
+
+
+def test_docs_core_task_g():
+    import versionhq as vhq
+    task = vhq.Task(
+        description="return the output following the given prompt.",
+        response_fields=[
+            vhq.ResponseField(title="test1", data_type=str, required=True),
+        ],
+        allow_delegation=True
+    )
+    task.execute()
+
+    assert task.output is not None
+    assert "vhq-Delegated-Agent" in task.processed_agents
+    assert task.delegations ==1

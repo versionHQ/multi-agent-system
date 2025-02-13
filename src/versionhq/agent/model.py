@@ -517,12 +517,11 @@ class Agent(BaseModel):
 
 
 
-    def execute_task(self, task, context: Optional[str] = None, task_tools: Optional[List[Tool | ToolSet]] = list()) -> str:
+    def execute_task(self, task, context: Optional[Any] = None, task_tools: Optional[List[Tool | ToolSet]] = list()) -> str:
         """
-        Execute the task and return the response in string.
-        The agent utilizes the tools in task or their own tools if the task.can_use_agent_tools is True.
-        The agent must consider the context to excute the task as well when it is given.
+        Format a task prompt, adding context from knowledge and memory (if given), and invoke LLM.
         """
+
         from versionhq.task.model import Task
         from versionhq.knowledge._utils import extract_knowledge_context
 
@@ -532,9 +531,7 @@ class Agent(BaseModel):
         if self.max_rpm and self._rpm_controller:
             self._rpm_controller._reset_request_count()
 
-        task_prompt = task.prompt(model_provider=self.llm.provider)
-        if context is not task.prompt_context:
-            task_prompt += context
+        task_prompt = task._prompt(model_provider=self.llm.provider, context=context)
 
         if self._knowledge:
             agent_knowledge = self._knowledge.query(query=[task_prompt,], limit=5)
@@ -547,7 +544,9 @@ class Agent(BaseModel):
             contextual_memory = ContextualMemory(
                 memory_config=self.memory_config, stm=self.short_term_memory, ltm=self.long_term_memory, um=self.user_memory
             )
-            memory = contextual_memory.build_context_for_task(task=task, context=context)
+            context_str = task._draft_context_prompt(context=context)
+            query = f"{task.description} {context_str}".strip()
+            memory = contextual_memory.build_context_for_task(query=query)
             if memory.strip() != "":
                 task_prompt += memory.strip()
 

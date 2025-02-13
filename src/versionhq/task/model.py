@@ -196,7 +196,7 @@ class TaskOutput(BaseModel):
         """
         When the task is called as context, return its output in concise string to add it to the prompt
         """
-        return json.dumps(self.json_dict) if self.json_dict else self.raw[0: 127]
+        return json.dumps(self.json_dict) if self.json_dict else self.raw[0: 1024]
 
 
     def evaluate(self, task) -> Evaluation:
@@ -245,7 +245,7 @@ class TaskOutput(BaseModel):
 
 
     @property
-    def json(self) -> Optional[str]:
+    def json_string(self) -> Optional[str]:
         return json.dumps(self.json_dict)
 
 
@@ -259,7 +259,6 @@ class Task(BaseModel):
     """
 
     __hash__ = object.__hash__
-    _logger: Logger = PrivateAttr(default_factory=lambda: Logger(verbose=True))
     _original_description: str = PrivateAttr(default=None)
     _task_output_handler = TaskOutputStorageHandler()
     config: Optional[Dict[str, Any]] = Field(default=None, description="values to set on Task class")
@@ -271,18 +270,17 @@ class Task(BaseModel):
     # output
     pydantic_output: Optional[Type[BaseModel]] = Field(default=None, description="store Pydantic class as structured response format")
     response_fields: Optional[List[ResponseField]] = Field(default_factory=list, description="store list of ResponseField as structured response format")
-    output: Optional[TaskOutput] = Field(default=None, description="store the final task output in TaskOutput class")
 
     # task setup
-    context: Optional[List["Task"]] = Field(default=None, description="other tasks whose outputs should be used as context")
-    prompt_context: Optional[str] = Field(default=None)
+    # context: Optional[List["Task"]] = Field(default=None, description="other tasks whose outputs should be used as context")
+    # prompt_context: Optional[str] = Field(default=None)
 
     # tool usage
     tools: Optional[List[ToolSet | Tool | Any]] = Field(default_factory=list, description="tools that the agent can use aside from their tools")
     can_use_agent_tools: bool = Field(default=False, description="whether the agent can use their own tools when executing the task")
     tool_res_as_final: bool = Field(default=False, description="when set True, tools res will be stored in the `TaskOutput`")
 
-    # execution rules
+    # executing
     execution_type: TaskExecutionType = Field(default=TaskExecutionType.SYNC)
     allow_delegation: bool = Field(default=False, description="ask other agents for help and run the task instead")
     callback: Optional[Callable] = Field(default=None, description="callback to be executed after the task is completed.")
@@ -294,10 +292,11 @@ class Task(BaseModel):
 
     # recording
     processed_agents: Set[str] = Field(default_factory=set, description="store roles of the agents that executed the task")
-    tools_errors: int = 0
+    tool_errors: int = 0
     delegations: int = 0
     latency: int | float = 0 # job latency in sec
     tokens: int = 0 # tokens consumed
+    output: Optional[TaskOutput] = Field(default=None, description="store the final task output in TaskOutput class")
 
 
     @model_validator(mode="before")
@@ -339,13 +338,6 @@ class Task(BaseModel):
         return self
 
 
-    @model_validator(mode="after")
-    def backup_description(self):
-        if self._original_description == None:
-            self._original_description = self.description
-        return self
-
-
     def _draft_output_prompt(self, model_provider: str) -> str:
         """
         Draft prompts on the output format by converting `
@@ -371,35 +363,60 @@ Your response MUST be a valid JSON string that strictly follows the response for
 Response format: {response_format}
 Ref. Output image: {output_formats_to_follow}
 """
-
         else:
             output_prompt = "Return your response as a valid JSON serializable string, enclosed in double quotes. Do not use single quotes, trailing commas, or other non-standard JSON syntax."
 
         return output_prompt
 
 
-    def prompt(self, model_provider: str = None, customer: str = None, product_overview: str = None) -> str:
+    def _draft_context_prompt(self, context: Any) -> str:
+        """
+        Create a context prompt from the given context in any format: a task object, task output object, list, dict.
+        """
+
+        context_to_add = None
+        if not context:
+            Logger().log(level="error", color="red", message="Missing a context to add to the prompt. We'll return ''.")
+            return context_to_add
+
+        match context:
+            case str():
+                context_to_add = context
+
+            case Task():
+                if not context.output:
+                    res = context.execute()
+                    context_to_add = res.raw
+
+                else:
+                    context_to_add = context.output.raw
+
+            case TaskOutput():
+                context_to_add = context.raw
+
+            case dict():
+                context_to_add = str(context)
+
+            case list():
+                res = ", ".join([self._draft_context_prompt(context=item) for item in context])
+                context_to_add = res
+
+            case _:
+                pass
+
+        return context_to_add
+
+
+    def _prompt(self, model_provider: str = None, context: Optional[Any] = None) -> str:
         """
         Format the task prompt and cascade it to the agent.
-        When the task has context, add context prompting of all the tasks in the context.
-        When we have cusotmer/product info, add them to the prompt.
         """
-
         output_prompt = self._draft_output_prompt(model_provider=model_provider)
-        task_slices = [self.description, output_prompt,]
+        context_prompt = self._draft_context_prompt(context=context) if context else None
+        task_slices = [self.description, output_prompt, ]
 
-        if self.context:
-            context_outputs = "\n".join([task.output.context_prompting() if hasattr(task, "output") else "" for task in self.context])
-            task_slices.insert(len(task_slices), f"Consider the following context when responding: {context_outputs}")
-
-        if self.prompt_context:
-            task_slices.insert(len(task_slices), f"Consider the following context when responding: {self.prompt_context}")
-
-        if customer:
-            task_slices.insert(len(task_slices), f"Customer to address: {customer}")
-
-        if product_overview:
-            task_slices.insert(len(task_slices), f"Product to promote: {product_overview}")
+        if context_prompt:
+            task_slices.insert(len(task_slices), f"Consider the following context when responding: {context_prompt}")
 
         return "\n".join(task_slices)
 
@@ -449,8 +466,8 @@ Ref. Output image: {output_formats_to_follow}
         """
 
         if raw is None or raw == "":
-            self._logger.log(level="warning", message="The model returned an empty response. Returning an empty dict.", color="yellow")
-            output = { "output": "n.a." }
+            Logger().log(level="warning", message="The model returned an empty response. Returning an empty dict.", color="yellow")
+            output = { "output": "" }
             return output
 
         try:
@@ -498,8 +515,10 @@ Ref. Output image: {output_formats_to_follow}
 
     def interpolate_inputs(self, inputs: Dict[str, Any]) -> None:
         """
-        Interpolate inputs into the task description and expected output.
+        Interpolate inputs into the task description.
         """
+        self._original_description = self.description
+
         if inputs:
             self.description = self._original_description.format(**inputs)
 
@@ -537,17 +556,18 @@ Ref. Output image: {output_formats_to_follow}
                 )
 
         except AttributeError as e:
-            self._logger.log(level="error", message=f"Missing attributes for long term memory: {str(e)}", color="red")
+            Logger().log(level="error", message=f"Missing attributes for long term memory: {str(e)}", color="red")
             pass
 
         except Exception as e:
-            self._logger.log(level="error", message=f"Failed to add to the memory: {str(e)}", color="red")
+            Logger().log(level="error", message=f"Failed to add to the memory: {str(e)}", color="red")
             pass
+
 
     def _build_agent_from_task(self, task_description: str = None) -> InstanceOf["vhq.Agent"]:
         task_description = task_description if task_description else self.description
         if not task_description:
-            self._logger.log(level="error", message="Task is missing the description.", color="red")
+            Logger().log(level="error", message="Task is missing the description.", color="red")
             pass
 
         agent = vhq.Agent(goal=task_description, role=task_description, maxit=1) #! REFINEME
@@ -555,7 +575,9 @@ Ref. Output image: {output_formats_to_follow}
 
 
     # task execution
-    def execute(self, type: TaskExecutionType = None, agent: Optional[Any] = None, context: Optional[str] = None) -> TaskOutput | Future[TaskOutput]:
+    def execute(
+            self, type: TaskExecutionType = None, agent: Optional["vhq.Agent"] = None, context: Optional[Any] = None
+            ) -> TaskOutput | Future[TaskOutput]:
         """
         A main method to handle task execution. Build an agent when the agent is not given.
         """
@@ -572,26 +594,14 @@ Ref. Output image: {output_formats_to_follow}
                 return self._execute_async(agent=agent, context=context)
 
 
-    def _execute_sync(self, agent, context: Optional[str | List[Any]] = None) -> TaskOutput:
-        """
-        Execute the task synchronously.
-        When the task has context, make sure we have executed all the tasks in the context first.
-        """
 
-        if self.context:
-            if isinstance(self.context, list):
-                for task in self.context:
-                    if isinstance(task, Task) and task.output is None:
-                        task._execute_core(agent, context)
-
+    def _execute_sync(self, agent, context: Optional[Any] = None) -> TaskOutput:
+        """Executes the task synchronously."""
         return self._execute_core(agent, context)
 
 
-    def _execute_async(self, agent, context: Optional[str] = None) -> Future[TaskOutput]:
-        """
-        Execute the task asynchronously.
-        """
-
+    def _execute_async(self, agent, context: Optional[Any] = None) -> Future[TaskOutput]:
+        """Executes the task asynchronously."""
         future: Future[TaskOutput] = Future()
         threading.Thread(daemon=True, target=self._execute_task_async, args=(agent, context, future)).start()
         return future
@@ -601,21 +611,19 @@ Ref. Output image: {output_formats_to_follow}
         """
         Executes the task asynchronously with context handling.
         """
-
         result = self._execute_core(agent, context)
         future.set_result(result)
 
 
-    def _execute_core(self, agent, context: Optional[str]) -> TaskOutput:
+    def _execute_core(self, agent, context: Optional[Any]) -> TaskOutput:
         """
         A core method for task execution.
-        Handles 1. agent delegation, 2. tools, 3. context to add to the prompt, and 4. callbacks
+        Handles 1. agent delegation, 2. tools, 3. context to add to the prompt, and 4. callbacks.
         """
 
         from versionhq.agent.model import Agent
         from versionhq.agent_network.model import AgentNetwork
 
-        self.prompt_context = context
         task_output: InstanceOf[TaskOutput] = None
         raw_output: str = None
         tool_output: str | list = None
@@ -719,52 +727,3 @@ Task ID: {str(self.id)}
 "Description": {self.description}
 "Tools": {", ".join([tool.name for tool in self.tools])}
         """
-
-
-
-# class ConditionalTask(Task):
-#     """
-#     A task that can be conditionally executed based on the output of another task.
-#     When the `condition` return True, execute the task, else skipped with `skipped task output`.
-#     """
-
-#     condition: Callable[[TaskOutput], bool] = Field(
-#         default=None,
-#         description="max. number of retries for an agent to execute a task when an error occurs",
-#     )
-
-
-#     def __init__(self, condition: Callable[[Any], bool], **kwargs):
-#         super().__init__(**kwargs)
-#         self.condition = condition
-
-
-#     def should_execute(self, context: TaskOutput) -> bool:
-#         """
-#         Decide whether the conditional task should be executed based on the provided context.
-#         Return `True` if it should be executed.
-#         """
-#         return self.condition(context)
-
-
-#     def get_skipped_task_output(self):
-#         return TaskOutput(task_id=self.id, raw="", pydantic=None, json_dict={})
-
-
-#     def _handle_conditional_task(self, task_outputs: List[TaskOutput], task_index: int, was_replayed: bool) -> Optional[TaskOutput]:
-#         """
-#         When the conditional task should be skipped, return `skipped_task_output` as task_output else return None
-#         """
-
-#         previous_output = task_outputs[task_index - 1] if task_outputs and len(task_outputs) > 1  else None
-
-#         if previous_output and not self.should_execute(previous_output):
-#             self._logger.log(level="warning", message=f"Skipping conditional task: {self.description}", color="yellow")
-#             skipped_task_output = self.get_skipped_task_output()
-#             self.output = skipped_task_output
-
-#             if not was_replayed:
-#                 self._store_execution_log(self, task_index=task_index, was_replayed=was_replayed, inputs={})
-#             return skipped_task_output
-
-#         return None

@@ -1,8 +1,6 @@
 ---
 tags:
-  - HTML5
-  - JavaScript
-  - CSS
+  - Task Graph
 ---
 
 # TaskGraph

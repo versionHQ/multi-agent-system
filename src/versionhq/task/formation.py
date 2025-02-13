@@ -82,18 +82,21 @@ def form_agent_network(
         res = vhq_task.execute(agent=vhq_formation_planner, context=context)
         _formation = Formation.SUPERVISING
 
+
         if res.pydantic:
             formation_keys = [k for k, v in Formation._member_map_.items() if k == res.pydantic.formation.upper()]
 
             if formation_keys:
                 _formation = Formation[formation_keys[0]]
 
-            created_agents = [Agent(role=item, goal=item) for item in res.pydantic.agent_roles]
-            created_tasks = [Task(description=item) for item in res.pydantic.task_descriptions]
 
             network_tasks = []
             members = []
             leader = str(res.pydantic.leader_agent)
+
+            created_agents = [Agent(role=item, goal=item) for item in res.pydantic.agent_roles]
+            created_tasks = [Task(description=item) for item in res.pydantic.task_descriptions]
+
 
             for i in range(len(created_agents)):
                 is_manager = bool(created_agents[i].role.lower() == leader.lower())
@@ -101,12 +104,15 @@ def form_agent_network(
 
                 if len(created_tasks) >= i and created_tasks[i]:
                     member.tasks.append(created_tasks[i])
-
                 members.append(member)
 
 
             if len(created_agents) < len(created_tasks):
                 network_tasks.extend(created_tasks[len(created_agents):len(created_tasks)])
+
+            if _formation == Formation.SUPERVISING and not [member for member in members if member.is_manager]:
+                manager = Member(agent=Agent(role=leader, goal=leader), is_manager=True)
+                members.append(manager)
 
             members.sort(key=lambda x: x.is_manager == False)
             network = AgentNetwork(members=members, formation=_formation, network_tasks=network_tasks)
@@ -138,8 +144,13 @@ def form_agent_network(
             if len(created_agents) < len(created_tasks):
                 network_tasks.extend(created_tasks[len(created_agents):len(created_tasks)])
 
+            if _formation == Formation.SUPERVISING and not [member for member in members if member.is_manager]:
+                member = Member(agent=Agent(role=leader, goal=leader), is_manager=True)
+                members.append(member)
+
             members.sort(key=lambda x: x.is_manager == False)
             network = AgentNetwork(members=members, formation=_formation,  network_tasks=network_tasks)
+
             return network
 
 

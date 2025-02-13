@@ -23,14 +23,11 @@ class ContextualMemory:
         self.um = um
 
 
-    def build_context_for_task(self, task, context: List[Any] | str) -> str:
+    def build_context_for_task(self, query: str = None) -> str:
         """
         Automatically builds a minimal, highly relevant set of contextual information for a given task.
         """
-
-        query = f"{task.description} {context}".strip()
-
-        if query == "":
+        if not query:
             return ""
 
         context = []
