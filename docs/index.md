@@ -201,6 +201,53 @@ Create `.env` file in the project root and add following:
 
 <hr />
 
+## Technologies Used
+
+**Schema, Data Validation**
+
+* [Pydantic](https://docs.pydantic.dev/latest/): Data validation and serialization library for Python.
+
+* [Upstage](https://console.upstage.ai/docs/getting-started/overview): Document processer for ML tasks. (Use `Document Parser API` to extract data from documents)
+
+* [Docling](https://ds4sd.github.io/docling/): Document parsing
+
+**Workflow, Task Graph**
+
+* [NetworkX](https://networkx.org/documentation/stable/reference/introduction.html): A Python package to analyze, create, and manipulate complex graph networks.
+
+* [Matplotlib](https://matplotlib.org/stable/index.html): For graph visualization.
+
+* [Graphviz](https://graphviz.org/about/): For graph visualization.
+
+**LLM Curation**
+
+* [LiteLLM](https://docs.litellm.ai/docs/providers): LLM orchestration platform
+
+**Tools**
+
+* [Composio](https://composio.dev/): Conect RAG agents with external tools, Apps, and APIs to perform actions and receive triggers. We use [tools](https://composio.dev/tools) and [RAG tools](https://app.composio.dev/app/ragtool) from Composio toolset.
+
+
+**Storage**
+
+* [mem0ai](https://docs.mem0.ai/quickstart#install-package): Agents' memory storage and management.
+
+* [Chroma DB](https://docs.trychroma.com/): Vector database for storing and querying usage data.
+
+* [SQLite](https://www.sqlite.org/docs.html): C-language library to implements a small SQL database engine.
+
+
+**Deployment**
+
+* **Python**: Primary programming language. v3.12.x is recommended
+
+* [uv](https://docs.astral.sh/uv/): Python package installer and resolver
+
+* [pre-commit](https://pre-commit.com/): Manage and maintain pre-commit hooks
+
+* [setuptools](https://pypi.org/project/setuptools/): Build python modules
+
+<hr />
 
 ## Trouble Shooting
 
@@ -224,57 +271,10 @@ Common issues and solutions:
 
 <hr />
 
-## Frequently Asked Questions (FAQ)
+## FAQ
 **Q. Where can I see if the agent is working?**
 
 A. Visit [playground](https://versi0n.io).
-
-<hr />
-
-## Technologies Used
-
-**Schema, Data Validation**
-
-* [Pydantic](https://docs.pydantic.dev/latest/): Data validation and serialization library for Python.
-
-* [Upstage](https://console.upstage.ai/docs/getting-started/overview): Document processer for ML tasks. (Use `Document Parser API` to extract data from documents)
-
-* [Docling](https://ds4sd.github.io/docling/): Document parsing
-
-**Graph Theory (Analysis and Visualization)**
-
-* [NetworkX](https://networkx.org/documentation/stable/reference/introduction.html): A Python package to analyze, create, and manipulate complex graph networks.
-
-* [Matplotlib](https://matplotlib.org/stable/index.html): Visualization library
-
-* [Graphviz](https://graphviz.org/about/): Graph visualization software
-
-
-**Storage**
-
-* [mem0ai](https://docs.mem0.ai/quickstart#install-package): Agents' memory storage and management.
-
-* [Chroma DB](https://docs.trychroma.com/): Vector database for storing and querying usage data.
-
-* [SQLite](https://www.sqlite.org/docs.html): C-language library to implements a small SQL database engine.
-
-**LLM-curation**
-
-* [LiteLLM](https://docs.litellm.ai/docs/providers): LLM orchestration platform
-
-**Tool**
-
-* [Composio](https://composio.dev/): Conect RAG agents with external tools, Apps, and APIs to perform actions and receive triggers. We use [tools](https://composio.dev/tools) and [RAG tools](https://app.composio.dev/app/ragtool) from Composio toolset.
-
-**Deployment**
-
-* **Python**: Primary programming language. v3.12.x is recommended
-
-* [uv](https://docs.astral.sh/uv/): Python package installer and resolver
-
-* [pre-commit](https://pre-commit.com/): Manage and maintain pre-commit hooks
-
-* [setuptools](https://pypi.org/project/setuptools/): Build python modules
 
 <hr />
 
@@ -283,7 +283,7 @@ A. Visit [playground](https://versi0n.io).
 `versionhq` is a open source project.
 
 
-### Steps
+**Steps**
 
 1. Create your feature branch (`git checkout -b feature/your-amazing-feature`)
 
@@ -321,7 +321,7 @@ A. Visit [playground](https://versi0n.io).
 * `Playground` is available at `https://versi0n.io`.
 
 
-### Package management
+**Package Management with UV**
 
 - Add a package: `uv add <package>`
 
@@ -332,7 +332,7 @@ A. Visit [playground](https://versi0n.io).
 * After updating dependencies, update `requirements.txt` accordingly or run `uv pip freeze > requirements.txt`
 
 
-### Pre-Commit hooks
+**Pre-commit Hooks**
 
 1. Install pre-commit hooks:
    ```
@@ -352,7 +352,7 @@ Pre-commit hooks help maintain code quality by running checks for formatting, li
    ```
 
 
-### Documentation
+**Documentation**
 
 * To edit the documentation, see `docs` repository and edit the respective component.
 

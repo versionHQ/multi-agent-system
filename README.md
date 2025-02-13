@@ -265,18 +265,25 @@ Tasks can be delegated to a manager, peers within the agent network, or a comple
 
 ## Technologies Used
 
-**Task Graph**
-
-* [NetworkX](https://networkx.org/documentation/stable/reference/introduction.html): A Python package to analyze, create, and manipulate complex graph networks.
-* [Matplotlib](https://matplotlib.org/stable/index.html): Visualization library
-* [Graphviz](https://graphviz.org/about/): Graph visualization software
-
-
 **Schema, Data Validation**
 
 * [Pydantic](https://docs.pydantic.dev/latest/): Data validation and serialization library for Python.
 * [Upstage](https://console.upstage.ai/docs/getting-started/overview): Document processer for ML tasks. (Use `Document Parser API` to extract data from documents)
 * [Docling](https://ds4sd.github.io/docling/): Document parsing
+
+**Workflow, Task Graph**
+
+* [NetworkX](https://networkx.org/documentation/stable/reference/introduction.html): A Python package to analyze, create, and manipulate complex graph networks.
+* [Matplotlib](https://matplotlib.org/stable/index.html): For graph visualization.
+* [Graphviz](https://graphviz.org/about/): For graph visualization.
+
+**LLM Curation**
+
+* [LiteLLM](https://docs.litellm.ai/docs/providers): LLM orchestration platform
+
+**Tools**
+
+* [Composio](https://composio.dev/): Conect RAG agents with external tools, Apps, and APIs to perform actions and receive triggers. We use [tools](https://composio.dev/tools) and [RAG tools](https://app.composio.dev/app/ragtool) from Composio toolset.
 
 
 **Storage**
@@ -285,13 +292,6 @@ Tasks can be delegated to a manager, peers within the agent network, or a comple
 * [Chroma DB](https://docs.trychroma.com/): Vector database for storing and querying usage data.
 * [SQLite](https://www.sqlite.org/docs.html): C-language library to implements a small SQL database engine.
 
-**LLM Integration**
-
-* [LiteLLM](https://docs.litellm.ai/docs/providers): Integration to diverse LLMs
-
-**Tools**
-
-* [Composio](https://composio.dev/): Conect RAG agents with external tools, Apps, and APIs to perform actions and receive triggers. We use [tools](https://composio.dev/tools) and [RAG tools](https://app.composio.dev/app/ragtool) from Composio toolset.
 
 **Deployment**
 
