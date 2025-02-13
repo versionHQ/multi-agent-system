@@ -72,7 +72,7 @@ class Logger(BaseModel):
                 pass
 
         cwd = Path.cwd()
-        log_file_dir = f"{cwd}/_logs"
+        log_file_dir = f"{cwd}/.logs"
         os.makedirs(log_file_dir, exist_ok=True)
         filename = filename if filename else datetime.now().strftime('%H_%M_%S_%d_%m_%Y')
         abs_dir = f"{log_file_dir}/{filename}.log"

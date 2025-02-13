@@ -30,7 +30,7 @@ from versionhq.memory.model import ShortTermMemory,LongTermMemory, UserMemory, M
 from versionhq.task.formation import form_agent_network
 
 
-__version__ = "1.2.1.4"
+__version__ = "1.2.1.5"
 __all__ = [
     "Agent",
 

@@ -28,7 +28,8 @@ memo.txt
 site/
 
 _logs/
-.cache
+.logs/
+.cache/
 __pycache__
 .ruff_cache/
 .pytest_cache/

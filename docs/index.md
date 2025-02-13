@@ -257,7 +257,7 @@ Common issues and solutions:
 
 * Issues related to dependencies: `rm -rf uv.lock`, `uv cache clean`, `uv venv`, and run `uv pip install -r requirements.txt -v`.
 
-* Issues related to agents and other systems: Check `_logs` directory for detailed error messages and stack traces.
+* Issues related to agents and other systems: Check `.logs` directory located in the root directory for detailed error messages and stack traces.
 
 * Issues related to `Python quit unexpectedly`: Check [this stackoverflow article](https://stackoverflow.com/questions/59888499/macos-catalina-python-quit-unexpectedly-error).
 
