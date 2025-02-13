@@ -1,4 +1,4 @@
-"""Test use cases in docs/core/agent.md"""
+"""Test use cases in docs/core/agents.md"""
 
 def test_docs_core_agent_a():
     from versionhq import Agent

@@ -14,7 +14,7 @@ Each agent has its unique knowledge and memory on the past task.
 You can create one and assign the task or reassign another task to the existing agent after fine-tuning.
 
 
-## Core usage
+## Quick Start
 
 By defining its role and goal in a simple sentence, the AI agent will be set up to run on <bold>`gpt-4o`</bold> by default.
 

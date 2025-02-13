@@ -11,7 +11,7 @@ tags:
 
 Tool is an unique function that the agent can utilize when they execute the task with or without LLM.
 
-## Core usage
+## Quick Start
 
 By defining the function, you can let the agent start to use it when they get an approval.
 

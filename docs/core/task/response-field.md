@@ -13,7 +13,7 @@ A class to store response formats to create JSON response schema.
 
 <hr/>
 
-## Core Usage
+## Quick Start
 
 `[var]`<bold>`title: str = None`</bold>
 

@@ -15,7 +15,7 @@ Ref. Node / Edge / TaskGraph class
 
 <hr />
 
-## Core usage
+## Quick Start
 
 Create a task by defining its description in one simple sentence. The `description` will be used for task prompting later.
 

@@ -108,11 +108,11 @@ theme:
 nav:
   - Home: 'index.md'
   - Quick Start: 'quickstart.md'
-  - Core:
-    - Agent: 'core/agent.md'
+  - Core Components:
+    - Agent: 'core/agent'
     - Task Graph: 'core/task-graph.md'
     - Task:
-      - Overview: 'core/task.md'
+      - Task: 'core/task.md'
       - ResponseField: 'core/task/response-field.md'
       - TaskOutput: 'core/task/task-output.md'
     - Tool: 'core/tool.md'

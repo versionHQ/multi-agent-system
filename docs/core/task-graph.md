@@ -18,7 +18,7 @@ The following example demonstrates a simple concept of a `supervising` agent net
 <img src="https://res.cloudinary.com/dfeirxlea/image/upload/v1739337639/pj_m_home/zfg4ccw1m1ww1tpnb0pa.png">
 
 
-## Core Usage
+## Quick Start
 
 `TaskGraph` needs at least two `nodes` and one `edges` to connect the nodes to function.
 
