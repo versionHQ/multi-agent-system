@@ -36,10 +36,10 @@ A Python framework for agentic orchestration that handles complex task automatio
   - [Supervising](#supervising)
 - [Technologies Used](#technologies-used)
 - [Project Structure](#project-structure)
-- [Setting Up a Project](#setting-up-a-project)
-  - [1. Installing package manager](#1-installing-package-manager)
-  - [2. Installing dependencies](#2-installing-dependencies)
-  - [3. Adding env secrets to .env file](#3-adding-env-secrets-to-env-file)
+- [Setting Up Your Project](#setting-up-your-project)
+  - [Installing package manager](#installing-package-manager)
+  - [Installing dependencies](#installing-dependencies)
+  - [Adding env secrets to .env file](#adding-env-secrets-to-env-file)
 - [Contributing](#contributing)
   - [Steps](#steps)
   - [Package Management with uv](#package-management-with-uv)
@@ -185,42 +185,42 @@ You can simply build an agent using `Agent` model and execute the task using `Ta
 By default, agents prioritize JSON over plane text outputs.
 
 
-   ```python
-   import versionhq as vhq
-   from pydantic import BaseModel
+```python
+import versionhq as vhq
+from pydantic import BaseModel
 
-   class CustomOutput(BaseModel):
-      test1: str
-      test2: list[str]
+class CustomOutput(BaseModel):
+   test1: str
+   test2: list[str]
 
-   def dummy_func(message: str, test1: str, test2: list[str]) -> str:
-      return f"""{message}: {test1}, {", ".join(test2)}"""
+def dummy_func(message: str, test1: str, test2: list[str]) -> str:
+   return f"""{message}: {test1}, {", ".join(test2)}"""
 
-   task = vhq.Task(
-      description="Amazing task",
-      pydantic_output=CustomOutput,
-      callback=dummy_func,
-      callback_kwargs=dict(message="Hi! Here is the result: ")
-   )
+task = vhq.Task(
+   description="Amazing task",
+   pydantic_output=CustomOutput,
+   callback=dummy_func,
+   callback_kwargs=dict(message="Hi! Here is the result: ")
+)
 
-   res = task.execute(context="amazing context to consider.")
-   print(res)
-   ```
+res = task.execute(context="amazing context to consider.")
+print(res)
+```
 
 
 This will return a `TaskOutput` object that stores response in plane text, JSON, and Pydantic model: `CustomOutput` formats with a callback result, tool output (if given), and evaluation results (if given).
 
-   ```python
-   res == TaskOutput(
-      task_id=UUID('<TASK UUID>'),
-      raw='{\"test1\":\"random str\", \"test2\":[\"str item 1\", \"str item 2\", \"str item 3\"]}',
-      json_dict={'test1': 'random str', 'test2': ['str item 1', 'str item 2', 'str item 3']},
-      pydantic=<class '__main__.CustomOutput'>,
-      tool_output=None,
-      callback_output='Hi! Here is the result: random str, str item 1, str item 2, str item 3', # returned a plain text summary
-      evaluation=None
-   )
-   ```
+```python
+res == TaskOutput(
+   task_id=UUID('<TASK UUID>'),
+   raw='{\"test1\":\"random str\", \"test2\":[\"str item 1\", \"str item 2\", \"str item 3\"]}',
+   json_dict={'test1': 'random str', 'test2': ['str item 1', 'str item 2', 'str item 3']},
+   pydantic=<class '__main__.CustomOutput'>,
+   tool_output=None,
+   callback_output='Hi! Here is the result: random str, str item 1, str item 2, str item 3', # returned a plain text summary
+   evaluation=None
+)
+```
 
 ### Supervising
 
@@ -326,16 +326,19 @@ src/
 │     └── ...
 │
 └── uploads/  [.gitignore]    # Local directory to store uploaded files such as graphviz diagrams generatd by `Network` class
-|
+│
+└── _logs/    [.gitignore]    # Local directory to store error/warning logs for debugging
+│
+│
 pyproject.toml                # Project config
 
 ```
 
 <hr />
 
-## Setting Up a Project
+## Setting Up Your Project
 
-### 1. Installing package manager
+### Installing package manager
 
    For MacOS:
 
@@ -349,7 +352,7 @@ pyproject.toml                # Project config
    ```
 
 
-### 2. Installing dependencies
+### Installing dependencies
 
    ```
    uv venv
@@ -382,7 +385,7 @@ pyproject.toml                # Project config
 
    - `torch`/`Docling` related errors: Set up default Python version either `3.11.x` or `3.12.x` (same as AssertionError)
 
-### 3. Adding env secrets to .env file
+### Adding env secrets to .env file
 
 Create `.env` file in the project root and add following:
 
@@ -394,6 +397,7 @@ Create `.env` file in the project root and add following:
    COMPOSIO_CLI_KEY=your-composio-cli-key
    [OTHER_LLM_INTERFACE_PROVIDER_OF_YOUR_CHOICE]_API_KEY=your-api-key
    ```
+
 
 <hr />
 
@@ -499,7 +503,7 @@ Common issues and solutions:
 
 * Issues related to dependencies: `rm -rf uv.lock`, `uv cache clean`, `uv venv`, and run `uv pip install -r requirements.txt -v`.
 
-* Issues related to the AI agents or RAG system: Check the `output.log` file for detailed error messages and stack traces.
+* Issues related to agents and other systems: Check `_logs` directory for detailed error messages and stack traces.
 
 * Issues related to `Python quit unexpectedly`: Check [this stackoverflow article](https://stackoverflow.com/questions/59888499/macos-catalina-python-quit-unexpectedly-error).
 

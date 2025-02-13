@@ -24,6 +24,7 @@ temp/*
 assets/*
 memo.txt
 site/
+_logs/
 
 __pycache__
 .ruff_cache/

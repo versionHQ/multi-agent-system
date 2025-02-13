@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 from typing import Optional
 
@@ -42,9 +43,52 @@ class Logger(BaseModel):
     """
 
     verbose: bool = Field(default=True)
+    info_file_save: bool = Field(default=False, description="whether to save INFO logs")
     _printer: Printer = PrivateAttr(default_factory=Printer)
 
-    def log(self, level, message, color="yellow"):
+    def log(self, level: str, message: str, color="yellow"):
         if self.verbose:
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             self._printer.print(f"\n{timestamp} - versionHQ [{level.upper()}]: {message}", color=color)
+
+        self._save(level=level, message=message)
+
+    def _save(self, level: str, message: str, filename: str = None):
+        import os
+        from pathlib import Path
+
+        logging_level = logging.INFO
+        match level:
+            case "warning":
+                logging_level = logging.WARNING
+            case "error":
+                logging_level = logging.ERROR
+            case _:
+                pass
+
+        if logging_level == logging.INFO and self.info_file_save == False:
+            return
+
+        cwd = Path.cwd()
+        log_file_dir = f"{cwd}/_logs"
+        os.makedirs(log_file_dir, exist_ok=True)
+        filename = filename if filename else datetime.now().strftime('%H_%M_%S_%d_%m_%Y')
+        abs_dir = f"{log_file_dir}/{filename}.log"
+
+        for handler in logging.root.handlers[:]:
+            logging.root.removeHandler(handler)
+
+        logging.basicConfig(filename=abs_dir, filemode='w', level=logging_level)
+        logger = logging.getLogger(__name__)
+        file_handler = logging.FileHandler(filename=abs_dir)
+        formatter = logging.Formatter('%(asctime)s : %(levelname)s : %(name)s : %(message)s')
+        file_handler.setFormatter(formatter)
+        logger.addHandler(file_handler)
+
+        match logging_level:
+            case logging.WARNING:
+                logger.warning(message)
+            case logging.ERROR:
+                logger.error(message)
+            case _:
+               logger.info(message)
