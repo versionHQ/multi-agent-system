@@ -39,7 +39,7 @@ def form_agent_network(
                         pass
 
                 case str():
-                    matched = [item for item in Formation._member_names_ if item == formation.upper()]
+                    matched = [item for item in Formation.s_ if item == formation.upper()]
                     if matched:
                         formation = getattr(Formation, matched[0])
                     else:

@@ -4,6 +4,7 @@ import datetime
 import uuid
 import inspect
 import enum
+from textwrap import dedent
 from concurrent.futures import Future
 from hashlib import md5
 from typing import Any, Dict, List, Set, Optional, Callable, Type
@@ -288,7 +289,7 @@ class Task(BaseModel):
     should_evaluate: bool = Field(default=False, description="True to run the evaluation flow")
     eval_criteria: Optional[List[str]] = Field(default_factory=list, description="criteria to evaluate the outcome. i.e., fit to the brand tone")
 
-    # recording
+    # recording !# REFINEME - eval_callbacks
     processed_agents: Set[str] = Field(default_factory=set, description="store roles of the agents that executed the task")
     tool_errors: int = 0
     delegations: int = 0
@@ -364,7 +365,7 @@ Ref. Output image: {output_formats_to_follow}
         else:
             output_prompt = "Return your response as a valid JSON serializable string, enclosed in double quotes. Do not use single quotes, trailing commas, or other non-standard JSON syntax."
 
-        return output_prompt
+        return dedent(output_prompt)
 
 
     def _draft_context_prompt(self, context: Any) -> str:
@@ -374,7 +375,7 @@ Ref. Output image: {output_formats_to_follow}
 
         context_to_add = None
         if not context:
-            Logger().log(level="error", color="red", message="Missing a context to add to the prompt. We'll return ''.")
+            # Logger().log(level="error", color="red", message="Missing a context to add to the prompt. We'll return ''.")
             return context_to_add
 
         match context:
@@ -403,7 +404,7 @@ Ref. Output image: {output_formats_to_follow}
             case _:
                 pass
 
-        return context_to_add
+        return dedent(context_to_add)
 
 
     def _prompt(self, model_provider: str = None, context: Optional[Any] = None) -> str:

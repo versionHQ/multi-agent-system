@@ -28,9 +28,10 @@ from versionhq.memory.contextual_memory import ContextualMemory
 from versionhq.memory.model import ShortTermMemory,LongTermMemory, UserMemory, MemoryItem
 
 from versionhq.task.formation import form_agent_network
+from versionhq.task_graph.draft import workflow
 
 
-__version__ = "1.2.1.5"
+__version__ = "1.2.1.6"
 __all__ = [
     "Agent",
 
@@ -88,5 +89,6 @@ __all__ = [
     "UserMemory",
     "MemoryItem",
 
-    "form_agent_network"
+    "form_agent_network",
+    "workflow",
 ]

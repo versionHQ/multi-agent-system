@@ -4,8 +4,9 @@ import networkx as nx
 import matplotlib.pyplot as plt
 from abc import ABC
 from typing import List, Any, Optional, Callable, Dict, Type, Tuple
+from typing_extensions import Self
 
-from pydantic import BaseModel, InstanceOf, Field, UUID4, field_validator
+from pydantic import BaseModel, InstanceOf, Field, UUID4, field_validator, model_validator
 from pydantic_core import PydanticCustomError
 
 from versionhq.task.model import Task, TaskOutput
@@ -36,32 +37,12 @@ class DependencyType(enum.Enum):
     START_TO_FINISH = "SF"  # Task B finishes when Task A starts
 
 
-
-# class TriggerEvent(enum.Enum):
-#     """
-#     Concise enumeration of key trigger events for task execution.
-#     """
-#     IMMEDIATE = 0 # execute immediately
-#     DEPENDENCIES_MET = 1  # All/required dependencies are satisfied
-#     RESOURCES_AVAILABLE = 2  # Necessary resources are available
-#     SCHEDULED_TIME = 3  # Scheduled start time or time window reached
-#     EXTERNAL_EVENT = 4  # Triggered by an external event/message
-#     DATA_AVAILABLE = 5  # Required data  is available both internal/external
-#     APPROVAL_RECEIVED = 6  # Necessary approvals have been granted
-#     STATUS_CHANGED = 7  # Relevant task/system status has changed
-#     RULE_MET = 8  # A predefined rule or condition has been met
-#     MANUAL_TRIGGER = 9  # Manually initiated by a user
-#     ERROR_HANDLED = 10  # A previous error/exception has been handled
-
-
-
 class Node(BaseModel):
     """
     A class to store a node object.
     """
     id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True)
     task: InstanceOf[Task] = Field(default=None)
-    # trigger_event: TriggerEvent = Field(default=TriggerEvent.IMMEDIATE, description="store trigger event for starting the task execution")
     in_degree_nodes: List[Any] = Field(default_factory=list, description="list of Node objects")
     out_degree_nodes: List[Any] = Field(default_factory=list, description="list of Node objects")
     assigned_to: InstanceOf[Agent] = Field(default=None)
@@ -113,7 +94,10 @@ class Node(BaseModel):
         return f"{str(self.id)}"
 
     def __str__(self):
-        return self.identifier
+        if self.task:
+            return f"{self.identifier}: {self.task.name if self.task.name else self.task.description[0: 12]}"
+        else:
+            return self.identifier
 
 
 class Edge(BaseModel):
@@ -134,6 +118,17 @@ class Edge(BaseModel):
 
     lag: Optional[float | int] = Field(default=None, description="lag time (sec) from the dependency met to the task execution")
     data_transfer: bool = Field(default=True, description="whether the data transfer is required. by default transfer plane text output from in-degree nodes as context")
+
+
+    def _response_schema(self) -> Type[BaseModel]:
+        class EdgeResponseSchema(BaseModel):
+            wight: float
+            dependecy_type: str
+            required: bool
+            need_condition: bool
+            lag_in_sec: float
+
+        return EdgeResponseSchema
 
 
     def dependency_met(self) -> bool:
@@ -210,8 +205,8 @@ class Graph(ABC, BaseModel):
 
     directed: bool = Field(default=False, description="Whether the graph is directed")
     graph: Type[nx.Graph] = Field(default=None)
-    nodes: Dict[str, InstanceOf[Node]] = Field(default_factory=dict, description="identifier: Node - for the sake of ")
-    edges: Dict[str, InstanceOf[Edge]] = Field(default_factory=dict)
+    nodes: Dict[str, Node] = Field(default_factory=dict, description="identifier: Node - for the sake of ")
+    edges: Dict[str, Edge] = Field(default_factory=dict)
 
     def __init__(self, directed: bool = False, **kwargs):
         super().__init__(directed=directed, **kwargs)
@@ -221,11 +216,16 @@ class Graph(ABC, BaseModel):
         return [v for k, v in self.nodes.items() if k == node_identifier][0] if [v for k, v in self.nodes.items() if k == node_identifier] else None
 
     def add_node(self, node: Node) -> None:
-        self.graph.add_node(node.identifier, **node.model_dump())
+        if node.identifier in self.nodes.keys():
+            return
+
+        # self.graph.add_node(node.identifier, **node.model_dump())
+        self.graph.add_node(node.identifier, node=node)
         self.nodes[node.identifier] = node
 
     def add_edge(self, source: str, target: str, edge: Edge) -> None:
-        self.graph.add_edge(source, target, **edge.model_dump())
+        # self.graph.add_edge(source, target, **edge.model_dump())
+        self.graph.add_edge(source, target, edge=edge)
         edge.source = self._return_node_object(source)
         edge.source.out_degree_nodes.append(target)
         edge.target = self._return_node_object(target)
@@ -340,8 +340,13 @@ class TaskGraph(Graph):
     should_reform: bool = Field(default=False)
     status: Dict[str, TaskStatus] = Field(default_factory=dict, description="store identifier (str) and TaskStatus of all task_nodes")
     outputs: Dict[str, TaskOutput] = Field(default_factory=dict, description="store node identifire and TaskOutput")
-    conclusion: Any = Field(default=None, description="store the final result of the entire task graph. critical path target/end node")
+    concl_template: Optional[Dict[str, Any] | Type[BaseModel]] = Field(default=None, description="stores a format of `concl` either in Pydantic model or JSON dict")
+    concl: Any = Field(default=None, description="store the final result of the entire task graph")
 
+    @model_validator(mode="after")
+    def set_status(self) -> Self:
+        if not self.status and self.nodes:
+            self.status = {k: node.status if node.status else TaskStatus.NOT_STARTED for k, node in self.nodes.items()}
 
     def _save(self, abs_file_path: str = None) -> None:
         """
@@ -360,23 +365,48 @@ class TaskGraph(Graph):
             Logger().log(level="error", message=f"Failed to save the graph {str(self.id)}: {str(e)}", color="red")
 
 
+    def _update_status(self, node: Node, status: TaskStatus = TaskStatus.NOT_STARTED) -> None:
+        self.status.update({ str(node.identifier): status})
+
+
     def add_task(self, task: Node | Task) -> Node:
         """Convert `task` to a Node object and add it to G"""
-        task_node = task if isinstance(task, Node) else Node(task=task)
-        self.add_node(task_node)
-        self.status[task_node.identifier] = TaskStatus.NOT_STARTED
-        return task_node
+
+        if isinstance(task, Node) and task.identifier in self.nodes.keys():
+            self._update_status(node=task)
+            return task
+
+        elif isinstance(task, Task):
+            match = []
+            for k, v in self.nodes.items():
+                if type(v) == dict and v["node"] and v["node"].identifier == k:
+                    match.append(v["node"])
+                elif v.task and v.identifier == k:
+                    match.append(v)
+            if match:
+                print("match", type(match[0]))
+                self._update_status(node=match[0])
+                return match[0]
+            else:
+                node = Node(task=task)
+                self.add_node(node)
+                self._update_status(node=node)
+                return node
+
+        else:
+            task_node = task if isinstance(task, Node) else Node(task=task)
+            self.add_node(task_node)
+            self._update_status(node=task_node)
+            return task_node
 
 
-    def add_dependency(
-            self, source_task_node_identifier: str, target_task_node_identifier: str, **edge_attributes
-        ) -> None:
+    def add_dependency(self, source_node_identifier: str, target_node_identifier: str, **edge_attributes) -> None:
         """
         Add an edge that connect task 1 (source) and task 2 (target) using task_node.name as an identifier
         """
 
         if not edge_attributes:
-            Logger(verbose=True).log(level="error", message="Edge attributes are missing.", color="red")
+            Logger().log(level="error", message="Edge attributes are missing.", color="red")
 
         edge = Edge()
         for k in Edge.model_fields.keys():
@@ -386,22 +416,22 @@ class TaskGraph(Graph):
             else:
                 pass
 
-        self.add_edge(source_task_node_identifier, target_task_node_identifier, edge)
+        self.add_edge(source_node_identifier, target_node_identifier, edge)
 
 
     def set_task_status(self, identifier: str, status: TaskStatus) -> None:
-        if identifier in self.status:
+        if identifier in self.status.keys():
             self.status[identifier] = status
         else:
-            Logger().log(level="warning", message=f"Task '{identifier}' not found in the graph.", color="yellow")
+            Logger().log(level="warning", message=f"Task node: {identifier} is not in the graph.", color="yellow")
             pass
 
 
     def get_task_status(self, identifier):
-        if identifier in self.status:
+        if identifier in self.status.keys():
             return self.status[identifier]
         else:
-            Logger().log(level="warning", message=f"Task '{identifier}' not found in the graph.", color="yellow")
+            Logger().log(level="warning", message=f"Task node: {identifier} is not in the graph.", color="yellow")
             return None
 
 
@@ -411,23 +441,44 @@ class TaskGraph(Graph):
         except ImportError:
             pos = nx.spring_layout(self.graph, seed=42) # REFINEME - layout
 
+
+        from matplotlib.lines import Line2D
+
         node_colors = list()
+        legend_elements = []
         for k, v in self.graph.nodes.items():
             status = self.get_task_status(identifier=k)
-            if status == TaskStatus.NOT_STARTED:
-                node_colors.append("skyblue")
-            elif status == TaskStatus.IN_PROGRESS:
-                node_colors.append("lightgreen")
-            elif status == TaskStatus.BLOCKED:
-                node_colors.append("lightcoral")
-            elif status == TaskStatus.COMPLETED:
-                node_colors.append("black")
-            elif status == TaskStatus.DELAYED:
-                node_colors.append("orange")
-            elif status == TaskStatus.ON_HOLD:
-                node_colors.append("yellow")
-            else:
-                node_colors.append("grey")
+            node = v["node"] if hasattr(v, "node") or "node" in v else v if isinstance(v, Node) else None
+            if node:
+                legend_label = node.task.name if node.task and node.task.name else node.task.description if node.task else k
+                match status:
+                    case TaskStatus.NOT_STARTED:
+                        node_colors.append("#0077B5")
+                        legend_elements.append(Line2D([0], [0], marker='o', color='w', label=legend_label, markerfacecolor='#0077B5'))
+
+                    case TaskStatus.IN_PROGRESS:
+                        node_colors.append("#00d1b2")
+                        legend_elements.append(Line2D([0], [0], marker='o', color='w', label=legend_label, markerfacecolor='#00d1b2'))
+
+                    case TaskStatus.WAITING:
+                        node_colors.append("#169d87")
+                        legend_elements.append(Line2D([0], [0], marker='o', color='w', label=legend_label, markerfacecolor='#169d87'))
+
+                    case TaskStatus.COMPLETED:
+                        node_colors.append("#B9005B")
+                        legend_elements.append(Line2D([0], [0], marker='o', color='w', label=legend_label, markerfacecolor="#B9005B"))
+
+                    case TaskStatus.DELAYED:
+                        node_colors.append("orange")
+                        legend_elements.append(Line2D([0], [0], marker='o', color='w', label=legend_label, markerfacecolor='#191b1b'))
+
+                    case TaskStatus.ON_HOLD:
+                        node_colors.append("yellow")
+                        legend_elements.append(Line2D([0], [0], marker='o', color='w', label=legend_label, markerfacecolor='#191b1b'))
+
+                    case _:
+                        node_colors.append("#414141")
+                        legend_elements.append(Line2D([0], [0], marker='o', color='w', label=legend_label, markerfacecolor='#414141'))
 
         critical_paths, duration, paths = self.find_critical_path()
         edge_colors = ['red' if (u, v) in zip(critical_paths, critical_paths[1:]) else 'black' for u, v in self.graph.edges()]
@@ -455,9 +506,10 @@ class TaskGraph(Graph):
         edge_labels = nx.get_edge_attributes(G=self.graph, name="edges")
         nx.draw_networkx_edge_labels(self.graph, pos, edge_labels=edge_labels)
 
+        plt.legend(handles=legend_elements, loc='upper right')
         plt.title("Project Network Diagram")
         self._save()
-        plt.show()
+        plt.show(block=False)
 
 
     def activate(self, target_node_identifier: Optional[str] = None) -> Tuple[TaskOutput | None, Dict[str, TaskOutput]]:

@@ -8,7 +8,7 @@
 ![pyenv ver](https://img.shields.io/badge/pyenv-2.5.0-orange)
 
 
-Agentic orchestration framework for multi-agent networks and task graph for complex task automation.
+Agentic orchestration framework for multi-agent networks and task graphs for complex task automation.
 
 **Visit:**
 
@@ -280,7 +280,7 @@ Tasks can be delegated to a manager, peers within the agent network, or a comple
 
 **Workflow, Task Graph**
 
-* [NetworkX](https://networkx.org/documentation/stable/reference/introduction.html): A Python package to analyze, create, and manipulate complex graph networks.
+* [NetworkX](https://networkx.org/documentation/stable/reference/introduction.html): A Python package to analyze, create, and manipulate complex graph networks. Ref. [Gallary](https://networkx.org/documentation/latest/auto_examples/index.html)
 * [Matplotlib](https://matplotlib.org/stable/index.html): For graph visualization.
 * [Graphviz](https://graphviz.org/about/): For graph visualization.
 
@@ -338,6 +338,7 @@ src/
 │
 │
 pyproject.toml                # Project config
+.env.sample                   # sample .env file
 
 ```
 
@@ -394,16 +395,7 @@ pyproject.toml                # Project config
 
 ### Adding env secrets to .env file
 
-Create `.env` file in the project root and add following:
-
-   ```
-   OPENAI_API_KEY=your-openai-api-key
-   GEMINI_API_KEY=your-gemini-api-key
-   LITELLM_API_KEY=your-litellm-api-key
-   COMPOSIO_API_KEY=your-composio-api-key
-   COMPOSIO_CLI_KEY=your-composio-cli-key
-   [OTHER_LLM_INTERFACE_PROVIDER_OF_YOUR_CHOICE]_API_KEY=your-api-key
-   ```
+Create `.env` file in the project root and add secret vars following `.env.sample` file.
 
 
 <hr />
