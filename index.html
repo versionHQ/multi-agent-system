@@ -996,11 +996,11 @@
 </span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>
 </span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="n">task_graph</span><span class="o">.</span><span class="n">add_dependency</span><span class="p">(</span>
 </span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>   <span class="n">node_a</span><span class="o">.</span><span class="n">identifier</span><span class="p">,</span> <span class="n">node_b</span><span class="o">.</span><span class="n">identifier</span><span class="p">,</span>
-</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>   <span class="nb">type</span><span class="o">=</span><span class="n">vhq</span><span class="o">.</span><span class="n">DependencyType</span><span class="o">.</span><span class="n">FINISH_TO_START</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;B depends on A&quot;</span>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>   <span class="n">dependency_type</span><span class="o">=</span><span class="n">vhq</span><span class="o">.</span><span class="n">DependencyType</span><span class="o">.</span><span class="n">FINISH_TO_START</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;B depends on A&quot;</span>
 </span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="p">)</span>
 </span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="n">task_graph</span><span class="o">.</span><span class="n">add_dependency</span><span class="p">(</span>
 </span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>   <span class="n">node_a</span><span class="o">.</span><span class="n">identifier</span><span class="p">,</span> <span class="n">node_c</span><span class="o">.</span><span class="n">identifier</span><span class="p">,</span>
-</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>   <span class="nb">type</span><span class="o">=</span><span class="n">vhq</span><span class="o">.</span><span class="n">DependencyType</span><span class="o">.</span><span class="n">FINISH_TO_FINISH</span><span class="p">,</span> <span class="n">lag</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="mi">3</span>
+</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>   <span class="n">dependency_type</span><span class="o">=</span><span class="n">vhq</span><span class="o">.</span><span class="n">DependencyType</span><span class="o">.</span><span class="n">FINISH_TO_FINISH</span><span class="p">,</span> <span class="n">lag</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="mi">3</span>
 </span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="p">)</span>
 </span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>
 </span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="c1"># To visualize the graph:</span>
@@ -1089,14 +1089,7 @@
 </li>
 </ul>
 <p><strong>Setting up a local env file</strong></p>
-<p>Create <code>.env</code> file in the project root and add following:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>OPENAI_API_KEY=your-openai-api-key
-</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>GEMINI_API_KEY=your-gemini-api-key
-</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>LITELLM_API_KEY=your-litellm-api-key
-</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>COMPOSIO_API_KEY=your-composio-api-key
-</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>COMPOSIO_CLI_KEY=your-composio-cli-key
-</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>[OTHER_LLM_INTERFACE_PROVIDER_OF_YOUR_CHOICE]_API_KEY=your-api-key
-</span></code></pre></div>
+<p>Create <code>.env</code> file at the root of the project directry and add your keys following <code>.env.sample</code>.</p>
 <hr />
 
 <h2 id="technologies-used">Technologies Used<a class="headerlink" href="#technologies-used" title="Permanent link">&para;</a></h2>
@@ -1213,7 +1206,7 @@
 <p>Add secret values defined in <code>.github/workflows/run_test.yml</code> to your Github <code>repository secrets</code> located at settings &gt; secrets &amp; variables &gt; Actions.</p>
 </li>
 <li>Run a following command:
-      <div class="language-text highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>uv run pytest tests -vv --cache-clear
+      <div class="language-text highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>uv run pytest tests -vv --cache-clear
 </span></code></pre></div></li>
 </ol>
 <p><strong>Building a new pytest function</strong></p>
@@ -1266,19 +1259,19 @@
 <ol>
 <li>
 <p>Install pre-commit hooks:
-   <div class="language-text highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>uv run pre-commit install
+   <div class="language-text highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>uv run pre-commit install
 </span></code></pre></div></p>
 </li>
 <li>
 <p>Run pre-commit checks manually:
-   <div class="language-text highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>uv run pre-commit run --all-files
+   <div class="language-text highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>uv run pre-commit run --all-files
 </span></code></pre></div></p>
 </li>
 </ol>
 <p>Pre-commit hooks help maintain code quality by running checks for formatting, linting, and other issues before each commit.</p>
 <ul>
 <li>To skip pre-commit hooks
-   <div class="language-text highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>git commit --no-verify -m &quot;your-commit-message&quot;
+   <div class="language-text highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>git commit --no-verify -m &quot;your-commit-message&quot;
 </span></code></pre></div></li>
 </ul>
 <p><strong>Documentation</strong></p>
@@ -1290,7 +1283,7 @@
 <p>We use <code>mkdocs</code> to update the docs. You can run the doc locally at http://127.0.0.1:8000/:</p>
 </li>
 </ul>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>uv run python3 -m mkdocs serve --clean
+<div class="language-text highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>uv run python3 -m mkdocs serve --clean
 </span></code></pre></div>
 <ul>
 <li>To add a new page, update <code>mkdocs.yml</code> in the root. Refer to <a href="https://squidfunk.github.io/mkdocs-material/getting-started/">MkDocs documentation</a> for more details.</li>
