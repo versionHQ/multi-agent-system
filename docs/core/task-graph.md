@@ -40,11 +40,11 @@ node_c = task_graph.add_task(task=task_c)
 
 task_graph.add_dependency(
     node_a.identifier, node_b.identifier,
-    type=vhq.DependencyType.FINISH_TO_START, weight=5, description="B depends on A"
+    dependency_type=vhq.DependencyType.FINISH_TO_START, weight=5, description="B depends on A"
 )
 task_graph.add_dependency(
     node_a.identifier, node_c.identifier,
-    type=vhq.DependencyType.FINISH_TO_FINISH, lag=1, required=False, weight=3
+    dependency_type=vhq.DependencyType.FINISH_TO_FINISH, lag=1, required=False, weight=3
 )
 
 critical_path, duration, paths = task_graph.find_critical_path()

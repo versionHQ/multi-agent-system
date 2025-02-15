@@ -69,11 +69,11 @@ node_c = task_graph.add_task(task=task_c)
 
 task_graph.add_dependency(
    node_a.identifier, node_b.identifier,
-   type=vhq.DependencyType.FINISH_TO_START, weight=5, description="B depends on A"
+   dependency_type=vhq.DependencyType.FINISH_TO_START, weight=5, description="B depends on A"
 )
 task_graph.add_dependency(
    node_a.identifier, node_c.identifier,
-   type=vhq.DependencyType.FINISH_TO_FINISH, lag=1, required=False, weight=3
+   dependency_type=vhq.DependencyType.FINISH_TO_FINISH, lag=1, required=False, weight=3
 )
 
 # To visualize the graph:
@@ -182,16 +182,7 @@ agent.update(
 
 **Setting up a local env file**
 
-Create `.env` file in the project root and add following:
-
-   ```
-   OPENAI_API_KEY=your-openai-api-key
-   GEMINI_API_KEY=your-gemini-api-key
-   LITELLM_API_KEY=your-litellm-api-key
-   COMPOSIO_API_KEY=your-composio-api-key
-   COMPOSIO_CLI_KEY=your-composio-cli-key
-   [OTHER_LLM_INTERFACE_PROVIDER_OF_YOUR_CHOICE]_API_KEY=your-api-key
-   ```
+Create `.env` file at the root of the project directry and add your keys following `.env.sample`.
 
 <hr />
 

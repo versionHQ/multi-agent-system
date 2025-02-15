@@ -478,7 +478,7 @@ Ref. Output image: {output_formats_to_follow}
                 return output
 
             else:
-                r = str(raw).replace("{'", '{"').replace("{ '", '{"').replace("': '", '": "').replace("'}", '"}').replace("' }", '"}').replace("', '", '", "').replace("['", '["').replace("[ '", '[ "').replace("']", '"]').replace("' ]", '" ]').replace("{\n'", '{"').replace("{\'", '{"').replace("true", "True").replace("false", "False")
+                r = str(raw).strip().replace("{'", '{"').replace("{ '", '{"').replace("': '", '": "').replace("'}", '"}').replace("' }", '"}').replace("', '", '", "').replace("['", '["').replace("[ '", '[ "').replace("']", '"]').replace("' ]", '" ]').replace("{\n'", '{"').replace("{\'", '{"').replace("true", "True").replace("false", "False").replace('\"', "'")
                 j = json.dumps(eval(r))
                 output = json.loads(j)
 
