@@ -316,7 +316,7 @@ Tasks can be delegated to a manager, peers within the agent network, or a comple
 .github
 └── workflows/                # Github actions
 │
-docs/                         # Documentation built by MkDocs
+docs/                         # Documentation
 mkdocs.yml                    # MkDocs config
 │
 src/
@@ -332,9 +332,9 @@ src/
 │     └── llm/
 │     └── ...
 │
-└── uploads/  [.gitignore]    # Local directory to store uploaded files such as graphviz diagrams generatd by `Network` class
+└── .diagrams/  [.gitignore]  # Local directory to store graph diagrams
 │
-└── .logs/    [.gitignore]    # Local directory to store error/warning logs for debugging
+└── .logs/      [.gitignore]  # Local directory to store error/warning logs for debugging
 │
 │
 pyproject.toml                # Project config

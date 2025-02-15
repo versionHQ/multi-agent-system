@@ -4,8 +4,9 @@ destinations.py
 train.py
 
 _memo
+memo.txt
 _idea.py
-
+site/
 
 dist/
 lib/
@@ -13,7 +14,7 @@ build/
 .pypirc
 *egg-info/
 
-uploads/
+.diagrams/
 sample_dataset/
 chroma.sqlite3
 
@@ -24,8 +25,8 @@ temp/*
 .vscode/*
 assets/*
 
-memo.txt
-site/
+
+
 
 _logs/
 .logs/

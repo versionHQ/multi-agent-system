@@ -594,7 +594,6 @@ Ref. Output image: {output_formats_to_follow}
                 return self._execute_async(agent=agent, context=context)
 
 
-
     def _execute_sync(self, agent, context: Optional[Any] = None) -> TaskOutput:
         """Executes the task synchronously."""
         return self._execute_core(agent, context)

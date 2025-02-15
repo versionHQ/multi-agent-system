@@ -12,14 +12,13 @@ def test_create_and_activate_network():
     node_c = task_graph.add_task(task=task_c)
 
     task_graph.add_dependency(
-        node_a.identifier, node_b.identifier,
-        type=vhq.DependencyType.FINISH_TO_START, weight=5, description="B depends on A"
+        source_node_identifier=node_a.identifier, target_node_identifier=node_b.identifier,
+        dependency_type=vhq.DependencyType.FINISH_TO_START, weight=5, description="B depends on A"
     )
     task_graph.add_dependency(
-        node_a.identifier, node_c.identifier,
-        type=vhq.DependencyType.FINISH_TO_FINISH, lag=1, required=False, weight=3
+        source_node_identifier=node_a.identifier, target_node_identifier=node_c.identifier,
+        dependency_type=vhq.DependencyType.FINISH_TO_FINISH, lag=1, required=False, weight=3
     )
-
     critical_path, duration, paths = task_graph.find_critical_path()
 
     import uuid
@@ -28,8 +27,12 @@ def test_create_and_activate_network():
     assert [type(k) == uuid.uuid4 and isinstance(v, vhq.Edge) for k, v in task_graph.edges.items()]
     assert critical_path is not None and duration is not None and paths is not None
 
-
     last_task_output, outputs = task_graph.activate()
 
-    assert isinstance(last_task_output, vhq.TaskOutput)
+    assert last_task_output is not None and isinstance(last_task_output, vhq.TaskOutput)
     assert [k in task_graph.nodes.keys() and v and isinstance(v, vhq.TaskOutput) for k, v in outputs.items()]
+
+    task_graph.visualize()
+
+
+test_create_and_activate_network()
