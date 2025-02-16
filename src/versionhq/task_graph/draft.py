@@ -1,6 +1,6 @@
 import sys
 from typing import Type, Any
-from pydantic import BaseModel
+from pydantic import BaseModel, create_model
 from pydantic._internal._model_construction import ModelMetaclass
 from textwrap import dedent
 if 'pydantic.main' not in sys.modules:
@@ -43,13 +43,13 @@ def workflow(final_output: Type[BaseModel], context: Any = None, human: bool = T
             ", ".join([k for k in DependencyType._member_map_.keys()]),
         ],
         llm="gemini-2.0",
-        use_memory=True,
+        # use_memory=True,
         maxit=1,
         max_retry_limit=1,
     )
 
     task = Task(
-        description=dedent(f"Design a resource-efficient workflow to achieve the following goal: {final_output_prompt}. The workflow should consist of a list of detailed tasks that represent decision making points, each with the following information:\nname: A concise name of the task\ndescription: A concise description of the task.\nconnections: A list of target tasks that this task connects to.\ndependency_types: The type of dependency between this task and each of its connected task. \noutput: key output from the task.\n\nUse the following dependency types: {dep_type_prompt}.\n\nPrioritize minimizing resource consumption (computation, memory, and data transfer) when defining tasks, connections, and dependencies.  Consider how data is passed between tasks and aim to reduce unnecessary data duplication or transfer. Explain any design choices made to optimize resource usage."),
+        description=dedent(f"Design a resource-efficient workflow to achieve the following goal: {final_output_prompt}. The workflow should consist of a list of detailed tasks that represent decision making points, each with the following information:\nname: A concise name of the task\ndescription: A concise description of the task.\nconnections: A list of target tasks that this task connects to.\ndependency_types: The type of dependency between this task and each of its connected task. \noutput: key output from the task in a word.\n\nUse the following dependency types: {dep_type_prompt}.\n\nPrioritize minimizing resource consumption (computation, memory, and data transfer) when defining tasks, connections, and dependencies.  Consider how data is passed between tasks and aim to reduce unnecessary data duplication or transfer. Explain any design choices made to optimize resource usage."),
         response_fields=[
             ResponseField(title="tasks", data_type=list, items=dict, properties=[
                     ResponseField(title="name", data_type=str),
@@ -68,14 +68,12 @@ def workflow(final_output: Type[BaseModel], context: Any = None, human: bool = T
 
     task_items = res.json_dict["tasks"]
     tasks, nodes = [], []
-    for item in task_items:
-        class Output(BaseModel):
-            item["output"]: str
 
-        task = Task(name=item["name"], description=item["description"], pydantic_output=Output)
+    for item in task_items:
+        key = item["output"].lower().replace(" ", "_") if item["output"] else "output"
+        task = Task(name=item["name"], description=item["description"], response_fields=[ResponseField(title=key, data_type=str)])
         tasks.append(task)
         nodes.append(Node(task=task))
-
 
     task_graph = TaskGraph(
         nodes={node.identifier: node for node in nodes},
