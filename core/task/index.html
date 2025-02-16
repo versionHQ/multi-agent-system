@@ -135,9 +135,7 @@
     
       
 
-  
-
-<header class="md-header md-header--shadow" data-md-component="header">
+<header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
     <a href="../.." title="versionHQ" class="md-header__button md-logo" aria-label="versionHQ" data-md-component="logo">
       
@@ -262,6 +260,125 @@
       
         
           
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../quickstart/" class="md-tabs__link">
+        
+  
+    
+  
+  Quick Start
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../agent/" class="md-tabs__link">
+          
+  
+    
+  
+  Core Components
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../tags/" class="md-tabs__link">
+        
+  
+    
+  
+  Tags
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="https://versi0n.io/playground" class="md-tabs__link">
+          
+  
+    
+  
+  Examples
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="https://github.com/versionHQ/multi-agent-system/releases" class="md-tabs__link">
+        
+  
+    
+  
+  Change Log
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
         
       
       <main class="md-main" data-md-component="main">
@@ -275,10 +392,12 @@
                     
 
 
+  
+
 
   
 
-<nav class="md-nav md-nav--primary md-nav--integrated" aria-label="Navigation" data-md-level="0">
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
     <a href="../.." title="versionHQ" class="md-nav__button md-logo" aria-label="versionHQ" data-md-component="logo">
       
@@ -365,15 +484,21 @@
       
     
     
+      
+        
+        
+      
+      
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
             
   
   <span class="md-ellipsis">
@@ -456,6 +581,9 @@
         
       
     
+    
+      
+      
     
     
     <li class="md-nav__item md-nav__item--active md-nav__item--nested">
@@ -571,6 +699,66 @@
       Executing
     </span>
   </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#callback" class="md-nav__link">
+    <span class="md-ellipsis">
+      Callback
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#evaluating" class="md-nav__link">
+    <span class="md-ellipsis">
+      Evaluating
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ref" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ref
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Ref">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      Variables
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#class-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      Class Methods
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      Properties
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -722,6 +910,9 @@
       
     
     
+      
+      
+    
     
     <li class="md-nav__item md-nav__item--nested">
       
@@ -866,7 +1057,7 @@
 <h1 id="task">Task<a class="headerlink" href="#task" title="Permanent link">&para;</a></h1>
 <p><class><code>class</code> versionhq.task.model.<bold>Task<bold></class></p>
 <p>A class to store and manage information for individual tasks, including their assignment to agents or agent networks, and dependencies via a node-based system that tracks conditions and status.</p>
-<p>Ref. Node / Edge / TaskGraph class</p>
+<p>Ref. Node / Edge / <a href="/core/task-graph">TaskGraph</a> class</p>
 <hr />
 
 <h2 id="quick-start">Quick Start<a class="headerlink" href="#quick-start" title="Permanent link">&para;</a></h2>
@@ -1114,6 +1305,8 @@
 </span></code></pre></div>
 <p>Context can consist of <code>Task</code> objects, <code>TaskOutput</code> objects, plain text <code>strings</code>, or <code>lists</code> containing any of these.</p>
 <p>In this scenario, <code>sub_task_2</code> executes before the main task. Its string output is then incorporated into the main task's context prompt on top of other context before the main task is executed.</p>
+<hr>
+
 <h2 id="executing">Executing<a class="headerlink" href="#executing" title="Permanent link">&para;</a></h2>
 <p><strong>Agent delegation</strong></p>
 <p><code>[var]</code><bold><code>allow_delegation: bool = False</code></bold></p>
@@ -1122,58 +1315,289 @@
 </span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
 </span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="n">task</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Task</span><span class="p">(</span>
 </span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;return the output following the given prompt.&quot;</span><span class="p">,</span>
-</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>    <span class="n">response_fields</span><span class="o">=</span><span class="p">[</span><span class="n">vhq</span><span class="o">.</span><span class="n">ResponseField</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;test1&quot;</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">)],</span>
-</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>    <span class="n">allow_delegation</span><span class="o">=</span><span class="kc">True</span>
-</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="p">)</span>
-</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="n">task</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
-</span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>
-</span><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="k">assert</span> <span class="n">task</span><span class="o">.</span><span class="n">output</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-</span><span id="__span-6-11"><a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a><span class="k">assert</span> <span class="s2">&quot;vhq-Delegated-Agent&quot;</span> <span class="ow">in</span> <span class="n">task</span><span class="o">.</span><span class="n">processed_agents</span> <span class="c1"># delegated agent</span>
-</span><span id="__span-6-12"><a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a><span class="k">assert</span> <span class="n">task</span><span class="o">.</span><span class="n">delegations</span> <span class="o">==</span><span class="mi">1</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>    <span class="n">allow_delegation</span><span class="o">=</span><span class="kc">True</span>
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="p">)</span>
+</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="n">task</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
+</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>
+</span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="k">assert</span> <span class="n">task</span><span class="o">.</span><span class="n">output</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+</span><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="k">assert</span> <span class="s2">&quot;vhq-Delegated-Agent&quot;</span> <span class="ow">in</span> <span class="n">task</span><span class="o">.</span><span class="n">processed_agents</span> <span class="c1"># delegated agent</span>
+</span><span id="__span-6-11"><a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a><span class="k">assert</span> <span class="n">task</span><span class="o">.</span><span class="n">delegations</span> <span class="o">==</span><span class="mi">1</span>
 </span></code></pre></div>
-<!--
+<hr>
 
-## Callbacks
-    callback: Optional[Callable] = Field(default=None, description="callback to be executed after the task is completed.")
-    callback_kwargs: Optional[Dict[str, Any]] = Field(default_factory=dict, description="kwargs for the callback when the callback is callable")
+<p><strong>SYNC - ASYNC</strong></p>
+<p><code>[var]</code><bold><code>type: bool = False</code></bold></p>
+<p>You can specify whether the task will be executed asynchronously.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">versionhq</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">vhq</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="n">task</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Task</span><span class="p">(</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Return a word: &#39;test&#39;&quot;</span><span class="p">,</span> 
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>    <span class="nb">type</span><span class="o">=</span><span class="n">vhq</span><span class="o">.</span><span class="n">TaskExecutionType</span><span class="o">.</span><span class="n">ASYNC</span> <span class="c1"># default: vhq.TaskExecutionType.SYNC</span>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="p">)</span>
+</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>
+</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="kn">from</span><span class="w"> </span><span class="nn">unittest.mock</span><span class="w"> </span><span class="kn">import</span> <span class="n">patch</span>
+</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="k">with</span> <span class="n">patch</span><span class="o">.</span><span class="n">object</span><span class="p">(</span><span class="n">vhq</span><span class="o">.</span><span class="n">Agent</span><span class="p">,</span> <span class="s2">&quot;execute_task&quot;</span><span class="p">,</span> <span class="n">return_value</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">execute</span><span class="p">:</span>
+</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>    <span class="n">res</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
+</span><span id="__span-7-11"><a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a>    <span class="k">assert</span> <span class="n">res</span><span class="o">.</span><span class="n">raw</span> <span class="o">==</span> <span class="s2">&quot;test&quot;</span>
+</span><span id="__span-7-12"><a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a>    <span class="n">execute</span><span class="o">.</span><span class="n">assert_called_once_with</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="n">task</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">task_tools</span><span class="o">=</span><span class="nb">list</span><span class="p">())</span>
+</span></code></pre></div>
+<hr>
 
+<p><strong>Using tools</strong></p>
+<p><code>[var]</code><bold><code>tools: Optional[List[ToolSet | Tool | Any]] = None</code></bold></p>
+<p><code>[var]</code><bold><code>tool_res_as_final: bool = False</code></bold></p>
+<p>Tasks can directly store tools explicitly called by the agent.</p>
+<p>If the results from the tool should be the final results, set <code>tool_res_as_final</code> True.</p>
+<p>This will allow the agent to store the tool results in the <code>tool_output</code> field of <code>TaskOutput</code> object.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">versionhq</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">vhq</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="k">def</span><span class="w"> </span><span class="nf">random_func</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>    <span class="k">return</span> <span class="n">message</span> <span class="o">+</span> <span class="s2">&quot;_demo&quot;</span>
+</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>
+</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="n">tool</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Tool</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;tool&quot;</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="n">random_func</span><span class="p">)</span>
+</span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="n">tool_set</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">ToolSet</span><span class="p">(</span><span class="n">tool</span><span class="o">=</span><span class="n">tool</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">message</span><span class="o">=</span><span class="s2">&quot;empty func&quot;</span><span class="p">))</span>
+</span><span id="__span-8-9"><a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="n">task</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Task</span><span class="p">(</span>
+</span><span id="__span-8-10"><a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;execute the given tools&quot;</span><span class="p">,</span> 
+</span><span id="__span-8-11"><a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a>    <span class="n">tools</span><span class="o">=</span><span class="p">[</span><span class="n">tool_set</span><span class="p">,],</span> <span class="c1"># stores tools</span>
+</span><span id="__span-8-12"><a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a>    <span class="n">tool_res_as_final</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="c1"># stores tool results in TaskOutput object</span>
+</span><span id="__span-8-13"><a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a><span class="p">)</span>
+</span><span id="__span-8-14"><a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a>
+</span><span id="__span-8-15"><a id="__codelineno-8-15" name="__codelineno-8-15" href="#__codelineno-8-15"></a><span class="n">res</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
+</span><span id="__span-8-16"><a id="__codelineno-8-16" name="__codelineno-8-16" href="#__codelineno-8-16"></a><span class="k">assert</span> <span class="n">res</span><span class="o">.</span><span class="n">tool_output</span> <span class="o">==</span> <span class="s2">&quot;empty func_demo&quot;</span>
+</span></code></pre></div>
+<p>Ref. <a href="/core/tool">Tool</a> class / <a href="/core/task/task-output">TaskOutput</a> class</p>
+<hr>
 
-### tools
-    tools: Optional[List[ToolSet | Tool | Any]] = Field(default_factory=list, description="tools that the agent can use aside from their tools")
-    can_use_agent_tools: bool = Field(default=False, description="whether the agent can use their own tools when executing the task")
-    tool_res_as_final: bool = Field(default=False, description="when set True, tools res will be stored in the `TaskOutput`")
+<p><strong>Using agents' tools</strong></p>
+<p><code>[var]</code><bold><code>can_use_agent_tools: bool = True</code></bold></p>
+<p>Tasks can explicitly stop/start using agent tools on top of the tools stored in the task object.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">versionhq</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">vhq</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="n">simple_tool</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Tool</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;simple tool&quot;</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="s2">&quot;simple func&quot;</span><span class="p">)</span>
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="n">agent</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Agent</span><span class="p">(</span><span class="n">role</span><span class="o">=</span><span class="s2">&quot;demo&quot;</span><span class="p">,</span> <span class="n">goal</span><span class="o">=</span><span class="s2">&quot;execute tools&quot;</span><span class="p">,</span> <span class="n">tools</span><span class="o">=</span><span class="p">[</span><span class="n">simple_tool</span><span class="p">,])</span>
+</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="n">task</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Task</span><span class="p">(</span>
+</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;execute tools&quot;</span><span class="p">,</span>
+</span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>    <span class="n">can_use_agent_tools</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="c1"># Flagged</span>
+</span><span id="__span-9-8"><a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>    <span class="n">tool_res_as_final</span><span class="o">=</span><span class="kc">True</span>
+</span><span id="__span-9-9"><a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="p">)</span>
+</span><span id="__span-9-10"><a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a><span class="n">res</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">agent</span><span class="o">=</span><span class="n">agent</span><span class="p">)</span>
+</span><span id="__span-9-11"><a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a><span class="k">assert</span> <span class="n">res</span><span class="o">.</span><span class="n">tool_output</span> <span class="o">==</span> <span class="s2">&quot;simple func&quot;</span>
+</span></code></pre></div>
+<hr>
 
+<h2 id="callback">Callback<a class="headerlink" href="#callback" title="Permanent link">&para;</a></h2>
+<p><code>[var]</code><bold><code>callback: Optional[Callable] = None</code></bold></p>
+<p><code>[var]</code><bold><code>callback_kwargs: Optional[Dict[str, Any]] = dict()</code></bold></p>
+<p>After executing the task, you can run a <code>callback</code> function with <code>callback_kwargs</code> and task output as parameters.</p>
+<p>Callback results will be stored in <code>callback_output</code> filed of the <code>TaskOutput</code> object.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">versionhq</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">vhq</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="k">def</span><span class="w"> </span><span class="nf">callback_func</span><span class="p">(</span><span class="n">condition</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">test1</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Result: </span><span class="si">{</span><span class="n">test1</span><span class="si">}</span><span class="s2">, condition added: </span><span class="si">{</span><span class="n">condition</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>
+</span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="n">task</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Task</span><span class="p">(</span>
+</span><span id="__span-10-7"><a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;return the output following the given prompt.&quot;</span><span class="p">,</span>
+</span><span id="__span-10-8"><a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>    <span class="n">callback</span><span class="o">=</span><span class="n">callback_func</span><span class="p">,</span>
+</span><span id="__span-10-9"><a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a>    <span class="n">callback_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">condition</span><span class="o">=</span><span class="s2">&quot;demo for pytest&quot;</span><span class="p">)</span>
+</span><span id="__span-10-10"><a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a><span class="p">)</span>
+</span><span id="__span-10-11"><a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a><span class="n">res</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
+</span><span id="__span-10-12"><a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a>
+</span><span id="__span-10-13"><a id="__codelineno-10-13" name="__codelineno-10-13" href="#__codelineno-10-13"></a><span class="k">assert</span> <span class="n">res</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">vhq</span><span class="o">.</span><span class="n">TaskOutput</span><span class="p">)</span>
+</span><span id="__span-10-14"><a id="__codelineno-10-14" name="__codelineno-10-14" href="#__codelineno-10-14"></a><span class="k">assert</span> <span class="n">res</span><span class="o">.</span><span class="n">task_id</span> <span class="ow">is</span> <span class="n">task</span><span class="o">.</span><span class="n">id</span>
+</span><span id="__span-10-15"><a id="__codelineno-10-15" name="__codelineno-10-15" href="#__codelineno-10-15"></a><span class="k">assert</span> <span class="s2">&quot;demo for pytest&quot;</span> <span class="ow">in</span> <span class="n">res</span><span class="o">.</span><span class="n">callback_output</span>
+</span></code></pre></div>
+<hr>
 
+<h2 id="evaluating">Evaluating<a class="headerlink" href="#evaluating" title="Permanent link">&para;</a></h2>
+<p><code>[var]</code><bold><code>should_evaluate: bool = False</code></bold></p>
+<p><code>[var]</code><bold><code>eval_criteria: Optional[List[str]] = list()</code></bold></p>
+<p>You can turn on customized evaluations using the given criteria.</p>
+<p>Refer <a href="/core/task/task-output">TaskOutput</a> class for details.</p>
+<hr>
 
-
-## Executing tasks
- EXECUTION type
-
-### Sync
-
-<hr />
-
-### Async
-
-<hr />
-
-### Assigning agents
-
-<hr />
-
-### Context
-
-
-
-## Evaluating
-
-    should_evaluate: bool = Field(default=False, description="True to run the evaluation flow")
-    eval_criteria: Optional[List[str]] = Field(default_factory=list, description="criteria to evaluate the outcome. i.e., fit to the brand tone")
-
-
-## Recording
-
-output: Optional[TaskOutput] = Field(default=None, description="store the final task output in TaskOutput class") -->
+<h2 id="ref">Ref<a class="headerlink" href="#ref" title="Permanent link">&para;</a></h2>
+<h3 id="variables">Variables<a class="headerlink" href="#variables" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;"><div style="width:160px"><strong>Variable</strong></div></th>
+<th style="text-align: left;"><strong>Data Type</strong></th>
+<th style="text-align: left;"><strong>Default</strong></th>
+<th style="text-align: left;"><strong>Nullable</strong></th>
+<th style="text-align: left;"><strong>Description</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong><code>id</code></strong></td>
+<td style="text-align: left;">UUID</td>
+<td style="text-align: left;">uuid.uuid4()</td>
+<td style="text-align: left;">False</td>
+<td style="text-align: left;">Stores task <code>id</code> as an identifier.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>name</code></strong></td>
+<td style="text-align: left;">Optional[str]</td>
+<td style="text-align: left;">None</td>
+<td style="text-align: left;">True</td>
+<td style="text-align: left;">Stores a task name (Inherited as <code>node</code> identifier if the task is dependent)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>description</code></strong></td>
+<td style="text-align: left;">str</td>
+<td style="text-align: left;">None</td>
+<td style="text-align: left;">False</td>
+<td style="text-align: left;">Required field to store a concise task description</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>pydantic_output</code></strong></td>
+<td style="text-align: left;">Optional[Type[BaseModel]]</td>
+<td style="text-align: left;">None</td>
+<td style="text-align: left;">True</td>
+<td style="text-align: left;">Stores pydantic custom output class for structured response</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>response_fields</code></strong></td>
+<td style="text-align: left;">Optional[List[ResponseField]]</td>
+<td style="text-align: left;">list()</td>
+<td style="text-align: left;">True</td>
+<td style="text-align: left;">Stores JSON formats for stuructured response</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>tools</code></strong></td>
+<td style="text-align: left;">Optional[List[ToolSet</td>
+<td style="text-align: left;">Tool</td>
+<td style="text-align: left;">Any]]</td>
+<td style="text-align: left;">None</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>can_use_agent_tools</code></strong></td>
+<td style="text-align: left;">bool</td>
+<td style="text-align: left;">True</td>
+<td style="text-align: left;">-</td>
+<td style="text-align: left;">Whether to use the agent tools</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>tool_res_as_final</code></strong></td>
+<td style="text-align: left;">bool</td>
+<td style="text-align: left;">False</td>
+<td style="text-align: left;">-</td>
+<td style="text-align: left;">Whether to make the tool response a final response from the agent</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>execution_type</code></strong></td>
+<td style="text-align: left;">TaskExecutionType</td>
+<td style="text-align: left;">TaskExecutionType.SYNC</td>
+<td style="text-align: left;">-</td>
+<td style="text-align: left;">Sync or async execution</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>allow_delegation</code></strong></td>
+<td style="text-align: left;">bool</td>
+<td style="text-align: left;">False</td>
+<td style="text-align: left;">-</td>
+<td style="text-align: left;">Whether to allow the agent to delegate the task to another agent</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>callback</code></strong></td>
+<td style="text-align: left;">Optional[Callable]</td>
+<td style="text-align: left;">None</td>
+<td style="text-align: left;">True</td>
+<td style="text-align: left;">Callback function to be executed after LLM calling</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>callback_kwargs</code></strong></td>
+<td style="text-align: left;">Optional[Dict[str, Any]]</td>
+<td style="text-align: left;">dict()</td>
+<td style="text-align: left;">True</td>
+<td style="text-align: left;">Args for the callback function (if any)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>should_evaluate</code></strong></td>
+<td style="text-align: left;">bool</td>
+<td style="text-align: left;">False</td>
+<td style="text-align: left;">-</td>
+<td style="text-align: left;">Whether to evaluate the task output using eval criteria</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>eval_criteria</code></strong></td>
+<td style="text-align: left;">Optional[List[str]]</td>
+<td style="text-align: left;">list()</td>
+<td style="text-align: left;">True</td>
+<td style="text-align: left;">Evaluation criteria given by the human client</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>processed_agents</code></strong></td>
+<td style="text-align: left;">Set[str]</td>
+<td style="text-align: left;">set()</td>
+<td style="text-align: left;">True</td>
+<td style="text-align: left;">[Ops] Stores roles of the agents executed the task</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>tool_errors</code></strong></td>
+<td style="text-align: left;">int</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: left;">True</td>
+<td style="text-align: left;">[Ops] Stores number of tool errors</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>delegation</code></strong></td>
+<td style="text-align: left;">int</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: left;">True</td>
+<td style="text-align: left;">[Ops] Stores number of agent delegations</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>output</code></strong></td>
+<td style="text-align: left;">Optional[TaskOutput]</td>
+<td style="text-align: left;">None</td>
+<td style="text-align: left;">True</td>
+<td style="text-align: left;">[Ops] Stores <code>TaskOutput</code> object after the execution</td>
+</tr>
+</tbody>
+</table>
+<h3 id="class-methods">Class Methods<a class="headerlink" href="#class-methods" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;"><div style="width:120px"><strong>Method</strong></div></th>
+<th style="text-align: left;"><div style="width:300px"><strong>Params</strong></div></th>
+<th style="text-align: left;"><strong>Returns</strong></th>
+<th style="text-align: left;"><strong>Description</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong><code>execute</code></strong></td>
+<td style="text-align: left;"><p>type: TaskExecutionType = None<br>agent: Optional["vhq.Agent"] = None<br>context: Optional[Any] = None</p></td>
+<td style="text-align: left;">InstanceOf[<code>TaskOutput</code>] or None (error)</td>
+<td style="text-align: left;">A main method to handle task execution. Auto-build an agent when the agent is not given.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="properties">Properties<a class="headerlink" href="#properties" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;"><div style="width:120px"><strong>Property</strong></div></th>
+<th style="text-align: left;"><strong>Returns</strong></th>
+<th style="text-align: left;"><strong>Description</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong><code>key</code></strong></td>
+<td style="text-align: left;">str</td>
+<td style="text-align: left;">Returns task key based on its description and output format.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>summary</code></strong></td>
+<td style="text-align: left;">str</td>
+<td style="text-align: left;">Returns a summary of the task based on its id, description and tools.</td>
+</tr>
+</tbody>
+</table>
 
 
 
@@ -1345,7 +1769,7 @@ output: Optional[TaskOutput] = Field(default=None, description="store the final 
       <div class="md-progress" data-md-component="progress" role="progressbar"></div>
     
     
-    <script id="__config" type="application/json">{"base": "../..", "features": ["announce.dismiss", "content.action.edit", "content.action.view", "content.code.annotate", "content.code.copy", "content.code.select", "content.tabs.link", "content.tooltips", "header.autohide", "navigation.path", "navigation.top", "navigation.footer", "navigation.indexes", "navigation.instant", "navigation.instant.progress", "navigation.instant.prefetch", "navigation.tracking", "toc.follow", "toc.integrate", "search.suggest", "search.highlight", "search.share"], "search": "../../assets/javascripts/workers/search.f8cc74c7.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["content.action.edit", "content.action.view", "content.code.annotate", "content.code.copy", "content.code.select", "content.tabs.link", "content.tooltips", "header.autohide", "navigation.tabs", "navigation.path", "navigation.top", "navigation.footer", "navigation.indexes", "navigation.instant", "navigation.instant.progress", "navigation.instant.prefetch", "navigation.tracking", "toc.follow", "toc.integrate", "search.suggest", "search.highlight", "search.share"], "search": "../../assets/javascripts/workers/search.f8cc74c7.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
       <script src="../../assets/javascripts/bundle.f1b6f286.min.js"></script>
