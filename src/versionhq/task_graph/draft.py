@@ -43,7 +43,7 @@ def workflow(final_output: Type[BaseModel], context: Any = None, human: bool = T
             ", ".join([k for k in DependencyType._member_map_.keys()]),
         ],
         llm="gemini-2.0",
-        # use_memory=True,
+        use_memory=True,
         maxit=1,
         max_retry_limit=1,
     )
