@@ -9,7 +9,7 @@ tags:
 
 A class to store and manage information for individual tasks, including their assignment to agents or agent networks, and dependencies via a node-based system that tracks conditions and status.
 
-Ref. Node / Edge / TaskGraph class
+Ref. Node / Edge / <a href="/core/task-graph">TaskGraph</a> class
 
 <hr />
 
@@ -284,6 +284,7 @@ Context can consist of `Task` objects, `TaskOutput` objects, plain text `strings
 
 In this scenario, `sub_task_2` executes before the main task. Its string output is then incorporated into the main task's context prompt on top of other context before the main task is executed.
 
+<hr>
 
 ## Executing
 
@@ -298,7 +299,6 @@ import versionhq as vhq
 
 task = vhq.Task(
     description="return the output following the given prompt.",
-    response_fields=[vhq.ResponseField(title="test1", data_type=str, required=True)],
     allow_delegation=True
 )
 task.execute()
@@ -308,47 +308,169 @@ assert "vhq-Delegated-Agent" in task.processed_agents # delegated agent
 assert task.delegations ==1
 ```
 
+<hr>
 
-<!--
+**SYNC - ASYNC**
 
-## Callbacks
-    callback: Optional[Callable] = Field(default=None, description="callback to be executed after the task is completed.")
-    callback_kwargs: Optional[Dict[str, Any]] = Field(default_factory=dict, description="kwargs for the callback when the callback is callable")
+`[var]`<bold>`type: bool = False`</bold>
 
+You can specify whether the task will be executed asynchronously.
 
-### tools
-    tools: Optional[List[ToolSet | Tool | Any]] = Field(default_factory=list, description="tools that the agent can use aside from their tools")
-    can_use_agent_tools: bool = Field(default=False, description="whether the agent can use their own tools when executing the task")
-    tool_res_as_final: bool = Field(default=False, description="when set True, tools res will be stored in the `TaskOutput`")
+```python
+import versionhq as vhq
 
+task = vhq.Task(
+    description="Return a word: 'test'",
+    type=vhq.TaskExecutionType.ASYNC # default: vhq.TaskExecutionType.SYNC
+)
 
+from unittest.mock import patch
+with patch.object(vhq.Agent, "execute_task", return_value="test") as execute:
+    res = task.execute()
+    assert res.raw == "test"
+    execute.assert_called_once_with(task=task, context=None, task_tools=list())
+```
 
+<hr>
 
-## Executing tasks
- EXECUTION type
+**Using tools**
 
-### Sync
+`[var]`<bold>`tools: Optional[List[ToolSet | Tool | Any]] = None`</bold>
 
-<hr />
-
-### Async
-
-<hr />
-
-### Assigning agents
-
-<hr />
-
-### Context
+`[var]`<bold>`tool_res_as_final: bool = False`</bold>
 
 
+Tasks can directly store tools explicitly called by the agent.
+
+If the results from the tool should be the final results, set `tool_res_as_final` True.
+
+This will allow the agent to store the tool results in the `tool_output` field of `TaskOutput` object.
+
+
+```python
+import versionhq as vhq
+from typing import Callable
+
+def random_func(message: str) -> str:
+    return message + "_demo"
+
+tool = vhq.Tool(name="tool", func=random_func)
+tool_set = vhq.ToolSet(tool=tool, kwargs=dict(message="empty func"))
+task = vhq.Task(
+    description="execute the given tools",
+    tools=[tool_set,], # stores tools
+    tool_res_as_final=True, # stores tool results in TaskOutput object
+)
+
+res = task.execute()
+assert res.tool_output == "empty func_demo"
+```
+
+Ref. <a href="/core/tool">Tool</a> class / <a href="/core/task/task-output">TaskOutput</a> class
+
+<hr>
+
+**Using agents' tools**
+
+`[var]`<bold>`can_use_agent_tools: bool = True`</bold>
+
+Tasks can explicitly stop/start using agent tools on top of the tools stored in the task object.
+
+```python
+import versionhq as vhq
+
+simple_tool = vhq.Tool(name="simple tool", func=lambda x: "simple func")
+agent = vhq.Agent(role="demo", goal="execute tools", tools=[simple_tool,])
+task = vhq.Task(
+    description="execute tools",
+    can_use_agent_tools=True, # Flagged
+    tool_res_as_final=True
+)
+res = task.execute(agent=agent)
+assert res.tool_output == "simple func"
+```
+
+<hr>
+
+## Callback
+
+`[var]`<bold>`callback: Optional[Callable] = None`</bold>
+
+`[var]`<bold>`callback_kwargs: Optional[Dict[str, Any]] = dict()`</bold>
+
+After executing the task, you can run a `callback` function with `callback_kwargs` and task output as parameters.
+
+Callback results will be stored in `callback_output` filed of the `TaskOutput` object.
+
+```python
+import versionhq as vhq
+
+def callback_func(condition: str, test1: str):
+    return f"Result: {test1}, condition added: {condition}"
+
+task = vhq.Task(
+    description="return the output following the given prompt.",
+    callback=callback_func,
+    callback_kwargs=dict(condition="demo for pytest")
+)
+res = task.execute()
+
+assert res and isinstance(res, vhq.TaskOutput)
+assert res.task_id is task.id
+assert "demo for pytest" in res.callback_output
+```
+
+<hr>
 
 ## Evaluating
 
-    should_evaluate: bool = Field(default=False, description="True to run the evaluation flow")
-    eval_criteria: Optional[List[str]] = Field(default_factory=list, description="criteria to evaluate the outcome. i.e., fit to the brand tone")
+`[var]`<bold>`should_evaluate: bool = False`</bold>
+
+`[var]`<bold>`eval_criteria: Optional[List[str]] = list()`</bold>
+
+You can turn on customized evaluations using the given criteria.
+
+Refer <a href="/core/task/task-output">TaskOutput</a> class for details.
+
+<hr>
 
 
-## Recording
+## Ref
 
-output: Optional[TaskOutput] = Field(default=None, description="store the final task output in TaskOutput class") -->
+### Variables
+
+| <div style="width:160px">**Variable**</div> | **Data Type** | **Default** | **Nullable** | **Description** |
+| :---               | :---  | :--- | :--- | :--- |
+| **`id`**   | UUID  | uuid.uuid4() | False | Stores task `id` as an identifier. |
+| **`name`**       | Optional[str]   | None | True | Stores a task name (Inherited as `node` identifier if the task is dependent) |
+| **`description`**       | str   | None | False | Required field to store a concise task description |
+| **`pydantic_output`** | Optional[Type[BaseModel]] | None | True | Stores pydantic custom output class for structured response |
+| **`response_fields`** | Optional[List[ResponseField]]  | list() | True | Stores JSON formats for stuructured response |
+| **`tools`** |  Optional[List[ToolSet | Tool | Any]] | None | True | Stores tools to be called when the agent executes the task. |
+| **`can_use_agent_tools`** |  bool | True | - | Whether to use the agent tools |
+| **`tool_res_as_final`** |  bool | False | - | Whether to make the tool response a final response from the agent |
+| **`execution_type`** | TaskExecutionType  | TaskExecutionType.SYNC | - | Sync or async execution |
+| **`allow_delegation`** | bool  | False | - | Whether to allow the agent to delegate the task to another agent |
+| **`callback`** | Optional[Callable] | None | True | Callback function to be executed after LLM calling |
+| **`callback_kwargs`** | Optional[Dict[str, Any]] | dict() | True | Args for the callback function (if any)|
+| **`should_evaluate`** | bool | False | - | Whether to evaluate the task output using eval criteria |
+| **`eval_criteria`** | Optional[List[str]] | list() | True | Evaluation criteria given by the human client |
+| **`processed_agents`** | Set[str] | set() | True | [Ops] Stores roles of the agents executed the task |
+| **`tool_errors`** | int | 0 | True | [Ops] Stores number of tool errors |
+| **`delegation`** | int | 0 | True | [Ops] Stores number of agent delegations |
+| **`output`** | Optional[TaskOutput] | None | True | [Ops] Stores `TaskOutput` object after the execution |
+
+
+### Class Methods
+
+| <div style="width:120px">**Method**</div> |  <div style="width:300px">**Params**</div> | **Returns** | **Description** |
+| :---               | :---  | :--- | :--- |
+| **`execute`**  | <p>type: TaskExecutionType = None<br>agent: Optional["vhq.Agent"] = None<br>context: Optional[Any] = None</p> | InstanceOf[`TaskOutput`] or None (error) |  A main method to handle task execution. Auto-build an agent when the agent is not given. |
+
+
+### Properties
+
+| <div style="width:120px">**Property**</div> | **Returns** | **Description** |
+| :---               | :---  | :--- |
+| **`key`**   | str | Returns task key based on its description and output format. |
+| **`summary`**  | str   | Returns a summary of the task based on its id, description and tools. |

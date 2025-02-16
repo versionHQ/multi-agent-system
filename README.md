@@ -1,6 +1,6 @@
 # Overview
 
-[![DL](https://img.shields.io/badge/Download-17K+-red)](https://clickpy.clickhouse.com/dashboard/versionhq)
+[![DL](https://img.shields.io/badge/Download-20K+-red)](https://clickpy.clickhouse.com/dashboard/versionhq)
 ![MIT license](https://img.shields.io/badge/License-MIT-green)
 [![Publisher](https://github.com/versionHQ/multi-agent-system/actions/workflows/publish.yml/badge.svg)](https://github.com/versionHQ/multi-agent-system/actions/workflows/publish.yml)
 ![PyPI](https://img.shields.io/badge/PyPI-v1.2.1+-blue)
@@ -12,11 +12,10 @@ Agentic orchestration framework for multi-agent networks and task graphs for com
 
 **Visit:**
 
-- [PyPI](https://pypi.org/project/versionhq/)
+- [Playground](https://versi0n.io/playground)
 - [Docs](https://docs.versi0n.io)
 - [Github Repository](https://github.com/versionHQ/multi-agent-system)
-- [Playground](https://versi0n.io/)
-
+- [PyPI](https://pypi.org/project/versionhq/)
 
 <hr />
 
@@ -513,10 +512,4 @@ Common issues and solutions:
 ## Frequently Asked Questions (FAQ)
 **Q. Where can I see if the agent is working?**
 
-A. Visit [playground](https://versi0n.io).
-
-
-**Q. How do you analyze the customer?**
-
-A. We employ soft clustering for each customer.
-<img width="200" src="https://res.cloudinary.com/dfeirxlea/image/upload/v1732732628/pj_m_agents/ito937s5d5x0so8isvw6.png">
+A. Visit [playground](https://versi0n.io/playground).

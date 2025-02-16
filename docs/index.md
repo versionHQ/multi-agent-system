@@ -1,6 +1,6 @@
 # Overview
 
-[![DL](https://img.shields.io/badge/Download-17K+-red)](https://clickpy.clickhouse.com/dashboard/versionhq)
+[![DL](https://img.shields.io/badge/Download-20K+-red)](https://clickpy.clickhouse.com/dashboard/versionhq)
 ![MIT license](https://img.shields.io/badge/License-MIT-green)
 [![Publisher](https://github.com/versionHQ/multi-agent-system/actions/workflows/publish.yml/badge.svg)](https://github.com/versionHQ/multi-agent-system/actions/workflows/publish.yml)
 ![PyPI](https://img.shields.io/badge/PyPI-v1.2.1+-blue)
@@ -11,9 +11,9 @@ A Python framework for agentic orchestration that handles complex task automatio
 
 **Visit:**
 
+- [Playground](https://versi0n.io/playground)
 - [PyPI](https://pypi.org/project/versionhq/)
 - [Docs](https://docs.versi0n.io)
-- [Playground](https://versi0n.io/)
 
 **Contribute:**
 
@@ -259,7 +259,7 @@ Common issues and solutions:
 ## FAQ
 **Q. Where can I see if the agent is working?**
 
-A. Visit [playground](https://versi0n.io).
+A. Visit [playground](https://versi0n.io/playground).
 
 <hr />
 

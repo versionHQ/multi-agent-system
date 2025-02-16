@@ -83,7 +83,7 @@ theme:
         icon: material/brightness-7
         name: Switch to light mode
   features:
-    - announce.dismiss
+    # - announce.dismiss
     - content.action.edit
     - content.action.view
     - content.code.annotate
@@ -92,6 +92,7 @@ theme:
     - content.tabs.link
     - content.tooltips
     - header.autohide
+    - navigation.tabs
     - navigation.path
     - navigation.top
     - navigation.footer
@@ -117,10 +118,9 @@ nav:
       - TaskOutput: 'core/task/task-output.md'
       - Evaluation: 'core/task/evaluation.md'
     - Tool: 'core/tool.md'
-  #   - Compoio Tools: 'core/composio-tool.md'
   - Tags: 'tags.md'
   - Examples:
-    - Playground: https://versi0n.io
+    - Playground: https://versi0n.io/playground
     - Experiment - Agent Performance: https://github.com/versionHQ/exp-agent-performance
   - Change Log: https://github.com/versionHQ/multi-agent-system/releases
 
@@ -137,6 +137,19 @@ extra:
   analytics:
     provider: google
     property: G-E19K228ENL
+    feedback:
+      title: Was this page helpful?
+      ratings:
+        - icon: material/emoticon-happy-outline
+          name: This page was helpful
+          data: 1
+          note: >-
+            Thanks for your feedback!
+        - icon: material/emoticon-sad-outline
+          name: This page could be improved
+          data: 0
+          note: >-
+            Thanks for your feedback! Help us improve this page by using our <a href="https://github.com/versionhq/multi-agent-system/issues/new/?title=[Feedback]+{title}+-+{url}" target="_blank" rel="noopener">feedback form</a>.
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/versionHQ/multi-agent-system

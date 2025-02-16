@@ -276,7 +276,7 @@ class Task(BaseModel):
 
     # tool usage
     tools: Optional[List[ToolSet | Tool | Any]] = Field(default_factory=list, description="tools that the agent can use aside from their tools")
-    can_use_agent_tools: bool = Field(default=False, description="whether the agent can use their own tools when executing the task")
+    can_use_agent_tools: bool = Field(default=True, description="whether the agent can use their own tools when executing the task")
     tool_res_as_final: bool = Field(default=False, description="when set True, tools res will be stored in the `TaskOutput`")
 
     # executing

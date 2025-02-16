@@ -7,7 +7,7 @@ tags:
 
 <class>`class` versionhq.task.model.<bold>ResponseField<bold></class>
 
-A Pydantic class to store response formats to create JSON response schema.
+A Pydantic class to store response formats to generate a structured response in JSON.
 
 <hr/>
 
@@ -105,7 +105,7 @@ Agents can handle **one layer** of nested items usign `properties` and `items` f
 
 We highly recommend to use `gemini-x` or `gpt-x` to get stable results.
 
-### List with Object
+### Object in List
 
 ```python
 import versionhq as vhq
@@ -129,7 +129,7 @@ list_with_objects = vhq.ResponseField(
 
 <hr />
 
-### List with List
+### List in List
 
 ```python
 import versionhq as vhq
@@ -150,7 +150,7 @@ list_with_list = vhq.ResponseField(
 
 <hr />
 
-### Object with List
+### List in Object
 
 ```python
 import versionhq as vhq
@@ -173,7 +173,7 @@ dict_with_list = vhq.ResponseField(
 
 <hr />
 
-### Object with Object
+### Object in Object
 
 ```python
 import versionhq as vhq

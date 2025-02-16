@@ -1473,16 +1473,16 @@ wheels = [
 
 [[package]]
 name = "langchain-openai"
-version = "0.3.5"
+version = "0.3.6"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "langchain-core" },
     { name = "openai" },
     { name = "tiktoken" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/fe/18/c7829a2ce2977d22db582d19b311d7dc3d100a51c32f5766517ee3474c26/langchain_openai-0.3.5.tar.gz", hash = "sha256:40cd5649b93b1af20a20e1cbee5a47628a77e15114a11f9b3f2ab08c7d1302bf", size = 255643 }
+sdist = { url = "https://files.pythonhosted.org/packages/72/67/4c2f371315bd1dd1163f3d1d48d271649e5c4b81b1982c38db3761b883a5/langchain_openai-0.3.6.tar.gz", hash = "sha256:7daf92e1cd98865ab5213ec5bec2cbd6c28f011e250714978b3a99c7e4fc88ce", size = 255792 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/9a/4a/18e98bb61e00f0553383fd14997a8d778999f5cf80109a74eb746a1f5919/langchain_openai-0.3.5-py3-none-any.whl", hash = "sha256:137a7514f11afeab26e5fc1eda3c2b96fbbb18a96d963ba256faecceb189ea71", size = 54982 },
+    { url = "https://files.pythonhosted.org/packages/b5/49/302754c09f955e4a240efe83e48f4e79149d50ca52b3f4731365f1be94b1/langchain_openai-0.3.6-py3-none-any.whl", hash = "sha256:05f0869f6cc963e2ec9e2e54ea1038d9c2af784c67f0e217040dfc918b31649a", size = 54930 },
 ]
 
 [[package]]
@@ -1551,7 +1551,7 @@ wheels = [
 
 [[package]]
 name = "litellm"
-version = "1.61.3"
+version = "1.61.5"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiohttp" },
@@ -1567,9 +1567,9 @@ dependencies = [
     { name = "tokenizers", version = "0.19.1", source = { registry = "https://pypi.org/simple" }, marker = "platform_machine == 'x86_64' and sys_platform == 'darwin'" },
     { name = "tokenizers", version = "0.21.0", source = { registry = "https://pypi.org/simple" }, marker = "platform_machine != 'x86_64' or sys_platform != 'darwin'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/79/b3/c5d01872929f6f5a5aada5829f3aac4e5f272f80ecfa18468fa4293586d4/litellm-1.61.3.tar.gz", hash = "sha256:626ca5731cf640097e30b0b665ec282de2d2bd8b95cf6a41255819576201de03", size = 6473446 }
+sdist = { url = "https://files.pythonhosted.org/packages/d2/0c/145830eec4375a995fe7ba0e597944576b891fb568911e8535eca7e2b9ab/litellm-1.61.5.tar.gz", hash = "sha256:0fda7698e64933e100398d2b3ed5d1dc096021adf699c885f8baf5a7b0d7589c", size = 6477731 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/2d/2c/0f358695146342ebce8021f1c55e3016681f042cc0d0d36d5eaa47097aed/litellm-1.61.3-py3-none-any.whl", hash = "sha256:c01145759260eeb7f624aba82e333804181da4c03fa5b980361490cdaf5b1e65", size = 6777747 },
+    { url = "https://files.pythonhosted.org/packages/cc/7b/e30a2cb2d4cf92de7d2469cef8afc7439c3c523b533055da0f5e69520d0b/litellm-1.61.5-py3-none-any.whl", hash = "sha256:0f842fe96d8354fce71bdb50b7b8d86b329653161885a047de4a9c78e0cfbe82", size = 6783018 },
 ]
 
 [[package]]
@@ -3980,7 +3980,7 @@ wheels = [
 
 [[package]]
 name = "versionhq"
-version = "1.2.1.6"
+version = "1.2.1.8"
 source = { editable = "." }
 dependencies = [
     { name = "appdirs" },

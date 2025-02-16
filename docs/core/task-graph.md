@@ -23,7 +23,7 @@ The following example demonstrates a simple concept of a `supervising` agent net
 You can define nodes and edges mannually by creating nodes from tasks, and defining edges.
 
 
-### Generating TaskGraph
+### Generating
 
 ```python
 import versionhq as vhq
@@ -57,7 +57,7 @@ assert critical_path  and duration  and paths
 ```
 
 
-### Activating TaskGraph
+### Activating
 
 Calling `.activate()` begins execution of the graph's nodes, respecting dependencies [`dependency-met`] and prioritizing the critical path.
 

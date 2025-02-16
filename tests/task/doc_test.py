@@ -152,9 +152,6 @@ def test_docs_core_task_g():
     import versionhq as vhq
     task = vhq.Task(
         description="return the output following the given prompt.",
-        response_fields=[
-            vhq.ResponseField(title="test1", data_type=str, required=True),
-        ],
         allow_delegation=True
     )
     task.execute()
@@ -162,3 +159,65 @@ def test_docs_core_task_g():
     assert task.output is not None
     assert "vhq-Delegated-Agent" in task.processed_agents
     assert task.delegations ==1
+
+
+def test_docs_core_task_h():
+    import versionhq as vhq
+
+    task = vhq.Task(description="Return a word: 'test'", type=vhq.TaskExecutionType.ASYNC)
+
+    from unittest.mock import patch
+    with patch.object(vhq.Agent, "execute_task", return_value="test") as execute:
+        res = task.execute()
+        assert res.raw == "test"
+        execute.assert_called_once_with(task=task, context=None, task_tools=list())
+
+
+def test_docs_core_task_i():
+    import versionhq as vhq
+
+    def random_func(message: str) -> str:
+        return message + "_demo"
+
+    tool = vhq.Tool(name="tool", func=random_func)
+    tool_set = vhq.ToolSet(tool=tool, kwargs=dict(message="empty func"))
+    task = vhq.Task(
+        description="execute the given tools",
+        tools=[tool_set,],
+        tool_res_as_final=True
+    )
+
+    res = task.execute()
+    assert res.tool_output == "empty func_demo"
+
+
+def test_docs_core_task_j():
+    import versionhq as vhq
+
+    simple_tool = vhq.Tool(name="simple tool", func=lambda x: "simple func")
+    agent = vhq.Agent(role="demo", goal="execute tools", tools=[simple_tool,])
+    task = vhq.Task(
+        description="execute tools",
+        can_use_agent_tools=True,
+        tool_res_as_final=True
+    )
+    res = task.execute(agent=agent)
+    assert res.tool_output == "simple func"
+
+
+def test_docs_core_task_k():
+    import versionhq as vhq
+
+    def callback_func(condition: str, test1: str):
+        return f"Result: {test1}, condition added: {condition}"
+
+    task = vhq.Task(
+        description="return the output following the given prompt.",
+        callback=callback_func,
+        callback_kwargs=dict(condition="demo for pytest")
+    )
+    res = task.execute()
+
+    assert res and isinstance(res, vhq.TaskOutput)
+    assert res.task_id is task.id
+    assert "demo for pytest" in res.callback_output
