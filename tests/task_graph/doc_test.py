@@ -1,4 +1,4 @@
-def test_create_and_activate_network(monkeypatch):
+def test_create_and_activate_network():
     import versionhq as vhq
 
     task_graph = vhq.TaskGraph(directed=False, should_reform=True)

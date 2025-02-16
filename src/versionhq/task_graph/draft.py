@@ -49,11 +49,12 @@ def workflow(final_output: Type[BaseModel], context: Any = None, human: bool = T
     )
 
     task = Task(
-        description=dedent(f"Design a resource-efficient workflow to achieve the following goal: {final_output_prompt}. The workflow should consist of a list of detailed tasks that represent decision making points, each with the following information:\nname: A concise name of the task\ndescription: A concise description of the task.\nconnections: A list of target tasks that this task connects to.\ndependency_types: The type of dependency between this task and each of its connected task. Use the following dependency types: {dep_type_prompt}.\n\nPrioritize minimizing resource consumption (computation, memory, and data transfer) when defining tasks, connections, and dependencies.  Consider how data is passed between tasks and aim to reduce unnecessary data duplication or transfer. Explain any design choices made to optimize resource usage."),
+        description=dedent(f"Design a resource-efficient workflow to achieve the following goal: {final_output_prompt}. The workflow should consist of a list of detailed tasks that represent decision making points, each with the following information:\nname: A concise name of the task\ndescription: A concise description of the task.\nconnections: A list of target tasks that this task connects to.\ndependency_types: The type of dependency between this task and each of its connected task. \noutput: key output from the task.\n\nUse the following dependency types: {dep_type_prompt}.\n\nPrioritize minimizing resource consumption (computation, memory, and data transfer) when defining tasks, connections, and dependencies.  Consider how data is passed between tasks and aim to reduce unnecessary data duplication or transfer. Explain any design choices made to optimize resource usage."),
         response_fields=[
             ResponseField(title="tasks", data_type=list, items=dict, properties=[
                     ResponseField(title="name", data_type=str),
                     ResponseField(title="description", data_type=str),
+                    ResponseField(title="output", data_type=str),
                     ResponseField(title="connections", data_type=list, items=str),
                     ResponseField(title="dependency_types", data_type=list, items=str),
                 ]
@@ -66,11 +67,20 @@ def workflow(final_output: Type[BaseModel], context: Any = None, human: bool = T
         return None
 
     task_items = res.json_dict["tasks"]
-    tasks = [Task(name=item["name"], description=item["description"]) for item in task_items]
-    nodes = [Node(task=task) for task in tasks]
+    tasks, nodes = [], []
+    for item in task_items:
+        class Output(BaseModel):
+            item["output"]: str
+
+        task = Task(name=item["name"], description=item["description"], pydantic_output=Output)
+        tasks.append(task)
+        nodes.append(Node(task=task))
+
+
     task_graph = TaskGraph(
         nodes={node.identifier: node for node in nodes},
-        concl=final_output,
+        concl_format=final_output,
+        concl=None,
         should_reform=True,
     )
 

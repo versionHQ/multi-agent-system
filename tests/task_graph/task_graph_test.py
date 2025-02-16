@@ -20,6 +20,7 @@ def test_draft():
             context="Planning a suprise day trip for my friend to celebrate her birthday. We live in CA and we like to have Korean food.",
             human=True
         )
+
         assert task_graph
         assert [k == node.identifier and node.task and isinstance(node, vhq.Node) for k, node in task_graph.nodes.items()]
         assert [isinstance(edge.dependency_type, vhq.DependencyType) and isinstance(edge, vhq.Edge) for k, edge in task_graph.edges.items()]

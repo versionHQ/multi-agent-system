@@ -1,12 +1,14 @@
+import matplotlib
+matplotlib.use('agg')
+
 import enum
 import uuid
 import networkx as nx
 import matplotlib.pyplot as plt
 from abc import ABC
 from typing import List, Any, Optional, Callable, Dict, Type, Tuple
-from typing_extensions import Self
 
-from pydantic import BaseModel, InstanceOf, Field, UUID4, field_validator, model_validator
+from pydantic import BaseModel, InstanceOf, Field, UUID4, field_validator
 from pydantic_core import PydanticCustomError
 
 from versionhq.task.model import Task, TaskOutput
@@ -60,7 +62,7 @@ class Node(BaseModel):
     def is_independent(self) -> bool:
         return not self.in_degree_nodes and not self.out_degree_nodes
 
-    def handle_task_execution(self, agent: Agent = None, context: str = None) -> TaskOutput | None:
+    def handle_task_execution(self, agent: Agent = None, context: str = None, format: Type[BaseModel] = None) -> TaskOutput | None:
         """
         Start task execution and update status accordingly.
         """
@@ -72,6 +74,7 @@ class Node(BaseModel):
             self.status = TaskStatus.ERROR
             return None
 
+        self.task.pydantic_output = self.task.pydantic_output if self.task.pydantic_output else format if type(format) == BaseModel else None
         res = self.task.execute(agent=agent, context=context)
         self.status = TaskStatus.COMPLETED if res else TaskStatus.ERROR
         return res
@@ -176,7 +179,7 @@ class Edge(BaseModel):
                     return False
 
 
-    def activate(self) -> TaskOutput | None:
+    def activate(self, format: Type[BaseModel] = None) -> TaskOutput | None:
         """
         Activates the edge to initiate task execution of the target node.
         """
@@ -194,7 +197,7 @@ class Edge(BaseModel):
             time.sleep(self.lag)
 
         context = self.source.task.output.raw if self.data_transfer else None
-        res = self.target.handle_task_execution(context=context)
+        res = self.target.handle_task_execution(context=context, format=format)
         return res
 
 
