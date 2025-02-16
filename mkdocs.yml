@@ -94,6 +94,7 @@ theme:
     - header.autohide
     - navigation.tabs
     - navigation.path
+    - navigation.expand
     - navigation.top
     - navigation.footer
     - navigation.indexes
@@ -110,16 +111,18 @@ nav:
   - Home: 'index.md'
   - Quick Start: 'quickstart.md'
   - Core Components:
-    - Agent: 'core/agent.md'
-    - Task Graph: 'core/task-graph.md'
+    - Agent:
+      - 'core/agent/index.md'
+    - Task Graph:
+      - 'core/task-graph/index.md'
     - Task:
-      - Task: 'core/task.md'
+      - 'core/task/index.md'
       - ResponseField: 'core/task/response-field.md'
       - TaskOutput: 'core/task/task-output.md'
       - Evaluation: 'core/task/evaluation.md'
     - Tool: 'core/tool.md'
   - Tags: 'tags.md'
-  - Examples:
+  - Cases:
     - Playground: https://versi0n.io/playground
     - Experiment - Agent Performance: https://github.com/versionHQ/exp-agent-performance
   - Change Log: https://github.com/versionHQ/multi-agent-system/releases

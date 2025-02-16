@@ -27,9 +27,9 @@ agent = vhq.Agent(
 
 <hr />
 
-## Customization
+## Customizing
 
-### Model optimization
+**Model Optimization**
 
 `[var]`<bold>`llm: Optional[str | LLM | Dict[str, Any]] = "gpt-4o"`</bold>
 
@@ -47,7 +47,9 @@ agent = vhq.Agent(
 )
 ```
 
-### Switching models
+<hr/>
+
+**Switching Models**
 
 `[class method]`<bold>`update_llm(self, llm: Any = None, llm_config: Optional[Dict[str, Any]] = None) -> Self`<bold>
 
@@ -69,11 +71,13 @@ assert agent.llm.max_tokens == 3000
 
 <hr/>
 
-### Developer Prompt (System Prompt)
+**Developer Prompt (System Prompt)**
 
 `[var]`<bold>`backstory: Optional[str] = TEMPLATE_BACKSTORY`<bold>
 
 Backstory will be drafted automatically using the given role, goal and other values in the Agent model, and converted into the **developer prompt** when the agent executes the task.
+
+<hr/>
 
 **Backstory template (full) for auto drafting:**
 
@@ -127,9 +131,11 @@ agent = vhq.Agent(
 )
 ```
 
-## Task Execution Rules
+<hr />
 
-### Delegation
+## Executing Tasks
+
+**Delegation**
 
 `[var]`<bold>`allow_delegation: [bool] = False`</bold>
 
@@ -145,7 +151,9 @@ agent = vhq.Agent(
 )
 ```
 
-### Max Retry Limit
+<hr />
+
+**Max Retry Limit**
 
 `[var]`<bold>`max_retry_limit: Optional[int] = 2`</bold>
 
@@ -161,7 +169,9 @@ agent = vhq.Agent(
 )
 ```
 
-### Maximum Number of Iterations (MaxIt)
+<hr />
+
+**Maximum Number of Iterations (maxit)**
 
 `[var]`<bold>`maxit: Optional[int] = 25`</bold>
 
@@ -179,76 +189,9 @@ agent = vhq.Agent(
 )
 ```
 
-### Callbacks
+<hr />
 
-`[var]`<bold>`callbacks: Optional[List[Callable]] = None`</bold>
-
-You can add callback functions that the agent will run after executing any task.
-
-By default, raw response from the agent will be added to the arguments of the callback function.
-
-e.g. Format a response after executing the task:
-
-```python
-import json
-import versionhq as vhq
-from typing import Dict, Any
-
-
-def format_response(res: str = None) -> str | Dict[str, Any]:
-	try:
-		r = json.dumps(eval(res))
-		formatted_res = json.loads(r)
-		return formatted_res
-	except:
-		return res
-
-agent = vhq.Agent(
-	role="Marketing Analyst",
-	goal="Coping with increased price competition in saturated markets.",
-	callbacks=[format_response]
-)
-```
-
-**Multiple callbacks to call**
-
-The callback functions are called in order of the list index referring to the task response and response from the previous callback functions by default.
-
-e.g. Validate an initial response from the assigned agent, and format the response.
-
-```python
-import json
-from typing import Dict, Any
-import versionhq as vhq
-
-def assessment(res: str) -> str:
-    try:
-        sub_agent = vhq.Agent(role="Validator", goal="Validate the given solutions.")
-        task = vhq.Task(
-            description=f"Assess the given solution based on feasibilities and fits to client's strategies, then refine the solution if necessary.\nSolution: {res}"
-        )
-        r = task.sync_execute(agent=sub_agent)
-        return r.raw
-
-    except:
-        return res
-
-def format_response(res: str = None) -> str | Dict[str, Any]:
-    try:
-        r = json.dumps(eval(res))
-        formatted_res = json.loads(r)
-        return formatted_res
-    except:
-        return res
-
-agent = vhq.Agent(
-    role="Marketing Analyst",
-    goal="Build solutions to address increased price competition in saturated markets",
-    callbacks=[assessment, format_response] # add multiple funcs as callbacks - executed in order of index
-)
-```
-
-### Context Window
+**Context Window**
 
 `[var]`<bold>`respect_context_window: [bool] = True`</bold>
 
@@ -260,7 +203,10 @@ By default, the agent will follow **the 80% rule** - where they only use 80% of 
 
 You can turn off this rule by setting `respect_context_window` False to have larger context window.
 
-### Max Tokens
+
+<hr />
+
+**Max Tokens**
 
 `[var]`<bold>`max_tokens: Optional[int] = None`</bold>
 
@@ -268,7 +214,10 @@ Max tokens defines the maximum number of tokens in the generated response. Token
 
 By default, the agent will follow the default max_tokens of the model, but you can specify the max token to limit the length of the generated output.
 
-### Maximum Execution Time
+
+<hr />
+
+**Maximum Execution Time**
 
 `[var]`<bold>`max_execution_times: Optional[int] = None`</bold>
 
@@ -276,7 +225,10 @@ The maximum amount of wall clock time to spend in the execution loop.
 
 By default, the agent will follow the default setting of the model.
 
-### Maximum RPM (Requests Per Minute)
+
+<hr />
+
+**Maximum RPM (Requests Per Minute)**
 
 `[var]`<bold>`max_rpm: Optional[int] = None`</bold>
 
@@ -284,7 +236,9 @@ The maximum number of requests that the agent can send to the LLM.
 
 By default, the agent will follow the default setting of the model. When the value is given, we let the model sleep for 60 seconds when the number of executions exceeds the maximum requests per minute.
 
-### Other LLM Configuration
+<hr />
+
+**Other LLM Configuration**
 
 `[var]`<bold>`llm_config: Optional[Dict[str, Any]] = None`</bold>
 
@@ -326,12 +280,84 @@ print(agent.llm)
 #     max_completion_tokens=10000,
 # )
 ```
+<hr >
+
+## Callbacks
+
+`[var]`<bold>`callbacks: Optional[List[Callable]] = None`</bold>
+
+You can add callback functions that the agent will run after executing any task.
+
+By default, raw response from the agent will be added to the arguments of the callback function.
+
+e.g. Format a response after executing the task:
+
+```python
+import json
+import versionhq as vhq
+from typing import Dict, Any
+
+
+def format_response(res: str = None) -> str | Dict[str, Any]:
+	try:
+		r = json.dumps(eval(res))
+		formatted_res = json.loads(r)
+		return formatted_res
+	except:
+		return res
+
+agent = vhq.Agent(
+	role="Marketing Analyst",
+	goal="Coping with increased price competition in saturated markets.",
+	callbacks=[format_response]
+)
+```
 
 <hr />
 
-## Knowledge
+**Multiple callbacks to call**
 
-### Knowledge Sources
+The callback functions are called in order of the list index referring to the task response and response from the previous callback functions by default.
+
+e.g. Validate an initial response from the assigned agent, and format the response.
+
+```python
+import json
+from typing import Dict, Any
+import versionhq as vhq
+
+def assessment(res: str) -> str:
+    try:
+        sub_agent = vhq.Agent(role="Validator", goal="Validate the given solutions.")
+        task = vhq.Task(
+            description=f"Assess the given solution based on feasibilities and fits to client's strategies, then refine the solution if necessary.\nSolution: {res}"
+        )
+        r = task.sync_execute(agent=sub_agent)
+        return r.raw
+
+    except:
+        return res
+
+def format_response(res: str = None) -> str | Dict[str, Any]:
+    try:
+        r = json.dumps(eval(res))
+        formatted_res = json.loads(r)
+        return formatted_res
+    except:
+        return res
+
+agent = vhq.Agent(
+    role="Marketing Analyst",
+    goal="Build solutions to address increased price competition in saturated markets",
+    callbacks=[assessment, format_response] # add multiple funcs as callbacks - executed in order of index
+)
+```
+
+<hr />
+
+## Building Knowledge
+
+**Knowlege Source**
 
 `[var]`<bold>`knowledge_sources: Optional[List[KnowledgeSource]] = None`</bold>
 
@@ -373,9 +399,9 @@ assert "gold" in res.raw  == True
 
 <hr />
 
-## Memory
+## Accessing Memories
 
-### Store task execution results in memory
+Store task execution results in memory
 
 `[var]`<bold>`use_memory: bool = False`</bold>
 
@@ -397,7 +423,9 @@ print(agent.long_term_memory)
 # returns LongTermMemory object.
 ```
 
-### RAG Storage
+<hr />
+
+**RAG Storage**
 
 When the agent is not given any `memory_config` values, they will create `RAGStorage` to store memory:
 
@@ -418,7 +446,7 @@ MEM0 Storage
 
 ## Utilities
 
-### Model configuration
+**Model configuration**
 
 `[var]`<bold>`config: Optional[Dict[str, Any]] = None`</bold>
 
@@ -450,7 +478,7 @@ agent = vhq.Agent(
 
 <hr />
 
-### Updating model values
+**Updating existing agents**
 
 `[class method]`<bold>`update(self, **kwargs) -> Self`</bold>
 

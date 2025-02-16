@@ -398,7 +398,7 @@ class TaskGraph(Graph):
         return self._return_node_object(identifier).status
 
 
-    def visualize(self, layout: str = None):
+    def visualize(self, layout: str = None, should_save: bool = False):
         from matplotlib.lines import Line2D
         from versionhq.task_graph.colors import white, black, darkgrey, grey, primary, orange, lightgreen, green, darkgreen, darkergreen
 
@@ -475,7 +475,9 @@ class TaskGraph(Graph):
 
         plt.legend(handles=legend_elements, loc='lower right')
         plt.title(f"vhq-Diagram {str(self.id)}")
-        self._save(title=f"vhq-Diagram {str(self.id)}")
+
+        if should_save:
+            self._save(title=f"vhq-Diagram {str(self.id)}")
         plt.show(block=False)
 
 
@@ -559,5 +561,7 @@ class TaskGraph(Graph):
                     node_identifier = edge.target.identifier
                     self.outputs.update({ node_identifier: res })
 
+            self.concl = res
+            self.concl_template = self.concl_template if self.concl_template else res.pydantic.__class__ if res.pydantic else None
             # last_task_output = [v for v in self.outputs.values()][len([v for v in self.outputs.values()]) - 1] if [v for v in self.outputs.values()] else None
             return res, self.outputs

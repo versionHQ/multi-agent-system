@@ -1,4 +1,4 @@
-def test_create_and_activate_network():
+def test_create_and_activate_network(monkeypatch):
     import versionhq as vhq
 
     task_graph = vhq.TaskGraph(directed=False, should_reform=True)
@@ -31,8 +31,4 @@ def test_create_and_activate_network():
 
     assert last_task_output is not None and isinstance(last_task_output, vhq.TaskOutput)
     assert [k in task_graph.nodes.keys() and v and isinstance(v, vhq.TaskOutput) for k, v in outputs.items()]
-
-    task_graph.visualize()
-
-
-test_create_and_activate_network()
+    assert task_graph.concl == last_task_output and task_graph.concl_template == None

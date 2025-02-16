@@ -33,7 +33,6 @@ def _test_specific_formation():
             task="Describe the color of the sky by weather condition",
             expected_outcome="Dict that pairs color of the sky with specific weather condition",
             formation=item,
-
         )
 
         assert isinstance(network, vhq.AgentNetwork)

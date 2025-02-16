@@ -49,7 +49,7 @@ def workflow(final_output: Type[BaseModel], context: Any = None, human: bool = T
     )
 
     task = Task(
-        description=f"Design a resource-efficient workflow to achieve the following goal: {final_output_prompt}.  The workflow should consist of a list of tasks, each with the following information:\nname: A concise name of the task\ndescription: A concise description of the task.\nconnections: A list of target tasks that this task connects to.\ndependency_types: The type of dependency between this task and each of its connected task. Use the following dependency types: {dep_type_prompt}.\n\nPrioritize minimizing resource consumption (computation, memory, and data transfer) when defining tasks, connections, and dependencies.  Consider how data is passed between tasks and aim to reduce unnecessary data duplication or transfer.  Explain any design choices made to optimize resource usage.",
+        description=dedent(f"Design a resource-efficient workflow to achieve the following goal: {final_output_prompt}. The workflow should consist of a list of detailed tasks that represent decision making points, each with the following information:\nname: A concise name of the task\ndescription: A concise description of the task.\nconnections: A list of target tasks that this task connects to.\ndependency_types: The type of dependency between this task and each of its connected task. Use the following dependency types: {dep_type_prompt}.\n\nPrioritize minimizing resource consumption (computation, memory, and data transfer) when defining tasks, connections, and dependencies.  Consider how data is passed between tasks and aim to reduce unnecessary data duplication or transfer. Explain any design choices made to optimize resource usage."),
         response_fields=[
             ResponseField(title="tasks", data_type=list, items=dict, properties=[
                     ResponseField(title="name", data_type=str),
@@ -79,23 +79,24 @@ def workflow(final_output: Type[BaseModel], context: Any = None, human: bool = T
             dependency_types = [DependencyType[dt] if DependencyType[dt] else DependencyType.FINISH_TO_START for dt in res["dependency_types"]]
 
             for i, target_task_name in enumerate(res["connections"]):
-                source = [v for k, v in task_graph.nodes.items() if v.task.name == res["name"]][0]
-                target = [v for k, v in task_graph.nodes.items() if v.task.name == target_task_name][0]
+                source = [v for v in task_graph.nodes.values() if v.task.name == res["name"]][0]
+                target = [v for v in task_graph.nodes.values() if v.task.name == target_task_name][0]
                 dependency_type = dependency_types[i]
-                task_graph.add_dependency(source_node_identifier=source.identifier, target_node_identifier=target.identifier, dependency_type=dependency_type)
+                task_graph.add_dependency(
+                    source_node_identifier=source.identifier, target_node_identifier=target.identifier, dependency_type=dependency_type)
 
-    ## test purpose
-    # task_graph.visualize()
 
-    # if human:
-    #     print('Proceed? Y/n:')
-    #     x = input()
+    task_graph.visualize()
 
-    #     if x.lower() == "y":
-    #         print("ok. generating agent network")
+    if human:
+        print('Proceed? Y/n:')
+        x = input()
 
-    #     else:
-    #         request = input("request?")
-    #         print('ok. regenerating the graph based on your input: ', request)
+        if x.lower() == "y":
+            print("ok. generating agent network")
+
+        else:
+            request = input("request?")
+            print('ok. regenerating the graph based on your input: ', request)
 
     return task_graph
