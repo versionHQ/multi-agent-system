@@ -30,10 +30,8 @@ from versionhq.memory.model import ShortTermMemory,LongTermMemory, UserMemory, M
 from versionhq.task.formation import form_agent_network
 from versionhq.task_graph.draft import workflow
 
-# from versionhq._utils.logger import Logger
 
-
-__version__ = "1.2.1.13"
+__version__ = "1.2.1.14"
 __all__ = [
     "Agent",
 
@@ -93,6 +91,4 @@ __all__ = [
 
     "form_agent_network",
     "workflow",
-
-    # "Logger",
 ]

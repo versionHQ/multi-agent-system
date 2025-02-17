@@ -587,11 +587,11 @@ class Agent(BaseModel):
         from versionhq.task.model import Task, ResponseField
 
         class Output(BaseModel):
+            result: str
             steps: list[str]
-            conclution: str
 
         task = Task(
-            description=f"List up first 3 steps that need to achieve {self.goal} in concise manner, then lead the conclusion in a sentence.",
+            description=f"Generate a simple result in a sentence to achieve the goal: {self.goal}. If needed, list up necessary steps in concise manner.",
             pydantic_output=Output
         )
         res = task.execute(agent=self, context=context)
