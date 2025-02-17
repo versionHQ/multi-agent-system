@@ -363,7 +363,7 @@ Response format: {response_format}
 Ref. Output image: {output_formats_to_follow}
 """
         else:
-            output_prompt = "Return your response as a valid JSON serializable string, enclosed in double quotes. Do not use single quotes, trailing commas, or other non-standard JSON syntax."
+            output_prompt = "You MUST Return your response as a valid JSON serializable string, enclosed in double quotes. Do not use single quotes, trailing commas, or other non-standard JSON syntax."
 
         return dedent(output_prompt)
 

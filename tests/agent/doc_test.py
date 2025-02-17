@@ -1,14 +1,16 @@
 """Test use cases in docs/core/agents.md"""
 
 def test_docs_core_agent_a():
-    from versionhq import Agent
-    agent = Agent(
+    import versionhq as vhq
+    agent = vhq.Agent(
         role="Marketing Analyst",
-        goal="Coping with price competition in saturated markets"
+        goal="Coping with price competition in saturated markets",
     )
 
     assert agent.id and agent.role == "Marketing Analyst" and agent.goal == "Coping with price competition in saturated markets" and agent.backstory is not None
 
+    res = agent.start(context="Planning a new campaign promotion starting this summer")
+    assert isinstance(res, vhq.TaskOutput)
 
 def test_docs_core_agent_b1():
     from versionhq import Agent

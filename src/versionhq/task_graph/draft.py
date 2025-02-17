@@ -1,6 +1,6 @@
 import sys
 from typing import Type, Any
-from pydantic import BaseModel, create_model
+from pydantic import BaseModel
 from pydantic._internal._model_construction import ModelMetaclass
 from textwrap import dedent
 if 'pydantic.main' not in sys.modules:
@@ -10,11 +10,11 @@ sys.modules['pydantic.main'].ModelMetaclass = ModelMetaclass
 
 from versionhq.agent.model import Agent
 from versionhq.task.model import ResponseField
-from versionhq.task_graph.model import TaskGraph, Task, DependencyType, Node, TaskStatus
+from versionhq.task_graph.model import TaskGraph, Task, DependencyType, Node
 from versionhq._utils.logger import Logger
 
 
-def workflow(final_output: Type[BaseModel], context: Any = None, human: bool = True) -> TaskGraph | None:
+def workflow(final_output: Type[BaseModel], context: Any = None, human: bool = False) -> TaskGraph | None:
     """
     Generate a TaskGraph object to generate the givne final_output most resource-efficiently.
     """
@@ -52,13 +52,12 @@ def workflow(final_output: Type[BaseModel], context: Any = None, human: bool = T
         description=dedent(f"Design a resource-efficient workflow to achieve the following goal: {final_output_prompt}. The workflow should consist of a list of detailed tasks that represent decision making points, each with the following information:\nname: A concise name of the task\ndescription: A concise description of the task.\nconnections: A list of target tasks that this task connects to.\ndependency_types: The type of dependency between this task and each of its connected task. \noutput: key output from the task in a word.\n\nUse the following dependency types: {dep_type_prompt}.\n\nPrioritize minimizing resource consumption (computation, memory, and data transfer) when defining tasks, connections, and dependencies.  Consider how data is passed between tasks and aim to reduce unnecessary data duplication or transfer. Explain any design choices made to optimize resource usage."),
         response_fields=[
             ResponseField(title="tasks", data_type=list, items=dict, properties=[
-                    ResponseField(title="name", data_type=str),
-                    ResponseField(title="description", data_type=str),
-                    ResponseField(title="output", data_type=str),
-                    ResponseField(title="connections", data_type=list, items=str),
-                    ResponseField(title="dependency_types", data_type=list, items=str),
-                ]
-            )
+                ResponseField(title="name", data_type=str),
+                ResponseField(title="description", data_type=str),
+                ResponseField(title="output", data_type=str),
+                ResponseField(title="connections", data_type=list, items=str),
+                ResponseField(title="dependency_types", data_type=list, items=str),
+            ])
         ]
     )
     res = task.execute(agent=graph_expert, context=[context_prompt, context])

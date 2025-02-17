@@ -3,7 +3,6 @@ import uuid
 from typing import Any, Dict, List, Optional, TypeVar, Callable, Type
 from typing_extensions import Self
 from dotenv import load_dotenv
-import litellm
 
 from pydantic import UUID4, BaseModel, Field, InstanceOf, PrivateAttr, model_validator, field_validator
 from pydantic_core import PydanticCustomError
@@ -57,9 +56,7 @@ class TokenProcess:
 # @track_agent()
 class Agent(BaseModel):
     """
-    A class to store agent information.
-    Agents must have `role`, `goal`, and `llm` = DEFAULT_MODEL_NAME as default.
-    Then run validation on `backstory`, `llm`, `tools`, `rpm` (request per min), `knowledge`, and `memory`.
+    A Pydantic class to store an agent object. Agents must have `role` and `goal` to start.
     """
 
     __hash__ = object.__hash__
@@ -453,7 +450,6 @@ class Agent(BaseModel):
         return self
 
 
-
     def invoke(
         self,
         prompts: str,
@@ -513,8 +509,6 @@ class Agent(BaseModel):
             if not raw_response:
                 self._logger.log(level="error", message="Received None or empty response from the model", color="red")
                 raise ValueError("Invalid response from LLM call - None or empty.")
-
-
 
 
     def execute_task(self, task, context: Optional[Any] = None, task_tools: Optional[List[Tool | ToolSet]] = list()) -> str:
@@ -580,6 +574,28 @@ class Agent(BaseModel):
             self._rpm_controller.stop_rpm_counter()
 
         return raw_response
+
+
+    def start(self, context: Any = None) -> Any | None:
+        """
+        Defines and executes a task when it is not given and returns TaskOutput object.
+        """
+
+        if not self.goal or not self.role:
+            return None
+
+        from versionhq.task.model import Task, ResponseField
+
+        class Output(BaseModel):
+            steps: list[str]
+            conclution: str
+
+        task = Task(
+            description=f"List up first 3 steps that need to achieve {self.goal} in concise manner, then lead the conclusion in a sentence.",
+            pydantic_output=Output
+        )
+        res = task.execute(agent=self, context=context)
+        return res
 
 
     def __repr__(self):

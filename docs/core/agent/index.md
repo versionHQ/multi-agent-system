@@ -25,6 +25,16 @@ agent = vhq.Agent(
 )
 ```
 
+To start the agent and receive a `TaskOutput` object based on its goal, call the `.start()` method.
+
+```python
+# ...Inherited from the previous code
+
+res = agent.start(context="Planning a new campaign promotion starting this summer")
+
+assert isinstance(res, vhq.TaskOutput)
+```
+
 <hr />
 
 ## Customizing
