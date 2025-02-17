@@ -14,7 +14,7 @@ from versionhq.task_graph.model import TaskGraph, Task, DependencyType, Node
 from versionhq._utils.logger import Logger
 
 
-def workflow(final_output: Type[BaseModel], context: Any = None, human: bool = False) -> TaskGraph | None:
+def workflow(final_output: Type[BaseModel], context: Any = None, human: bool = False, use_memory: bool = False) -> TaskGraph | None:
     """
     Generate a TaskGraph object to generate the givne final_output most resource-efficiently.
     """
@@ -43,7 +43,7 @@ def workflow(final_output: Type[BaseModel], context: Any = None, human: bool = F
             ", ".join([k for k in DependencyType._member_map_.keys()]),
         ],
         llm="gemini-2.0",
-        use_memory=True,
+        use_memory=use_memory,
         maxit=1,
         max_retry_limit=1,
     )
