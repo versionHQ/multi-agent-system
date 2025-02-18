@@ -530,9 +530,9 @@ Ref. Output image: {output_formats_to_follow}
         from versionhq.agent.model import Agent
         from versionhq.memory.model import ShortTermMemory, MemoryMetadata, LongTermMemory
 
-        agent = agent if isinstance(agent, Agent) else Agent(role=str(agent), goal=str(agent), use_memory=True)
+        agent = agent if isinstance(agent, Agent) else Agent(role=str(agent), goal=str(agent), with_memory=True)
 
-        if agent.use_memory == False:
+        if agent.with_memory == False:
             return None
 
         try:

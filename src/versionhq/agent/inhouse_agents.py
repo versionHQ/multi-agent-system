@@ -10,7 +10,7 @@ vhq_client_manager = Agent(
     role="vhq-Client Manager",
     goal="Efficiently communicate with the client on the task progress",
     llm=DEFAULT_MODEL_NAME,
-    use_memory=True,
+    with_memory=True,
 )
 
 
@@ -21,7 +21,7 @@ vhq_task_evaluator = Agent(
     llm_config=dict(top_p=0.8, top_k=30, max_tokens=5000, temperature=0.9),
     maxit=1,
     max_retry_limit=1,
-    use_memory=True # refer past eval records of similar tasks
+    with_memory=True # refer past eval records of similar tasks
 )
 
 

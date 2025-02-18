@@ -24,7 +24,7 @@ def test_build_agent_with_minimal_input():
     assert agent.llm.model == DEFAULT_MODEL_NAME
     assert agent.llm.api_key == LITELLM_API_KEY
     assert agent.tools == []
-    assert isinstance(agent.function_calling_llm, LLM)
+    assert isinstance(agent.func_calling_llm, LLM)
 
 
 def test_build_agent_from_config():
@@ -36,7 +36,7 @@ def test_build_agent_from_config():
     assert agent.llm.model == DEFAULT_MODEL_NAME
     assert agent.llm.api_key == LITELLM_API_KEY
     assert agent.tools == []
-    assert isinstance(agent.function_calling_llm, LLM)
+    assert isinstance(agent.func_calling_llm, LLM)
 
 
 def test_build_agent_with_backstory():
@@ -53,7 +53,7 @@ def test_build_agent_with_backstory():
     assert agent.llm.model == DEFAULT_MODEL_NAME
     assert agent.llm.api_key == LITELLM_API_KEY
     assert agent.tools == []
-    assert isinstance(agent.function_calling_llm, LLM)
+    assert isinstance(agent.func_calling_llm, LLM)
 
 
 def test_build_agent():
@@ -69,7 +69,7 @@ def test_build_agent():
     assert agent.llm.model == DEFAULT_MODEL_NAME
     assert agent.llm.api_key == LITELLM_API_KEY
     assert agent.tools == []
-    assert isinstance(agent.function_calling_llm, LLM)
+    assert isinstance(agent.func_calling_llm, LLM)
 
 
 def test_build_agent_with_llm():
@@ -88,7 +88,7 @@ def test_build_agent_with_llm():
     assert agent.llm.model == "gpt-4o"
     assert agent.llm.api_key == LITELLM_API_KEY
     assert agent.tools == []
-    assert isinstance(agent.function_calling_llm, LLM)
+    assert isinstance(agent.func_calling_llm, LLM)
 
 
 def test_build_agent_with_llm_config():
@@ -115,7 +115,7 @@ def test_build_agent_with_llm_config():
     )
 
     assert isinstance(agent.llm, LLM)
-    assert isinstance(agent.function_calling_llm, LLM)
+    assert isinstance(agent.func_calling_llm, LLM)
     assert agent.llm.model == "gemini/gemini-1.5-flash"
     assert agent.llm.callbacks == [dummy_func]
 
@@ -136,16 +136,15 @@ def test_build_agent_with_llm_instance():
         role="analyst",
         goal="analyze the company's website and retrieve the product overview",
         llm=llm,
-        max_tokens=3000,
         callbacks=[dummy_func],
     )
     assert isinstance(agent.llm, LLM)
     assert agent.llm.model == "gemini/gemini-1.5-flash"
     assert agent.llm.api_key is not None
-    assert agent.llm.max_tokens == 3000
+    assert agent.llm.max_tokens == 4000
     assert agent.llm.logprobs == False
     assert agent.llm.callbacks == [dummy_func]
-    assert isinstance(agent.function_calling_llm, LLM)
+    assert isinstance(agent.func_calling_llm, LLM)
 
 
 def test_build_agent_with_llm_and_func_llm_config():
@@ -156,13 +155,13 @@ def test_build_agent_with_llm_and_func_llm_config():
     agent = Agent(
         role="analyst",
         goal="analyze the company's website and retrieve the product overview",
-        function_calling_llm=llm_params,
+        func_calling_llm=llm_params,
         callbacks=[dummy_func]
     )
 
     assert isinstance(agent.llm, LLM) and agent.llm.model == DEFAULT_MODEL_NAME
-    assert isinstance(agent.function_calling_llm, LLM)
-    assert agent.function_calling_llm.model == "gemini/gemini-1.5-flash" if agent.function_calling_llm._supports_function_calling() else DEFAULT_MODEL_NAME
+    assert isinstance(agent.func_calling_llm, LLM)
+    assert agent.func_calling_llm.model == "gemini/gemini-1.5-flash" if agent.func_calling_llm._supports_function_calling() else DEFAULT_MODEL_NAME
 
 
 def test_build_agent_with_llm_and_func_llm_instance():
@@ -174,18 +173,17 @@ def test_build_agent_with_llm_and_func_llm_instance():
         role="analyst",
         goal="analyze the company's website and retrieve the product overview",
         llm=llm,
-        function_calling_llm=llm,
+        func_calling_llm=llm,
         llm_config=dict(),
-        max_tokens=3000,
         callbacks=[dummy_func]
     )
-    assert isinstance(agent.llm, LLM) and isinstance(agent.function_calling_llm, LLM)
-    assert agent.function_calling_llm.model == "gemini/gemini-1.5-flash" if agent.function_calling_llm._supports_function_calling() else DEFAULT_MODEL_NAME
-    assert agent.function_calling_llm.api_key is not None
-    assert agent.function_calling_llm.max_tokens == 3000
-    assert agent.function_calling_llm.logprobs == False
-    assert agent.function_calling_llm.callbacks == [dummy_func]
-    assert isinstance(agent.function_calling_llm, LLM)
+    assert isinstance(agent.llm, LLM) and isinstance(agent.func_calling_llm, LLM)
+    assert agent.func_calling_llm.model == "gemini/gemini-1.5-flash" if agent.func_calling_llm._supports_function_calling() else DEFAULT_MODEL_NAME
+    assert agent.func_calling_llm.api_key is not None
+    assert agent.func_calling_llm.max_tokens == 4000
+    assert agent.func_calling_llm.logprobs == False
+    assert agent.func_calling_llm.callbacks == [dummy_func]
+    assert isinstance(agent.func_calling_llm, LLM)
 
 
 def test_agent_with_random_dict_tools():
@@ -268,7 +266,7 @@ def test_using_contextual_memory():
     from versionhq.storage.rag_storage import RAGStorage
     from versionhq.storage.ltm_sqlite_storage import LTMSQLiteStorage
 
-    agent = Agent(role="Researcher", goal="You research about math.", use_memory=True)
+    agent = Agent(role="Researcher", goal="You research about math.", with_memory=True)
     assert agent.short_term_memory.storage and isinstance(agent.short_term_memory.storage, RAGStorage) and agent.short_term_memory.storage.type == "stm"
     assert agent.long_term_memory.storage and isinstance(agent.long_term_memory.storage, LTMSQLiteStorage)
 
@@ -282,7 +280,7 @@ def test_disabled_memory():
     from versionhq.task.model import Task
     from versionhq.memory.contextual_memory import ContextualMemory
 
-    agent = Agent(role="Researcher", goal="You research about math.", use_memory=False)
+    agent = Agent(role="Researcher", goal="You research about math.", with_memory=False)
     # assert agent.short_term_memory is None
     # assert agent.long_term_memory is None
     # assert agent.user_memory is None
@@ -297,8 +295,8 @@ def test_disabled_memory():
 def test_agent_with_memory_config():
     from versionhq.storage.ltm_sqlite_storage import LTMSQLiteStorage
 
-    agent_1 = Agent(role="Researcher", goal="You research about math.", use_memory=True, memory_config=dict(provider="mem0"))
-    agent_2 = Agent(role="Researcher", goal="You research about math.", use_memory=True, memory_config=dict(provider="mem0", user_id="123"))
+    agent_1 = Agent(role="Researcher", goal="You research about math.", with_memory=True, memory_config=dict(provider="mem0"))
+    agent_2 = Agent(role="Researcher", goal="You research about math.", with_memory=True, memory_config=dict(provider="mem0", user_id="123"))
 
 
     assert agent_1.short_term_memory is not None
@@ -316,11 +314,29 @@ def test_updating_llm():
     import versionhq as vhq
 
     agent = vhq.Agent(role="Researcher", goal="You research about math.")
-    agent.update_llm(llm="gemini-2.0")
+    agent._update_llm(llm="gemini-2.0")
     assert isinstance(agent.llm, vhq.LLM) and "gemini-2.0" in agent.llm.model
 
-    agent.update_llm(llm_config=dict(max_tokens=10000))
+    agent._update_llm(llm_config=dict(max_tokens=10000))
     assert agent.llm.max_tokens == 10000
 
-    agent.update_llm(llm="deepseek", llm_config=dict(max_tokens=500))
+    agent._update_llm(llm="deepseek", llm_config=dict(max_tokens=500))
     assert isinstance(agent.llm, vhq.LLM) and "deepseek-r1" in agent.llm.model and agent.llm.max_tokens == 500
+
+
+def test_start_with_tools():
+    import versionhq as vhq
+
+    def demo_func() -> str:
+        return "demo"
+
+    my_tool = vhq.Tool(func=demo_func)
+
+    agent = vhq.Agent(
+        role="Tool Handler",
+        goal="efficiently use the given tools",
+        tools=[my_tool, ]
+    )
+
+    res = agent.start(tool_res_as_final=True)
+    assert res.tool_output == "demo"

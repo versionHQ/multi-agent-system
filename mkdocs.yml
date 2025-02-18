@@ -110,15 +110,20 @@ theme:
 nav:
   - Home: 'index.md'
   - Quick Start: 'quickstart.md'
-  - Core Components:
+  - Core:
     - Agent:
       - 'core/agent/index.md'
+      - Configuration: 'core/agent/config.md'
+      - Task Handling: 'core/agent/task-handling.md'
+      - Reference: 'core/agent/ref.md'
+    - LLM:
+      - 'core/llm/index.md'
     - Task Graph:
       - 'core/task-graph/index.md'
     - Task:
       - 'core/task/index.md'
-      - ResponseField: 'core/task/response-field.md'
       - TaskOutput: 'core/task/task-output.md'
+      - ResponseField: 'core/task/response-field.md'
       - Evaluation: 'core/task/evaluation.md'
     - Tool: 'core/tool.md'
   - Tags: 'tags.md'

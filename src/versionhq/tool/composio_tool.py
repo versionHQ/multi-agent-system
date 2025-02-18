@@ -2,14 +2,13 @@ import os
 import uuid
 from abc import ABC
 from dotenv import load_dotenv
-from typing import Any, Callable, Type, get_args, get_origin, Optional, Tuple, Dict
+from typing import Any, Optional, Tuple, Dict
 from typing_extensions import Self
 
 from pydantic import BaseModel, Field, model_validator, field_validator, UUID4, PrivateAttr
 from pydantic_core import PydanticCustomError
 
 from composio import ComposioToolSet
-from composio_langchain import action
 
 from versionhq.tool.composio_tool_vars import ComposioAppName, ComposioAuthScheme, composio_app_set, ComposioStatus, ComposioAction
 from versionhq.tool.cache_handler import CacheHandler

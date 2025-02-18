@@ -43,10 +43,10 @@ def test_demo_agent_customization():
             'https://business.linkedin.com',
             f'{current_path}/demo.csv',
         ],
-        use_memory=True
+        with_memory=True
     )
 
     assert "gemini-2.0" in agent.llm.model
     assert agent.llm.temperature == 1 and agent.llm.top_p == 0.1 and agent.llm.n==1 and agent.llm.stop == "test"
     assert agent.knowledge_sources == ['https://business.linkedin.com', f'{current_path}/demo.csv',]
-    assert agent.use_memory == True
+    assert agent.with_memory == True

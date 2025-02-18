@@ -60,7 +60,6 @@ class Agent(BaseModel):
     """
 
     __hash__ = object.__hash__
-    _logger: Logger = PrivateAttr(default_factory=lambda: Logger(verbose=True))
     _rpm_controller: Optional[RPMController] = PrivateAttr(default=None)
     _request_within_rpm_limit: Any = PrivateAttr(default=None)
     _token_process: TokenProcess = PrivateAttr(default_factory=TokenProcess)
@@ -76,39 +75,38 @@ class Agent(BaseModel):
 
     # knowledge
     knowledge_sources: Optional[List[BaseKnowledgeSource | Any]] = Field(default=None)
+    embedder_config: Optional[Dict[str, Any]] = Field(default=None, description="embedder configuration for knowledge sources")
     _knowledge: Optional[Knowledge] = PrivateAttr(default=None)
 
     # memory
-    use_memory: bool = Field(default=False, description="whether to store/use memory when executing the task")
-    memory_config: Optional[Dict[str, Any]] = Field(default=None, description="configuration for the memory. need to store user_id for UserMemory")
+    with_memory: bool = Field(default=False, description="whether to use memories during the task execution")
+    memory_config: Optional[Dict[str, Any]] = Field(default=None, description="memory config. needs to store user_id for UserMemory to work")
     short_term_memory: Optional[InstanceOf[ShortTermMemory]] = Field(default=None)
     long_term_memory: Optional[InstanceOf[LongTermMemory]] = Field(default=None)
     user_memory: Optional[InstanceOf[UserMemory]] = Field(default=None)
-    embedder_config: Optional[Dict[str, Any]] = Field(default=None, description="embedder configuration for the agent's knowledge")
 
     # prompting
     use_developer_prompt: Optional[bool] = Field(default=True, description="Use developer prompt when calling the llm")
-    developer_propmt_template: Optional[str] = Field(default=None, description="ddeveloper prompt template")
-    user_prompt_template: Optional[str] = Field(default=None, description="user prompt template")
+    developer_propmt_template: Optional[str] = Field(default=None, description="abs. file path to developer prompt template")
+    user_prompt_template: Optional[str] = Field(default=None, description="abs. file path to user prompt template")
 
     # task execution rules
     network: Optional[List[Any]] = Field(default=None, description="store a list of agent networks that the agent belong as a member")
-    allow_delegation: bool = Field(default=False,description="if the agent can delegate the task to another agent or ask some help")
-    max_retry_limit: int = Field(default=2 ,description="max. number of retry for the task execution when an error occurs")
-    maxit: Optional[int] = Field(default=25,description="max. number of total optimization loops conducted when an error occurs")
+    allow_delegation: bool = Field(default=False, description="whether to delegate the task to another agent")
+    max_retry_limit: int = Field(default=2, description="max. number of task retries when an error occurs")
+    maxit: Optional[int] = Field(default=25, description="max. number of total optimization loops conducted when an error occurs")
     callbacks: Optional[List[Callable]] = Field(default_factory=list, description="callback functions to execute after any task execution")
 
     # llm settings cascaded to the LLM model
     llm: str | InstanceOf[LLM] | Dict[str, Any] = Field(default=None)
-    function_calling_llm: str | InstanceOf[LLM] | Dict[str, Any] = Field(default=None)
-    respect_context_window: bool = Field(default=True,description="Keep messages under the context window size by summarizing content")
-    max_tokens: Optional[int] = Field(default=None, description="max. number of tokens for the agent's execution")
-    max_execution_time: Optional[int] = Field(default=None, description="max. execution time for an agent to execute a task")
+    func_calling_llm: str | InstanceOf[LLM] | Dict[str, Any] = Field(default=None)
+    respect_context_window: bool = Field(default=True,description="keep messages under the context window size")
+    max_execution_time: Optional[int] = Field(default=None, description="max. task execution time in seconds")
     max_rpm: Optional[int] = Field(default=None, description="max. number of requests per minute")
     llm_config: Optional[Dict[str, Any]] = Field(default=None, description="other llm config cascaded to the LLM model")
 
-    # cache, error, ops handling
-    formatting_errors: int = Field(default=0, description="number of formatting errors.")
+    # # cache, error, ops handling
+    # formatting_errors: int = Field(default=0, description="number of formatting errors.")
 
 
     @field_validator("id", mode="before")
@@ -136,18 +134,18 @@ class Agent(BaseModel):
     @model_validator(mode="after")
     def set_up_llm(self) -> Self:
         """
-        Set up `llm` and `function_calling_llm` as valid LLM objects using the given kwargs.
+        Set up `llm` and `func_calling_llm` as valid LLM objects using the given kwargs.
         """
         self.llm = self._convert_to_llm_object(llm=self.llm)
 
-        function_calling_llm = self.function_calling_llm if self.function_calling_llm else self.llm if self.llm else None
-        function_calling_llm = self._convert_to_llm_object(llm=function_calling_llm)
-        if function_calling_llm._supports_function_calling():
-            self.function_calling_llm = function_calling_llm
+        func_calling_llm = self.func_calling_llm if self.func_calling_llm else self.llm if self.llm else None
+        func_calling_llm = self._convert_to_llm_object(llm=func_calling_llm)
+        if func_calling_llm._supports_function_calling():
+            self.func_calling_llm = func_calling_llm
         elif self.llm._supports_function_calling():
-            self.function_calling_llm = self.llm
+            self.func_calling_llm = self.llm
         else:
-            self.function_calling_llm = self._convert_to_llm_object(llm=LLM(model=DEFAULT_MODEL_NAME))
+            self.func_calling_llm = self._convert_to_llm_object(llm=LLM(model=DEFAULT_MODEL_NAME))
         return self
 
 
@@ -179,7 +177,7 @@ class Agent(BaseModel):
                 model_name = (getattr(self.llm, "model_name") or getattr(self.llm, "deployment_name") or str(self.llm))
                 llm_obj = LLM(model=model_name if model_name else DEFAULT_MODEL_NAME)
                 llm_params = {
-                    "max_tokens": (getattr(llm, "max_tokens") or self.max_tokens or 3000),
+                    "max_tokens": (getattr(llm, "max_tokens") or 3000),
                     "timeout": getattr(llm, "timeout", self.max_execution_time),
                     "callbacks": getattr(llm, "callbacks", None),
                     "temperature": getattr(llm, "temperature", None),
@@ -222,7 +220,7 @@ class Agent(BaseModel):
 
 
         llm.timeout = self.max_execution_time if llm.timeout is None else llm.timeout
-        llm.max_tokens = self.max_tokens if self.max_tokens else llm.max_tokens
+        # llm.max_tokens = self.max_tokens if self.max_tokens else llm.max_tokens
 
         if llm.provider is None:
             provider_name = llm.model.split("/")[0]
@@ -262,7 +260,7 @@ class Agent(BaseModel):
                     tool_list.append(item)
 
                 else:
-                    self._logger.log(level="error", message=f"Tool {str(item)} is missing a function.", color="red")
+                    Logger().log(level="error", message=f"Tool {str(item)} is missing a function.", color="red")
                     raise PydanticCustomError("invalid_tool", f"The tool {str(item)} is missing a function.", {})
 
             self.tools = tool_list
@@ -346,7 +344,7 @@ class Agent(BaseModel):
                 self._knowledge = Knowledge(sources=knowledge_sources, embedder_config=self.embedder_config, collection_name=collection_name)
 
             except:
-                self._logger.log(level="warning", message="We cannot find the format for the source. Add BaseKnowledgeSource objects instead.", color="yellow")
+                Logger().log(level="warning", message="We cannot find the format for the source. Add BaseKnowledgeSource objects instead.", color="yellow")
 
         return self
 
@@ -357,7 +355,7 @@ class Agent(BaseModel):
         Set up memories: stm, ltm, and um
         """
 
-        # if self.use_memory == True:
+        # if self.with_memory == True:
         self.long_term_memory = self.long_term_memory if self.long_term_memory else LongTermMemory()
         self.short_term_memory = self.short_term_memory if self.short_term_memory else ShortTermMemory(agent=self, embedder_config=self.embedder_config)
 
@@ -371,21 +369,13 @@ class Agent(BaseModel):
         return self
 
 
-    def _train(self) -> Self:
-        """
-        Fine-tuned the base model using OpenAI train framework.
-        """
-        if not isinstance(self.llm, LLM):
-            pass
-
-
-    def update_llm(self, llm: Any = None, llm_config: Optional[Dict[str, Any]] = None) -> Self:
+    def _update_llm(self, llm: Any = None, llm_config: Optional[Dict[str, Any]] = None) -> Self:
         """
         Update llm and llm_config of the exsiting agent. (Other conditions will remain the same.)
         """
 
         if not llm and not llm_config:
-            self._logger.log(level="error", message="Missing llm or llm_config values to update", color="red")
+            Logger().log(level="error", message="Missing llm or llm_config values to update", color="red")
             pass
 
         self.llm = llm
@@ -398,59 +388,15 @@ class Agent(BaseModel):
         return self.set_up_llm()
 
 
-    def update(self, **kwargs) -> Self:
+    def _train(self) -> Self:
         """
-        Update the existing agent. Address variables that require runnning set_up_x methods first, then update remaining variables.
+        Fine-tuned the base model using OpenAI train framework.
         """
-
-        if not kwargs:
-            self._logger.log(level="error", message="Missing values to update", color="red")
-            return self
-
-        for k, v in kwargs.items():
-            match k:
-                case "tools":
-                    self.tools = kwargs.get(k, self.tools)
-                    self.set_up_tools()
-
-                case "role" | "goal":
-                    self.role = kwargs.get("role", self.role)
-                    self.goal = kwargs.get("goal", self.goal)
-                    if not self.backstory:
-                        self.set_up_backstory()
-
-                    if self.backstory:
-                        self.backstory += f"new role: {self.role}, new goal: {self.goal}"
-
-                case "max_rpm":
-                    self.max_rpm = kwargs.get(k, self.max_rpm)
-                    self.set_up_rpm()
-
-                case "knowledge_sources":
-                    self.knowledge_sources = kwargs.get("knowledge_sources", self.knowledge_sources)
-                    self.set_up_knowledge()
-
-                case "use_memory" | "memory_config":
-                    self.use_memory = kwargs.get("use_memory", self.use_memory)
-                    self.memory_config = kwargs.get("memory_config", self.memory_config)
-                    self.set_up_memory()
-
-                case "llm" | "llm_config":
-                    self.llm = kwargs.get("llm", self.llm)
-                    self.llm_config = kwargs.get("llm_config", self.llm_config)
-                    self.update_llm(llm=self.llm, llm_config=self.llm_config)
-
-                case _:
-                    try:
-                        setattr(self, k, v)
-                    except Exception as e:
-                        self._logger.log(level="error", message=f"Failed to update the key: {k} We'll skip. Error: {str(e)}", color="red")
-                        pass
-
-        return self
+        if not isinstance(self.llm, LLM):
+            pass
 
 
-    def invoke(
+    def _invoke(
         self,
         prompts: str,
         response_format: Optional[Dict[str, Any]] = None,
@@ -477,21 +423,21 @@ class Agent(BaseModel):
             if self._rpm_controller and self.max_rpm:
                 self._rpm_controller.check_or_wait()
 
-            self._logger.log(level="info", message=f"Messages sent to the model: {messages}", color="blue")
+            Logger().log(level="info", message=f"Messages sent to the model: {messages}", color="blue")
 
             if tool_res_as_final:
-                raw_response = self.function_calling_llm.call(messages=messages, tools=tools, tool_res_as_final=True)
-                task.tokens = self.function_calling_llm._tokens
+                raw_response = self.func_calling_llm.call(messages=messages, tools=tools, tool_res_as_final=True)
+                task.tokens = self.func_calling_llm._tokens
             else:
                 raw_response = self.llm.call(messages=messages, response_format=response_format, tools=tools)
                 task.tokens = self.llm._tokens
 
             task_execution_counter += 1
-            self._logger.log(level="info", message=f"Agent response: {raw_response}", color="green")
+            Logger().log(level="info", message=f"Agent response: {raw_response}", color="green")
             return raw_response
 
         except Exception as e:
-            self._logger.log(level="error", message=f"An error occured. The agent will retry: {str(e)}", color="red")
+            Logger().log(level="error", message=f"An error occured. The agent will retry: {str(e)}", color="red")
 
             while not raw_response and task_execution_counter <= self.max_retry_limit:
                 while (not raw_response or raw_response == "" or raw_response is None) and iterations < self.maxit:
@@ -503,12 +449,87 @@ class Agent(BaseModel):
                     iterations += 1
 
                 task_execution_counter += 1
-                self._logger.log(level="info", message=f"Agent #{task_execution_counter} response: {raw_response}", color="green")
+                Logger().log(level="info", message=f"Agent #{task_execution_counter} response: {raw_response}", color="green")
                 return raw_response
 
             if not raw_response:
-                self._logger.log(level="error", message="Received None or empty response from the model", color="red")
+                Logger().log(level="error", message="Received None or empty response from the model", color="red")
                 raise ValueError("Invalid response from LLM call - None or empty.")
+
+
+    def update(self, **kwargs) -> Self:
+        """
+        Update the existing agent. Address variables that require runnning set_up_x methods first, then update remaining variables.
+        """
+
+        if not kwargs:
+            Logger().log(level="error", message="Missing values to update", color="red")
+            return self
+
+        for k, v in kwargs.items():
+            match k:
+                case "tools":
+                    self.tools = kwargs.get(k, self.tools)
+                    self.set_up_tools()
+
+                case "role" | "goal":
+                    self.role = kwargs.get("role", self.role)
+                    self.goal = kwargs.get("goal", self.goal)
+                    if not self.backstory:
+                        self.set_up_backstory()
+
+                    if self.backstory:
+                        self.backstory += f"new role: {self.role}, new goal: {self.goal}"
+
+                case "max_rpm":
+                    self.max_rpm = kwargs.get(k, self.max_rpm)
+                    self.set_up_rpm()
+
+                case "knowledge_sources":
+                    self.knowledge_sources = kwargs.get("knowledge_sources", self.knowledge_sources)
+                    self.set_up_knowledge()
+
+                case "with_memory" | "memory_config":
+                    self.with_memory = kwargs.get("with_memory", self.with_memory)
+                    self.memory_config = kwargs.get("memory_config", self.memory_config)
+                    self.set_up_memory()
+
+                case "llm" | "llm_config":
+                    self.llm = kwargs.get("llm", self.llm)
+                    self.llm_config = kwargs.get("llm_config", self.llm_config)
+                    self._update_llm(llm=self.llm, llm_config=self.llm_config)
+
+                case _:
+                    try:
+                        setattr(self, k, v)
+                    except Exception as e:
+                        Logger().log(level="error", message=f"Failed to update the field: {k} We'll skip it. Error: {str(e)}", color="red")
+                        pass
+
+        return self
+
+
+    def start(self, context: Any = None, tool_res_as_final: bool = False) -> Any | None:
+        """
+        Defines and executes a task when it is not given and returns TaskOutput object.
+        """
+
+        if not self.goal or not self.role:
+            return None
+
+        from versionhq.task.model import Task
+
+        class Output(BaseModel):
+            result: str
+            steps: list[str]
+
+        task = Task(
+            description=f"Generate a simple result in a sentence to achieve the goal: {self.goal}. If needed, list up necessary steps in concise manner.",
+            pydantic_output=Output,
+            tool_res_as_final=tool_res_as_final,
+        )
+        res = task.execute(agent=self, context=context)
+        return res
 
 
     def execute_task(self, task, context: Optional[Any] = None, task_tools: Optional[List[Tool | ToolSet]] = list()) -> str:
@@ -534,7 +555,7 @@ class Agent(BaseModel):
                 if agent_knowledge_context:
                     task_prompt += agent_knowledge_context
 
-        if self.use_memory == True:
+        if self.with_memory == True:
             contextual_memory = ContextualMemory(
                 memory_config=self.memory_config, stm=self.short_term_memory, ltm=self.long_term_memory, um=self.user_memory
             )
@@ -553,7 +574,7 @@ class Agent(BaseModel):
 
         try:
             self._times_executed += 1
-            raw_response = self.invoke(
+            raw_response = self._invoke(
                 prompts=task_prompt,
                 response_format=task._structure_response_format(model_provider=self.llm.provider),
                 tools=tools,
@@ -563,39 +584,17 @@ class Agent(BaseModel):
 
         except Exception as e:
             self._times_executed += 1
-            self._logger.log(level="error", message=f"The agent failed to execute the task. Error: {str(e)}", color="red")
+            Logger().log(level="error", message=f"The agent failed to execute the task. Error: {str(e)}", color="red")
             raw_response = self.execute_task(task, context, task_tools)
 
             if self._times_executed > self.max_retry_limit:
-                self._logger.log(level="error", message=f"Max retry limit has exceeded.", color="red")
+                Logger().log(level="error", message=f"Max retry limit has exceeded.", color="red")
                 raise e
 
         if self.max_rpm and self._rpm_controller:
             self._rpm_controller.stop_rpm_counter()
 
         return raw_response
-
-
-    def start(self, context: Any = None) -> Any | None:
-        """
-        Defines and executes a task when it is not given and returns TaskOutput object.
-        """
-
-        if not self.goal or not self.role:
-            return None
-
-        from versionhq.task.model import Task, ResponseField
-
-        class Output(BaseModel):
-            result: str
-            steps: list[str]
-
-        task = Task(
-            description=f"Generate a simple result in a sentence to achieve the goal: {self.goal}. If needed, list up necessary steps in concise manner.",
-            pydantic_output=Output
-        )
-        res = task.execute(agent=self, context=context)
-        return res
 
 
     def __repr__(self):

@@ -28,7 +28,7 @@ def test_docs_core_tool_b():
     )
 
     assert agent.tools == [my_tool, ]
-    assert agent.function_calling_llm.model is not None
+    assert agent.func_calling_llm.model is not None
 
 
 def test_docs_core_tool_c():
@@ -46,7 +46,7 @@ def test_docs_core_tool_c():
     )
 
     assert agent.tools == [toolset]
-    assert agent.function_calling_llm.model is not None
+    assert agent.func_calling_llm.model is not None
 
 
 def test_docs_core_tool_d():
@@ -136,7 +136,7 @@ def test_docs_core_tool_h1():
     agent = Agent(
         role="demo",
         goal="execute tools",
-        function_calling_llm="gpt-4o",
+        func_calling_llm="gpt-4o",
         tools=[my_tool],
         maxit=1,
         max_tokens=3000

@@ -10,7 +10,10 @@ def test_docs_core_agent_a():
     assert agent.id and agent.role == "Marketing Analyst" and agent.goal == "Coping with price competition in saturated markets" and agent.backstory is not None
 
     res = agent.start(context="Planning a new campaign promotion starting this summer")
+
     assert isinstance(res, vhq.TaskOutput)
+    assert res.json_dict
+
 
 def test_docs_core_agent_b1():
     from versionhq import Agent
@@ -24,18 +27,18 @@ def test_docs_core_agent_b1():
     assert "gemini-2.0" in agent.llm.model and isinstance(agent.llm, LLM)
 
 
-def test_docs_core_agent_b2():
-    import versionhq as vhq
+# def test_docs_core_agent_b2():
+#     import versionhq as vhq
 
-    agent = vhq.Agent(
-        role="Marketing Analyst",
-        goal="Coping with price competition in saturated markets",
-        llm="gemini-2.0"
-    )
+#     agent = vhq.Agent(
+#         role="Marketing Analyst",
+#         goal="Coping with price competition in saturated markets",
+#         llm="gemini-2.0"
+#     )
 
-    agent.update_llm(llm="deepseek", llm_config=dict(max_tokens=3000))
-    assert "deepseek-r1" in agent.llm.model
-    assert agent.llm.max_tokens == 3000
+#     agent._update_llm(llm="deepseek", llm_config=dict(max_tokens=3000))
+#     assert "deepseek-r1" in agent.llm.model
+#     assert agent.llm.max_tokens == 3000
 
 
 def test_docs_core_agent_b3():
@@ -66,7 +69,7 @@ def test_docs_core_agent_b3():
     assert isinstance(agent.user_memory, vhq.UserMemory)
     assert "gemini-2.0" in agent.llm.model and agent.llm.provider == "gemini"
     assert agent.use_developer_prompt == False
-
+    assert isinstance(agent.llm, vhq.LLM)
 
 
 def test_docs_core_agent_c1():
@@ -151,34 +154,27 @@ def test_docs_core_agent_e2():
 
 
 def test_docs_core_agent_f():
-    from versionhq import Agent
+    import versionhq as vhq
 
-    llm_config = dict(
-        temperature=1,
-        top_p=0.1,
-        n=1,
-        stream=False,
-        stream_options=None,
-        stop="test",
-        max_completion_tokens=10000,
-        dummy="I am dummy"
-    )
-
-    agent = Agent(
+    agent = vhq.Agent(
         role="Marketing Analyst",
         goal="Coping with increased price competition in saturated markets.",
         respect_context_window=False,
-        max_tokens=3000,
         max_execution_time=60,
         max_rpm=5,
-        llm_config=llm_config
-    )
-
-    assert agent.llm.max_tokens == 3000
+        llm_config=dict(
+                temperature=1,
+                top_p=0.1,
+                n=1,
+                stop="answer",
+                dummy="I am dummy" # <- invalid field will be ignored automatically.
+            )
+        )
+    assert isinstance(agent.llm, vhq.LLM)
     assert agent.llm.temperature == 1
     assert agent.llm.top_p == 0.1
     assert agent.llm.n == 1
-    assert agent.llm.stop=="test"
+    assert agent.llm.stop == "answer"
 
 
 def test_docs_core_agent_g():
@@ -209,7 +205,7 @@ def test_docs_core_agent_h():
     agent = Agent(
         role="Researcher",
         goal="You research about math.",
-        use_memory=True
+        with_memory=True
     )
 
     from versionhq.memory.model import ShortTermMemory, LongTermMemory

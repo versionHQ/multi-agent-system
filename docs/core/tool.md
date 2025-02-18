@@ -241,7 +241,7 @@ my_tool = Tool(name="demo tool", func=lambda x: "demo func")
 agent = Agent(
 	role="demo",
 	goal="execute tools",
-	function_calling_llm="gpt-4o",
+	func_calling_llm="gpt-4o",
 	tools=[my_tool]
 )
 
@@ -311,9 +311,9 @@ print(task.processed_agents)
 
 **Function calling LLM**
 
-By default, the agent will prioritize the given `function_calling_llm` over its main `llm` when it uses tools.
+By default, the agent will prioritize the given `func_calling_llm` over its main `llm` when it uses tools.
 
-When you build the agent, it will check if the model acutally supports function callings, and if not,  `function_calling_llm` will be switched to main `llm` or default model.
+When you build the agent, it will check if the model acutally supports function callings, and if not,  `func_calling_llm` will be switched to main `llm` or default model.
 
 If you want to see if the model of your choice supports function calling <bold>explicitly</bold>, run the following:
 
