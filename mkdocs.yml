@@ -110,7 +110,8 @@ theme:
 nav:
   - Home: 'index.md'
   - Quick Start: 'quickstart.md'
-  - Core:
+  - Agent Network:
+    - 'core/agent-network/index.md'
     - Agent:
       - 'core/agent/index.md'
       - Configuration: 'core/agent/config.md'
@@ -118,15 +119,16 @@ nav:
       - Reference: 'core/agent/ref.md'
     - LLM:
       - 'core/llm/index.md'
-    - Task Graph:
-      - 'core/task-graph/index.md'
+  - Task Graph:
+    - 'core/task-graph/index.md'
     - Task:
       - 'core/task/index.md'
       - TaskOutput: 'core/task/task-output.md'
       - ResponseField: 'core/task/response-field.md'
       - Evaluation: 'core/task/evaluation.md'
+  - Components:
     - Tool: 'core/tool.md'
-  - Tags: 'tags.md'
+  - Archive: 'tags.md'
   - Cases:
     - Playground: https://versi0n.io/playground
     - Experiment - Agent Performance: https://github.com/versionHQ/exp-agent-performance

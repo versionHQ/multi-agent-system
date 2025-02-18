@@ -1,6 +1,6 @@
 ---
 tags:
-  - Utils
+  - Utilities
 ---
 
 # Tool

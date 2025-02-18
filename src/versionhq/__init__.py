@@ -27,11 +27,11 @@ from versionhq.tool.composio_tool import ComposioHandler
 from versionhq.memory.contextual_memory import ContextualMemory
 from versionhq.memory.model import ShortTermMemory,LongTermMemory, UserMemory, MemoryItem
 
-from versionhq.task.formation import form_agent_network
+from versionhq.agent_network.formation import form_agent_network
 from versionhq.task_graph.draft import workflow
 
 
-__version__ = "1.2.1.16"
+__version__ = "1.2.1.17"
 __all__ = [
     "Agent",
 

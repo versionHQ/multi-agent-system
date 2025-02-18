@@ -1,3 +1,5 @@
+"""frontend home use cases pre-test"""
+
 def test_demo_hello_world():
     import versionhq as vhq
 
@@ -15,9 +17,12 @@ def test_demo_network():
         expected_outcome='email subject and body in string',
         context="use email_subject and email_body as keys in your response."
     )
+
     assert isinstance(network, vhq.AgentNetwork) and isinstance(network.formation, vhq.Formation)
 
-    # res = network.launch()
+    res = network.launch()
+
+    assert res.pydantic is not None
 
 
 

@@ -281,7 +281,7 @@ class Task(BaseModel):
 
     # executing
     execution_type: TaskExecutionType = Field(default=TaskExecutionType.SYNC)
-    allow_delegation: bool = Field(default=False, description="ask other agents for help and run the task instead")
+    allow_delegation: bool = Field(default=False, description="whether to delegate the task to another agent")
     callback: Optional[Callable] = Field(default=None, description="callback to be executed after the task is completed.")
     callback_kwargs: Optional[Dict[str, Any]] = Field(default_factory=dict, description="kwargs for the callback when the callback is callable")
 
@@ -574,6 +574,36 @@ Ref. Output image: {output_formats_to_follow}
         return agent
 
 
+    def _select_agent_to_delegate(self, agent: Any = None) -> Any | None: # return agent object or None
+        """
+        Creates or selects an agent to delegate the given task and returns Agent object else None.
+        """
+
+        from versionhq.agent.model import Agent
+
+        if not self.allow_delegation:
+            return None
+
+        agent_to_delegate: InstanceOf[Agent] = None
+
+        if not agent:
+            agent_to_delegate = self._build_agent_from_task()
+
+        elif agent and not agent.networks:
+            agent_to_delegate = Agent(role="vhq-Delegated-Agent", goal=agent.goal, llm=agent.llm)
+
+        else:
+            _managers = []
+            _members = []
+            for network in agent.networks:
+                _managers.extend(member.agent for member in network.members if member.is_manager)
+                _members.extend(member.agent for member in network.members if not member.is_manager)
+
+            agent_to_delegate = _managers[0] if _managers else _members[0] if _members else Agent(role="vhq-Delegated-Agent", goal=agent.goal, llm=agent.llm)
+
+        return agent_to_delegate
+
+
     # task execution
     def execute(
             self, type: TaskExecutionType = None, agent: Optional["vhq.Agent"] = None, context: Optional[Any] = None
@@ -635,19 +665,7 @@ Ref. Output image: {output_formats_to_follow}
                     task_tools.append(item)
 
         if self.allow_delegation == True:
-            agent_to_delegate = None
-
-            if hasattr(agent, "network") and isinstance(agent.network, AgentNetwork):
-                if agent.network.managers:
-                    idling_manager_agents = [manager.agent for manager in agent.network.managers if manager.is_idling]
-                    agent_to_delegate = idling_manager_agents[0] if idling_manager_agents else agent.network.managers[0]
-                else:
-                    peers = [member.agent for member in agent.network.members if member.is_manager == False and member.agent.id is not agent.id]
-                    if len(peers) > 0:
-                        agent_to_delegate = peers[0]
-            else:
-                agent_to_delegate = Agent(role="vhq-Delegated-Agent", goal=agent.goal, llm=agent.llm)
-
+            agent_to_delegate = self._select_agent_to_delegate(agent=agent)
             agent = agent_to_delegate
             self.delegations += 1
 

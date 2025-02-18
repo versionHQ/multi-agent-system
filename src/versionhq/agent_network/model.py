@@ -28,7 +28,6 @@ warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")
 
 
 class Formation(str, Enum):
-    UNDEFINED = 0
     SOLO = 1
     SUPERVISING = 2
     SQUAD = 3
@@ -96,7 +95,6 @@ class AgentNetwork(BaseModel):
 
     __hash__ = object.__hash__
     _execution_span: Any = PrivateAttr()
-    _logger: Logger = PrivateAttr(default_factory=lambda: Logger(verbose=True))
     _inputs: Optional[Dict[str, Any]] = PrivateAttr(default=None)
 
     id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True)
@@ -167,12 +165,12 @@ class AgentNetwork(BaseModel):
         """
         if self.process == TaskHandlingProcess.HIERARCHY or self.formation == Formation.SUPERVISING:
             if not self.managers:
-                self._logger.log(level="error", message="The process or formation created needs at least 1 manager agent.", color="red")
+                Logger().log(level="error", message="The process or formation created needs at least 1 manager agent.", color="red")
                 raise PydanticCustomError("missing_manager", "`manager` is required when using hierarchical process.", {})
 
         ## comment out for the formation flexibilities
         # if self.managers and (self.manager_tasks is None or self.network_tasks is None):
-        #     self._logger.log(level="error", message="The manager is idling. At least 1 task needs to be assigned to the manager.", color="red")
+        #     Logger().log(level="error", message="The manager is idling. At least 1 task needs to be assigned to the manager.", color="red")
         #     raise PydanticCustomError("missing_manager_task", "manager needs to have at least one manager task or network task.", {})
 
         return self
@@ -186,9 +184,10 @@ class AgentNetwork(BaseModel):
         if self.process == TaskHandlingProcess.SEQUENT and self.network_tasks is None:
             for task in self.tasks:
                 if not [member.task == task for member in self.members]:
-                    self._logger.log(level="error", message=f"The following task needs a dedicated agent to be assinged: {task.description}", color="red")
+                    Logger().log(level="error", message=f"The following task needs a dedicated agent to be assinged: {task.description}", color="red")
                     raise PydanticCustomError("missing_agent_in_task", "Sequential process error: Agent is missing the task", {})
         return self
+
 
     @model_validator(mode="after")
     def validate_end_with_at_most_one_async_task(self):
@@ -371,7 +370,7 @@ class AgentNetwork(BaseModel):
             task_outputs = self._process_async_tasks(futures, was_replayed)
 
         if not task_outputs:
-            self._logger.log(level="error", message="Missing task outputs.", color="red")
+            Logger().log(level="error", message="Missing task outputs.", color="red")
             raise ValueError("Missing task outputs")
 
         final_task_output = lead_task_output if lead_task_output is not None else task_outputs[0] #! REFINEME
@@ -399,12 +398,12 @@ class AgentNetwork(BaseModel):
             self._assign_tasks()
 
         if kwargs_pre is not None:
-            for func in self.pre_launch_callbacks:
+            for func in self.pre_launch_callbacks: # signature check
                 func(**kwargs_pre)
 
         for member in self.members:
             agent = member.agent
-            agent.network = self
+            agent.networks.append(self)
 
             if self.step_callback:
                 agent.callbacks.append(self.step_callback)

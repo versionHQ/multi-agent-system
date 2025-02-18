@@ -2,9 +2,9 @@
 
 ## Package installation
 
-   ```
-   pip install versionhq
-   ```
+```
+pip install versionhq
+```
 
 (Python 3.11, 3.12)
 
@@ -16,15 +16,15 @@ You can generate a network of multiple agents depending on your task complexity.
 
 Here is a code snippet:
 
-   ```python
-   import versionhq as vhq
+```python
+import versionhq as vhq
 
-   network = vhq.form_agent_network(
-      task="YOUR AMAZING TASK OVERVIEW",
-      expected_outcome="YOUR OUTCOME EXPECTATION",
-   )
-   res = network.launch()
-   ```
+network = vhq.form_agent_network(
+   task="YOUR AMAZING TASK OVERVIEW",
+   expected_outcome="YOUR OUTCOME EXPECTATION",
+)
+res = network.launch()
+```
 
 This will form a network with multiple agents on `Formation` and return results as a `TaskOutput` object, storing outputs in JSON, plane text, Pydantic model formats along with evaluation.
 
@@ -36,44 +36,45 @@ If you don't need to form a network or assign a specific agent to the network, y
 Agents can execute tasks using `Task` model and return JSON format by default with plane text and pydantic model formats as options.
 
 
-   ```python
-   import versionhq as vhq
-   from pydantic import BaseModel
+```python
+import versionhq as vhq
+from pydantic import BaseModel
 
-   class CustomOutput(BaseModel):
-      test1: str
-      test2: list[str]
+class CustomOutput(BaseModel):
+   test1: str
+   test2: list[str]
 
-   def dummy_func(message: str, test1: str, test2: list[str]) -> str:
-      return f"""{message}: {test1}, {", ".join(test2)}"""
+def dummy_func(message: str, test1: str, test2: list[str]) -> str:
+   return f"""{message}: {test1}, {", ".join(test2)}"""
 
 
-   agent = vhq.Agent(role="demo", goal="amazing project goal")
+agent = vhq.Agent(role="demo", goal="amazing project goal")
 
-   task = vhq.Task(
-      description="Amazing task",
-      pydantic_output=CustomOutput,
-      callback=dummy_func,
-      callback_kwargs=dict(message="Hi! Here is the result: ")
-   )
+task = vhq.Task(
+   description="Amazing task",
+   pydantic_output=CustomOutput,
+   callback=dummy_func,
+   callback_kwargs=dict(message="Hi! Here is the result: ")
+)
 
-   res = task.execute(agent=agent, context="amazing context to consider.")
-   print(res)
-   ```
+res = task.execute(agent=agent, context="amazing context to consider.")
+
+assert isinstance(res, vhq.TaskOutput)
+```
 
 This will return a `TaskOutput` object that stores response in plane text, JSON, and Pydantic model: `CustomOutput` formats with a callback result, tool output (if given), and evaluation results (if given).
 
-   ```python
-   res == TaskOutput(
-      task_id=UUID('<TASK UUID>'),
-      raw='{\"test1\":\"random str\", \"test2\":[\"str item 1\", \"str item 2\", \"str item 3\"]}',
-      json_dict={'test1': 'random str', 'test2': ['str item 1', 'str item 2', 'str item 3']},
-      pydantic=<class '__main__.CustomOutput'>,
-      tool_output=None,
-      callback_output='Hi! Here is the result: random str, str item 1, str item 2, str item 3', # returned a plain text summary
-      evaluation=None
-   )
-   ```
+```python
+res == TaskOutput(
+   task_id=UUID('<TASK UUID>'),
+   raw='{\"test1\":\"random str\", \"test2\":[\"str item 1\", \"str item 2\", \"str item 3\"]}',
+   json_dict={'test1': 'random str', 'test2': ['str item 1', 'str item 2', 'str item 3']},
+   pydantic=<class '__main__.CustomOutput'>,
+   tool_output=None,
+   callback_output='Hi! Here is the result: random str, str item 1, str item 2, str item 3', # returned a plain text summary
+   evaluation=None
+)
+```
 
 ## Supervising
 
@@ -106,8 +107,8 @@ network =vhq.AgentNetwork(
 res = network.launch()
 
 assert isinstance(res, vhq.NetworkOutput)
-assert not [item for item in task_1.processed_agents if "vhq-Delegated-Agent" == item]
-assert [item for item in task_1.processed_agents if "agent b" == item]
+assert "agent b" in task_1.processed_agents # agent_b delegated by agent_a
+assert "agent b" in task_2.processed_agents
 ```
 
 This will return a list with dictionaries with keys defined in the `ResponseField` of each task.

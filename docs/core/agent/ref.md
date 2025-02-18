@@ -17,7 +17,7 @@
 | **`use_developer_prompt`** |  bool | True | - | Whether to use the system (developer) prompt when calling the model. |
 | **`developer_promt_template`** | str | None | True | File path to the prompt template. |
 | **`user_promt_template`** | str | None | True | File path to the prompt template. |
-| **`network`** | [List[Any]] | None | True | Stores a list of agent networks that the agent belongs to. |
+| **`networks`** | List[Any] | list() | True | Stores a list of agent networks that the agent belongs to. |
 | **`allow_delegation`** | bool | False | - | Whether the agent can delegate assinged tasks to another agent. |
 | **`max_retry_limit`** | int | 2 | - | Maximum number of retries when the task execution failed. |
 | **`maxit`** | int | 25 | - | Maximum number of total optimization loops conducted when an error occues during the task execution. |

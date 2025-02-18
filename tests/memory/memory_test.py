@@ -17,7 +17,7 @@ def test_save_and_search_stm(short_term_memory):
     memory = MemoryItem(
         data=MemoryData(
             agent="test_agent",
-            config=dict(val="""test value test value test value test value test value test value test value testvalue test value test value test value test value test value test value test value test value test value test value""")
+            config=dict(val="""test value test value test value test value test value test value test value testvalue test value test value test value test value test value test value cat test value test value test value test value""")
         ),
         metadata=MemoryMetadata(config={ "task": "test_task" })
     )

@@ -66,5 +66,5 @@ def test_doc_index_c():
     res = network.launch()
 
     assert isinstance(res, vhq.NetworkOutput)
-    assert not [item for item in task_1.processed_agents if "vhq-Delegated-Agent" == item]
-    assert [item for item in task_1.processed_agents if "agent b" == item]
+    assert "agent b" in task_1.processed_agents # delegated by agent_a
+    assert "agent b" in task_2.processed_agents

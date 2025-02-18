@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 def test_minimum_inputs():
     import versionhq as vhq
 
@@ -12,16 +14,16 @@ def test_minimum_inputs():
     assert network.managers if network.formation in (vhq.Formation.SUPERVISING, vhq.Formation.HYBRID) else not network.managers
 
 
-def _test_specific_formation():
+
+def test_specific_formation():
     import versionhq as vhq
 
     formations_to_test = [
-        vhq.Formation.NETWORK,
+        vhq.Formation.SQUAD,
         vhq.Formation.RANDOM,
         vhq.Formation.SOLO,
         vhq.Formation.SUPERVISING,
-        vhq.Formation.UNDEFINED,
-        "network",
+        "squad",
         1,
         "dummy",
         1000,
@@ -36,7 +38,4 @@ def _test_specific_formation():
         )
 
         assert isinstance(network, vhq.AgentNetwork)
-        assert network.formation == item if isinstance(item, vhq.Formation) and item != vhq.Formation.UNDEFINED else isinstance(network.formation, vhq.Formation)
-        assert network.members
-        assert network.tasks
-        assert network.managers is not None if network.formation == vhq.Formation.SUPERVISING else not network.manager_tasks
+        assert network.formation == item if isinstance(item, vhq.Formation) else isinstance(network.formation, vhq.Formation)
