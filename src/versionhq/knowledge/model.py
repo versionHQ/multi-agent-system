@@ -9,6 +9,7 @@ class Knowledge(BaseModel):
     """
     Knowlede class for collection of sources and setup for the vector store to query relevant context.
     """
+
     collection_name: Optional[str] = None
     sources: List[BaseKnowledgeSource] = Field(default_factory=list)
     storage: KnowledgeStorage = Field(default_factory=KnowledgeStorage)

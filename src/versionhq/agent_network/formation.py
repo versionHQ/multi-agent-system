@@ -9,6 +9,9 @@ from versionhq.agent_network.model import AgentNetwork, Member, Formation
 from versionhq.agent.inhouse_agents  import vhq_formation_planner
 from versionhq._utils import Logger
 
+import chromadb
+chromadb.api.client.SharedSystemClient.clear_system_cache()
+
 
 def form_agent_network(
         task: str,
@@ -85,7 +88,7 @@ def form_agent_network(
     members = []
     leader = str(res.pydantic.leader_agent) if res.pydantic else str(res.json_dict["leader_agent"])
 
-    created_agents = [Agent(role=item, goal=item) for item in res.pydantic.agent_roles]
+    created_agents = [Agent(role=str(item), goal=str(item)) for item in res.pydantic.agent_roles]
     created_tasks = []
 
     if res.pydantic:

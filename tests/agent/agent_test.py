@@ -244,10 +244,12 @@ def test_agent_with_knowledge_sources():
 
     agent = Agent(role="Information Agent", goal="Provide information based on knowledge sources", knowledge_sources=knowledge_sources)
 
-    assert agent._knowledge.collection_name == f"{agent.role.replace(' ', '_')}"
+    assert  f"{agent.role.replace(' ', '_')}" in agent._knowledge.collection_name
     assert [isinstance(item, StringKnowledgeSource | DoclingSource) for item in agent.knowledge_sources]
     assert agent._knowledge.embedder_config == agent.embedder_config
-    assert agent._knowledge.storage and agent._knowledge.storage.embedding_function and  agent._knowledge.storage.app is not None and agent._knowledge.storage.collection_name is not None
+    assert agent._knowledge.storage and agent._knowledge.storage.embedding_function
+    assert agent._knowledge.storage.app is not None
+    assert agent._knowledge.storage.collection_name is not None
 
     task = Task(description="Answer the following question: What is Kuriko's favorite color?")
 

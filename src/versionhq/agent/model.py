@@ -222,7 +222,7 @@ class Agent(BaseModel):
 
         if self.knowledge_sources:
             try:
-                collection_name = f"{self.role.replace(' ', '_')}"
+                collection_name = f"{self.role.replace(' ', '_')}-{str(self.id)}"
                 knowledge_sources = []
                 docling_fp, txt_fp, json_fp, excel_fp, csv_fp, pdf_fp = [], [], [], [], [], []
                 str_cont = ""

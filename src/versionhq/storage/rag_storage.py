@@ -129,16 +129,16 @@ class RAGStorage(BaseRAGStorage):
         from chromadb.config import Settings
 
         self._set_embedder_config()
-        chroma_client = chromadb.PersistentClient(
-            path=self.path if self.path else self.storage_file_name,
-            settings=Settings(allow_reset=self.allow_reset),
-        )
-        self.app = chroma_client
-
         try:
+            chroma_client = chromadb.PersistentClient(
+                path=self.path if self.path else self.storage_file_name,
+                settings=Settings(allow_reset=self.allow_reset),
+            )
+            self.app = chroma_client
             self.collection = self.app.get_collection(name=self.type, embedding_function=self.embedder_config)
         except Exception:
-            self.collection = self.app.create_collection(name=self.type, embedding_function=self.embedder_config)
+            if self.app:
+                self.collection = self.app.create_collection(name=self.type, embedding_function=self.embedder_config)
 
 
     def _sanitize_role(self, role: str) -> str:
