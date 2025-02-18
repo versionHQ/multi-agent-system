@@ -8,7 +8,7 @@ def process_config(values_to_update: Dict[str, Any], model_class: Type[BaseModel
     Refer to the Pydantic model class for field validation.
     """
 
-    config = values_to_update.pop("config", {})
+    config = values_to_update.pop("config") if "config" in values_to_update else {}
 
     if config:
         for k, v in config.items():

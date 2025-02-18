@@ -94,7 +94,7 @@ def form_agent_network(
                 fields = {}
                 for ob in item:
                     try:
-                        field_name = str(ob).lower().replace(" ", "_").replace(":", "_")[0: 10]
+                        field_name = str(ob).lower().split(":")[0].replace(" ", "_")[0: 16]
                         fields[field_name] = (str, Field(default=None))
                     except:
                         pass
@@ -108,7 +108,7 @@ def form_agent_network(
                 fields = {}
                 for ob in item:
                     try:
-                        field_name = str(ob).lower().replace(" ", "_").replace(":", "_")[0: 10]
+                        field_name = str(ob).lower().split(":")[0].replace(" ", "_")[0: 16]
                         fields[field_name] = (str, Field(default=None))
                     except:
                         pass
@@ -137,7 +137,7 @@ def form_agent_network(
             member = Member(agent=created_agents[i], is_manager=is_manager, tasks=[created_tasks[i]])
             members.append(member)
 
-        network_tasks.append(created_tasks[len(created_agents):len(created_tasks)])
+        network_tasks.extend(created_tasks[len(created_agents):len(created_tasks)])
 
 
     if _formation == Formation.SUPERVISING and not [member for member in members if member.is_manager]:

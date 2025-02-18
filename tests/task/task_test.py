@@ -1,18 +1,10 @@
-import sys
-import threading
 from unittest.mock import patch
 from typing import Callable
-
-from pydantic import BaseModel, Field
 
 from versionhq.agent.model import Agent, LLM
 from versionhq.task.model import Task, ResponseField, TaskOutput, TaskExecutionType
 from versionhq.tool.model import Tool, ToolSet
 from versionhq.tool.decorator import tool
-
-sys.setrecursionlimit(2097152)
-threading.stack_size(134217728)
-
 
 
 # def test_async_execute_task():
