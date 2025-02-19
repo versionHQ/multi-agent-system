@@ -64,6 +64,7 @@ class Agent(BaseModel):
     _request_within_rpm_limit: Any = PrivateAttr(default=None)
     _token_process: TokenProcess = PrivateAttr(default_factory=TokenProcess)
     _times_executed: int = PrivateAttr(default=0)
+    _logger_config: Dict[str, Any] = PrivateAttr(default=dict(verbose=True, info_file_save=True))
     config: Optional[Dict[str, Any]] = Field(default=None, exclude=True, description="values to add to the Agent class")
 
     id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True)
@@ -172,7 +173,7 @@ class Agent(BaseModel):
                     tool_list.append(item)
 
                 else:
-                    Logger().log(level="error", message=f"Tool {str(item)} is missing a function.", color="red")
+                    Logger(**self.loger_config, filename=self.key).log(level="error", message=f"Tool {str(item)} is missing a function.", color="red")
                     raise PydanticCustomError("invalid_tool", f"The tool {str(item)} is missing a function.", {})
 
             self.tools = tool_list
@@ -222,7 +223,7 @@ class Agent(BaseModel):
 
         if self.knowledge_sources:
             try:
-                collection_name = f"{self.role.replace(' ', '_')}-{str(self.id)}"
+                collection_name = self.key
                 knowledge_sources = []
                 docling_fp, txt_fp, json_fp, excel_fp, csv_fp, pdf_fp = [], [], [], [], [], []
                 str_cont = ""
@@ -256,7 +257,7 @@ class Agent(BaseModel):
                 self._knowledge = Knowledge(sources=knowledge_sources, embedder_config=self.embedder_config, collection_name=collection_name)
 
             except:
-                Logger().log(level="warning", message="We cannot find the format for the source. Add BaseKnowledgeSource objects instead.", color="yellow")
+                Logger(**self._logger_config, filename=self.key).log(level="warning", message="We cannot find the format for the source. Add BaseKnowledgeSource objects instead.", color="yellow")
 
         return self
 
@@ -375,7 +376,7 @@ class Agent(BaseModel):
         """
 
         if not llm and not llm_config:
-            Logger().log(level="error", message="Missing llm or llm_config values to update", color="red")
+            Logger(**self._logger_config, filename=self.key).log(level="error", message="Missing llm or llm_config values to update", color="red")
             pass
 
         self.llm = llm
@@ -423,7 +424,7 @@ class Agent(BaseModel):
             if self._rpm_controller and self.max_rpm:
                 self._rpm_controller.check_or_wait()
 
-            Logger().log(level="info", message=f"Messages sent to the model: {messages}", color="blue")
+            Logger(**self._logger_config, filename=self.key).log(level="info", message=f"Messages sent to the model: {messages}", color="blue")
 
             if tool_res_as_final:
                 raw_response = self.func_calling_llm.call(messages=messages, tools=tools, tool_res_as_final=True)
@@ -433,11 +434,11 @@ class Agent(BaseModel):
                 task.tokens = self.llm._tokens
 
             task_execution_counter += 1
-            Logger().log(level="info", message=f"Agent response: {raw_response}", color="green")
+            Logger(**self._logger_config, filename=self.key).log(level="info", message=f"Agent response: {raw_response}", color="green")
             return raw_response
 
         except Exception as e:
-            Logger().log(level="error", message=f"An error occured. The agent will retry: {str(e)}", color="red")
+            Logger(**self._logger_config, filename=self.key).log(level="error", message=f"An error occured. The agent will retry: {str(e)}", color="red")
 
             while not raw_response and task_execution_counter <= self.max_retry_limit:
                 while (not raw_response or raw_response == "" or raw_response is None) and iterations < self.maxit:
@@ -449,11 +450,11 @@ class Agent(BaseModel):
                     iterations += 1
 
                 task_execution_counter += 1
-                Logger().log(level="info", message=f"Agent #{task_execution_counter} response: {raw_response}", color="green")
+                Logger(**self._logger_config, filename=self.key).log(level="info", message=f"Agent #{task_execution_counter} response: {raw_response}", color="green")
                 return raw_response
 
             if not raw_response:
-                Logger().log(level="error", message="Received None or empty response from the model", color="red")
+                Logger(**self._logger_config, filename=self.key).log(level="error", message="Received None or empty response from the model", color="red")
                 raise ValueError("Invalid response from LLM call - None or empty.")
 
 
@@ -463,7 +464,7 @@ class Agent(BaseModel):
         """
 
         if not kwargs:
-            Logger().log(level="error", message="Missing values to update", color="red")
+            Logger(**self._logger_config, filename=self.key).log(level="error", message="Missing values to update", color="red")
             return self
 
         for k, v in kwargs.items():
@@ -503,7 +504,7 @@ class Agent(BaseModel):
                     try:
                         setattr(self, k, v)
                     except Exception as e:
-                        Logger().log(level="error", message=f"Failed to update the field: {k} We'll skip it. Error: {str(e)}", color="red")
+                        Logger(**self._logger_config, filename=self.key).log(level="error", message=f"Failed to update the field: {k} We'll skip it. Error: {str(e)}", color="red")
                         pass
 
         return self
@@ -584,17 +585,26 @@ class Agent(BaseModel):
 
         except Exception as e:
             self._times_executed += 1
-            Logger().log(level="error", message=f"The agent failed to execute the task. Error: {str(e)}", color="red")
+            Logger(**self._logger_config, filename=self.key).log(level="error", message=f"The agent failed to execute the task. Error: {str(e)}", color="red")
             raw_response = self.execute_task(task, context, task_tools)
 
             if self._times_executed > self.max_retry_limit:
-                Logger().log(level="error", message=f"Max retry limit has exceeded.", color="red")
+                Logger(**self._logger_config, filename=self.key).log(level="error", message=f"Max retry limit has exceeded.", color="red")
                 raise e
 
         if self.max_rpm and self._rpm_controller:
             self._rpm_controller.stop_rpm_counter()
 
         return raw_response
+
+
+    @property
+    def key(self):
+        """
+        A key to identify an agent. Used in storage, logging, and other recodings.
+        """
+        sanitized_role = self.role.lower().replace(" ", "-").replace("/", "").replace("{", "").replace("}", "").replace("\n", "")
+        return f"{str(self.id)}-{sanitized_role}"
 
 
     def __repr__(self):

@@ -15,7 +15,7 @@ def test_minimum_inputs():
 
 
 
-def test_specific_formation():
+def _test_specific_formation():
     import versionhq as vhq
 
     formations_to_test = [

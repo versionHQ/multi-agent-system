@@ -244,7 +244,7 @@ def test_agent_with_knowledge_sources():
 
     agent = Agent(role="Information Agent", goal="Provide information based on knowledge sources", knowledge_sources=knowledge_sources)
 
-    assert  f"{agent.role.replace(' ', '_')}" in agent._knowledge.collection_name
+    assert agent._knowledge.collection_name == agent.key
     assert [isinstance(item, StringKnowledgeSource | DoclingSource) for item in agent.knowledge_sources]
     assert agent._knowledge.embedder_config == agent.embedder_config
     assert agent._knowledge.storage and agent._knowledge.storage.embedding_function

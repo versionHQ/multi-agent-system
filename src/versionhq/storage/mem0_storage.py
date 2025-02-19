@@ -40,11 +40,11 @@ class Mem0Storage(Storage):
             self.memory = MemoryClient(api_key=mem0_api_key)
 
 
-    def _sanitize_role(self, role: str) -> str:
-        """
-        Sanitizes agent roles to ensure valid directory names.
-        """
-        return role.replace("\n", "").replace(" ", "_").replace("/", "_")
+    # def _sanitize_role(self, role: str) -> str:
+    #     """
+    #     Sanitizes agent roles to ensure valid directory names.
+    #     """
+    #     return role.replace("\n", "").replace(" ", "_").replace("/", "_")
 
 
     def save(self, value: Dict[str, Any] | str, metadata: Dict[str, Any]) -> None:
@@ -104,6 +104,5 @@ class Mem0Storage(Storage):
 
     def _get_agent_name(self):
         agents = self.agents if self.agents else []
-        agents = [self._sanitize_role(agent.role) for agent in agents]
-        agents = "_".join(agents)
+        agents = "_".join([item.key for item in agents])
         return agents

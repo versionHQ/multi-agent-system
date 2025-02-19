@@ -52,15 +52,13 @@ class BaseRAGStorage(ABC):
 
     def _initialize_agents(self) -> str:
         if self.agents:
-            return "_".join(
-                [self._sanitize_role(agent.role) for agent in self.agents]
-            )
+            return "_".join([agent.key for agent in self.agents])
         return ""
 
-    @abstractmethod
-    def _sanitize_role(self, role: str) -> str:
-        """Sanitizes agent roles to ensure valid directory names."""
-        pass
+    # @abstractmethod
+    # def _sanitize_role(self, role: str) -> str:
+    #     """Sanitizes agent roles to ensure valid directory names."""
+    #     pass
 
     @abstractmethod
     def save(self, value: Any, metadata: Dict[str, Any]) -> None:
@@ -108,7 +106,7 @@ class RAGStorage(BaseRAGStorage):
     def __init__(self, type, allow_reset=True, embedder_config=None, agents=list(), path=None):
         super().__init__(type, allow_reset, embedder_config, agents)
         agents = agents
-        agents = [self._sanitize_role(agent.role) for agent in agents]
+        agents = [agent.key for agent in agents]
         agents = "_".join(agents)
 
         self.agents = agents
@@ -141,11 +139,11 @@ class RAGStorage(BaseRAGStorage):
                 self.collection = self.app.create_collection(name=self.type, embedding_function=self.embedder_config)
 
 
-    def _sanitize_role(self, role: str) -> str:
-        """
-        Sanitizes agent roles to ensure valid directory names.
-        """
-        return role.replace("\n", "").replace(" ", "_").replace("/", "_")
+    # def _sanitize_role(self, role: str) -> str:
+    #     """
+    #     Sanitizes agent roles to ensure valid directory names.
+    #     """
+    #     return role.replace("\n", "").replace(" ", "_").replace("/", "_")
 
 
     def _build_storage_file_name(self, type: str, file_name: str) -> str:

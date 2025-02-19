@@ -44,6 +44,7 @@ class Logger(BaseModel):
 
     verbose: bool = Field(default=True)
     info_file_save: bool = Field(default=False, description="whether to save INFO logs")
+    filename: str = Field(default=None)
     _printer: Printer = PrivateAttr(default_factory=Printer)
 
 
@@ -52,7 +53,7 @@ class Logger(BaseModel):
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             self._printer.print(f"\n{timestamp} - versionHQ [{level.upper()}]: {message}", color=color)
 
-        self._save(level=level, message=message)
+        self._save(level=level, message=message, filename=self.filename)
 
 
     def _save(self, level: str, message: str, filename: str = None):
@@ -74,7 +75,7 @@ class Logger(BaseModel):
         cwd = Path.cwd()
         log_file_dir = f"{cwd}/.logs"
         os.makedirs(log_file_dir, exist_ok=True)
-        filename = filename if filename else datetime.now().strftime('%H_%M_%S_%d_%m_%Y')
+        filename = filename if filename else self.filename if self.filename else datetime.now().strftime('%H_%M_%S_%d_%m_%Y')
         abs_dir = f"{log_file_dir}/{filename}.log"
 
         logging.basicConfig(filename=abs_dir, filemode='w', level=logging_level)
