@@ -603,7 +603,7 @@ class Agent(BaseModel):
         """
         A key to identify an agent. Used in storage, logging, and other recodings.
         """
-        sanitized_role = self.role.lower().replace(" ", "-").replace("/", "").replace("{", "").replace("}", "").replace("\n", "")[0, 16]
+        sanitized_role = self.role.lower().replace(" ", "-").replace("/", "").replace("{", "").replace("}", "").replace("\n", "")[0: 16]
         return f"{str(self.id)}-{sanitized_role}"
 
 
