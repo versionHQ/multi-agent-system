@@ -750,6 +750,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      Properties
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1403,9 +1412,9 @@
 <td style="text-align: left;">File path to the prompt template.</td>
 </tr>
 <tr>
-<td style="text-align: left;"><strong><code>network</code></strong></td>
-<td style="text-align: left;">[List[Any]]</td>
-<td style="text-align: left;">None</td>
+<td style="text-align: left;"><strong><code>networks</code></strong></td>
+<td style="text-align: left;">List[Any]</td>
+<td style="text-align: left;">list()</td>
 <td style="text-align: left;">True</td>
 <td style="text-align: left;">Stores a list of agent networks that the agent belongs to.</td>
 </tr>
@@ -1516,6 +1525,23 @@
 <td style="text-align: left;">task: [Task] <br> context: Any = None <br> task_tools: Optional[List[Tool | ToolSet]] = list()</td>
 <td style="text-align: left;">str</td>
 <td style="text-align: left;">Returns response from the model in plane text format.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="properties">Properties<a class="headerlink" href="#properties" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;"><div style="width:120px"><strong>Property</strong></div></th>
+<th style="text-align: left;"><strong>Returns</strong></th>
+<th style="text-align: left;"><strong>Description</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong><code>key</code></strong></td>
+<td style="text-align: left;">str</td>
+<td style="text-align: left;">Unique idenfirifer of the agent with ID and sanitized role.</td>
 </tr>
 </tbody>
 </table>
