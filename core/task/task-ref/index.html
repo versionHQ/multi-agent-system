@@ -12,13 +12,13 @@
         <meta name="author" content="Version IO Sdn. Bhd.">
       
       
-        <link rel="canonical" href="https://docs.versi0n.io/core/task/response-field/">
+        <link rel="canonical" href="https://docs.versi0n.io/core/task/task-ref/">
       
       
-        <link rel="prev" href="../task-strc-response/">
+        <link rel="prev" href="../evaluation/">
       
       
-        <link rel="next" href="../task-execution/">
+        <link rel="next" href="../../tool/">
       
       
       <link rel="icon" href="../../../_logos/favicon.ico">
@@ -26,7 +26,7 @@
     
     
       
-        <title>ResponseField - versionHQ</title>
+        <title>Reference - versionHQ</title>
       
     
     
@@ -131,7 +131,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#response-field" class="md-skip">
+        <a href="#variables-task" class="md-skip">
           Skip to content
         </a>
       
@@ -164,7 +164,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              ResponseField
+              Reference
             
           </span>
         </div>
@@ -909,10 +909,8 @@
                 
   
   
-    
   
   
-  
     
     
       
@@ -926,11 +924,13 @@
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_2_2" checked>
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_2_2" >
         
           
           <label class="md-nav__link" for="__nav_4_2_2" id="__nav_4_2_2_label" tabindex="0">
@@ -945,7 +945,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_2_2_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_2_2_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_4_2_2">
             <span class="md-nav__icon md-icon"></span>
             Structuring Response
@@ -978,31 +978,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    ResponseField
-    
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../response-field/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1012,119 +991,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#variables" class="md-nav__link">
-    <span class="md-ellipsis">
-      Variables
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Variables">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#object" class="md-nav__link">
-    <span class="md-ellipsis">
-      Object
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#list" class="md-nav__link">
-    <span class="md-ellipsis">
-      List
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#nesting" class="md-nav__link">
-    <span class="md-ellipsis">
-      Nesting
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Nesting">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#object-in-list" class="md-nav__link">
-    <span class="md-ellipsis">
-      Object in List
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#list-in-list" class="md-nav__link">
-    <span class="md-ellipsis">
-      List in List
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#list-in-object" class="md-nav__link">
-    <span class="md-ellipsis">
-      List in Object
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#object-in-object" class="md-nav__link">
-    <span class="md-ellipsis">
-      Object in Object
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#config" class="md-nav__link">
-    <span class="md-ellipsis">
-      Config
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1208,10 +1074,29 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../task-ref/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Reference
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -1221,6 +1106,51 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#variables-task" class="md-nav__link">
+    <span class="md-ellipsis">
+      Variables Task
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#class-methods-task" class="md-nav__link">
+    <span class="md-ellipsis">
+      Class Methods Task
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#properties-task" class="md-nav__link">
+    <span class="md-ellipsis">
+      Properties Task
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1471,7 +1401,7 @@
 
 
   
-    <a href="https://github.com/versionhq/multi-agent-system/edit/main/docs/core/task/response-field.md" title="Edit this page" class="md-content__button md-icon">
+    <a href="https://github.com/versionhq/multi-agent-system/edit/main/docs/core/task/task-ref.md" title="Edit this page" class="md-content__button md-icon">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75z"/></svg>
     </a>
@@ -1480,23 +1410,20 @@
     
       
     
-    <a href="https://github.com/versionhq/multi-agent-system/raw/main/docs/core/task/response-field.md" title="View source of this page" class="md-content__button md-icon">
+    <a href="https://github.com/versionhq/multi-agent-system/raw/main/docs/core/task/task-ref.md" title="View source of this page" class="md-content__button md-icon">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0 8a5 5 0 0 1-5-5 5 5 0 0 1 5-5 5 5 0 0 1 5 5 5 5 0 0 1-5 5m0-12.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5"/></svg>
     </a>
   
 
 
-<h1 id="response-field">Response Field<a class="headerlink" href="#response-field" title="Permanent link">&para;</a></h1>
-<p><class><code>class</code> versionhq.task.model.<bold>ResponseField<bold></class></p>
-<p>A Pydantic class to store response formats to generate a structured response in JSON.</p>
-<hr/>
+  <h1>Reference</h1>
 
-<h2 id="variables">Variables<a class="headerlink" href="#variables" title="Permanent link">&para;</a></h2>
+<h2 id="variables-task">Variables <code>Task</code><a class="headerlink" href="#variables-task" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
-<th style="text-align: left;"><div style="width:120px"><strong>Variable</strong></div></th>
+<th style="text-align: left;"><div style="width:160px"><strong>Variable</strong></div></th>
 <th style="text-align: left;"><strong>Data Type</strong></th>
 <th style="text-align: left;"><strong>Default</strong></th>
 <th style="text-align: left;"><strong>Nullable</strong></th>
@@ -1505,205 +1432,174 @@
 </thead>
 <tbody>
 <tr>
-<td style="text-align: left;"><strong><code>title</code></strong></td>
+<td style="text-align: left;"><strong><code>id</code></strong></td>
+<td style="text-align: left;">UUID</td>
+<td style="text-align: left;">uuid.uuid4()</td>
+<td style="text-align: left;">False</td>
+<td style="text-align: left;">Stores task <code>id</code> as an identifier.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>name</code></strong></td>
+<td style="text-align: left;">Optional[str]</td>
+<td style="text-align: left;">None</td>
+<td style="text-align: left;">True</td>
+<td style="text-align: left;">Stores a task name (Inherited as <code>node</code> identifier if the task is dependent)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>description</code></strong></td>
 <td style="text-align: left;">str</td>
 <td style="text-align: left;">None</td>
 <td style="text-align: left;">False</td>
-<td style="text-align: left;">Stores a field title.</td>
+<td style="text-align: left;">Required field to store a concise task description</td>
 </tr>
 <tr>
-<td style="text-align: left;"><strong><code>data_type</code></strong></td>
-<td style="text-align: left;">Type</td>
-<td style="text-align: left;">None</td>
-<td style="text-align: left;">False</td>
-<td style="text-align: left;">Stores data type of the response.</td>
-</tr>
-<tr>
-<td style="text-align: left;"><strong><code>items</code></strong></td>
-<td style="text-align: left;">Type</td>
+<td style="text-align: left;"><strong><code>pydantic_output</code></strong></td>
+<td style="text-align: left;">Optional[Type[BaseModel]]</td>
 <td style="text-align: left;">None</td>
 <td style="text-align: left;">True</td>
-<td style="text-align: left;">Stores data type of items in the list. Can leave it None when <code>data_type</code> is not list.</td>
+<td style="text-align: left;">Stores pydantic custom output class for structured response</td>
 </tr>
 <tr>
-<td style="text-align: left;"><strong><code>properties</code></strong></td>
-<td style="text-align: left;">List[<code>ResponseField</code>]</td>
-<td style="text-align: left;">None</td>
+<td style="text-align: left;"><strong><code>response_fields</code></strong></td>
+<td style="text-align: left;">Optional[List[ResponseField]]</td>
+<td style="text-align: left;">list()</td>
 <td style="text-align: left;">True</td>
-<td style="text-align: left;">Stores properties as a list of <code>ResponseFormat</code> objects when the <code>data_type</code> is dict.</td>
+<td style="text-align: left;">Stores JSON formats for stuructured response</td>
 </tr>
 <tr>
-<td style="text-align: left;"><strong><code>nullable</code></strong></td>
+<td style="text-align: left;"><strong><code>tools</code></strong></td>
+<td style="text-align: left;">Optional[List[ToolSet</td>
+<td style="text-align: left;">Tool</td>
+<td style="text-align: left;">Any]]</td>
+<td style="text-align: left;">None</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>can_use_agent_tools</code></strong></td>
+<td style="text-align: left;">bool</td>
+<td style="text-align: left;">True</td>
+<td style="text-align: left;">-</td>
+<td style="text-align: left;">Whether to use the agent tools</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>tool_res_as_final</code></strong></td>
 <td style="text-align: left;">bool</td>
 <td style="text-align: left;">False</td>
-<td style="text-align: left;">False</td>
-<td style="text-align: left;">If the field is nullable.</td>
+<td style="text-align: left;">-</td>
+<td style="text-align: left;">Whether to make the tool response a final response from the agent</td>
 </tr>
 <tr>
-<td style="text-align: left;"><strong><code>config</code></strong></td>
-<td style="text-align: left;">Dict[str, Any]</td>
+<td style="text-align: left;"><strong><code>execution_type</code></strong></td>
+<td style="text-align: left;">TaskExecutionType</td>
+<td style="text-align: left;">TaskExecutionType.SYNC</td>
+<td style="text-align: left;">-</td>
+<td style="text-align: left;">Sync or async execution</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>allow_delegation</code></strong></td>
+<td style="text-align: left;">bool</td>
+<td style="text-align: left;">False</td>
+<td style="text-align: left;">-</td>
+<td style="text-align: left;">Whether to allow the agent to delegate the task to another agent</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>callback</code></strong></td>
+<td style="text-align: left;">Optional[Callable]</td>
 <td style="text-align: left;">None</td>
 <td style="text-align: left;">True</td>
-<td style="text-align: left;">Stores other configs passed to response schema.</td>
+<td style="text-align: left;">Callback function to be executed after LLM calling</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>callback_kwargs</code></strong></td>
+<td style="text-align: left;">Optional[Dict[str, Any]]</td>
+<td style="text-align: left;">dict()</td>
+<td style="text-align: left;">True</td>
+<td style="text-align: left;">Args for the callback function (if any)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>should_evaluate</code></strong></td>
+<td style="text-align: left;">bool</td>
+<td style="text-align: left;">False</td>
+<td style="text-align: left;">-</td>
+<td style="text-align: left;">Whether to evaluate the task output using eval criteria</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>eval_criteria</code></strong></td>
+<td style="text-align: left;">Optional[List[str]]</td>
+<td style="text-align: left;">list()</td>
+<td style="text-align: left;">True</td>
+<td style="text-align: left;">Evaluation criteria given by the human client</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>processed_agents</code></strong></td>
+<td style="text-align: left;">Set[str]</td>
+<td style="text-align: left;">set()</td>
+<td style="text-align: left;">True</td>
+<td style="text-align: left;">[Ops] Stores roles of the agents executed the task</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>tool_errors</code></strong></td>
+<td style="text-align: left;">int</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: left;">True</td>
+<td style="text-align: left;">[Ops] Stores number of tool errors</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>delegation</code></strong></td>
+<td style="text-align: left;">int</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: left;">True</td>
+<td style="text-align: left;">[Ops] Stores number of agent delegations</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>output</code></strong></td>
+<td style="text-align: left;">Optional[TaskOutput]</td>
+<td style="text-align: left;">None</td>
+<td style="text-align: left;">True</td>
+<td style="text-align: left;">[Ops] Stores <code>TaskOutput</code> object after the execution</td>
 </tr>
 </tbody>
 </table>
-<p><strong>Quick Start</strong></p>
-<p>Define a response format with field titles and data types.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">versionhq</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">vhq</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="n">response_field</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">ResponseField</span><span class="p">(</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>  <span class="n">title</span><span class="o">=</span><span class="s2">&quot;summary&quot;</span><span class="p">,</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>  <span class="n">data_type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>  <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="c1"># default = False. Explicitly mentioned.</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="p">)</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="c1">## Agent output:</span>
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="c1">#  &quot;summary&quot;: &lt;AGENT_RESPONSE_IN_STRING&gt;</span>
-</span></code></pre></div>
-<h3 id="object">Object<a class="headerlink" href="#object" title="Permanent link">&para;</a></h3>
-<p><code>[var]</code><bold><code>properties: List[InstanceOf[ResponseField]] = None</code></bold></p>
-<p>To format an object, add <code>ResponseField</code> objects to the <code>properties</code> fields.</p>
-<p>Missing properties for dict will trigger an error.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">versionhq</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">vhq</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">response_field</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">ResponseField</span><span class="p">(</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>  <span class="n">title</span><span class="o">=</span><span class="s2">&quot;dict-summary&quot;</span><span class="p">,</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>  <span class="n">data_type</span><span class="o">=</span><span class="nb">dict</span><span class="p">,</span>
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>  <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>  <span class="n">properties</span><span class="o">=</span><span class="p">[</span>
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>    <span class="n">vhq</span><span class="o">.</span><span class="n">ResponseField</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;summary-1&quot;</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="nb">str</span><span class="p">),</span>
-</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>    <span class="n">vhq</span><span class="o">.</span><span class="n">ResponseField</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;summary-2&quot;</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="nb">int</span><span class="p">),</span>
-</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>  <span class="p">]</span>
-</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="p">)</span>
-</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>
-</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="c1">## Agent output:</span>
-</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="c1">#  dict-summary: {</span>
-</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="c1">#   &quot;summary-1&quot;: &lt;AGENT_RESPONSE_1_IN_STRING&gt;,</span>
-</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="c1">#   &quot;summary-2&quot;: &lt;AGENT_RESPONSE_2_IN_INTEGER&gt;,</span>
-</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="c1"># }</span>
-</span></code></pre></div>
-<hr />
-
-<h3 id="list">List<a class="headerlink" href="#list" title="Permanent link">&para;</a></h3>
-<p><code>[var]</code><bold><code>items: Optional[Type] = None</code></bold></p>
-<p>To format a list, add data types of the list items to the <code>items</code> field.</p>
-<p>Missing items for list will trigger an error.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">versionhq</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">vhq</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">response_field</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">ResponseField</span><span class="p">(</span>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>  <span class="n">title</span><span class="o">=</span><span class="s2">&quot;list-summary&quot;</span><span class="p">,</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>  <span class="n">data_type</span><span class="o">=</span><span class="nb">list</span><span class="p">,</span>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>  <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>  <span class="n">items</span><span class="o">=</span><span class="nb">str</span>
-</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="p">)</span>
-</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>
-</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="c1">## Agent output:</span>
-</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="c1">#  list-summary: [</span>
-</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="c1">#     &lt;AGENT_RESPONSE_1_IN_STRING&gt;,</span>
-</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="c1">#     &lt;AGENT_RESPONSE_2_IN_STRING&gt;,</span>
-</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="c1">#     ...</span>
-</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="c1"># ]</span>
-</span></code></pre></div>
-<hr />
-
-<h2 id="nesting">Nesting<a class="headerlink" href="#nesting" title="Permanent link">&para;</a></h2>
-<p>Agents can handle <strong>one layer</strong> of nested items usign <code>properties</code> and <code>items</code> fields.</p>
-<p>We highly recommend to use <code>gemini-x</code> or <code>gpt-x</code> to get stable results.</p>
-<h3 id="object-in-list">Object in List<a class="headerlink" href="#object-in-list" title="Permanent link">&para;</a></h3>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">versionhq</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">vhq</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="n">list_with_objects</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">ResponseField</span><span class="p">(</span>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>  <span class="n">title</span><span class="o">=</span><span class="s2">&quot;parent&quot;</span><span class="p">,</span>
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>  <span class="n">data_type</span><span class="o">=</span><span class="nb">list</span><span class="p">,</span>
-</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>  <span class="n">items</span><span class="o">=</span><span class="nb">dict</span><span class="p">,</span>
-</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>  <span class="n">properties</span><span class="o">=</span><span class="p">[</span>
-</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>    <span class="n">vhq</span><span class="o">.</span><span class="n">ResponseField</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;nest-1&quot;</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="nb">str</span><span class="p">),</span>
-</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>    <span class="n">vhq</span><span class="o">.</span><span class="n">ResponseField</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;nest-2&quot;</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="nb">float</span><span class="p">),</span>
-</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>  <span class="p">]</span>
-</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="p">)</span>
-</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>
-</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="c1"># Agent output</span>
-</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="c1"># parent: [</span>
-</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="c1">#   { &quot;nest-1&quot;: &lt;AGENT_RESOPONSE_IN_STRING&gt;},</span>
-</span><span id="__span-3-16"><a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a><span class="c1">#   { &quot;nest-2&quot;: &lt;AGENT_RESOPONSE_IN_NUMBER&gt;},</span>
-</span><span id="__span-3-17"><a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a><span class="c1"># ]</span>
-</span></code></pre></div>
-<hr />
-
-<h3 id="list-in-list">List in List<a class="headerlink" href="#list-in-list" title="Permanent link">&para;</a></h3>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">versionhq</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">vhq</span>
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="n">list_with_list</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">ResponseField</span><span class="p">(</span>
-</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>  <span class="n">title</span><span class="o">=</span><span class="s2">&quot;parent&quot;</span><span class="p">,</span>
-</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>  <span class="n">data_type</span><span class="o">=</span><span class="nb">list</span><span class="p">,</span>
-</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>  <span class="n">items</span><span class="o">=</span><span class="nb">list</span>
-</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="p">)</span>
-</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>
-</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="c1"># Agent output</span>
-</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="c1"># parent: [</span>
-</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="c1">#   [&lt;AGENT_RESOPONSE_IN_STRING&gt;, ...],</span>
-</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="c1">#   [&lt;AGENT_RESOPONSE_IN_STRING&gt;, ...]</span>
-</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="c1">#   ...</span>
-</span><span id="__span-4-14"><a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a><span class="c1"># ]</span>
-</span></code></pre></div>
-<hr />
-
-<h3 id="list-in-object">List in Object<a class="headerlink" href="#list-in-object" title="Permanent link">&para;</a></h3>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">versionhq</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">vhq</span>
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
-</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="n">dict_with_list</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">ResponseField</span><span class="p">(</span>
-</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>  <span class="n">title</span><span class="o">=</span><span class="s2">&quot;parent&quot;</span><span class="p">,</span>
-</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>  <span class="n">data_type</span><span class="o">=</span><span class="nb">dict</span><span class="p">,</span>
-</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>  <span class="n">properties</span><span class="o">=</span><span class="p">[</span>
-</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>    <span class="n">vhq</span><span class="o">.</span><span class="n">ResponseField</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;nest-1&quot;</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="nb">list</span><span class="p">,</span> <span class="n">items</span><span class="o">=</span><span class="nb">str</span><span class="p">),</span>
-</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>    <span class="n">vhq</span><span class="o">.</span><span class="n">ResponseField</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;nest-2&quot;</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="nb">list</span><span class="p">,</span> <span class="n">items</span><span class="o">=</span><span class="nb">int</span><span class="p">),</span>
-</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>  <span class="p">]</span>
-</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="p">)</span>
-</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>
-</span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="c1"># Agent output</span>
-</span><span id="__span-5-13"><a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a><span class="c1"># parent: {</span>
-</span><span id="__span-5-14"><a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a><span class="c1">#   nest-1: [&lt;AGENT_RESOPONSE_IN_STRING&gt;, ...],</span>
-</span><span id="__span-5-15"><a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a><span class="c1">#   nest-2: [&lt;AGENT_RESOPONSE_IN_INTEGER&gt;, ...]</span>
-</span><span id="__span-5-16"><a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a><span class="c1"># }</span>
-</span></code></pre></div>
-<hr />
-
-<h3 id="object-in-object">Object in Object<a class="headerlink" href="#object-in-object" title="Permanent link">&para;</a></h3>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">versionhq</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">vhq</span>
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
-</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="n">dict_with_dict</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">ResponseField</span><span class="p">(</span>
-</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>  <span class="n">title</span><span class="o">=</span><span class="s2">&quot;parent&quot;</span><span class="p">,</span>
-</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>  <span class="n">data_type</span><span class="o">=</span><span class="nb">dict</span><span class="p">,</span>
-</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>  <span class="n">properties</span><span class="o">=</span><span class="p">[</span>
-</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>    <span class="n">vhq</span><span class="o">.</span><span class="n">ResponseField</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;nest-1&quot;</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="nb">dict</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="p">[</span>
-</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>      <span class="n">vhq</span><span class="o">.</span><span class="n">ResponseField</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;nest-1-1&quot;</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
-</span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>    <span class="p">]),</span>
-</span><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>    <span class="n">vhq</span><span class="o">.</span><span class="n">ResponseField</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;nest-2&quot;</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="nb">list</span><span class="p">,</span> <span class="n">items</span><span class="o">=</span><span class="nb">int</span><span class="p">),</span>
-</span><span id="__span-6-11"><a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>  <span class="p">]</span>
-</span><span id="__span-6-12"><a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a><span class="p">)</span>
-</span><span id="__span-6-13"><a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a>
-</span><span id="__span-6-14"><a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a><span class="c1"># Agent output</span>
-</span><span id="__span-6-15"><a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a><span class="c1"># parent: {</span>
-</span><span id="__span-6-16"><a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a><span class="c1">#   nest-1: { nest-1-1: &lt;AGENT_RESOPONSE_IN_STRING&gt;, },</span>
-</span><span id="__span-6-17"><a id="__codelineno-6-17" name="__codelineno-6-17" href="#__codelineno-6-17"></a><span class="c1">#   nest-2: [&lt;AGENT_RESOPONSE_IN_INTEGER&gt;, ...]</span>
-</span><span id="__span-6-18"><a id="__codelineno-6-18" name="__codelineno-6-18" href="#__codelineno-6-18"></a><span class="c1"># }</span>
-</span></code></pre></div>
-<h3 id="config">Config<a class="headerlink" href="#config" title="Permanent link">&para;</a></h3>
-<p><code>[var]</code><bold><code>config: Optional[Dict[str, Any]] = {}</code></bold></p>
-<p>You can add other configs you want to pass to the LLM.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">versionhq</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">vhq</span>
-</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>
-</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="n">response_field</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">ResponseField</span><span class="p">(</span>
-</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>  <span class="n">title</span><span class="o">=</span><span class="s2">&quot;summary-with-config&quot;</span><span class="p">,</span>
-</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>  <span class="n">data_type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
-</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>  <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>  <span class="n">config</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="p">)</span>
-</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="p">)</span>
-</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>
-</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="c1"># Agent output:</span>
-</span><span id="__span-7-11"><a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="c1"># summary-with-config: &lt;AGENT_RESPONSE_IN_STRING&gt;</span>
-</span></code></pre></div>
+<h2 id="class-methods-task">Class Methods <code>Task</code><a class="headerlink" href="#class-methods-task" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;"><div style="width:120px"><strong>Method</strong></div></th>
+<th style="text-align: left;"><div style="width:300px"><strong>Params</strong></div></th>
+<th style="text-align: left;"><strong>Returns</strong></th>
+<th style="text-align: left;"><strong>Description</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong><code>execute</code></strong></td>
+<td style="text-align: left;"><p>type: TaskExecutionType = None<br>agent: Optional["vhq.Agent"] = None<br>context: Optional[Any] = None</p></td>
+<td style="text-align: left;">InstanceOf[<code>TaskOutput</code>] or None (error)</td>
+<td style="text-align: left;">A main method to handle task execution. Auto-build an agent when the agent is not given.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="properties-task">Properties <code>Task</code><a class="headerlink" href="#properties-task" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;"><div style="width:120px"><strong>Property</strong></div></th>
+<th style="text-align: left;"><strong>Returns</strong></th>
+<th style="text-align: left;"><strong>Description</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong><code>key</code></strong></td>
+<td style="text-align: left;">str</td>
+<td style="text-align: left;">Returns task key based on its description and output format.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>summary</code></strong></td>
+<td style="text-align: left;">str</td>
+<td style="text-align: left;">Returns a summary of the task based on its id, description and tools.</td>
+</tr>
+</tbody>
+</table>
 
 
 
@@ -1749,7 +1645,7 @@
               
                 
               
-              Thanks for your feedback! Help us improve this page by using our <a href="https://github.com/versionhq/multi-agent-system/issues/new/?title=[Feedback]+ResponseField+-+/core/task/response-field/" target="_blank" rel="noopener">feedback form</a>.
+              Thanks for your feedback! Help us improve this page by using our <a href="https://github.com/versionhq/multi-agent-system/issues/new/?title=[Feedback]+Reference+-+/core/task/task-ref/" target="_blank" rel="noopener">feedback form</a>.
             </div>
           
         </div>
@@ -1783,7 +1679,7 @@
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../task-strc-response/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Concept">
+          <a href="../evaluation/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Evaluating">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -1793,20 +1689,20 @@
                 Previous
               </span>
               <div class="md-ellipsis">
-                Concept
+                Evaluating
               </div>
             </div>
           </a>
         
         
           
-          <a href="../task-execution/" class="md-footer__link md-footer__link--next" aria-label="Next: Executing">
+          <a href="../../tool/" class="md-footer__link md-footer__link--next" aria-label="Next: Tool">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Executing
+                Tool
               </div>
             </div>
             <div class="md-footer__button md-icon">

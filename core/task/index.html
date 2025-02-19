@@ -18,7 +18,7 @@
         <link rel="prev" href="../task-graph/">
       
       
-        <link rel="next" href="task-output/">
+        <link rel="next" href="task-strc-response/">
       
       
       <link rel="icon" href="../../_logos/favicon.ico">
@@ -859,6 +859,10 @@
       
         
       
+        
+      
+        
+      
     
     
       
@@ -907,12 +911,59 @@
   
   
   
+    
+    
+      
+        
+      
+        
+      
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_2_2" id="__nav_4_2_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Structuring Response
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            Structuring Response
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
     <li class="md-nav__item">
-      <a href="task-output/" class="md-nav__link">
+      <a href="task-strc-response/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    TaskOutput
+    Concept
     
   </span>
   
@@ -945,6 +996,58 @@
 
               
             
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="task-execution/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Executing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="task-output/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Outputs
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
               
                 
   
@@ -956,7 +1059,29 @@
         
   
   <span class="md-ellipsis">
-    Evaluation
+    Evaluating
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="task-ref/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Reference
     
   </span>
   
@@ -1266,522 +1391,11 @@
 </span></code></pre></div>
 <hr />
 
-<h2 id="structured-response">Structured Response<a class="headerlink" href="#structured-response" title="Permanent link">&para;</a></h2>
-<p>By default, agents will generate plane text and JSON outputs, and store them in the <code>TaskOutput</code> object.</p>
-<ul>
-<li>Ref. <a href="/core/task/task-output"><code>TaskOutput</code></a> class</li>
-</ul>
-<p>But you can choose to generate Pydantic class or specifig JSON object as response.</p>
-<hr />
-
-<p><strong>1. Pydantic</strong></p>
-<p><code>[var]</code><bold><code>pydantic_output: Optional[Type[BaseModel]] = None</code></bold></p>
-<p>Create and add a <code>custom Pydantic class</code> as a structured response format to the <code>pydantic_output</code> field.</p>
-<p>The custom class can accept <strong>one layer of a nested child</strong> as you can see in the following code snippet:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">versionhq</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">vhq</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="c1"># 1. Define Pydantic class with a description (optional), annotations and field names.</span>
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="k">class</span><span class="w"> </span><span class="nc">Demo</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
-</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="sd">    A demo pydantic class to validate the outcome with various nested data types.</span>
-</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>    <span class="n">demo_1</span><span class="p">:</span> <span class="nb">int</span>
-</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>    <span class="n">demo_2</span><span class="p">:</span> <span class="nb">float</span>
-</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>    <span class="n">demo_3</span><span class="p">:</span> <span class="nb">str</span>
-</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>    <span class="n">demo_4</span><span class="p">:</span> <span class="nb">bool</span>
-</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>    <span class="n">demo_5</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
-</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>    <span class="n">demo_6</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
-</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>    <span class="n">demo_nest_1</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="c1"># 1 layer of nested child is ok.</span>
-</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a>    <span class="n">demo_nest_2</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span>
-</span><span id="__span-2-19"><a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a>    <span class="n">demo_nest_3</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span>
-</span><span id="__span-2-20"><a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a>    <span class="n">demo_nest_4</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span>
-</span><span id="__span-2-21"><a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a>    <span class="c1"># error_1: list[list[dict[str, list[str]]]] # &lt;- Trigger 400 error due to 2+ layers of nested child.</span>
-</span><span id="__span-2-22"><a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a>    <span class="c1"># error_2: InstanceOf[AnotherPydanticClass] # &lt;- Trigger 400 error due to non-typing annotation.</span>
-</span><span id="__span-2-23"><a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a>    <span class="c1"># error_3: list[InstanceOf[AnotherPydanticClass]] # &lt;- Trigger 400 error due to non-typing annotation as a nested child.</span>
-</span><span id="__span-2-24"><a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a>
-</span><span id="__span-2-25"><a id="__codelineno-2-25" name="__codelineno-2-25" href="#__codelineno-2-25"></a><span class="c1"># 2. Define a task</span>
-</span><span id="__span-2-26"><a id="__codelineno-2-26" name="__codelineno-2-26" href="#__codelineno-2-26"></a><span class="n">task</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Task</span><span class="p">(</span>
-</span><span id="__span-2-27"><a id="__codelineno-2-27" name="__codelineno-2-27" href="#__codelineno-2-27"></a>    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;generate random output that strictly follows the given format&quot;</span><span class="p">,</span>
-</span><span id="__span-2-28"><a id="__codelineno-2-28" name="__codelineno-2-28" href="#__codelineno-2-28"></a>    <span class="n">pydantic_output</span><span class="o">=</span><span class="n">Demo</span><span class="p">,</span>
-</span><span id="__span-2-29"><a id="__codelineno-2-29" name="__codelineno-2-29" href="#__codelineno-2-29"></a><span class="p">)</span>
-</span><span id="__span-2-30"><a id="__codelineno-2-30" name="__codelineno-2-30" href="#__codelineno-2-30"></a>
-</span><span id="__span-2-31"><a id="__codelineno-2-31" name="__codelineno-2-31" href="#__codelineno-2-31"></a><span class="c1"># 3. Execute</span>
-</span><span id="__span-2-32"><a id="__codelineno-2-32" name="__codelineno-2-32" href="#__codelineno-2-32"></a><span class="n">res</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
-</span><span id="__span-2-33"><a id="__codelineno-2-33" name="__codelineno-2-33" href="#__codelineno-2-33"></a>
-</span><span id="__span-2-34"><a id="__codelineno-2-34" name="__codelineno-2-34" href="#__codelineno-2-34"></a><span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">vhq</span><span class="o">.</span><span class="n">TaskOutput</span><span class="p">)</span>
-</span><span id="__span-2-35"><a id="__codelineno-2-35" name="__codelineno-2-35" href="#__codelineno-2-35"></a><span class="k">assert</span> <span class="n">res</span><span class="o">.</span><span class="n">raw</span> <span class="ow">and</span> <span class="n">res</span><span class="o">.</span><span class="n">json</span>
-</span><span id="__span-2-36"><a id="__codelineno-2-36" name="__codelineno-2-36" href="#__codelineno-2-36"></a><span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">raw</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">json_dict</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
-</span><span id="__span-2-37"><a id="__codelineno-2-37" name="__codelineno-2-37" href="#__codelineno-2-37"></a><span class="k">assert</span> <span class="p">[</span>
-</span><span id="__span-2-38"><a id="__codelineno-2-38" name="__codelineno-2-38" href="#__codelineno-2-38"></a>    <span class="nb">getattr</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">pydantic</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span> <span class="ow">and</span> <span class="n">v</span><span class="o">.</span><span class="n">annotation</span> <span class="o">==</span> <span class="n">Demo</span><span class="o">.</span><span class="n">model_fields</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">annotation</span>
-</span><span id="__span-2-39"><a id="__codelineno-2-39" name="__codelineno-2-39" href="#__codelineno-2-39"></a>    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">res</span><span class="o">.</span><span class="n">pydantic</span><span class="o">.</span><span class="n">model_fields</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-</span><span id="__span-2-40"><a id="__codelineno-2-40" name="__codelineno-2-40" href="#__codelineno-2-40"></a><span class="p">]</span>
-</span></code></pre></div>
-<p><strong>2. JSON</strong></p>
-<p><code>[var]</code><bold><code>response_fields: List[InstanceOf[ResponseField]] = None</code></bold></p>
-<p>Similar to Pydantic, JSON output structure can be defined by using a list of <code>ResponseField</code> objects.</p>
-<p>The following code snippet demonstrates how to use <code>ResponseField</code> to generate output with a maximum of one level of nesting.</p>
-<p>Custom JSON outputs can accept <strong>one layer of a nested child</strong>.</p>
-<p><strong>[NOTES]</strong></p>
-<ul>
-<li>
-<p><code>demo_response_fields</code> in the following case is identical to the previous Demo class, except that titles are specified for nested fields.</p>
-</li>
-<li>
-<p>Agents generate JSON output by default, whether or not <code>response_fields</code> are used.</p>
-</li>
-<li>
-<p>However, response_fields are REQUIRED to specify JSON key titles and data types.</p>
-</li>
-</ul>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">versionhq</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">vhq</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="c1"># 1. Define a list of ResponseField objects.</span>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="n">demo_response_fields</span> <span class="o">=</span> <span class="p">[</span>
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    <span class="c1"># no nesting</span>
-</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="n">vhq</span><span class="o">.</span><span class="n">ResponseField</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;demo_1&quot;</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="nb">int</span><span class="p">),</span>
-</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>    <span class="n">vhq</span><span class="o">.</span><span class="n">ResponseField</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;demo_2&quot;</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="nb">float</span><span class="p">),</span>
-</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>    <span class="n">vhq</span><span class="o">.</span><span class="n">ResponseField</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;demo_3&quot;</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="nb">str</span><span class="p">),</span>
-</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>    <span class="n">vhq</span><span class="o">.</span><span class="n">ResponseField</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;demo_4&quot;</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="nb">bool</span><span class="p">),</span>
-</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>    <span class="n">vhq</span><span class="o">.</span><span class="n">ResponseField</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;demo_5&quot;</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="nb">list</span><span class="p">,</span> <span class="n">items</span><span class="o">=</span><span class="nb">str</span><span class="p">),</span>
-</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>    <span class="n">vhq</span><span class="o">.</span><span class="n">ResponseField</span><span class="p">(</span>
-</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>        <span class="n">title</span><span class="o">=</span><span class="s2">&quot;demo_6&quot;</span><span class="p">,</span>
-</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>        <span class="n">data_type</span><span class="o">=</span><span class="nb">dict</span><span class="p">,</span>
-</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>        <span class="n">properties</span><span class="o">=</span><span class="p">[</span><span class="n">vhq</span><span class="o">.</span><span class="n">ResponseField</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;demo-item&quot;</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="nb">str</span><span class="p">)]</span>
-</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a>    <span class="p">),</span>
-</span><span id="__span-3-16"><a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a>    <span class="c1"># nesting</span>
-</span><span id="__span-3-17"><a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a>    <span class="n">vhq</span><span class="o">.</span><span class="n">ResponseField</span><span class="p">(</span>
-</span><span id="__span-3-18"><a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a>        <span class="n">title</span><span class="o">=</span><span class="s2">&quot;demo_nest_1&quot;</span><span class="p">,</span>
-</span><span id="__span-3-19"><a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a>        <span class="n">data_type</span><span class="o">=</span><span class="nb">list</span><span class="p">,</span>
-</span><span id="__span-3-20"><a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a>        <span class="n">items</span><span class="o">=</span><span class="nb">dict</span><span class="p">,</span>
-</span><span id="__span-3-21"><a id="__codelineno-3-21" name="__codelineno-3-21" href="#__codelineno-3-21"></a>        <span class="n">properties</span><span class="o">=</span><span class="p">([</span>
-</span><span id="__span-3-22"><a id="__codelineno-3-22" name="__codelineno-3-22" href="#__codelineno-3-22"></a>            <span class="n">vhq</span><span class="o">.</span><span class="n">ResponseField</span><span class="p">(</span>
-</span><span id="__span-3-23"><a id="__codelineno-3-23" name="__codelineno-3-23" href="#__codelineno-3-23"></a>                <span class="n">title</span><span class="o">=</span><span class="s2">&quot;nest1&quot;</span><span class="p">,</span>
-</span><span id="__span-3-24"><a id="__codelineno-3-24" name="__codelineno-3-24" href="#__codelineno-3-24"></a>                <span class="n">data_type</span><span class="o">=</span><span class="nb">dict</span><span class="p">,</span>
-</span><span id="__span-3-25"><a id="__codelineno-3-25" name="__codelineno-3-25" href="#__codelineno-3-25"></a>                <span class="n">properties</span><span class="o">=</span><span class="p">[</span><span class="n">vhq</span><span class="o">.</span><span class="n">ResponseField</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;nest11&quot;</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="nb">str</span><span class="p">)]</span>
-</span><span id="__span-3-26"><a id="__codelineno-3-26" name="__codelineno-3-26" href="#__codelineno-3-26"></a>            <span class="p">)</span>
-</span><span id="__span-3-27"><a id="__codelineno-3-27" name="__codelineno-3-27" href="#__codelineno-3-27"></a>        <span class="p">])</span>
-</span><span id="__span-3-28"><a id="__codelineno-3-28" name="__codelineno-3-28" href="#__codelineno-3-28"></a>    <span class="p">),</span>
-</span><span id="__span-3-29"><a id="__codelineno-3-29" name="__codelineno-3-29" href="#__codelineno-3-29"></a>    <span class="n">vhq</span><span class="o">.</span><span class="n">ResponseField</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;demo_nest_2&quot;</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="nb">list</span><span class="p">,</span> <span class="n">items</span><span class="o">=</span><span class="nb">list</span><span class="p">),</span>
-</span><span id="__span-3-30"><a id="__codelineno-3-30" name="__codelineno-3-30" href="#__codelineno-3-30"></a>    <span class="n">vhq</span><span class="o">.</span><span class="n">ResponseField</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;demo_nest_3&quot;</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="nb">dict</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="p">[</span>
-</span><span id="__span-3-31"><a id="__codelineno-3-31" name="__codelineno-3-31" href="#__codelineno-3-31"></a>        <span class="n">vhq</span><span class="o">.</span><span class="n">ResponseField</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;nest1&quot;</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="nb">list</span><span class="p">,</span> <span class="n">items</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
-</span><span id="__span-3-32"><a id="__codelineno-3-32" name="__codelineno-3-32" href="#__codelineno-3-32"></a>    <span class="p">]),</span>
-</span><span id="__span-3-33"><a id="__codelineno-3-33" name="__codelineno-3-33" href="#__codelineno-3-33"></a>    <span class="n">vhq</span><span class="o">.</span><span class="n">ResponseField</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;demo_nest_4&quot;</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="nb">dict</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="p">[</span>
-</span><span id="__span-3-34"><a id="__codelineno-3-34" name="__codelineno-3-34" href="#__codelineno-3-34"></a>        <span class="n">vhq</span><span class="o">.</span><span class="n">ResponseField</span><span class="p">(</span>
-</span><span id="__span-3-35"><a id="__codelineno-3-35" name="__codelineno-3-35" href="#__codelineno-3-35"></a>            <span class="n">title</span><span class="o">=</span><span class="s2">&quot;nest1&quot;</span><span class="p">,</span>
-</span><span id="__span-3-36"><a id="__codelineno-3-36" name="__codelineno-3-36" href="#__codelineno-3-36"></a>            <span class="n">data_type</span><span class="o">=</span><span class="nb">dict</span><span class="p">,</span>
-</span><span id="__span-3-37"><a id="__codelineno-3-37" name="__codelineno-3-37" href="#__codelineno-3-37"></a>            <span class="n">properties</span><span class="o">=</span><span class="p">[</span><span class="n">vhq</span><span class="o">.</span><span class="n">ResponseField</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;nest12&quot;</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="nb">str</span><span class="p">)]</span>
-</span><span id="__span-3-38"><a id="__codelineno-3-38" name="__codelineno-3-38" href="#__codelineno-3-38"></a>        <span class="p">)</span>
-</span><span id="__span-3-39"><a id="__codelineno-3-39" name="__codelineno-3-39" href="#__codelineno-3-39"></a>    <span class="p">])</span>
-</span><span id="__span-3-40"><a id="__codelineno-3-40" name="__codelineno-3-40" href="#__codelineno-3-40"></a><span class="p">]</span>
-</span><span id="__span-3-41"><a id="__codelineno-3-41" name="__codelineno-3-41" href="#__codelineno-3-41"></a>
-</span><span id="__span-3-42"><a id="__codelineno-3-42" name="__codelineno-3-42" href="#__codelineno-3-42"></a>
-</span><span id="__span-3-43"><a id="__codelineno-3-43" name="__codelineno-3-43" href="#__codelineno-3-43"></a><span class="c1"># 2. Define a task</span>
-</span><span id="__span-3-44"><a id="__codelineno-3-44" name="__codelineno-3-44" href="#__codelineno-3-44"></a><span class="n">task</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Task</span><span class="p">(</span>
-</span><span id="__span-3-45"><a id="__codelineno-3-45" name="__codelineno-3-45" href="#__codelineno-3-45"></a>    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Output random values strictly following the data type defined in the given response format.&quot;</span><span class="p">,</span>
-</span><span id="__span-3-46"><a id="__codelineno-3-46" name="__codelineno-3-46" href="#__codelineno-3-46"></a>    <span class="n">response_fields</span><span class="o">=</span><span class="n">demo_response_fields</span>
-</span><span id="__span-3-47"><a id="__codelineno-3-47" name="__codelineno-3-47" href="#__codelineno-3-47"></a><span class="p">)</span>
-</span><span id="__span-3-48"><a id="__codelineno-3-48" name="__codelineno-3-48" href="#__codelineno-3-48"></a>
-</span><span id="__span-3-49"><a id="__codelineno-3-49" name="__codelineno-3-49" href="#__codelineno-3-49"></a>
-</span><span id="__span-3-50"><a id="__codelineno-3-50" name="__codelineno-3-50" href="#__codelineno-3-50"></a><span class="c1"># 3. Execute</span>
-</span><span id="__span-3-51"><a id="__codelineno-3-51" name="__codelineno-3-51" href="#__codelineno-3-51"></a><span class="n">res</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
-</span><span id="__span-3-52"><a id="__codelineno-3-52" name="__codelineno-3-52" href="#__codelineno-3-52"></a>
-</span><span id="__span-3-53"><a id="__codelineno-3-53" name="__codelineno-3-53" href="#__codelineno-3-53"></a><span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">vhq</span><span class="o">.</span><span class="n">TaskOutput</span><span class="p">)</span> <span class="ow">and</span> <span class="n">res</span><span class="o">.</span><span class="n">task_id</span> <span class="ow">is</span> <span class="n">task</span><span class="o">.</span><span class="n">id</span>
-</span><span id="__span-3-54"><a id="__codelineno-3-54" name="__codelineno-3-54" href="#__codelineno-3-54"></a><span class="k">assert</span> <span class="n">res</span><span class="o">.</span><span class="n">raw</span> <span class="ow">and</span> <span class="n">res</span><span class="o">.</span><span class="n">json</span> <span class="ow">and</span> <span class="n">res</span><span class="o">.</span><span class="n">pydantic</span> <span class="ow">is</span> <span class="kc">None</span>
-</span><span id="__span-3-55"><a id="__codelineno-3-55" name="__codelineno-3-55" href="#__codelineno-3-55"></a><span class="k">assert</span> <span class="p">[</span><span class="n">v</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">==</span> <span class="n">task</span><span class="o">.</span><span class="n">response_fields</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">data_type</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">json_dict</span><span class="o">.</span><span class="n">items</span><span class="p">())]</span>
-</span></code></pre></div>
-<ul>
-<li>Ref. <a href="/core/task/response-field"><code>ResponseField</code></a> class</li>
-</ul>
-<hr />
-
-<p><strong>Structuring reponse format</strong></p>
-<ul>
-<li>
-<p>Higlhy recommends assigning agents optimized for <code>gemini-x</code> or <code>gpt-x</code> to produce structured outputs with nested items.</p>
-</li>
-<li>
-<p>To generate response with more than 2 layers of nested items, seperate them into multipe tasks or utilize nodes.</p>
-</li>
-</ul>
-<p>The following case demonstrates to returning a <code>Main</code> class that contains a nested <code>Sub</code> class.</p>
-<p><strong>[NOTES]</strong></p>
-<ul>
-<li>
-<p>Using <code>callback</code> functions to format the final response. (You can try other functions suitable for your use case.)</p>
-</li>
-<li>
-<p>Passing parameter: <code>sub</code> to the callback function via the <code>callback_kwargs</code> variable.</p>
-</li>
-<li>
-<p>By default, the outputs of <code>main_task</code> are automatically passed to the callback function; you do NOT need to explicitly define them.</p>
-</li>
-<li>
-<p>Callback results will be stored in the <code>callback_output</code> field of the <code>TaskOutput</code> class.</p>
-</li>
-</ul>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">versionhq</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">vhq</span>
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span>
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
-</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>
-</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="c1"># 1. Define and execute a sub task with Pydantic output.</span>
-</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="k">class</span><span class="w"> </span><span class="nc">Sub</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
-</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>    <span class="n">sub1</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span>
-</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>    <span class="n">sub2</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
-</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>
-</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="n">sub_task</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Task</span><span class="p">(</span>
-</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;generate random values that strictly follows the given format.&quot;</span><span class="p">,</span>
-</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>    <span class="n">pydantic_output</span><span class="o">=</span><span class="n">Sub</span>
-</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="p">)</span>
-</span><span id="__span-4-14"><a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a><span class="n">sub_res</span> <span class="o">=</span> <span class="n">sub_task</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
-</span><span id="__span-4-15"><a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a>
-</span><span id="__span-4-16"><a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a><span class="c1"># 2. Define a main task, callback function to format the final response.</span>
-</span><span id="__span-4-17"><a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a><span class="k">class</span><span class="w"> </span><span class="nc">Main</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
-</span><span id="__span-4-18"><a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a>    <span class="n">main1</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="c1"># &lt;= assume expecting to store Sub object in this field.</span>
-</span><span id="__span-4-19"><a id="__codelineno-4-19" name="__codelineno-4-19" href="#__codelineno-4-19"></a>    <span class="c1"># error_main1: list[InstanceOf[Sub]]  # as this will trigger 400 error!</span>
-</span><span id="__span-4-20"><a id="__codelineno-4-20" name="__codelineno-4-20" href="#__codelineno-4-20"></a>    <span class="n">main2</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
-</span><span id="__span-4-21"><a id="__codelineno-4-21" name="__codelineno-4-21" href="#__codelineno-4-21"></a>
-</span><span id="__span-4-22"><a id="__codelineno-4-22" name="__codelineno-4-22" href="#__codelineno-4-22"></a><span class="k">def</span><span class="w"> </span><span class="nf">format_response</span><span class="p">(</span><span class="n">sub</span><span class="p">:</span> <span class="n">InstanceOf</span><span class="p">[</span><span class="n">Sub</span><span class="p">],</span> <span class="n">main1</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">main2</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Main</span><span class="p">:</span>
-</span><span id="__span-4-23"><a id="__codelineno-4-23" name="__codelineno-4-23" href="#__codelineno-4-23"></a>    <span class="n">main1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sub</span><span class="p">)</span>
-</span><span id="__span-4-24"><a id="__codelineno-4-24" name="__codelineno-4-24" href="#__codelineno-4-24"></a>    <span class="n">main</span> <span class="o">=</span> <span class="n">Main</span><span class="p">(</span><span class="n">main1</span><span class="o">=</span><span class="n">main1</span><span class="p">,</span> <span class="n">main2</span><span class="o">=</span><span class="n">main2</span><span class="p">)</span>
-</span><span id="__span-4-25"><a id="__codelineno-4-25" name="__codelineno-4-25" href="#__codelineno-4-25"></a>    <span class="k">return</span> <span class="n">main</span>
-</span><span id="__span-4-26"><a id="__codelineno-4-26" name="__codelineno-4-26" href="#__codelineno-4-26"></a>
-</span><span id="__span-4-27"><a id="__codelineno-4-27" name="__codelineno-4-27" href="#__codelineno-4-27"></a><span class="c1"># 3. Execute</span>
-</span><span id="__span-4-28"><a id="__codelineno-4-28" name="__codelineno-4-28" href="#__codelineno-4-28"></a><span class="n">main_task</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Task</span><span class="p">(</span>
-</span><span id="__span-4-29"><a id="__codelineno-4-29" name="__codelineno-4-29" href="#__codelineno-4-29"></a>    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;generate random values that strictly follows the given format&quot;</span><span class="p">,</span>
-</span><span id="__span-4-30"><a id="__codelineno-4-30" name="__codelineno-4-30" href="#__codelineno-4-30"></a>    <span class="n">pydantic_output</span><span class="o">=</span><span class="n">Main</span><span class="p">,</span>
-</span><span id="__span-4-31"><a id="__codelineno-4-31" name="__codelineno-4-31" href="#__codelineno-4-31"></a>    <span class="n">callback</span><span class="o">=</span><span class="n">format_response</span><span class="p">,</span>
-</span><span id="__span-4-32"><a id="__codelineno-4-32" name="__codelineno-4-32" href="#__codelineno-4-32"></a>    <span class="n">callback_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">sub</span><span class="o">=</span><span class="n">Sub</span><span class="p">(</span><span class="n">sub1</span><span class="o">=</span><span class="n">sub_res</span><span class="o">.</span><span class="n">pydantic</span><span class="o">.</span><span class="n">sub1</span><span class="p">,</span> <span class="n">sub2</span><span class="o">=</span><span class="n">sub_res</span><span class="o">.</span><span class="n">pydantic</span><span class="o">.</span><span class="n">sub2</span><span class="p">)),</span>
-</span><span id="__span-4-33"><a id="__codelineno-4-33" name="__codelineno-4-33" href="#__codelineno-4-33"></a><span class="p">)</span>
-</span><span id="__span-4-34"><a id="__codelineno-4-34" name="__codelineno-4-34" href="#__codelineno-4-34"></a><span class="n">res</span> <span class="o">=</span> <span class="n">main_task</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">context</span><span class="o">=</span><span class="n">sub_res</span><span class="o">.</span><span class="n">raw</span><span class="p">)</span> <span class="c1"># [Optional] Adding sub_task as a context.</span>
-</span><span id="__span-4-35"><a id="__codelineno-4-35" name="__codelineno-4-35" href="#__codelineno-4-35"></a>
-</span><span id="__span-4-36"><a id="__codelineno-4-36" name="__codelineno-4-36" href="#__codelineno-4-36"></a><span class="k">assert</span> <span class="p">[</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">res</span><span class="o">.</span><span class="n">callback_output</span><span class="o">.</span><span class="n">main1</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">Sub</span><span class="p">)]</span>
-</span></code></pre></div>
-<p>To automate these manual setups, refer to <a href="/core/agent-network">AgentNetwork</a> class.</p>
-<hr />
-
-<h2 id="prompting">Prompting<a class="headerlink" href="#prompting" title="Permanent link">&para;</a></h2>
-<p><code>[class method]</code><bold><code>prompt(self, model_provider: str = None, context: Optional[Any] = None) -&gt; str</code></bold></p>
-<p>Prompts are generated automatically based on the task <code>description</code>, response format, context, agent <code>role</code>, and <code>goal</code>.</p>
-<p><strong>Context</strong></p>
-<p>The following snippet demonstrates how to add <code>context</code> to the prompt.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">versionhq</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">vhq</span>
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
-</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="n">sub_task_1</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Task</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Run a sub demo part 1&quot;</span><span class="p">)</span>
-</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="n">sub_res</span> <span class="o">=</span> <span class="n">sub_task_1</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
-</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>
-</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="n">sub_task_2</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Task</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Run a sub demo part 2&quot;</span><span class="p">)</span>
-</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>
-</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="n">task</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Task</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Run a main demo&quot;</span><span class="p">)</span>
-</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>
-</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="n">context</span> <span class="o">=</span> <span class="p">[</span><span class="n">sub_res</span><span class="p">,</span> <span class="n">sub_task_2</span><span class="p">,</span> <span class="s2">&quot;context to add in string&quot;</span><span class="p">]</span>
-</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="n">res</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">)</span>
-</span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>
-</span><span id="__span-5-13"><a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a><span class="c1"># Explicitly mentioned. `task.execute()` will trigger the following:</span>
-</span><span id="__span-5-14"><a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a><span class="n">task_prompt</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">_prompt</span><span class="p">(</span><span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">)</span>
-</span><span id="__span-5-15"><a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a>
-</span><span id="__span-5-16"><a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a><span class="k">assert</span> <span class="n">sub_res</span><span class="o">.</span><span class="n">to_context_prompt</span><span class="p">()</span> <span class="ow">in</span> <span class="n">task_prompt</span>
-</span><span id="__span-5-17"><a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a><span class="k">assert</span> <span class="n">sub_task_2</span><span class="o">.</span><span class="n">output</span> <span class="ow">and</span> <span class="n">sub_task_2</span><span class="o">.</span><span class="n">output</span><span class="o">.</span><span class="n">to_context_prompt</span><span class="p">()</span> <span class="ow">in</span> <span class="n">task_prompt</span>  <span class="c1"># sub tasks&#39; outputs are included in the task prompt.</span>
-</span><span id="__span-5-18"><a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a><span class="k">assert</span> <span class="s2">&quot;context to add in string&quot;</span> <span class="ow">in</span> <span class="n">task_promp</span>
-</span><span id="__span-5-19"><a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a><span class="k">assert</span> <span class="n">res</span>
-</span></code></pre></div>
-<p>Context can consist of <code>Task</code> objects, <code>TaskOutput</code> objects, plain text <code>strings</code>, or <code>lists</code> containing any of these.</p>
-<p>In this scenario, <code>sub_task_2</code> executes before the main task. Its string output is then incorporated into the main task's context prompt on top of other context before the main task is executed.</p>
-<hr>
-
-<h2 id="executing">Executing<a class="headerlink" href="#executing" title="Permanent link">&para;</a></h2>
-<p><strong>Agent delegation</strong></p>
-<p><code>[var]</code><bold><code>allow_delegation: bool = False</code></bold></p>
-<p>You can assign another agent to complete the task:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">versionhq</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">vhq</span>
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
-</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="n">task</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Task</span><span class="p">(</span>
-</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;return the output following the given prompt.&quot;</span><span class="p">,</span>
-</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>    <span class="n">allow_delegation</span><span class="o">=</span><span class="kc">True</span>
-</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="p">)</span>
-</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="n">task</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
-</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>
-</span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="k">assert</span> <span class="n">task</span><span class="o">.</span><span class="n">output</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-</span><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="k">assert</span> <span class="s2">&quot;vhq-Delegated-Agent&quot;</span> <span class="ow">in</span> <span class="n">task</span><span class="o">.</span><span class="n">processed_agents</span> <span class="c1"># delegated agent</span>
-</span><span id="__span-6-11"><a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a><span class="k">assert</span> <span class="n">task</span><span class="o">.</span><span class="n">delegations</span> <span class="o">==</span><span class="mi">1</span>
-</span></code></pre></div>
-<hr>
-
-<p><strong>SYNC - ASYNC</strong></p>
-<p><code>[var]</code><bold><code>type: bool = False</code></bold></p>
-<p>You can specify whether the task will be executed asynchronously.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">versionhq</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">vhq</span>
-</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>
-</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="n">task</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Task</span><span class="p">(</span>
-</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Return a word: &#39;test&#39;&quot;</span><span class="p">,</span>
-</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>    <span class="nb">type</span><span class="o">=</span><span class="n">vhq</span><span class="o">.</span><span class="n">TaskExecutionType</span><span class="o">.</span><span class="n">ASYNC</span> <span class="c1"># default: vhq.TaskExecutionType.SYNC</span>
-</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="p">)</span>
-</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>
-</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="kn">from</span><span class="w"> </span><span class="nn">unittest.mock</span><span class="w"> </span><span class="kn">import</span> <span class="n">patch</span>
-</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="k">with</span> <span class="n">patch</span><span class="o">.</span><span class="n">object</span><span class="p">(</span><span class="n">vhq</span><span class="o">.</span><span class="n">Agent</span><span class="p">,</span> <span class="s2">&quot;execute_task&quot;</span><span class="p">,</span> <span class="n">return_value</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">execute</span><span class="p">:</span>
-</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>    <span class="n">res</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
-</span><span id="__span-7-11"><a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a>    <span class="k">assert</span> <span class="n">res</span><span class="o">.</span><span class="n">raw</span> <span class="o">==</span> <span class="s2">&quot;test&quot;</span>
-</span><span id="__span-7-12"><a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a>    <span class="n">execute</span><span class="o">.</span><span class="n">assert_called_once_with</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="n">task</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">task_tools</span><span class="o">=</span><span class="nb">list</span><span class="p">())</span>
-</span></code></pre></div>
-<hr>
-
-<p><strong>Using tools</strong></p>
-<p><code>[var]</code><bold><code>tools: Optional[List[ToolSet | Tool | Any]] = None</code></bold></p>
-<p><code>[var]</code><bold><code>tool_res_as_final: bool = False</code></bold></p>
-<p>Tasks can directly store tools explicitly called by the agent.</p>
-<p>If the results from the tool should be the final results, set <code>tool_res_as_final</code> True.</p>
-<p>This will allow the agent to store the tool results in the <code>tool_output</code> field of <code>TaskOutput</code> object.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">versionhq</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">vhq</span>
-</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span>
-</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>
-</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="k">def</span><span class="w"> </span><span class="nf">random_func</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>    <span class="k">return</span> <span class="n">message</span> <span class="o">+</span> <span class="s2">&quot;_demo&quot;</span>
-</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>
-</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="n">tool</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Tool</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;tool&quot;</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="n">random_func</span><span class="p">)</span>
-</span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="n">tool_set</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">ToolSet</span><span class="p">(</span><span class="n">tool</span><span class="o">=</span><span class="n">tool</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">message</span><span class="o">=</span><span class="s2">&quot;empty func&quot;</span><span class="p">))</span>
-</span><span id="__span-8-9"><a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="n">task</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Task</span><span class="p">(</span>
-</span><span id="__span-8-10"><a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;execute the given tools&quot;</span><span class="p">,</span>
-</span><span id="__span-8-11"><a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a>    <span class="n">tools</span><span class="o">=</span><span class="p">[</span><span class="n">tool_set</span><span class="p">,],</span> <span class="c1"># stores tools</span>
-</span><span id="__span-8-12"><a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a>    <span class="n">tool_res_as_final</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="c1"># stores tool results in TaskOutput object</span>
-</span><span id="__span-8-13"><a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a><span class="p">)</span>
-</span><span id="__span-8-14"><a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a>
-</span><span id="__span-8-15"><a id="__codelineno-8-15" name="__codelineno-8-15" href="#__codelineno-8-15"></a><span class="n">res</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
-</span><span id="__span-8-16"><a id="__codelineno-8-16" name="__codelineno-8-16" href="#__codelineno-8-16"></a><span class="k">assert</span> <span class="n">res</span><span class="o">.</span><span class="n">tool_output</span> <span class="o">==</span> <span class="s2">&quot;empty func_demo&quot;</span>
-</span></code></pre></div>
-<p>Ref. <a href="/core/tool">Tool</a> class / <a href="/core/task/task-output">TaskOutput</a> class</p>
-<hr>
-
-<p><strong>Using agents' tools</strong></p>
-<p><code>[var]</code><bold><code>can_use_agent_tools: bool = True</code></bold></p>
-<p>Tasks can explicitly stop/start using agent tools on top of the tools stored in the task object.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">versionhq</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">vhq</span>
-</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>
-</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="n">simple_tool</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Tool</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;simple tool&quot;</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="s2">&quot;simple func&quot;</span><span class="p">)</span>
-</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="n">agent</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Agent</span><span class="p">(</span><span class="n">role</span><span class="o">=</span><span class="s2">&quot;demo&quot;</span><span class="p">,</span> <span class="n">goal</span><span class="o">=</span><span class="s2">&quot;execute tools&quot;</span><span class="p">,</span> <span class="n">tools</span><span class="o">=</span><span class="p">[</span><span class="n">simple_tool</span><span class="p">,])</span>
-</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="n">task</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Task</span><span class="p">(</span>
-</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;execute tools&quot;</span><span class="p">,</span>
-</span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>    <span class="n">can_use_agent_tools</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="c1"># Flagged</span>
-</span><span id="__span-9-8"><a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>    <span class="n">tool_res_as_final</span><span class="o">=</span><span class="kc">True</span>
-</span><span id="__span-9-9"><a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="p">)</span>
-</span><span id="__span-9-10"><a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a><span class="n">res</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">agent</span><span class="o">=</span><span class="n">agent</span><span class="p">)</span>
-</span><span id="__span-9-11"><a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a><span class="k">assert</span> <span class="n">res</span><span class="o">.</span><span class="n">tool_output</span> <span class="o">==</span> <span class="s2">&quot;simple func&quot;</span>
-</span></code></pre></div>
-<hr>
-
-<h2 id="callback">Callback<a class="headerlink" href="#callback" title="Permanent link">&para;</a></h2>
-<p><code>[var]</code><bold><code>callback: Optional[Callable] = None</code></bold></p>
-<p><code>[var]</code><bold><code>callback_kwargs: Optional[Dict[str, Any]] = dict()</code></bold></p>
-<p>After executing the task, you can run a <code>callback</code> function with <code>callback_kwargs</code> and task output as parameters.</p>
-<p>Callback results will be stored in <code>callback_output</code> filed of the <code>TaskOutput</code> object.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">versionhq</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">vhq</span>
-</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>
-</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="k">def</span><span class="w"> </span><span class="nf">callback_func</span><span class="p">(</span><span class="n">condition</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">test1</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Result: </span><span class="si">{</span><span class="n">test1</span><span class="si">}</span><span class="s2">, condition added: </span><span class="si">{</span><span class="n">condition</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>
-</span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="n">task</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Task</span><span class="p">(</span>
-</span><span id="__span-10-7"><a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;return the output following the given prompt.&quot;</span><span class="p">,</span>
-</span><span id="__span-10-8"><a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>    <span class="n">callback</span><span class="o">=</span><span class="n">callback_func</span><span class="p">,</span>
-</span><span id="__span-10-9"><a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a>    <span class="n">callback_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">condition</span><span class="o">=</span><span class="s2">&quot;demo for pytest&quot;</span><span class="p">)</span>
-</span><span id="__span-10-10"><a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a><span class="p">)</span>
-</span><span id="__span-10-11"><a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a><span class="n">res</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
-</span><span id="__span-10-12"><a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a>
-</span><span id="__span-10-13"><a id="__codelineno-10-13" name="__codelineno-10-13" href="#__codelineno-10-13"></a><span class="k">assert</span> <span class="n">res</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">vhq</span><span class="o">.</span><span class="n">TaskOutput</span><span class="p">)</span>
-</span><span id="__span-10-14"><a id="__codelineno-10-14" name="__codelineno-10-14" href="#__codelineno-10-14"></a><span class="k">assert</span> <span class="n">res</span><span class="o">.</span><span class="n">task_id</span> <span class="ow">is</span> <span class="n">task</span><span class="o">.</span><span class="n">id</span>
-</span><span id="__span-10-15"><a id="__codelineno-10-15" name="__codelineno-10-15" href="#__codelineno-10-15"></a><span class="k">assert</span> <span class="s2">&quot;demo for pytest&quot;</span> <span class="ow">in</span> <span class="n">res</span><span class="o">.</span><span class="n">callback_output</span>
-</span></code></pre></div>
-<hr>
-
 <h2 id="evaluating">Evaluating<a class="headerlink" href="#evaluating" title="Permanent link">&para;</a></h2>
 <p><code>[var]</code><bold><code>should_evaluate: bool = False</code></bold></p>
 <p><code>[var]</code><bold><code>eval_criteria: Optional[List[str]] = list()</code></bold></p>
 <p>You can turn on customized evaluations using the given criteria.</p>
 <p>Refer <a href="/core/task/task-output">TaskOutput</a> class for details.</p>
-<hr>
-
-<h2 id="reference">Reference<a class="headerlink" href="#reference" title="Permanent link">&para;</a></h2>
-<h3 id="variables">Variables<a class="headerlink" href="#variables" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;"><div style="width:160px"><strong>Variable</strong></div></th>
-<th style="text-align: left;"><strong>Data Type</strong></th>
-<th style="text-align: left;"><strong>Default</strong></th>
-<th style="text-align: left;"><strong>Nullable</strong></th>
-<th style="text-align: left;"><strong>Description</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;"><strong><code>id</code></strong></td>
-<td style="text-align: left;">UUID</td>
-<td style="text-align: left;">uuid.uuid4()</td>
-<td style="text-align: left;">False</td>
-<td style="text-align: left;">Stores task <code>id</code> as an identifier.</td>
-</tr>
-<tr>
-<td style="text-align: left;"><strong><code>name</code></strong></td>
-<td style="text-align: left;">Optional[str]</td>
-<td style="text-align: left;">None</td>
-<td style="text-align: left;">True</td>
-<td style="text-align: left;">Stores a task name (Inherited as <code>node</code> identifier if the task is dependent)</td>
-</tr>
-<tr>
-<td style="text-align: left;"><strong><code>description</code></strong></td>
-<td style="text-align: left;">str</td>
-<td style="text-align: left;">None</td>
-<td style="text-align: left;">False</td>
-<td style="text-align: left;">Required field to store a concise task description</td>
-</tr>
-<tr>
-<td style="text-align: left;"><strong><code>pydantic_output</code></strong></td>
-<td style="text-align: left;">Optional[Type[BaseModel]]</td>
-<td style="text-align: left;">None</td>
-<td style="text-align: left;">True</td>
-<td style="text-align: left;">Stores pydantic custom output class for structured response</td>
-</tr>
-<tr>
-<td style="text-align: left;"><strong><code>response_fields</code></strong></td>
-<td style="text-align: left;">Optional[List[ResponseField]]</td>
-<td style="text-align: left;">list()</td>
-<td style="text-align: left;">True</td>
-<td style="text-align: left;">Stores JSON formats for stuructured response</td>
-</tr>
-<tr>
-<td style="text-align: left;"><strong><code>tools</code></strong></td>
-<td style="text-align: left;">Optional[List[ToolSet</td>
-<td style="text-align: left;">Tool</td>
-<td style="text-align: left;">Any]]</td>
-<td style="text-align: left;">None</td>
-</tr>
-<tr>
-<td style="text-align: left;"><strong><code>can_use_agent_tools</code></strong></td>
-<td style="text-align: left;">bool</td>
-<td style="text-align: left;">True</td>
-<td style="text-align: left;">-</td>
-<td style="text-align: left;">Whether to use the agent tools</td>
-</tr>
-<tr>
-<td style="text-align: left;"><strong><code>tool_res_as_final</code></strong></td>
-<td style="text-align: left;">bool</td>
-<td style="text-align: left;">False</td>
-<td style="text-align: left;">-</td>
-<td style="text-align: left;">Whether to make the tool response a final response from the agent</td>
-</tr>
-<tr>
-<td style="text-align: left;"><strong><code>execution_type</code></strong></td>
-<td style="text-align: left;">TaskExecutionType</td>
-<td style="text-align: left;">TaskExecutionType.SYNC</td>
-<td style="text-align: left;">-</td>
-<td style="text-align: left;">Sync or async execution</td>
-</tr>
-<tr>
-<td style="text-align: left;"><strong><code>allow_delegation</code></strong></td>
-<td style="text-align: left;">bool</td>
-<td style="text-align: left;">False</td>
-<td style="text-align: left;">-</td>
-<td style="text-align: left;">Whether to allow the agent to delegate the task to another agent</td>
-</tr>
-<tr>
-<td style="text-align: left;"><strong><code>callback</code></strong></td>
-<td style="text-align: left;">Optional[Callable]</td>
-<td style="text-align: left;">None</td>
-<td style="text-align: left;">True</td>
-<td style="text-align: left;">Callback function to be executed after LLM calling</td>
-</tr>
-<tr>
-<td style="text-align: left;"><strong><code>callback_kwargs</code></strong></td>
-<td style="text-align: left;">Optional[Dict[str, Any]]</td>
-<td style="text-align: left;">dict()</td>
-<td style="text-align: left;">True</td>
-<td style="text-align: left;">Args for the callback function (if any)</td>
-</tr>
-<tr>
-<td style="text-align: left;"><strong><code>should_evaluate</code></strong></td>
-<td style="text-align: left;">bool</td>
-<td style="text-align: left;">False</td>
-<td style="text-align: left;">-</td>
-<td style="text-align: left;">Whether to evaluate the task output using eval criteria</td>
-</tr>
-<tr>
-<td style="text-align: left;"><strong><code>eval_criteria</code></strong></td>
-<td style="text-align: left;">Optional[List[str]]</td>
-<td style="text-align: left;">list()</td>
-<td style="text-align: left;">True</td>
-<td style="text-align: left;">Evaluation criteria given by the human client</td>
-</tr>
-<tr>
-<td style="text-align: left;"><strong><code>processed_agents</code></strong></td>
-<td style="text-align: left;">Set[str]</td>
-<td style="text-align: left;">set()</td>
-<td style="text-align: left;">True</td>
-<td style="text-align: left;">[Ops] Stores roles of the agents executed the task</td>
-</tr>
-<tr>
-<td style="text-align: left;"><strong><code>tool_errors</code></strong></td>
-<td style="text-align: left;">int</td>
-<td style="text-align: left;">0</td>
-<td style="text-align: left;">True</td>
-<td style="text-align: left;">[Ops] Stores number of tool errors</td>
-</tr>
-<tr>
-<td style="text-align: left;"><strong><code>delegation</code></strong></td>
-<td style="text-align: left;">int</td>
-<td style="text-align: left;">0</td>
-<td style="text-align: left;">True</td>
-<td style="text-align: left;">[Ops] Stores number of agent delegations</td>
-</tr>
-<tr>
-<td style="text-align: left;"><strong><code>output</code></strong></td>
-<td style="text-align: left;">Optional[TaskOutput]</td>
-<td style="text-align: left;">None</td>
-<td style="text-align: left;">True</td>
-<td style="text-align: left;">[Ops] Stores <code>TaskOutput</code> object after the execution</td>
-</tr>
-</tbody>
-</table>
-<h3 id="class-methods">Class Methods<a class="headerlink" href="#class-methods" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;"><div style="width:120px"><strong>Method</strong></div></th>
-<th style="text-align: left;"><div style="width:300px"><strong>Params</strong></div></th>
-<th style="text-align: left;"><strong>Returns</strong></th>
-<th style="text-align: left;"><strong>Description</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;"><strong><code>execute</code></strong></td>
-<td style="text-align: left;"><p>type: TaskExecutionType = None<br>agent: Optional["vhq.Agent"] = None<br>context: Optional[Any] = None</p></td>
-<td style="text-align: left;">InstanceOf[<code>TaskOutput</code>] or None (error)</td>
-<td style="text-align: left;">A main method to handle task execution. Auto-build an agent when the agent is not given.</td>
-</tr>
-</tbody>
-</table>
-<h3 id="properties">Properties<a class="headerlink" href="#properties" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;"><div style="width:120px"><strong>Property</strong></div></th>
-<th style="text-align: left;"><strong>Returns</strong></th>
-<th style="text-align: left;"><strong>Description</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;"><strong><code>key</code></strong></td>
-<td style="text-align: left;">str</td>
-<td style="text-align: left;">Returns task key based on its description and output format.</td>
-</tr>
-<tr>
-<td style="text-align: left;"><strong><code>summary</code></strong></td>
-<td style="text-align: left;">str</td>
-<td style="text-align: left;">Returns a summary of the task based on its id, description and tools.</td>
-</tr>
-</tbody>
-</table>
 
 
 
@@ -1881,13 +1495,13 @@
         
         
           
-          <a href="task-output/" class="md-footer__link md-footer__link--next" aria-label="Next: TaskOutput">
+          <a href="task-strc-response/" class="md-footer__link md-footer__link--next" aria-label="Next: Concept">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                TaskOutput
+                Concept
               </div>
             </div>
             <div class="md-footer__button md-icon">
