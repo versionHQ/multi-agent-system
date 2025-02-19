@@ -123,9 +123,13 @@ nav:
     - 'core/task-graph/index.md'
     - Task:
       - 'core/task/index.md'
-      - TaskOutput: 'core/task/task-output.md'
-      - ResponseField: 'core/task/response-field.md'
-      - Evaluation: 'core/task/evaluation.md'
+      - Structuring Response:
+        - Concept: 'core/task/task-strc-response.md'
+        - ResponseField: 'core/task/response-field.md'
+      - Executing: 'core/task/task-execution.md'
+      - Outputs: 'core/task/task-output.md'
+      - Evaluating: 'core/task/evaluation.md'
+      - Reference: 'core/task/task-ref.md'
   - Components:
     - Tool: 'core/tool.md'
   - Archive: 'tags.md'

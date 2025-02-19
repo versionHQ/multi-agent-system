@@ -38,3 +38,11 @@
 | **`update`** | **kwargs: Any  | Self | Updates agents with given kwargs. Invalid keys will be ignored. |
 | **`start`** | context: Any = None <br> tool_res_as_final: bool = False  | `TaskOutput` \| None  | Starts to operate the agent. |
 | **`execute_task`** | task: [Task] <br> context: Any = None <br> task_tools: Optional[List[Tool \| ToolSet]] = list() | str | Returns response from the model in plane text format. |
+
+
+
+## Properties
+
+| <div style="width:120px">**Property**</div> | **Returns** | **Description** |
+| :---               | :---  | :--- |
+| **`key`** | str | Unique identifier of the agent using its ID and sanitized role. |

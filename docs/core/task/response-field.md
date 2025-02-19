@@ -1,8 +1,3 @@
----
-tags:
-  - Task Graph
----
-
 # Response Field
 
 <class>`class` versionhq.task.model.<bold>ResponseField<bold></class>
