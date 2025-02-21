@@ -14,43 +14,11 @@ from versionhq.memory.contextual_memory import ContextualMemory
 from versionhq.memory.model import ShortTermMemory, LongTermMemory, UserMemory
 from versionhq._utils.logger import Logger
 from versionhq.agent.rpm_controller import RPMController
-from versionhq._utils.usage_metrics import UsageMetrics
 from versionhq._utils.process_config import process_config
 
 
 load_dotenv(override=True)
 T = TypeVar("T", bound="Agent")
-
-
-class TokenProcess:
-    total_tokens: int = 0
-    prompt_tokens: int = 0
-    cached_prompt_tokens: int = 0
-    completion_tokens: int = 0
-    successful_requests: int = 0
-
-    def sum_prompt_tokens(self, tokens: int) -> None:
-        self.prompt_tokens = self.prompt_tokens + tokens
-        self.total_tokens = self.total_tokens + tokens
-
-    def sum_completion_tokens(self, tokens: int) -> None:
-        self.completion_tokens = self.completion_tokens + tokens
-        self.total_tokens = self.total_tokens + tokens
-
-    def sum_cached_prompt_tokens(self, tokens: int) -> None:
-        self.cached_prompt_tokens = self.cached_prompt_tokens + tokens
-
-    def sum_successful_requests(self, requests: int) -> None:
-        self.successful_requests = self.successful_requests + requests
-
-    def get_summary(self) -> UsageMetrics:
-        return UsageMetrics(
-            total_tokens=self.total_tokens,
-            prompt_tokens=self.prompt_tokens,
-            cached_prompt_tokens=self.cached_prompt_tokens,
-            completion_tokens=self.completion_tokens,
-            successful_requests=self.successful_requests,
-        )
 
 
 # @track_agent()
@@ -62,7 +30,6 @@ class Agent(BaseModel):
     __hash__ = object.__hash__
     _rpm_controller: Optional[RPMController] = PrivateAttr(default=None)
     _request_within_rpm_limit: Any = PrivateAttr(default=None)
-    _token_process: TokenProcess = PrivateAttr(default_factory=TokenProcess)
     _times_executed: int = PrivateAttr(default=0)
     _logger_config: Dict[str, Any] = PrivateAttr(default=dict(verbose=True, info_file_save=True))
     config: Optional[Dict[str, Any]] = Field(default=None, exclude=True, description="values to add to the Agent class")
@@ -92,7 +59,7 @@ class Agent(BaseModel):
     user_prompt_template: Optional[str] = Field(default=None, description="abs. file path to user prompt template")
 
     # task execution rules
-    networks: Optional[List[Any]] = Field(default_factory=list, description="store a list of agent networks that the agent belong as a member")
+    networks: Optional[List[Any]] = Field(default_factory=list, description="store a list of agent networks that the agent belongs to as a member")
     allow_delegation: bool = Field(default=False, description="whether to delegate the task to another agent")
     max_retry_limit: int = Field(default=2, description="max. number of task retries when an error occurs")
     maxit: Optional[int] = Field(default=25, description="max. number of total optimization loops conducted when an error occurs")
@@ -428,10 +395,10 @@ class Agent(BaseModel):
 
             if tool_res_as_final:
                 raw_response = self.func_calling_llm.call(messages=messages, tools=tools, tool_res_as_final=True)
-                task.tokens = self.func_calling_llm._tokens
+                task._tokens = self.func_calling_llm._tokens
             else:
                 raw_response = self.llm.call(messages=messages, response_format=response_format, tools=tools)
-                task.tokens = self.llm._tokens
+                task._tokens = self.llm._tokens
 
             task_execution_counter += 1
             Logger(**self._logger_config, filename=self.key).log(level="info", message=f"Agent response: {raw_response}", color="green")
@@ -446,7 +413,7 @@ class Agent(BaseModel):
                         self._rpm_controller.check_or_wait()
 
                     raw_response = self.llm.call(messages=messages, response_format=response_format, tools=tools)
-                    task.tokens = self.llm._tokens
+                    task._tokens = self.llm._tokens
                     iterations += 1
 
                 task_execution_counter += 1

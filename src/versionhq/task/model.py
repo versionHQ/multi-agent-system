@@ -14,8 +14,7 @@ from pydantic import UUID4, BaseModel, Field, PrivateAttr, field_validator, mode
 from pydantic_core import PydanticCustomError
 
 import versionhq as vhq
-from versionhq.task.log_handler import TaskOutputStorageHandler
-from versionhq.task.evaluate import Evaluation, EvaluationItem
+from versionhq.task.evaluation import Evaluation, EvaluationItem
 from versionhq.tool.model import Tool, ToolSet
 from versionhq._utils import process_config, Logger
 
@@ -176,14 +175,16 @@ class TaskOutput(BaseModel):
     """
     A class to store the final output of the given task in raw (string), json_dict, and pydantic class formats.
     """
+    _tokens: int = PrivateAttr(default=0)
 
     task_id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True, description="store Task ID")
     raw: str = Field(default="", description="Raw output of the task")
     json_dict: Dict[str, Any] = Field(default=None, description="`raw` converted to dictionary")
     pydantic: Optional[Any] = Field(default=None)
-    tool_output: Optional[Any] = Field(default=None, description="store tool result when the task takes tool output as its final output")
-    callback_output: Optional[Any] = Field(default=None, description="store task or agent callback outcome")
-    evaluation: Optional[InstanceOf[Evaluation]] = Field(default=None, description="store overall evaluation of the task output. passed to ltm")
+    tool_output: Optional[Any] = Field(default=None, description="stores tool result when the task takes tool output as its final output")
+    callback_output: Optional[Any] = Field(default=None, description="stores task or agent callback outcome")
+    latency: float = Field(default=None, description="job latency in ms")
+    evaluation: Optional[InstanceOf[Evaluation]] = Field(default=None, description="stores overall evaluation of the task output. stored in ltm")
 
 
     def to_context_prompt(self) -> str:
@@ -206,21 +207,25 @@ class TaskOutput(BaseModel):
         """
         Evaluate the output based on the criteria, score each from 0 to 1 scale, and raise suggestions for future improvement.
         """
-        from versionhq.task.TEMPLATES.Description import EVALUATE
+        from versionhq.task.TEMPLATES.Description import EVALUATE, SHOTS
 
         self.evaluation = Evaluation() if not self.evaluation else self.evaluation
 
-        # self.evaluation.latency = latency if latency is not None else task.latency
-        # self.evaluation.tokens = tokens if tokens is not None else task.tokens
+        eval_criteria = task.eval_criteria if task.eval_criteria else  ["accuracy", "completeness", "conciseness", ]
+        fsl_prompt = ""
 
-        eval_criteria = task.eval_criteria if task.eval_criteria else  ["Overall competitiveness", ]
+        if task.fsls:
+            fsl_prompt = SHOTS.format(c=task.fsls[0], w=task.fsls[1] if len(task.fsls) > 1 else "")
+        else:
+            fsl_prompt = self.evaluation._draft_fsl_prompt(task_description=task.description)
 
         for item in eval_criteria:
-            task_eval = Task(
-                description=EVALUATE.format(task_description=task.description, task_output=self.raw, eval_criteria=str(item)),
-                pydantic_output=EvaluationItem
-            )
+            description = EVALUATE.format(task_description=task.description, task_output=self.raw, eval_criteria=str(item))
+            description = description + fsl_prompt if fsl_prompt else description
+
+            task_eval = Task(description=description, pydantic_output=EvaluationItem)
             res = task_eval.execute(agent=self.evaluation.eval_by)
+            self._tokens += task_eval._tokens
 
             if res.pydantic:
                 item = EvaluationItem(score=res.pydantic.score, suggestion=res.pydantic.suggestion, criteria=res.pydantic.criteria)
@@ -263,7 +268,6 @@ class Task(BaseModel):
 
     __hash__ = object.__hash__
     _original_description: str = PrivateAttr(default=None)
-    _task_output_handler = TaskOutputStorageHandler()
     config: Optional[Dict[str, Any]] = Field(default=None, description="values to set on Task class")
 
     id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True, description="unique identifier for the object, not set by user")
@@ -287,15 +291,15 @@ class Task(BaseModel):
 
     # evaluation
     should_evaluate: bool = Field(default=False, description="True to run the evaluation flow")
-    eval_criteria: Optional[List[str]] = Field(default_factory=list, description="criteria to evaluate the outcome. i.e., fit to the brand tone")
+    eval_criteria: Optional[List[str]] = Field(default_factory=list, description="stores a list of criteria to evaluate the outcome")
+    fsls: Optional[list[str]] = Field(default=None, description="stores ideal/weak responses")
 
-    # recording !# REFINEME - eval_callbacks
-    processed_agents: Set[str] = Field(default_factory=set, description="store roles of the agents that executed the task")
+    # recording
+    _tokens: int = 0
+    processed_agents: Set[str] = Field(default_factory=set, description="store keys of the agents that executed the task")
     tool_errors: int = 0
     delegations: int = 0
-    latency: int | float = 0 # job latency in sec
-    tokens: int = 0 # tokens consumed
-    output: Optional[TaskOutput] = Field(default=None, description="store the final task output in TaskOutput class")
+    output: Optional[TaskOutput] = Field(default=None, description="store the final TaskOutput object")
 
 
     @model_validator(mode="before")
@@ -553,7 +557,7 @@ Ref. Output image: {output_formats_to_follow}
                 task_output=str(task_output.raw),
                 agent=str(agent.role),
                 metadata=memory_metadata
-                )
+            )
 
         except AttributeError as e:
             Logger().log(level="error", message=f"Missing attributes for long term memory: {str(e)}", color="red")
@@ -604,10 +608,16 @@ Ref. Output image: {output_formats_to_follow}
         return agent_to_delegate
 
 
+    def _store_logs(self, inputs: Optional[Dict[str, Any]] = {}) -> None:
+        from versionhq.storage.task_output_storage import TaskOutputStorageHandler
+
+        TaskOutputStorageHandler().update(task=self, inputs=inputs)
+
+
     # task execution
     def execute(
             self, type: TaskExecutionType = None, agent: Optional["vhq.Agent"] = None, context: Optional[Any] = None
-            ) -> TaskOutput | Future[TaskOutput]:
+        ) -> TaskOutput | Future[TaskOutput]:
         """
         A main method to handle task execution. Build an agent when the agent is not given.
         """
@@ -632,27 +642,19 @@ Ref. Output image: {output_formats_to_follow}
     def _execute_async(self, agent, context: Optional[Any] = None) -> Future[TaskOutput]:
         """Executes the task asynchronously."""
         future: Future[TaskOutput] = Future()
-        threading.Thread(daemon=True, target=self._execute_task_async, args=(agent, context, future)).start()
+
+        def _handle_task_async(self, agent, context: Optional[str], future: Future[TaskOutput]) -> None:
+            result = self._execute_core(agent, context)
+            future.set_result(result)
+
+        threading.Thread(daemon=True, target=_handle_task_async, args=(agent, context, future)).start()
         return future
-
-
-    def _execute_task_async(self, agent, context: Optional[str], future: Future[TaskOutput]) -> None:
-        """
-        Executes the task asynchronously with context handling.
-        """
-        result = self._execute_core(agent, context)
-        future.set_result(result)
 
 
     def _execute_core(self, agent, context: Optional[Any]) -> TaskOutput:
         """
-        A core method for task execution.
-        Handles 1. agent delegation, 2. tools, 3. context to add to the prompt, and 4. callbacks.
+        A core method to execute a task.
         """
-
-        from versionhq.agent.model import Agent
-        from versionhq.agent_network.model import AgentNetwork
-
         task_output: InstanceOf[TaskOutput] = None
         raw_output: str = None
         tool_output: str | list = None
@@ -669,12 +671,12 @@ Ref. Output image: {output_formats_to_follow}
             agent = agent_to_delegate
             self.delegations += 1
 
-
         if self.tool_res_as_final == True:
             started_at = datetime.datetime.now()
             tool_output = agent.execute_task(task=self, context=context, task_tools=task_tools)
+            raw_output = str(tool_output) if tool_output else ""
             ended_at = datetime.datetime.now()
-            task_output = TaskOutput(task_id=self.id, tool_output=tool_output, raw=str(tool_output) if tool_output else "")
+            task_output = TaskOutput(task_id=self.id, tool_output=tool_output, raw=raw_output)
 
         else:
             started_at = datetime.datetime.now()
@@ -691,26 +693,13 @@ Ref. Output image: {output_formats_to_follow}
                 task_id=self.id,
                 raw=raw_output if raw_output is not None else "",
                 pydantic=pydantic_output,
-                json_dict=json_dict_output
+                json_dict=json_dict_output,
             )
 
-        self.latency = (ended_at - started_at).total_seconds()
-        task_output.evaluation = Evaluation(latency=self.latency, tokens=self.tokens)
+        task_output.latency = round((ended_at - started_at).total_seconds() * 1000, 3)
+        task_output._tokens = self._tokens
         self.output = task_output
-        self.processed_agents.add(agent.role)
-
-        if self.should_evaluate and raw_output: # eval only when raw output exsits
-            task_output.evaluate(task=self)
-
-        self._create_short_and_long_term_memories(agent=agent, task_output=task_output)
-
-        if self.callback and isinstance(self.callback, Callable):
-            kwargs = { **self.callback_kwargs, **task_output.json_dict }
-            sig = inspect.signature(self.callback)
-            valid_keys = [param.name for param in sig.parameters.values() if param.kind == param.POSITIONAL_OR_KEYWORD]
-            valid_kwargs = { k: kwargs[k] if  k in kwargs else None for k in valid_keys }
-            callback_res = self.callback(**valid_kwargs)
-            task_output.callback_output = callback_res
+        self.processed_agents.add(agent.key)
 
         # if self.output_file: ## disabled for now
         #     content = (
@@ -719,15 +708,25 @@ Ref. Output image: {output_formats_to_follow}
         #         else pydantic_output.model_dump_json() if pydantic_output else result
         #     )
         #     self._save_file(content)
+
+
+        # successful output will be evaluated and stored in the logs
+        if raw_output:
+            if self.should_evaluate:
+                task_output.evaluate(task=self)
+            self._create_short_and_long_term_memories(agent=agent, task_output=task_output)
+
+            if self.callback and isinstance(self.callback, Callable):
+                kwargs = { **self.callback_kwargs, **task_output.json_dict }
+                sig = inspect.signature(self.callback)
+                valid_keys = [param.name for param in sig.parameters.values() if param.kind == param.POSITIONAL_OR_KEYWORD]
+                valid_kwargs = { k: kwargs[k] if  k in kwargs else None for k in valid_keys }
+                callback_res = self.callback(**valid_kwargs)
+                task_output.callback_output = callback_res
+
+            self._store_logs()
+
         return task_output
-
-
-    def _store_execution_log(self, task_index: int, was_replayed: bool = False, inputs: Optional[Dict[str, Any]] = {}) -> None:
-        """
-        Store the task execution log.
-        """
-
-        self._task_output_handler.update(task=self, task_index=task_index, was_replayed=was_replayed, inputs=inputs)
 
 
     @property

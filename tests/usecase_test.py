@@ -20,7 +20,7 @@ def test_demo_network():
 
     assert isinstance(network, vhq.AgentNetwork) and isinstance(network.formation, vhq.Formation)
 
-    res = network.launch()
+    res, _ = network.launch()
 
     assert res.pydantic is not None
 

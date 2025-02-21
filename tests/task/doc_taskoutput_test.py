@@ -1,4 +1,3 @@
-
 def test_doc_core_taskoutput_a():
     import versionhq as vhq
     from pydantic import BaseModel
@@ -30,7 +29,7 @@ def test_doc_core_taskoutput_a():
     assert "Hi! Here is the result: " in res.callback_output
     assert res.pydantic.test1 in res.callback_output and ", ".join(res.pydantic.test2) in res.callback_output
     assert res.tool_output is None
-    assert res.evaluation and isinstance(res.evaluation, vhq.Evaluation)
+    assert isinstance(res.evaluation, vhq.Evaluation)
     assert [isinstance(item, vhq.EvaluationItem) and item.criteria in task.eval_criteria for item in res.evaluation.items]
-    assert res.evaluation.latency and res.evaluation.tokens
+    assert res.latency and res._tokens
     assert res.evaluation.aggregate_score is not None and res.evaluation.suggestion_summary

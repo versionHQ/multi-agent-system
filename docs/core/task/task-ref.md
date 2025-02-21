@@ -16,6 +16,7 @@
 | **`callback_kwargs`** | Optional[Dict[str, Any]] | dict() | True | Args for the callback function (if any)|
 | **`should_evaluate`** | bool | False | - | Whether to evaluate the task output using eval criteria |
 | **`eval_criteria`** | Optional[List[str]] | list() | True | Evaluation criteria given by the human client |
+| **`fsls`** | Optional[List[str]] | None | True | Examples of excellent and weak responses |
 | **`processed_agents`** | Set[str] | set() | True | [Ops] Stores roles of the agents executed the task |
 | **`tool_errors`** | int | 0 | True | [Ops] Stores number of tool errors |
 | **`delegation`** | int | 0 | True | [Ops] Stores number of agent delegations |

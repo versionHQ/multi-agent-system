@@ -90,7 +90,7 @@ def workflow(final_output: Type[BaseModel], context: Any = None, human: bool = F
                 target = [v for v in task_graph.nodes.values() if v.task.name == target_task_name][0]
                 dependency_type = dependency_types[i]
                 task_graph.add_dependency(
-                    source_node_identifier=source.identifier, target_node_identifier=target.identifier, dependency_type=dependency_type)
+                    source=source.identifier, target=target.identifier, dependency_type=dependency_type)
 
 
     task_graph.visualize()

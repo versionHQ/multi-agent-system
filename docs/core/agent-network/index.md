@@ -33,7 +33,7 @@ network = vhq.form_agent_network(
   expected_outcome='media mix, key messages, and CTA targets.'
 )
 
-res = network.launch()
+res, _ = network.launch()
 
 assert isinstance(res, vhq.TaskOutput)
 ```

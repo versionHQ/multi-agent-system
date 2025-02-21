@@ -4,15 +4,18 @@ from enum import Enum
 from concurrent.futures import Future
 from hashlib import md5
 from typing import Any, Dict, List, Callable, Optional, Tuple
+from typing_extensions import Self
+
 from pydantic import UUID4, BaseModel, Field, PrivateAttr, field_validator, model_validator
 from pydantic._internal._generate_schema import GenerateSchema
 from pydantic_core import PydanticCustomError, core_schema
 
+
 from versionhq.agent.model import Agent
 from versionhq.task.model import Task, TaskOutput, TaskExecutionType, ResponseField
-from versionhq.task.formatter import create_raw_outputs
+from versionhq.task_graph.model import TaskGraph, Node, Edge, TaskStatus, DependencyType
 from versionhq._utils.logger import Logger
-from versionhq._utils.usage_metrics import UsageMetrics
+# from versionhq.recording.usage_metrics import UsageMetrics
 
 
 initial_match_type = GenerateSchema.match_type
@@ -40,36 +43,9 @@ class TaskHandlingProcess(str, Enum):
     A class representing task handling processes to tackle multiple tasks.
     When the agent network has multiple tasks that connect with edges, follow the edge conditions.
     """
-    SEQUENT = 1
-    HIERARCHY = 2
-    CONSENSUAL = 3 # either from managers or peers or (human) - most likely controlled by edge
-
-
-class NetworkOutput(TaskOutput):
-    """
-    A class to store output from the network, inherited from TaskOutput class.
-    """
-
-    network_id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True, description="store the network ID as an identifier that generate the output")
-    task_description: str = Field(default=None, description="store initial request (task description) from the client")
-    task_outputs: list[TaskOutput] = Field(default=list, description="store TaskOutput objects of all tasks that the network has executed")
-    # token_usage: UsageMetrics = Field(default=dict, description="processed token summary")
-
-    def return_all_task_outputs(self) -> List[Dict[str, Any]]:
-        res = [output.json_dict for output in self.task_outputs]
-        return res
-
-    def __str__(self):
-        return (str(self.pydantic) if self.pydantic else str(self.json_dict) if self.json_dict else self.raw)
-
-    def __getitem__(self, key):
-        if self.pydantic and hasattr(self.pydantic, key):
-            return getattr(self.pydantic, key)
-        elif self.json_dict and key in self.json_dict:
-            return self.json_dict[key]
-        else:
-            raise KeyError(f"Key '{key}' not found in the output.")
-
+    HIERARCHY = 1
+    SEQUENTIAL = 2
+    CONSENSUAL = 3 # either from manager class agents from diff network or human. need to define a trigger
 
 
 class Member(BaseModel):
@@ -88,10 +64,7 @@ class Member(BaseModel):
 
 
 class AgentNetwork(BaseModel):
-    """
-    A class to store a agent network with agent members and their tasks.
-    Tasks can be 1. multiple individual tasks, 2. multiple dependant tasks connected via TaskGraph, and 3. hybrid.
-    """
+    """A Pydantic class to store an agent network with agent members and tasks."""
 
     __hash__ = object.__hash__
     _execution_span: Any = PrivateAttr()
@@ -103,27 +76,21 @@ class AgentNetwork(BaseModel):
     formation: Optional[Formation] = Field(default=None)
     should_reform: bool = Field(default=False, description="True if task exe. failed or eval scores below threshold")
 
-    # formation planning
-    network_tasks: Optional[List[Task]] = Field(default_factory=list, description="tasks without dedicated agents")
+    network_tasks: Optional[List[Task]] = Field(default_factory=list, description="tasks without dedicated agents - network's common tasks")
 
     # task execution rules
-    prompt_file: str = Field(default="", description="absolute path to the prompt json file")
-    process: TaskHandlingProcess = Field(default=TaskHandlingProcess.SEQUENT)
+    prompt_file: str = Field(default="", description="absolute file path to the prompt file that stores jsonified prompts")
+    process: TaskHandlingProcess = Field(default=TaskHandlingProcess.SEQUENTIAL)
+    consent_trigger: Optional[Callable] = Field(default=None, description="returns bool")
 
     # callbacks
-    pre_launch_callbacks: List[Callable[[Optional[Dict[str, Any]]], Optional[Dict[str, Any]]]] = Field(
-        default_factory=list,
-        description="list of callback functions to be executed before the network launch. i.e., adjust inputs"
-    )
-    post_launch_callbacks: List[Callable[[NetworkOutput], NetworkOutput]] = Field(
-        default_factory=list,
-        description="list of callback functions to be executed after the network launch. i.e., store the result in repo"
-    )
-    step_callback: Optional[Any] = Field(default=None, description="callback to be executed after each step for all agents execution")
+    pre_launch_callbacks: List[Callable[..., Any]]= Field(default_factory=list, description="list of callback funcs called before the network launch")
+    post_launch_callbacks: List[Callable[..., Any]] = Field(default_factory=list, description="list of callback funcs called after the network launch")
+    step_callback: Optional[Any] = Field(default=None, description="callback to be executed after each step of all agents execution")
 
     cache: bool = Field(default=True)
     execution_logs: List[Dict[str, Any]] = Field(default_factory=list, description="list of execution logs of the tasks handled by members")
-    usage_metrics: Optional[UsageMetrics] = Field(default=None, description="usage metrics for all the llm executions")
+    # usage_metrics: Optional[UsageMetrics] = Field(default=None, description="usage metrics for all the llm executions")
 
 
     def __name__(self) -> str:
@@ -136,6 +103,24 @@ class AgentNetwork(BaseModel):
         """Prevent manual setting of the 'id' field by users."""
         if v:
             raise PydanticCustomError("may_not_set_field", "The 'id' field cannot be set by the user.", {})
+
+
+    @model_validator(mode="after")
+    def validate_process(self) -> Self:
+        if self.process == TaskHandlingProcess.CONSENSUAL and not self.consent_trigger:
+            Logger().log(level="error", message="Need to define the consent trigger function that returns bool", color="red")
+            raise PydanticCustomError("invalid_process", "Need to define the consent trigger function that returns bool", {})
+
+        return self
+
+
+    @model_validator(mode="after")
+    def set_up_network_for_members(self) -> Self:
+        if self.members:
+            for member in self.members:
+                member.agent.networks.append(self)
+
+        return self
 
 
     @model_validator(mode="after")
@@ -181,7 +166,7 @@ class AgentNetwork(BaseModel):
         """
         Sequential task processing without any network_tasks require a task-agent pairing.
         """
-        if self.process == TaskHandlingProcess.SEQUENT and self.network_tasks is None:
+        if self.process == TaskHandlingProcess.SEQUENTIAL and self.network_tasks is None:
             for task in self.tasks:
                 if not [member.task == task for member in self.members]:
                     Logger().log(level="error", message=f"The following task needs a dedicated agent to be assinged: {task.description}", color="red")
@@ -209,11 +194,8 @@ class AgentNetwork(BaseModel):
         return self
 
 
-    @staticmethod
-    def handle_assigning_agents(unassigned_tasks: List[Task]) -> List[Member]:
-        """
-        Build an agent and assign it with a task. Return a list of Member connecting the agent created and the task given.
-        """
+    def _generate_agents(self, unassigned_tasks: List[Task]) -> List[Member]:
+        """Generates agents as members in the network."""
 
         from versionhq.agent.inhouse_agents import vhq_agent_creator
 
@@ -221,10 +203,7 @@ class AgentNetwork(BaseModel):
 
         for unassgined_task in unassigned_tasks:
             task = Task(
-                description=f"""
-                    Based on the following task summary, draft a AI agent's role and goal in concise manner.
-                    Task summary: {unassgined_task.summary}
-                """,
+                description=f"Based on the following task summary, draft an agent's role and goal in concise manner. Task summary: {unassgined_task.summary}",
                 response_fields=[
                     ResponseField(title="goal", data_type=str, required=True),
                     ResponseField(title="role", data_type=str, required=True),
@@ -242,187 +221,212 @@ class AgentNetwork(BaseModel):
         return new_member_list
 
 
-    def _get_responsible_agent(self, task: Task) -> Agent | None:
-        if task is None:
-            return None
-        else:
-            for member in self.members:
-                if member.tasks and [item for item in member.tasks if item.id == task.id]:
-                    return member.agent
-
-            return None
-
-
     def _assign_tasks(self) -> None:
-        """
-        Form a agent network considering given agents and tasks, and update `self.members` field:
-            1. Idling managers to take the network tasks.
-            2. Idling members to take the remaining tasks starting from the network tasks to member tasks.
-            3. Create agents to handle the rest tasks.
-        """
+        """Assigns tasks to member agents."""
 
         idling_managers: List[Member] = [member for member in self.members if member.is_idling and member.is_manager == True]
         idling_members: List[Member] =  [member for member in self.members if member.is_idling and member.is_manager == False]
-        unassigned_tasks: List[Task] = self.network_tasks + self.member_tasks_without_agent if self.network_tasks else self.member_tasks_without_agent
+        unassigned_tasks: List[Task] = self.network_tasks + self.unassigned_member_tasks if self.network_tasks else self.unassigned_member_tasks
         new_members: List[Member] = []
 
-        if idling_managers:
-            idling_managers[0].tasks.extend(unassigned_tasks)
-
-        elif idling_members:
-            idling_members[0].tasks.extend(unassigned_tasks)
+        if not unassigned_tasks:
+            return
 
         else:
-            new_members = self.handle_assigning_agents(unassigned_tasks=unassigned_tasks)
-            if new_members:
-                self.members += new_members
+            if idling_managers:
+                idling_managers[0].tasks.extend(unassigned_tasks)
+
+            elif idling_members:
+                idling_members[0].tasks.extend(unassigned_tasks)
+
+            else:
+                new_members = self._generate_agents(unassigned_tasks=unassigned_tasks)
+                if new_members:
+                    self.members += new_members
+
+
+    def _get_responsible_agent(self, task: Task) -> Agent | None:
+        if not task:
+            return None
+
+        self._assign_tasks()
+        for member in self.members:
+            if member.tasks and [item for item in member.tasks if item.id == task.id]:
+                return member.agent
 
 
     # task execution
-    def _process_async_tasks(self, futures: List[Tuple[Task, Future[TaskOutput], int]], was_replayed: bool = False) -> List[TaskOutput]:
-        """
-        When we have `Future` tasks, updated task outputs and task execution logs accordingly.
-        """
+    # def _process_async_tasks(self, futures: List[Tuple[Task, Future[TaskOutput], int]], was_replayed: bool = False) -> List[TaskOutput]:
+    #     """
+    #     When we have `Future` tasks, updated task outputs and task execution logs accordingly.
+    #     """
 
-        task_outputs: List[TaskOutput] = []
+    #     task_outputs: List[TaskOutput] = []
 
-        for future_task, future, task_index in futures:
-            task_output = future.result()
-            task_outputs.append(task_output)
-            future_task._store_execution_log(task_index, was_replayed)
+    #     for future_task, future, task_index in futures:
+    #         task_output = future.result()
+    #         task_outputs.append(task_output)
+    #         future_task._store_execution_log(task_index, was_replayed)
 
-        return task_outputs
-
-
-    def _calculate_usage_metrics(self) -> UsageMetrics:
-        """
-        Calculate and return the usage metrics that consumed by the agent network.
-        """
-        total_usage_metrics = UsageMetrics()
-
-        for member in self.members:
-            agent = member.agent
-            if hasattr(agent, "_token_process"):
-                token_sum = agent._token_process.get_summary()
-                total_usage_metrics.add_usage_metrics(token_sum)
-
-        if self.managers:
-            for manager in self.managers:
-                if hasattr(manager.agent, "_token_process"):
-                    token_sum = manager.agent._token_process.get_summary()
-                    total_usage_metrics.add_usage_metrics(token_sum)
-
-        self.usage_metrics = total_usage_metrics
-        return total_usage_metrics
+    #     return task_outputs
 
 
-    def _execute_tasks(self, tasks: List[Task], start_index: Optional[int] = 0, was_replayed: bool = False) -> NetworkOutput:
-        """
-        Executes tasks sequentially and returns the final output in NetworkOutput class.
-        When we have a manager agent, we will start from executing manager agent's tasks.
-        Priority:
-        1. Network tasks > 2. Manager task > 3. Member tasks (in order of index)
-        """
+    # def _calculate_usage_metrics(self) -> UsageMetrics:
+    #     """
+    #     Calculate and return the usage metrics that consumed by the agent network.
+    #     """
+    #     total_usage_metrics = UsageMetrics()
 
-        task_outputs: List[TaskOutput] = []
-        lead_task_output: TaskOutput = None
-        futures: List[Tuple[Task, Future[TaskOutput], int]] = []
-        last_sync_output: Optional[TaskOutput] = None
+    #     for member in self.members:
+    #         agent = member.agent
+    #         if hasattr(agent, "_token_process"):
+    #             token_sum = agent._token_process.get_summary()
+    #             total_usage_metrics.add_usage_metrics(token_sum)
 
-        for task_index, task in enumerate(tasks):
-            if start_index is not None and task_index < start_index:
-                if task.output:
-                    if task.execution_type == TaskExecutionType.ASYNC:
-                        task_outputs.append(task.output)
-                    else:
-                        task_outputs = [task.output]
-                        last_sync_output = task.output
-                continue
+    #     if self.managers:
+    #         for manager in self.managers:
+    #             if hasattr(manager.agent, "_token_process"):
+    #                 token_sum = manager.agent._token_process.get_summary()
+    #                 total_usage_metrics.add_usage_metrics(token_sum)
 
-            responsible_agent = self._get_responsible_agent(task)
-            if responsible_agent is None:
-                self._assign_tasks()
-
-            ## commented out - this will be handled by node objects
-            # if isinstance(task, ConditionalTask):
-            #     skipped_task_output = task._handle_conditional_task(task_outputs, futures, task_index, was_replayed)
-            #     if skipped_task_output:
-            #         continue
-
-            # self._log_task_start(task, responsible_agent)
-
-            if task.execution_type == TaskExecutionType.ASYNC:
-                context = create_raw_outputs(tasks=[task, ], task_outputs=([last_sync_output,] if last_sync_output else []))
-                future = task._execute_async(agent=responsible_agent, context=context)
-                futures.append((task, future, task_index))
-            else:
-                context = create_raw_outputs(tasks=[task,], task_outputs=([last_sync_output,] if last_sync_output else [] ))
-                task_output = task.execute(agent=responsible_agent, context=context)
-
-                if self.managers and responsible_agent in [manager.agent for manager in self.managers]:
-                    lead_task_output = task_output
-
-                task_outputs.append(task_output)
-                task._store_execution_log(task_index, was_replayed, self._inputs)
+    #     self.usage_metrics = total_usage_metrics
+    #     return total_usage_metrics
 
 
-        if futures:
-            task_outputs = self._process_async_tasks(futures, was_replayed)
+    def _execute_tasks(self, tasks: List[Task], start_index: Optional[int] = None) -> Tuple[TaskOutput, TaskGraph]:
+        """Executes tasks and returns TaskOutput object as concl or latest response in the network."""
+        res, task_graph = None, None
 
-        if not task_outputs:
+        if len(tasks) == 1:
+            task = self.tasks[0]
+            responsible_agent = self._get_responsible_agent(task=task)
+            res = task.execute(agent=responsible_agent)
+            return res, task_graph
+
+
+        nodes = [
+            Node(
+                task=task,
+                assigned_to=self._get_responsible_agent(task=task),
+                status=TaskStatus.NOT_STARTED if not start_index or i >= start_index else TaskStatus.COMPLETED,
+            ) for i, task in enumerate(tasks)
+        ]
+        task_graph = TaskGraph(nodes={node.identifier: node for node in nodes})
+
+        for i in range(0, len(nodes) - 1):
+            task_graph.add_edge(
+                source=nodes[i].identifier,
+                target=nodes[i+1].identifier,
+                edge=Edge(
+                    weight=3 if nodes[i].task in self.manager_tasks else 1,
+                    dependency_type=DependencyType.FINISH_TO_START if self.process == TaskHandlingProcess.HIERARCHY else DependencyType.START_TO_START,
+                    required=bool(self.process == TaskHandlingProcess.CONSENSUAL),
+                    condition=self.consent_trigger,
+                    data_transfer=bool(self.process == TaskHandlingProcess.HIERARCHY),
+                )
+            )
+
+        if start_index is not None:
+            res, _ = task_graph.activate(target=nodes[start_index].indentifier)
+
+        else:
+            res, _ = task_graph.activate()
+
+        # task_outputs: List[TaskOutput] = []
+        # lead_task_output: TaskOutput = None
+        # futures: List[Tuple[Task, Future[TaskOutput], int]] = []
+        # last_sync_output: Optional[TaskOutput] = None
+
+        # for task_index, task in enumerate(tasks):
+        #     if start_index is not None and task_index < start_index:
+        #         if task.output:
+        #             if task.execution_type == TaskExecutionType.ASYNC:
+        #                 task_outputs.append(task.output)
+        #             else:
+        #                 task_outputs = [task.output]
+        #                 last_sync_output = task.output
+        #         continue
+
+        #     responsible_agent = self._get_responsible_agent(task=task)
+
+        #     ## commented out - this will be handled by node objects
+        #     # if isinstance(task, ConditionalTask):
+        #     #     skipped_task_output = task._handle_conditional_task(task_outputs, futures, task_index, was_replayed)
+        #     #     if skipped_task_output:
+        #     #         continue
+
+        #     # self._log_task_start(task, responsible_agent)
+
+        #     context = create_raw_outputs(tasks=[task, ], task_outputs=([last_sync_output,] if last_sync_output else []))
+        #     res = task.execute(agent=responsible_agent, context=context)
+
+        #     if isinstance(res, Future):
+        #         futures.append((task, res, task_index))
+        #     else:
+        #         # if self.managers and responsible_agent in [manager.agent for manager in self.managers]:
+        #         #     lead_task_output = task_output
+
+        #         task_outputs.append(res)
+        #         task._store_log(task_index, was_replayed, self._inputs)
+
+
+        # if futures:
+        #     task_outputs = self._process_async_tasks(futures, was_replayed)
+
+        if not res:
             Logger().log(level="error", message="Missing task outputs.", color="red")
             raise ValueError("Missing task outputs")
 
-        final_task_output = lead_task_output if lead_task_output is not None else task_outputs[0] #! REFINEME
-
-        # token_usage = self._calculate_usage_metrics() #! combining with Eval
-
-        return NetworkOutput(
-            network_id=self.id,
-            raw=final_task_output.raw,
-            json_dict=final_task_output.json_dict,
-            pydantic=final_task_output.pydantic,
-            task_outputs=task_outputs,
-            # token_usage=token_usage,
-        )
+        return res, task_graph
 
 
-    def launch(self, kwargs_pre: Optional[Dict[str, str]] = None, kwargs_post: Optional[Dict[str, Any]] = None) -> NetworkOutput:
+
+    def launch(
+            self, kwargs_pre: Optional[Dict[str, str]] = None, kwargs_post: Optional[Dict[str, Any]] = None, start_index: int = None
+        ) -> Tuple[TaskOutput, TaskGraph]:
         """
         Launch the agent network - executing tasks and recording their outputs.
         """
 
-        metrics: List[UsageMetrics] = []
+        self._assign_tasks()
 
-        if self.network_tasks or self.member_tasks_without_agent:
-            self._assign_tasks()
-
-        if kwargs_pre is not None:
+        if kwargs_pre:
             for func in self.pre_launch_callbacks: # signature check
                 func(**kwargs_pre)
 
         for member in self.members:
             agent = member.agent
-            agent.networks.append(self)
+
+            if not agent.networks:
+                agent.networks.append(self)
 
             if self.step_callback:
                 agent.callbacks.append(self.step_callback)
 
         if self.process is None:
-            self.process = TaskHandlingProcess.SEQUENT
+            self.process = TaskHandlingProcess.SEQUENTIAL
 
-        result = self._execute_tasks(self.tasks)
+        result, tg = self._execute_tasks(self.tasks, start_index=start_index)
+        callback_output = None
 
         for func in self.post_launch_callbacks:
-            result = func(result, **kwargs_post)
+            callback_output = func(result, **kwargs_post)
 
-        metrics += [member.agent._token_process.get_summary() for member in self.members]
+        if callback_output:
+            match result:
+                case TaskOutput():
+                    result.callback_output = callback_output
 
-        self.usage_metrics = UsageMetrics()
-        for metric in metrics:
-            self.usage_metrics.add_usage_metrics(metric)
+                case _:
+                    pass
 
-        return result
+        # metrics += [member.agent._token_process.get_summary() for member in self.members]
+
+        # self.usage_metrics = UsageMetrics()
+        # for metric in metrics:
+        #     self.usage_metrics.add_usage_metrics(metric)
+
+        return result, tg
 
 
     @property
@@ -474,7 +478,7 @@ class AgentNetwork(BaseModel):
 
 
     @property
-    def member_tasks_without_agent(self) -> List[Task]:
+    def unassigned_member_tasks(self) -> List[Task]:
         res = list()
 
         if self.members:

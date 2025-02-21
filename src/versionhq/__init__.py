@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 load_dotenv(override=True)
 
 from versionhq.agent.model import Agent
-from versionhq.agent_network.model import AgentNetwork, NetworkOutput, Formation, Member, TaskHandlingProcess
+from versionhq.agent_network.model import AgentNetwork, Formation, Member, TaskHandlingProcess
 from versionhq.llm.model import LLM
 from versionhq.llm.llm_vars import LLM_CONTEXT_WINDOW_SIZES, PARAMS, PROVIDERS, MODELS
 from versionhq.clients.customer.model import Customer
@@ -19,7 +19,7 @@ from versionhq.knowledge.source import PDFKnowledgeSource, CSVKnowledgeSource, J
 from versionhq.knowledge.source_docling import DoclingSource
 from versionhq.task_graph.model import TaskStatus, TaskGraph, Node, Edge, DependencyType
 from versionhq.task.model import Task, TaskOutput, ResponseField, TaskExecutionType
-from versionhq.task.evaluate import Evaluation, EvaluationItem
+from versionhq.task.evaluation import Evaluation, EvaluationItem
 from versionhq.tool.model import Tool, ToolSet
 from versionhq.tool.cache_handler import CacheHandler
 from versionhq.tool.tool_handler import ToolHandler
@@ -31,12 +31,11 @@ from versionhq.agent_network.formation import form_agent_network
 from versionhq.task_graph.draft import workflow
 
 
-__version__ = "1.2.1.22"
+__version__ = "1.2.2.0"
 __all__ = [
     "Agent",
 
     "AgentNetwork",
-    "NetworkOutput",
     "Formation",
     "Member",
     "TaskHandlingProcess",

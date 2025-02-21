@@ -34,12 +34,14 @@ class MemoryMetadata:
 
     def __init__(
         self,
+        task_description: str = None,
         eval_criteria: Optional[str] = None,
         score: Optional[int | float] = None,
         suggestion: Optional[str] = None,
         eval_by: Optional[str] = None, # task evaluator agent
         config: Optional[Dict[str, Any]] = None
     ):
+        self.task_description = task_description
         self.eval_criteria = eval_criteria
         self.score = score
         self.suggestion = suggestion
@@ -104,7 +106,7 @@ class MemoryItem:
 
 class ShortTermMemory(Memory):
     """
-    A class for managing transient data related to immediate tasks and interactions.
+    A Pydantic class to store agents' short-term memories.
     - Type: stm
     - Storage: Mem0Storage | RAGStorage
     """
@@ -165,7 +167,7 @@ class ShortTermMemory(Memory):
 
 class LongTermMemory(Memory):
     """
-    A class for managing cross runs data related to overall task executions.
+    A Pydantic class for storing agents' long-term memories. Query task outputs for the evaluation.
     - Type: ltm
     - Storage: LTMSQLiteStorage | RAGStorage
     """

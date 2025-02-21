@@ -12,11 +12,11 @@ def test_create_and_activate_network():
     node_c = task_graph.add_task(task=task_c)
 
     task_graph.add_dependency(
-        source_node_identifier=node_a.identifier, target_node_identifier=node_b.identifier,
+        source=node_a.identifier, target=node_b.identifier,
         dependency_type=vhq.DependencyType.FINISH_TO_START, weight=5, description="B depends on A"
     )
     task_graph.add_dependency(
-        source_node_identifier=node_a.identifier, target_node_identifier=node_c.identifier,
+        source=node_a.identifier, target=node_c.identifier,
         dependency_type=vhq.DependencyType.FINISH_TO_FINISH, lag=1, required=False, weight=3
     )
     critical_path, duration, paths = task_graph.find_critical_path()

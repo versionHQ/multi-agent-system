@@ -6,13 +6,14 @@ import uuid
 import networkx as nx
 import matplotlib.pyplot as plt
 from abc import ABC
+from concurrent.futures import Future
 from typing import List, Any, Optional, Callable, Dict, Type, Tuple
 
 from pydantic import BaseModel, InstanceOf, Field, UUID4, field_validator
 from pydantic_core import PydanticCustomError
 
-from versionhq.task.model import Task, TaskOutput
 from versionhq.agent.model import Agent
+from versionhq.task.model import Task, TaskOutput
 from versionhq._utils.logger import Logger
 
 
@@ -62,20 +63,23 @@ class Node(BaseModel):
     def is_independent(self) -> bool:
         return not self.in_degree_nodes and not self.out_degree_nodes
 
-    def handle_task_execution(self, agent: Agent = None, context: str = None, format: Type[BaseModel] = None) -> TaskOutput | None:
-        """
-        Start task execution and update status accordingly.
-        """
+    def handle_task_execution(self, agent: Agent = None, context: str = None, response_format: Type[BaseModel] = None) -> TaskOutput | None:
+        """Executes the task and updates its status"""
 
         self.status = TaskStatus.IN_PROGRESS
 
         if not self.task:
-            Logger(verbose=True).log(level="error", message="Missing a task to execute. We'll return None.", color="red")
+            Logger().log(level="error", message="Missing a task to execute. We'll return None.", color="red")
             self.status = TaskStatus.ERROR
             return None
 
-        self.task.pydantic_output = self.task.pydantic_output if self.task.pydantic_output else format if type(format) == BaseModel else None
+        agent = agent if agent else self.assigned_to
+        self.task.pydantic_output = self.task.pydantic_output if self.task.pydantic_output else response_format if type(response_format) == BaseModel else None
         res = self.task.execute(agent=agent, context=context)
+
+        if isinstance(res, Future): # activate async
+            res = res.result()
+
         self.status = TaskStatus.COMPLETED if res else TaskStatus.ERROR
         return res
 
@@ -179,7 +183,7 @@ class Edge(BaseModel):
                     return False
 
 
-    def activate(self, format: Type[BaseModel] = None) -> TaskOutput | None:
+    def activate(self, response_format: Type[BaseModel] = None) -> TaskOutput | None:
         """
         Activates the edge to initiate task execution of the target node.
         """
@@ -197,7 +201,7 @@ class Edge(BaseModel):
             time.sleep(self.lag)
 
         context = self.source.task.output.raw if self.data_transfer else None
-        res = self.target.handle_task_execution(context=context, format=format)
+        res = self.target.handle_task_execution(context=context, response_format=response_format)
         return res
 
 
@@ -207,13 +211,12 @@ class Graph(ABC, BaseModel):
     """
     directed: bool = Field(default=False, description="Whether the graph is directed")
     graph: Type[nx.Graph] = Field(default=None)
-    nodes: Dict[str, Node] = Field(default_factory=dict, description="identifier: Node - for the sake of ")
+    nodes: Dict[str, Node] = Field(default_factory=dict, description="{node_identifier: Node}")
     edges: Dict[str, Edge] = Field(default_factory=dict)
 
     def __init__(self, directed: bool = False, **kwargs):
         super().__init__(directed=directed, **kwargs)
         self.graph = nx.DiGraph(directed=True) if self.directed else nx.Graph()
-
 
     def _return_node_object(self, node_identifier) -> Node | None:
         match = [v for k, v in self.nodes.items() if k == node_identifier]
@@ -262,9 +265,7 @@ class Graph(ABC, BaseModel):
         return [v for v in self.nodes.values() if v.out_degrees == 0 and v.in_degrees > 0]
 
     def find_critical_end_node(self) -> Node | None:
-        """
-        Find a critical end node from all the end nodes to lead a conclusion of the entire graph.
-        """
+        """Finds a critical end node from all the end nodes to lead a conclusion of the entire graph."""
         end_nodes = self.find_end_nodes()
         if not end_nodes:
             return None
@@ -275,7 +276,6 @@ class Graph(ABC, BaseModel):
         edges = [v for k, v in self.edges if isinstance(v, Edge) and v.source in end_nodes]
         critical_edge = max(edges, key=lambda item: item['weight']) if edges else None
         return critical_edge.target if critical_edge else None
-
 
     def find_path(self, source: Optional[str] | None, target: str, weight: Optional[Any] | None) -> Any:
         try:
@@ -309,8 +309,7 @@ class Graph(ABC, BaseModel):
         critical_path = max(all_paths, key=all_paths.get)
         critical_duration = all_paths[critical_path]
 
-        return list(critical_path), critical_duration, all_paths
-
+        return list(set(critical_path)), critical_duration, all_paths
 
     def is_circled(self, node: Node) -> bool:
         """Check if there's a path from the node to itself and return bool."""
@@ -325,8 +324,8 @@ class TaskGraph(Graph):
     id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True)
     should_reform: bool = Field(default=False)
     outputs: Dict[str, TaskOutput] = Field(default_factory=dict, description="stores node identifier and TaskOutput")
-    concl_template: Optional[Dict[str, Any] | Type[BaseModel]] = Field(default=None, description="stores a format of `concl` either in Pydantic model or JSON dict")
-    concl: Any = Field(default=None, description="store the final result of the entire task graph")
+    concl_template: Optional[Dict[str, Any] | Type[BaseModel]] = Field(default=None, description="stores final response format in Pydantic class or JSON dict")
+    concl: Optional[TaskOutput] = Field(default=None, description="stores the final or latest conclusion of the entire task graph")
 
 
     def _save(self, title: str, abs_file_path: str = None) -> None:
@@ -373,7 +372,7 @@ class TaskGraph(Graph):
             return task_node
 
 
-    def add_dependency(self, source_node_identifier: str, target_node_identifier: str, **edge_attributes) -> None:
+    def add_dependency(self, source: str, target: str, **edge_attributes) -> None:
         """
         Add an edge that connect task 1 (source) and task 2 (target) using task_node.name as an identifier
         """
@@ -389,7 +388,7 @@ class TaskGraph(Graph):
             else:
                 pass
 
-        self.add_edge(source_node_identifier, target_node_identifier, edge)
+        self.add_edge(source, target, edge)
 
 
     def get_task_status(self, identifier: str) -> TaskStatus | None:
@@ -484,7 +483,7 @@ class TaskGraph(Graph):
         plt.show(block=False)
 
 
-    def activate(self, target_node_identifier: Optional[str] = None) -> Tuple[TaskOutput | None, Dict[str, TaskOutput]]:
+    def activate(self, target: Optional[str] = None) -> Tuple[TaskOutput | None, Dict[str, TaskOutput]]:
         """
         Starts to execute all nodes in the graph or a specific node if the target is given, following the given conditons of the edge obeject.
         Then returns tuple of the last task output and all task outputs (self.outputs)
@@ -492,24 +491,24 @@ class TaskGraph(Graph):
 
         Logger().log(color="blue", message=f"Start to activate the graph: {str(self.id)}", level="info")
 
-        if target_node_identifier:
-            if not [k for k in self.nodes.keys() if k == target_node_identifier]:
-                Logger().log(level="error", message=f"The node {str(target_node_identifier)} is not in the graph.", color="red")
-                return None
+        if target:
+            if not [k for k in self.nodes.keys() if k == target]:
+                Logger().log(level="error", message=f"The node {str(target)} is not in the graph.", color="red")
+                return None, None
 
             # find a shortest path to each in-degree node of the node and see if dependency met.
-            node = self._return_node_object(target_node_identifier)
+            node = self._return_node_object(target)
             sources = node.in_degrees
             edge_status = []
             res = None
 
             for item in sources:
-                edge = self.find_path(source=item, target=target_node_identifier)
+                edge = self.find_path(source=item, target=target)
                 edge_status.append(dict(edge=edge if edge else None, dep_met=edge.dependency_met() if edge else False))
 
             if len([item for item in edge_status if item["dep_met"] == True]) == len(sources):
                 res = node.handle_task_execution()
-                self.outputs.update({ target_node_identifier: res })
+                self.outputs.update({ target: res })
 
             return res, self.outputs
 
@@ -524,40 +523,35 @@ class TaskGraph(Graph):
             critical_path, _, _ = self.find_critical_path()
             res = None
 
-            # When all nodes are completed, return the output of the critical end node or end node.
             if end_nodes and len([node for node in end_nodes if node.status == TaskStatus.COMPLETED]) == len(end_nodes):
-                if critical_end_node:
-                    return critical_end_node.task.output, self.outputs
-                else:
-                    return [v.task.output for k, v in end_nodes.items()][0], self.outputs
+                res = self.concl if self.concl else critical_end_node.task.output if critical_end_node else  [v.task.output for v in end_nodes.values()][0]
 
-            # Else, execute nodes connected with the critical_path
             elif critical_path:
-                for item in critical_path:
-                    edge = [v for k, v in self.edges.items() if item in k]
-                    if edge:
-                        edge = edge[0]
-
-                        if edge.target.status == TaskStatus.COMPLETED:
-                            res = edge.target.output
+                nodes = [v for k, v in self.nodes.items() if k in critical_path]
+                if nodes:
+                    for node in nodes:
+                        if node.status == TaskStatus.COMPLETED:
+                            res = node.task.output
 
                         else:
-                            res = edge.activate()
-                            node_identifier = edge.target.identifier
-                            self.outputs.update({ node_identifier: res })
+                            res = node.handle_task_execution()
+                            self.outputs.update({ node.identifier: res })
 
                             if not res and start_nodes:
                                 for node in start_nodes:
                                     res = node.handle_task_execution()
                                     self.outputs.update({ node.identifier: res })
+                else:
+                    for k, edge in self.edges.items():
+                        res = edge.activate()
+                        node_identifier = edge.target.identifier
+                        self.outputs.update({ node_identifier: res })
 
-            # If no critical paths in the graph, simply start from the start nodes.
             elif start_nodes:
                 for node in start_nodes:
                     res = node.handle_task_execution()
                     self.outputs.update({ node.identifier: res })
 
-            # If none of above is applicable, try to activate all the edges.
             else:
                 for k, edge in self.edges.items():
                     res = edge.activate()
@@ -566,5 +560,36 @@ class TaskGraph(Graph):
 
             self.concl = res
             self.concl_template = self.concl_template if self.concl_template else res.pydantic.__class__ if res.pydantic else None
-            # last_task_output = [v for v in self.outputs.values()][len([v for v in self.outputs.values()]) - 1] if [v for v in self.outputs.values()] else None
+             # last_task_output = [v for v in self.outputs.values()][len([v for v in self.outputs.values()]) - 1] if [v for v in self.outputs.values()] else None
             return res, self.outputs
+
+
+    def evaluate(self, eval_criteria: List[str] = None):
+        """Evaluates the conclusion based on the given eval criteria."""
+
+        if not isinstance(self.concl, TaskOutput):
+            return None
+
+        tasks = [v.task for v in self.nodes.values() if v.task and v.task.id == self.concl.task_id]
+        task = tasks[0] if tasks else None
+
+        if not task:
+            return None
+
+        if not task.eval_criteria:
+            task.eval_criteria = eval_criteria
+
+        eval = self.concl.evaluate(task=task)
+        return eval
+
+
+    @property
+    def usage(self) -> Tuple[int, float]:
+        """Returns aggregate number of consumed tokens and job latency in ms during the activation"""
+
+        tokens, latency = 0, 0
+        for v in self.outputs.values():
+            tokens += v._tokens
+            latency += v.latency
+
+        return tokens, latency

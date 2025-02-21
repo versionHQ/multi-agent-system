@@ -1,9 +1,7 @@
 # Executing Task
 
 
-## Prompting
-
-`[class method]`<bold>`prompt(self, model_provider: str = None, context: Optional[Any] = None) -> str`</bold>
+## Prompt Engineering
 
 Prompts are generated automatically based on the task `description`, response format, context, agent `role`, and `goal`.
 
@@ -40,9 +38,7 @@ In this scenario, `sub_task_2` executes before the main task. Its string output 
 
 <hr>
 
-## Executing
-
-**Agent delegation**
+## Delegation
 
 `[var]`<bold>`allow_delegation: bool = False`</bold>
 
@@ -58,13 +54,13 @@ task = vhq.Task(
 task.execute()
 
 assert task.output is not None
-assert "vhq-Delegated-Agent" in task.processed_agents # delegated agent
+assert task.processed_agents is not None # auto assigned
 assert task.delegations ==1
 ```
 
 <hr>
 
-**SYNC - ASYNC**
+## Sync - Async Execution
 
 `[var]`<bold>`type: bool = False`</bold>
 
@@ -87,7 +83,7 @@ with patch.object(vhq.Agent, "execute_task", return_value="test") as execute:
 
 <hr>
 
-**Using tools**
+## Using Tools
 
 `[var]`<bold>`tools: Optional[List[ToolSet | Tool | Any]] = None`</bold>
 
@@ -146,7 +142,7 @@ assert res.tool_output == "simple func"
 
 <hr>
 
-## Callback
+## Callbacks
 
 `[var]`<bold>`callback: Optional[Callable] = None`</bold>
 

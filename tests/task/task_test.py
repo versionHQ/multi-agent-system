@@ -2,7 +2,7 @@ from unittest.mock import patch
 from typing import Callable
 
 from versionhq.agent.model import Agent, LLM
-from versionhq.task.model import Task, ResponseField, TaskOutput, TaskExecutionType
+from versionhq.task.model import Task, ResponseField, TaskOutput
 from versionhq.tool.model import Tool, ToolSet
 from versionhq.tool.decorator import tool
 
@@ -117,7 +117,10 @@ def test_store_task_log():
         description="return the output following the given prompt.",
         response_fields=[ResponseField(title="task_1", data_type=str, required=True),],
     )
-    assert task._task_output_handler.load() is not None
+    task.execute()
+
+    from versionhq.storage.task_output_storage import TaskOutputStorageHandler
+    assert TaskOutputStorageHandler().load() is not None
 
 
 def test_task_with_agent_tools():
@@ -260,23 +263,3 @@ def test_maxit():
     with patch.object(LLM, "call", wraps=agent.llm.call) as mock:
         task.execute(agent=agent)
         assert mock.call_count <= 2
-
-
-# def test_evaluation():
-#     """
-#     See if the output will be evaluated accurately - when the task was given eval criteria
-#     """
-#     from versionhq.task.evaluate import Evaluation, EvaluationItem
-#     from versionhq.agent.inhouse_agents import vhq_task_evaluator
-
-#     task = Task(
-#         description="Research a topic to teach a kid aged 6 about math.",
-#         should_evaluate=True,
-#         eval_criteria=["Uniquness of the topic researched", "Fit to the target audience",],
-#     )
-#     res = task.execute()
-
-#     assert res.evaluation and isinstance(res.evaluation, Evaluation)
-#     assert [isinstance(item, EvaluationItem) and item.criteria in task.eval_criteria for item in res.evaluation.items]
-#     assert res.evaluation.latency and res.evaluation.tokens and res.evaluation.eval_by == vhq_task_evaluator
-#     assert res.evaluation.aggregate_score is not None and res.evaluation.suggestion_summary

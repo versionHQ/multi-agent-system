@@ -237,6 +237,41 @@ class LLM(BaseModel):
         return valid_params
 
 
+    def _supports_function_calling(self) -> bool:
+        try:
+            if self.model:
+                params = litellm.get_supported_openai_params(model=self.model)
+                return "response_format" in params if params else False
+        except Exception as e:
+            self._logger.log(level="warning", message=f"Failed to get supported params: {str(e)}", color="yellow")
+            return False
+
+
+    def _supports_stop_words(self) -> bool:
+        supported_params = litellm.get_supported_openai_params(model=self.model, custom_llm_provider=self.endpoint_provider)
+        return "stop" in supported_params if supported_params else False
+
+
+    def _get_context_window_size(self) -> int:
+        """
+        Only use 75% of the context window size to avoid cutting the message in the middle.
+        """
+        return int(LLM_CONTEXT_WINDOW_SIZES.get(self.model) * 0.75) if LLM_CONTEXT_WINDOW_SIZES.get(self.model) is not None else DEFAULT_CONTEXT_WINDOW_SIZE
+
+
+    def _set_callbacks(self, callbacks: List[Any]):
+        callback_types = [type(callback) for callback in callbacks]
+        for callback in litellm.success_callback[:]:
+            if type(callback) in callback_types:
+                litellm.success_callback.remove(callback)
+
+        for callback in litellm._async_success_callback[:]:
+            if type(callback) in callback_types:
+                litellm._async_success_callback.remove(callback)
+
+        litellm.callbacks = callbacks
+
+
     def call(
         self,
         messages: List[Dict[str, str]],
@@ -345,38 +380,3 @@ class LLM(BaseModel):
                 self._logger.log(level="error", message=f"{self.model} failed to execute: {str(e)}", color="red")
                 if "litellm.RateLimitError" in str(e):
                     raise e
-
-
-    def _supports_function_calling(self) -> bool:
-        try:
-            if self.model:
-                params = litellm.get_supported_openai_params(model=self.model)
-                return "response_format" in params if params else False
-        except Exception as e:
-            self._logger.log(level="warning", message=f"Failed to get supported params: {str(e)}", color="yellow")
-            return False
-
-
-    def _supports_stop_words(self) -> bool:
-        supported_params = litellm.get_supported_openai_params(model=self.model, custom_llm_provider=self.endpoint_provider)
-        return "stop" in supported_params if supported_params else False
-
-
-    def _get_context_window_size(self) -> int:
-        """
-        Only use 75% of the context window size to avoid cutting the message in the middle.
-        """
-        return int(LLM_CONTEXT_WINDOW_SIZES.get(self.model) * 0.75) if LLM_CONTEXT_WINDOW_SIZES.get(self.model) is not None else DEFAULT_CONTEXT_WINDOW_SIZE
-
-
-    def _set_callbacks(self, callbacks: List[Any]):
-        callback_types = [type(callback) for callback in callbacks]
-        for callback in litellm.success_callback[:]:
-            if type(callback) in callback_types:
-                litellm.success_callback.remove(callback)
-
-        for callback in litellm._async_success_callback[:]:
-            if type(callback) in callback_types:
-                litellm._async_success_callback.remove(callback)
-
-        litellm.callbacks = callbacks

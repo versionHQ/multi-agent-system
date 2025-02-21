@@ -187,7 +187,6 @@ def test_docs_core_tool_h3():
         goal="execute tools",
         tools=[my_tool],
         maxit=1,
-        max_tokens=3000
     )
 
     task = Task(
@@ -199,7 +198,7 @@ def test_docs_core_tool_h3():
     res = task.execute(agent=agent)
 
     assert res.tool_output == "demo func"
-    assert "Demo Tool Handler" in task.processed_agents
+    assert agent.key in task.processed_agents
 
 
 def test_docs_core_tool_h4():

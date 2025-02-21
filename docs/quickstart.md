@@ -23,7 +23,7 @@ network = vhq.form_agent_network(
    task="YOUR AMAZING TASK OVERVIEW",
    expected_outcome="YOUR OUTCOME EXPECTATION",
 )
-res = network.launch()
+res, _ = network.launch()
 ```
 
 This will form a network with multiple agents on `Formation` and return results as a `TaskOutput` object, storing outputs in JSON, plane text, Pydantic model formats along with evaluation.
@@ -104,7 +104,7 @@ network =vhq.AgentNetwork(
       vhq.Member(agent=agent_b, is_manager=True, tasks=[task_2]), # Agent B as a manager
    ],
 )
-res = network.launch()
+res, _ = network.launch()
 
 assert isinstance(res, vhq.NetworkOutput)
 assert "agent b" in task_1.processed_agents # agent_b delegated by agent_a

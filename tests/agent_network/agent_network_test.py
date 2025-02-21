@@ -2,8 +2,7 @@ from unittest.mock import patch
 
 from versionhq.agent.model import Agent
 from versionhq.task.model import Task, ResponseField, TaskOutput
-from versionhq.agent_network.model import AgentNetwork, Member, TaskHandlingProcess, NetworkOutput
-from versionhq._utils.usage_metrics import UsageMetrics
+from versionhq.agent_network.model import AgentNetwork, Member, TaskHandlingProcess
 from versionhq.llm.model import DEFAULT_MODEL_NAME
 
 
@@ -91,16 +90,11 @@ def test_launch_without_leader():
             Member(agent=agent_b, is_manager=False, tasks=[task_2,]),
         ],
     )
-    res = network.launch()
-    res_all = res.return_all_task_outputs()
+    res, tg = network.launch()
+    res_all = [v for v in tg.outputs.values()]
 
-    assert isinstance(res, NetworkOutput) and res.network_id is network.id
-    assert isinstance(res.raw, str) and isinstance(res.json_dict, dict)
-    assert res.pydantic is None
-    assert [isinstance(item, TaskOutput) for item in res.task_outputs]
-    assert isinstance(res_all, list) and len(res_all) == 2 and [isinstance(item, dict) for item in res_all]
-    # assert isinstance(res.token_usage, UsageMetrics)
-    # assert res.token_usage.total_tokens == 0 # as we dont set token usage on agent
+    assert isinstance(res, TaskOutput)
+    assert len(res_all) == 2 and [isinstance(item, TaskOutput) for item in res_all]
 
 
 def test_launch_with_task_callback():
@@ -143,10 +137,10 @@ def test_launch_with_task_callback():
             Member(agent=agent_b, is_manager=False, tasks=[task_2,]),
         ],
     )
-    res = network.launch()
+    res, tg = network.launch()
 
     assert res.raw and res.json_dict
-    assert len(res.return_all_task_outputs()) == 2
+    assert len(tg.outputs.keys()) == 2
     assert len(demo_list) == 2
     assert "pytest" in demo_list[0]
     assert "pytest" in demo_list[1]
@@ -203,17 +197,14 @@ def test_launch_with_leader():
             Member(agent=agent_b, is_manager=True, tasks=[task_2,]),
         ],
     )
-    res = network.launch()
+    res, tg = network.launch()
 
-    assert isinstance(res, NetworkOutput)
-    assert res.network_id is network.id
-    assert res.raw is not None
-    assert res.json_dict is not None
+    assert isinstance(res, TaskOutput)
     assert network.managers[0].agent.id is agent_b.id
-    assert len(res.task_outputs) == 2
-    assert [item.raw is not None for item in res.task_outputs]
+    assert tg.concl is not None
+    assert len(tg.outputs.keys()) == 2
+    assert [item.raw is not None for item in tg.outputs.values()]
     assert len(network.tasks) == 2
-    assert network.tasks[0].output.raw == res.raw
 
 
 def test_hierarchial_process():
@@ -243,17 +234,14 @@ def test_hierarchial_process():
         ],
         process=TaskHandlingProcess.HIERARCHY
     )
-    res = network.launch()
+    res, tg = network.launch()
 
-    assert isinstance(res, NetworkOutput)
-    assert res.network_id is network.id
-    assert res.raw is not None
-    assert res.json_dict is not None
+    assert isinstance(res, TaskOutput)
     assert network.managers[0].agent.id is agent_b.id
-    assert len(res.task_outputs) == 2
-    assert [item.raw is not None for item in res.task_outputs]
+    assert tg.concl is not None
+    assert len(tg.outputs.keys()) == 2
+    assert [item.raw is not None for item in tg.outputs.values()]
     assert len(network.tasks) == 2
-    assert network.tasks[0].output.raw == res.raw
 
 
 def test_handle_network_task():
@@ -319,8 +307,25 @@ def test_handle_network_task():
     )
     networks = [network_solo, network_flat, network_leader, network_dual_leaders, network_leader_without_task]
 
-
     for item in networks:
-        with patch.object(AgentNetwork, "_execute_tasks", kwargs=dict(tasks=item.tasks)) as private_mock:
+        with patch.object(AgentNetwork, "_execute_tasks", kwargs=dict(tasks=item.tasks), return_value=("test", "test")) as private_mock:
             item.launch()
             private_mock.assert_called_once()
+
+
+def test_network_eval():
+    import versionhq as vhq
+
+    network = vhq.AgentNetwork(
+        members=[
+            vhq.Member(agent=Agent(role="a", goal="a")),
+            vhq.Member(agent=Agent(role="b", goal="b")),
+        ],
+        network_tasks=[Task(description="draft a random poem")]
+    )
+
+    res, _ = network.launch()
+    assert res._tokens and res.latency
+
+
+test_network_eval()

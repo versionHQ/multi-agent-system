@@ -5,6 +5,7 @@ from pathlib import Path
 
 load_dotenv(override=True)
 
+
 def fetch_db_storage_path() -> str:
     directory_name = get_project_directory_name()
     data_dir = Path(appdirs.user_data_dir(appname=directory_name, appauthor="Version IO Sdn Bhd", version=None, roaming=False))

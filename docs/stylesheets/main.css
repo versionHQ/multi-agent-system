@@ -6,9 +6,9 @@
 
 
 class {
-    background-color: #363636;
+    background-color: hsl(0, 0%, 21%);
     padding: 8px 10px;
-    border-radius: 5px;
+    border-radius: 3px;
     color: #ededeb;
 }
 

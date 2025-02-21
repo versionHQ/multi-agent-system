@@ -9,7 +9,7 @@ def test_doc_index_a():
         task="YOUR AMAZING TASK OVERVIEW",
         expected_outcome="YOUR OUTCOME EXPECTATION",
     )
-    res = network.launch()
+    res, _ = network.launch()
     assert res.raw is not None
 
 
@@ -63,8 +63,9 @@ def test_doc_index_c():
             vhq.Member(agent=agent_b, is_manager=True, tasks=[task_2]),
         ],
     )
-    res = network.launch()
+    res, tg = network.launch()
 
-    assert isinstance(res, vhq.NetworkOutput)
-    assert "agent b" in task_1.processed_agents # delegated by agent_a
-    assert "agent b" in task_2.processed_agents
+    assert isinstance(res, vhq.TaskOutput)
+    assert isinstance(tg, vhq.TaskGraph)
+    assert agent_b.key in task_1.processed_agents # delegated by agent_a
+    assert agent_b.key in task_2.processed_agents

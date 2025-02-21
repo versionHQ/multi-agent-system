@@ -15,7 +15,7 @@ Ref. Node / Edge / <a href="/core/task-graph">TaskGraph</a> class
 
 ## Quick Start
 
-Create a task by defining its description in one simple sentence. The `description` will be used for task prompting later.
+Create a task by defining its description in one simple sentence. The `description` will be used in the prompt later.
 
 Each task will be assigned a unique ID as an identifier.
 

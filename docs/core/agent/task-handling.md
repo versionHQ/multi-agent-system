@@ -1,7 +1,7 @@
 
-## Prompting
+## Prompt Engineering
 
-**Developer Prompt (System Prompt)**
+**Developer Prompt**
 
 `[var]`<bold>`backstory: Optional[str] = TEMPLATE_BACKSTORY`<bold>
 
@@ -25,9 +25,7 @@ agent = vhq.Agent(
 	goal="Coping with price competition in saturated markets"
 )
 
-print(agent.backstory)
-
-# You are an expert marketing analyst with relevant skillsets and abilities to query relevant information from the given knowledge sources. Leveraging these, you will identify competitive solutions to achieve the following goal: coping with price competition in saturated markets.
+assert agent.backstory == "You are an expert marketing analyst with relevant skillsets and abilities to query relevant information from the given knowledge sources. Leveraging these, you will identify competitive solutions to achieve the following goal: coping with price competition in saturated markets."
 ```
 
 You can also specify your own backstory by simply adding the value to the backstory field of the Agent model:
@@ -41,9 +39,7 @@ agent = vhq.Agent(
     backstory="You are a marketing analyst for a company in a saturated market. The market is becoming increasingly price-competitive, and your company's profit margins are shrinking. Your primary goal is to develop and implement strategies to help your company maintain its market share and profitability in this challenging environment."
 )
 
-print(agent.backstory)
-
-# You are a marketing analyst for a company in a saturated market. The market is becoming increasingly price-competitive, and your company's profit margins are shrinking. Your primary goal is to develop and implement strategies to help your company maintain its market share and profitability in this challenging environment.
+assert agent.backstory == "You are a marketing analyst for a company in a saturated market. The market is becoming increasingly price-competitive, and your company's profit margins are shrinking. Your primary goal is to develop and implement strategies to help your company maintain its market share and profitability in this challenging environment."
 ```
 <hr />
 

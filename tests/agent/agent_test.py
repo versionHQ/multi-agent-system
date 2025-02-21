@@ -264,7 +264,7 @@ def test_agent_with_knowledge_sources():
 
 def test_using_contextual_memory():
     from versionhq.task.model import Task
-    from versionhq.task.evaluate import Evaluation
+    from versionhq.task.evaluation import Evaluation
     from versionhq.storage.rag_storage import RAGStorage
     from versionhq.storage.ltm_sqlite_storage import LTMSQLiteStorage
 

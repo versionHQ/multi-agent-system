@@ -22,8 +22,7 @@ def demo_func(message: str) -> str:
 my_tool = vhq.Tool(func=demo_func)
 res = my_tool.run(params=dict(message="Hi!"))
 
-print(res)
-# Hi!_demo
+assert res == "Hi!_demo"
 ```
 
 e.g. Build an agent with a simple tool
@@ -87,8 +86,7 @@ def demo_func() -> str:
 
 my_tool = Tool(func=demo_func)
 
-print(my_tool.name)
-# demo_func
+assert my_tool.name == "demo_func"
 ```
 
 ```python
@@ -96,8 +94,7 @@ from versionhq import Tool
 
 my_tool = Tool(name="my empty tool", func=lambda x: x)
 
-print(my_tool.name)
-# my empty tool
+assert my_tool.name == "my empty tool"
 ```
 
 Tool names are used to call cached tools later.
@@ -119,8 +116,7 @@ from versionhq import Tool
 my_tool = Tool(func=lambda x: f"demo-{x}")
 res = my_tool._run(x="TESTING")
 
-print(res)
-# demo-TESTING
+assert res == "demo-TESTING"
 ```
 
 Another way to define the logic is to add a function to the `func` field.
@@ -137,8 +133,7 @@ def demo_func() -> str:
 my_tool = Tool(func=demo_func)
 res = my_tool._run()
 
-print(res)
-# demo
+assert res == "demo"
 ```
 
 You can also pass parameters using the class method.
@@ -152,8 +147,7 @@ def demo_func(message: str) -> str:
 my_tool = Tool(func=demo_func)
 res = my_tool._run(message="Hi!")
 
-print(res)
-# Hi!_demo
+assert res == "Hi!_demo"
 ```
 
 ### Custom tool execution
@@ -173,8 +167,7 @@ class MyCustomTool(Tool):
 my_custom_tool = MyCustomTool(func=lambda x: len(x))
 res = my_custom_tool._run(["demo1", "demo2"])
 
-print(res)
-# 2
+assert res == 2
 ```
 
 ### Cached tool execution
@@ -197,11 +190,8 @@ def demo_func(demo_list: List[Any]) -> int:
 my_tool = CustomTool(func=demo_func)
 res = my_tool.run(params=dict(demo_list=["demo1", "demo2"]))
 
-print(res)
-# 2
-
-print(my_tool.tool_handler)
-# ToolHandler object
+assert res == 2
+assert isinstance(my_tool.tool_handler, vhq.ToolHandler)
 ```
 
 *Reference: <bold>`ToolHandler` class</bold>
@@ -252,8 +242,7 @@ task = Task(
 )
 
 res = task.execute(agent=agent)
-print(res)
-# demo func
+assert res == "demo func"
 ```
 
 When the function calling LLM is not provided, we use the main model or default model `gpt-4o` .
@@ -278,8 +267,7 @@ task = Task(
 )
 
 res = task.execute(agent=agent)
-print(res.tool_output)
-# demo func
+assert res.tool_output == "demo func"
 ```
 
 ```python
@@ -300,11 +288,8 @@ task = Task(
 )
 
 res = task.execute(agent=agent)
-print(res.tool_output)
-# "demo func"
-
-print(task.processed_agents)
-# {'Demo Tool Handler'}
+assert res.tool_output == "demo func"
+assert agent.key in task.processed_agents
 ```
 
 <hr />
@@ -320,8 +305,9 @@ If you want to see if the model of your choice supports function calling <bold>e
 ```python
 from versionhq.llm.model import LLM
 llm = LLM(model="<MODEL_NAME_OF_YOUR_CHOICE>")
-llm._supports_function_calling()
-# return bool
+res = llm._supports_function_calling()
+
+assert type(res) == bool
 ```
 
 ### 2. Add tools to the task
@@ -355,8 +341,7 @@ task = Task(
 )
 
 res = task.execute(agent=agent)
-print(res)
-# empty func_demo
+assert res == "empty func_demo"
 ```
 
 ## Decorator
@@ -373,13 +358,7 @@ def my_tool(test_words: str) -> str:
 """Test a tool decorator."""
 return test_words
 
-print(my_tool.name)
-# demo
-
-print(my_tool.description)
-# Tool: demo
-# Args: {'test_words': {'description': '', 'type': 'str'}}
-
-print(my_tool.func("tool's final part!"))
-# tool's final part!
+assert my_tool.name == "demo"
+assert "Tool: demo" in my_tool.description and "'test_words': {'description': '', 'type': 'str'" in my_tool.description
+assert my_tool.func("testing") == "testing"
 ```

@@ -1,6 +1,3 @@
-
-<hr />
-
 ## Optimizing Model
 
 **Model Optimization**

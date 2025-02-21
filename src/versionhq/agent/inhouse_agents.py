@@ -10,13 +10,15 @@ vhq_client_manager = Agent(
     role="vhq-Client Manager",
     goal="Efficiently communicate with the client on the task progress",
     llm=DEFAULT_MODEL_NAME,
+    maxit=1,
+    max_retry_limit=1,
     with_memory=True,
 )
 
 
 vhq_task_evaluator = Agent(
     role="vhq-Task Evaluator",
-    goal="score the output according to the given evaluation criteria.",
+    goal="score the output according to the given evaluation criteria, taking a step by step approach.",
     llm=DEFAULT_MODEL_NAME,
     llm_config=dict(top_p=0.8, top_k=30, max_tokens=5000, temperature=0.9),
     maxit=1,
@@ -45,4 +47,6 @@ vhq_agent_creator = Agent(
     role="vhq-Agent Creator",
     goal="build an agent that can handle the given task",
     llm="gemini/gemini-2.0-flash-exp",
+    maxit=1,
+    max_retry_limit=1,
 )

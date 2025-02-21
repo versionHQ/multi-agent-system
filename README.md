@@ -178,7 +178,7 @@ agent.update(
       task="YOUR AMAZING TASK OVERVIEW",
       expected_outcome="YOUR OUTCOME EXPECTATION",
    )
-   res = network.launch()
+   res, _ = network.launch()
    ```
 
 This will form a network with multiple agents on `Formation` and return `TaskOutput` object with output in JSON, plane text, Pydantic model format with evaluation.
@@ -209,15 +209,16 @@ task = vhq.Task(
    callback_kwargs=dict(message="Hi! Here is the result: ")
 )
 
-res = task.execute(context="amazing context to consider.")
-print(res)
+res = task.execute(context="context to consider")
+
+assert isinstance(res, vhq.TaskOutput)
 ```
 
 
 This will return a `TaskOutput` object that stores response in plane text, JSON, and Pydantic model: `CustomOutput` formats with a callback result, tool output (if given), and evaluation results (if given).
 
 ```python
-res == TaskOutput(
+res == vhq.TaskOutput(
    task_id=UUID('<TASK UUID>'),
    raw='{\"test1\":\"random str\", \"test2\":[\"str item 1\", \"str item 2\", \"str item 3\"]}',
    json_dict={'test1': 'random str', 'test2': ['str item 1', 'str item 2', 'str item 3']},
@@ -256,9 +257,9 @@ network =vhq.AgentNetwork(
       vhq.Member(agent=agent_b, is_manager=True, tasks=[task_2]), # Agent B as a manager
    ],
 )
-res = network.launch()
+res, _ = network.launch()
 
-assert isinstance(res, vhq.NetworkOutput)
+assert isinstance(res, vhq.TaskOutput)
 assert not [item for item in task_1.processed_agents if "vhq-Delegated-Agent" == item]
 assert [item for item in task_1.processed_agents if "agent b" == item]
 ```
