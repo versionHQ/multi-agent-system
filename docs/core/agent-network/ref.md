@@ -3,10 +3,77 @@ tags:
   - Agent Network
 ---
 
-## Variable `AgentNetwork`
+
+## Class `AgentNetwork`
+
+### Variable
+
+| <div style="width:200px">**Variable**</div> | **Data Type** | **Default** | **Nullable** | **Description** |
+| :---               | :---  | :--- | :--- | :--- |
+| **`id`**   | UUID4 | uuid.uuid4() | False | Stores auto-generated ID as identifier. Not editable. |
+| **`name`**   | str | None | True | Stores a name of the network. |
+| **`members`**   | List[`Member`] | list() | False | Stores a list of `Member` objects. |
+| **`formation`**  | `Formation`| None | True | Stores `Formation` enum. |
+| **`should_reform`**  | bool | False | - | Whether to reform the network during the activation. |
+| **`network_tasks`**  | List[`Task`] | list() | - | Stores a list of `Task` objects not assigned to any network members. |
+| **`prompt_file`** | str | None | True | Stores absolute file path to the prompt file with JSON formatted prompt |
+| **`process`** | `TaskHandlingProcess` | TaskHandlingProcess.SEQUENTIAL | - | Enum of the task handling process. |
+| **`consent_trigger`** | Callable[..., Any] | None | True | Stores a trigger event (func) for consentual processing. |
+| **`pre_launch_callbacks`** | List[Callable[..., Any]] | list() | - | Stores callbacks to run before the network launch. |
+| **`post_launch_callbacks`** | List[Callable[..., Any]] | list() | - | Stores callbacks to run after the network launch. |
+| **`step_callbacks`** | Callable[..., Any] | None | True | Stores callbacks to run at every step of each member agent takes during the activation. |
+| **`cache`** | bool | True | - | Whether to store cache. |
+| **`execution_logs`** |  List[Dict[str, Any]] | list() | - | Stores a list of execution logs of all the tasks in the network. |
 
 
-| <div style="width:160px">**Variable**</div> | **Data Type** | **Default** | **Nullable** | **Description** |
+### Class Methods
+
+| <div style="width:120px">**Method**</div> | **Params** | **Returns** | **Description** |
+| :---               | :---  | :--- | :--- |
+| **`launch`** | kwargs_pre: Optional[Dict[str, str]] = None <br> kwargs_post: Optional[Dict[str, Any]] = None <br> start_index: int = None |  Tuple[TaskOutput, TaskGraph]: | Core method to launch the network and execute tasks |
+
+
+### Properties
+
+| <div style="width:120px">**Property**</div> | **Returns** | **Description** |
+| :---               | :---  | :--- |
+| **`key`** | str | Unique identifier of the netowrk. |
+| **`managers`** | List[`Member`] | A list of manager members. |
+| **`manager_tasks`** | List[`Task`] | A list of tasks handled by managers. |
+| **`tasks`** | List[`Task`] | All the tasks in the network.|
+| **`unassigned_member_tasks`** | List[Task] | Unassigned member-level tasks. |
+
+
+<hr>
+
+## Class `Member`
+
+### Variable
+
+| <div style="width:200px">**Variable**</div> | **Data Type** | **Default** | **Nullable** | **Description** |
+| :---               | :---  | :--- | :--- | :--- |
+| **`agent`**   | `Agent` | None | True | Agent as a member |
+| **`is_manager`**   | bool | False | - | Whether the member is a manager. |
+| **`can_share_knowledge`**   | bool | True | - | Whether the member can share its knowledge among the other members in the network. |
+| **`can_share_memory`**   | bool | True | - | Whether the member can share its memories among the other members in the network. |
+| **`tasks`**  | List[`Task`]| list() | - | Assinged tasks. |
+
+
+### Properties
+
+| <div style="width:120px">**Property**</div> | **Returns** | **Description** |
+| :---               | :---  | :--- |
+| **`is_idling`** | bool | Whether it has unprocessed assgined task/s |
+
+
+
+<hr>
+
+## Class `Agent`
+
+### Variables
+
+| <div style="width:200px">**Variable**</div> | **Data Type** | **Default** | **Nullable** | **Description** |
 | :---               | :---  | :--- | :--- | :--- |
 | **`id`**   | UUID4 | uuid.uuid4() | False | Stores auto-generated ID as identifier. Not editable. |
 | **`role`**   | str | None | False | Stores a role of the agent. |
@@ -37,7 +104,7 @@ tags:
 | **`config`** | Dict[str, Any] | None | True | Stores model config. |
 
 
-## Class Methods `AgentNetwork`
+### Class Methods
 
 | <div style="width:120px">**Method**</div> | **Params** | **Returns** | **Description** |
 | :---               | :---  | :--- | :--- |
@@ -46,9 +113,29 @@ tags:
 | **`execute_task`** | task: [Task] <br> context: Any = None <br> task_tools: Optional[List[Tool \| ToolSet]] = list() | str | Returns response from the model in plane text format. |
 
 
-
-## Properties `AgentNetwork`
+### Properties
 
 | <div style="width:120px">**Property**</div> | **Returns** | **Description** |
 | :---               | :---  | :--- |
 | **`key`** | str | Unique identifier of the agent using its ID and sanitized role. |
+
+
+## ENUM `Formation`
+
+```python
+class Formation(str, Enum):
+    SOLO = 1
+    SUPERVISING = 2
+    SQUAD = 3
+    RANDOM = 4
+    HYBRID = 10
+```
+
+## ENUM `TaskHandlingProcess`
+
+```python
+class TaskHandlingProcess(str, Enum):
+    HIERARCHY = 1
+    SEQUENTIAL = 2
+    CONSENSUAL = 3
+```

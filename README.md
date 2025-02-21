@@ -3,7 +3,7 @@
 [![DL](https://img.shields.io/badge/Download-20K+-red)](https://clickpy.clickhouse.com/dashboard/versionhq)
 ![MIT license](https://img.shields.io/badge/License-MIT-green)
 [![Publisher](https://github.com/versionHQ/multi-agent-system/actions/workflows/publish.yml/badge.svg)](https://github.com/versionHQ/multi-agent-system/actions/workflows/publish.yml)
-![PyPI](https://img.shields.io/badge/PyPI-v1.2.1+-blue)
+![PyPI](https://img.shields.io/badge/PyPI-v1.2.2+-blue)
 ![python ver](https://img.shields.io/badge/Python-3.11/3.12-purple)
 ![pyenv ver](https://img.shields.io/badge/pyenv-2.5.0-orange)
 
@@ -174,14 +174,14 @@ agent.update(
    ```python
    import versionhq as vhq
 
-   network = vhq.form_agent_network(
+   network = work(
       task="YOUR AMAZING TASK OVERVIEW",
       expected_outcome="YOUR OUTCOME EXPECTATION",
    )
-   res, _ = network.launch()
+   res, tg = network.launch()
    ```
 
-This will form a network with multiple agents on `Formation` and return `TaskOutput` object with output in JSON, plane text, Pydantic model format with evaluation.
+This will form a agent network with multiple agents on `Formation` and return response in `TaskOutput` object and `TaskGraph` that connects multiple tasks as nodes.
 
 
 ### Executing tasks
@@ -213,7 +213,6 @@ res = task.execute(context="context to consider")
 
 assert isinstance(res, vhq.TaskOutput)
 ```
-
 
 This will return a `TaskOutput` object that stores response in plane text, JSON, and Pydantic model: `CustomOutput` formats with a callback result, tool output (if given), and evaluation results (if given).
 
@@ -257,11 +256,13 @@ network =vhq.AgentNetwork(
       vhq.Member(agent=agent_b, is_manager=True, tasks=[task_2]), # Agent B as a manager
    ],
 )
-res, _ = network.launch()
+res, tg = network.launch()
 
 assert isinstance(res, vhq.TaskOutput)
-assert not [item for item in task_1.processed_agents if "vhq-Delegated-Agent" == item]
-assert [item for item in task_1.processed_agents if "agent b" == item]
+assert agent_b.key in task_1.processed_agents
+assert agent_b.key in task_2.processed_agents
+
+assert isinstance(tg, vhq.TaskGraph)
 ```
 
 This will return a list with dictionaries with keys defined in the `ResponseField` of each task.

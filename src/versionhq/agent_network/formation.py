@@ -61,7 +61,7 @@ def form_agent_network(
     # try:
     prompt_formation = formation.name if formation and isinstance(formation, Formation) else f"Select the best formation to effectively execute the tasks from the given Enum sets: {str(Formation.__dict__)}."
 
-    prompt_expected_outcome = expected_outcome if isinstance(expected_outcome, str) else expected_outcome.model_dump_json()
+    prompt_expected_outcome = expected_outcome if isinstance(expected_outcome, str) else str(expected_outcome.model_dump()) if type(expected_outcome) == BaseModel else ""
 
     class Outcome(BaseModel):
         formation: Enum
@@ -76,7 +76,7 @@ def form_agent_network(
     )
 
     if agents:
-        vhq_task.description += "Consider adding following agents in the formation: " + ", ".join([agent.role for agent in agents if isinstance(agent, Agent)])
+        vhq_task.description += "You MUST add the following agents' roles in the network formation: " + ", ".join([agent.role for agent in agents if isinstance(agent, Agent)])
 
     res = vhq_task.execute(agent=vhq_formation_planner, context=context)
 
@@ -88,7 +88,17 @@ def form_agent_network(
     members = []
     leader = str(res.pydantic.leader_agent) if res.pydantic else str(res.json_dict["leader_agent"])
 
-    created_agents = [Agent(role=str(item), goal=str(item)) for item in res.pydantic.agent_roles]
+    agent_roles = res.pydantic.agent_roles if res.pydantic else res.json_dict["agent_roles"]
+    created_agents = [Agent(role=str(item), goal=str(item)) for item in agent_roles]
+
+    if agents:
+        for i, agent in enumerate(created_agents):
+            matches = [item for item in agents if item.role == agent.role]
+            if matches:
+                created_agents[i] = matches[0]
+            else:
+                pass
+
     created_tasks = []
 
     if res.pydantic:

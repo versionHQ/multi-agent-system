@@ -3982,7 +3982,7 @@ wheels = [
 
 [[package]]
 name = "versionhq"
-version = "1.2.2.0"
+version = "1.2.2.1"
 source = { editable = "." }
 dependencies = [
     { name = "appdirs" },

@@ -255,44 +255,6 @@ class AgentNetwork(BaseModel):
                 return member.agent
 
 
-    # task execution
-    # def _process_async_tasks(self, futures: List[Tuple[Task, Future[TaskOutput], int]], was_replayed: bool = False) -> List[TaskOutput]:
-    #     """
-    #     When we have `Future` tasks, updated task outputs and task execution logs accordingly.
-    #     """
-
-    #     task_outputs: List[TaskOutput] = []
-
-    #     for future_task, future, task_index in futures:
-    #         task_output = future.result()
-    #         task_outputs.append(task_output)
-    #         future_task._store_execution_log(task_index, was_replayed)
-
-    #     return task_outputs
-
-
-    # def _calculate_usage_metrics(self) -> UsageMetrics:
-    #     """
-    #     Calculate and return the usage metrics that consumed by the agent network.
-    #     """
-    #     total_usage_metrics = UsageMetrics()
-
-    #     for member in self.members:
-    #         agent = member.agent
-    #         if hasattr(agent, "_token_process"):
-    #             token_sum = agent._token_process.get_summary()
-    #             total_usage_metrics.add_usage_metrics(token_sum)
-
-    #     if self.managers:
-    #         for manager in self.managers:
-    #             if hasattr(manager.agent, "_token_process"):
-    #                 token_sum = manager.agent._token_process.get_summary()
-    #                 total_usage_metrics.add_usage_metrics(token_sum)
-
-    #     self.usage_metrics = total_usage_metrics
-    #     return total_usage_metrics
-
-
     def _execute_tasks(self, tasks: List[Task], start_index: Optional[int] = None) -> Tuple[TaskOutput, TaskGraph]:
         """Executes tasks and returns TaskOutput object as concl or latest response in the network."""
         res, task_graph = None, None
@@ -302,7 +264,6 @@ class AgentNetwork(BaseModel):
             responsible_agent = self._get_responsible_agent(task=task)
             res = task.execute(agent=responsible_agent)
             return res, task_graph
-
 
         nodes = [
             Node(
@@ -332,53 +293,11 @@ class AgentNetwork(BaseModel):
         else:
             res, _ = task_graph.activate()
 
-        # task_outputs: List[TaskOutput] = []
-        # lead_task_output: TaskOutput = None
-        # futures: List[Tuple[Task, Future[TaskOutput], int]] = []
-        # last_sync_output: Optional[TaskOutput] = None
-
-        # for task_index, task in enumerate(tasks):
-        #     if start_index is not None and task_index < start_index:
-        #         if task.output:
-        #             if task.execution_type == TaskExecutionType.ASYNC:
-        #                 task_outputs.append(task.output)
-        #             else:
-        #                 task_outputs = [task.output]
-        #                 last_sync_output = task.output
-        #         continue
-
-        #     responsible_agent = self._get_responsible_agent(task=task)
-
-        #     ## commented out - this will be handled by node objects
-        #     # if isinstance(task, ConditionalTask):
-        #     #     skipped_task_output = task._handle_conditional_task(task_outputs, futures, task_index, was_replayed)
-        #     #     if skipped_task_output:
-        #     #         continue
-
-        #     # self._log_task_start(task, responsible_agent)
-
-        #     context = create_raw_outputs(tasks=[task, ], task_outputs=([last_sync_output,] if last_sync_output else []))
-        #     res = task.execute(agent=responsible_agent, context=context)
-
-        #     if isinstance(res, Future):
-        #         futures.append((task, res, task_index))
-        #     else:
-        #         # if self.managers and responsible_agent in [manager.agent for manager in self.managers]:
-        #         #     lead_task_output = task_output
-
-        #         task_outputs.append(res)
-        #         task._store_log(task_index, was_replayed, self._inputs)
-
-
-        # if futures:
-        #     task_outputs = self._process_async_tasks(futures, was_replayed)
-
         if not res:
             Logger().log(level="error", message="Missing task outputs.", color="red")
             raise ValueError("Missing task outputs")
 
         return res, task_graph
-
 
 
     def launch(
@@ -391,7 +310,7 @@ class AgentNetwork(BaseModel):
         self._assign_tasks()
 
         if kwargs_pre:
-            for func in self.pre_launch_callbacks: # signature check
+            for func in self.pre_launch_callbacks: #! REFINEME -  signature check
                 func(**kwargs_pre)
 
         for member in self.members:
@@ -419,12 +338,6 @@ class AgentNetwork(BaseModel):
 
                 case _:
                     pass
-
-        # metrics += [member.agent._token_process.get_summary() for member in self.members]
-
-        # self.usage_metrics = UsageMetrics()
-        # for metric in metrics:
-        #     self.usage_metrics.add_usage_metrics(metric)
 
         return result, tg
 

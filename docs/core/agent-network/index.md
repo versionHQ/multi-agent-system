@@ -23,7 +23,7 @@ You can specify a desired formation or allow the agents to determine it autonomo
 
 By default, lead agents will determine the best network formation autonomously based on the given task and its goal.
 
-Calling `.launch()` method can start executing tasks by the network, then generate a response in text and JSON formats stored in the `TaskOutput` object.
+Calling `.launch()` method can start executing tasks and generate a tuple of response as a `TaskOutput` object and `TaskGraph` object.
 
 ```python
 import versionhq as vhq
@@ -33,11 +33,12 @@ network = vhq.form_agent_network(
   expected_outcome='media mix, key messages, and CTA targets.'
 )
 
-res, _ = network.launch()
+res, tg = network.launch()
 
 assert isinstance(res, vhq.TaskOutput)
+assert isinstance(tg, vhq.TaskGraph)
 ```
 
-Ref. <a href="/core/task-output">TaskOutput</a> class
+Ref. <a href="/core/task-output">TaskOutput</a> / <a href="/core/task-graph">TaskGraph </a> class.
 
 Visit <a href="https://versi0n.io">Playground</a>.

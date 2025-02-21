@@ -112,16 +112,15 @@ nav:
   - Quick Start: 'quickstart.md'
   - Agent Network:
     - 'core/agent-network/index.md'
-    - Configuration: 'core/agent-network/config.md'
-    - Task Handling: 'core/agent-network/task-handling.md'
-    - Reference: 'core/agent-network/ref.md'
+    - Generating: 'core/agent-network/form.md'
+    - Configuring: 'core/agent-network/config.md'
     - Agent:
       - 'core/agent/index.md'
       - Configuration: 'core/agent/config.md'
       - Task Handling: 'core/agent/task-handling.md'
-      - Reference: 'core/agent/ref.md'
     - LLM:
       - 'core/llm/index.md'
+    - Reference: 'core/agent-network/ref.md'
   - Task Graph:
     - 'core/task-graph/index.md'
     - Task:
