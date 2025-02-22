@@ -9,10 +9,10 @@ try:
     from docling_core.transforms.chunker.hierarchical_chunker import HierarchicalChunker
     from docling_core.types.doc.document import DoclingDocument
     DOCLING_AVAILABLE = True
-except ImportError:
-    import envoy
-    envoy.run("uv add docling --optional docling")
-    DOCLING_AVAILABLE = True
+# except ImportError:
+    # import envoy
+    # envoy.run("uv add docling --optional docling")
+    # DOCLING_AVAILABLE = True
 except:
     DOCLING_AVAILABLE = False
 

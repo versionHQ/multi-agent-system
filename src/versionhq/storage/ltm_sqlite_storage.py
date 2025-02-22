@@ -97,7 +97,7 @@ class LTMSQLiteStorage:
                     ]
 
         except sqlite3.Error as e:
-            self._logger.log(level="error", message=f"MEMORY ERROR: An error occurred while querying LTM: {e}",color="red")
+            self._logger.log(level="error", message=f"MEMORY ERROR: An error occurred while querying LTM: {str(e)}",color="red")
             return None
 
 

@@ -263,6 +263,8 @@ class AgentNetwork(BaseModel):
             task = self.tasks[0]
             responsible_agent = self._get_responsible_agent(task=task)
             res = task.execute(agent=responsible_agent)
+            node = Node(task=task)
+            task_graph = TaskGraph(nodes={ node.identifier: node, }, concl=res if res else None)
             return res, task_graph
 
         nodes = [

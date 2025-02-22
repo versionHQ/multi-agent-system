@@ -55,3 +55,18 @@ def test_demo_agent_customization():
     assert agent.llm.temperature == 1 and agent.llm.top_p == 0.1 and agent.llm.n == 1 and agent.llm.stop == "test"
     assert agent.knowledge_sources == ['https://business.linkedin.com', f'{current_path}/demo.csv',]
     assert agent.with_memory == True
+
+
+def test_solo_tg_eval():
+    import versionhq as vhq
+
+    network = vhq.form_agent_network(
+        task="test",
+        expected_outcome="test"
+    )
+
+    res, tg = network.launch()
+    eval = tg.evaluate(
+        eval_criteria=["cost", "", "{criteria_3}"]
+    )
+    assert isinstance(eval, vhq.Evaluation)

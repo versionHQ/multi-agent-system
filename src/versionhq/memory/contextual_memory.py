@@ -23,25 +23,25 @@ class ContextualMemory:
         self.um = um
 
 
-    def build_context_for_task(self, query: str = None) -> str:
+    def _sanitize_query(self, query: str = None) -> str:
+        if not query:
+            return ""
+
+        return query.replace("{", "").replace("}", "")
+
+
+    def _fetch_stm_context(self, query: str = None) -> str:
         """
-        Automatically builds a minimal, highly relevant set of contextual information for a given task.
+        Fetches recent relevant insights from STM
         """
         if not query:
             return ""
 
-        context = []
-        context.append(self._fetch_stm_context(query))
-        if self.memory_provider == "mem0":
-            context.append(self._fetch_user_context(query))
-        return "\n".join(filter(None, context))
 
-
-    def _fetch_stm_context(self, query) -> str:
-        """
-        Fetches recent relevant insights from STM related to the task's description and expected_output, formatted as bullet points.
-        """
         stm_results = self.stm.search(query)
+        if not stm_results:
+            return ""
+
         formatted_results = "\n".join(
             [
                 f"- {result['memory'] if self.memory_provider == 'mem0' else result['context']}"
@@ -51,13 +51,16 @@ class ContextualMemory:
         return f"Recent Insights:\n{formatted_results}" if stm_results else ""
 
 
-    def _fetch_ltm_context(self, task) -> Optional[str]:
+    def _fetch_ltm_context(self, query: str = None) -> Optional[str]:
         """
         Fetches historical data or insights from LTM that are relevant to the task's description and expected_output, formatted as bullet points.
         """
-        ltm_results = self.ltm.search(task, latest_n=2)
+        if not query:
+            return ""
+
+        ltm_results = self.ltm.search(query, latest_n=2)
         if not ltm_results:
-            return None
+            return ""
 
         formatted_results = [suggestion for result in ltm_results for suggestion in result["metadata"]["suggestions"]]
         formatted_results = list(dict.fromkeys(formatted_results))
@@ -65,10 +68,12 @@ class ContextualMemory:
         return f"Historical Data:\n{formatted_results}" if ltm_results else ""
 
 
-    def _fetch_user_context(self, query: str) -> str:
+    def _fetch_user_context(self, query: str = None) -> str:
         """
         Fetches and formats relevant user information from User Memory.
         """
+        if not query:
+            return ""
 
         user_memories = self.um.search(query)
         if not user_memories:
@@ -76,6 +81,23 @@ class ContextualMemory:
 
         formatted_memories = "\n".join(f"- {result['memory']}" for result in user_memories)
         return f"User memories/preferences:\n{formatted_memories}"
+
+
+    def build_context_for_task(self, query: str = None) -> str:
+        """
+        Automatically builds a minimal, highly relevant set of contextual information for a given task.
+        """
+        if not query:
+            return ""
+
+        query = self._sanitize_query(query=query)
+
+        context = []
+        context.append(self._fetch_stm_context(query))
+        context.append(self._fetch_ltm_context(query))
+        if self.memory_provider == "mem0":
+            context.append(self._fetch_user_context(query))
+        return "\n".join(filter(None, context))
 
 
     # def _fetch_entity_context(self, query) -> str:
