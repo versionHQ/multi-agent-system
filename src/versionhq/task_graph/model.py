@@ -8,13 +8,62 @@ import matplotlib.pyplot as plt
 from abc import ABC
 from concurrent.futures import Future
 from typing import List, Any, Optional, Callable, Dict, Type, Tuple
+from typing_extensions import Self
 
-from pydantic import BaseModel, InstanceOf, Field, UUID4, field_validator
+from pydantic import BaseModel, InstanceOf, Field, UUID4, field_validator, model_validator
 from pydantic_core import PydanticCustomError
 
 from versionhq.agent.model import Agent
-from versionhq.task.model import Task, TaskOutput
+from versionhq.task.model import Task, TaskOutput, Evaluation
 from versionhq._utils.logger import Logger
+
+class ConditionType(enum.Enum):
+    AND = 1
+    OR = 2
+
+
+class Condition(BaseModel):
+    """
+    A Pydantic class to store edge conditions and their args and types.
+    """
+    # edge_id: UUID4 = uuid.uuid4()
+    methods: Dict[str, Callable | "Condition"] = dict()
+    args: Dict[str, Dict[str, Any]] = dict()
+    type: ConditionType = None
+
+    @model_validator(mode="after")
+    def validate_type(self) -> Self:
+        if len(self.methods.keys()) > 1 and self.type is None:
+            raise PydanticCustomError("missing_type", "Missing type", {})
+        return self
+
+    def _execute_method(self, key: str, method: Callable | "Condition") -> bool:
+        match method:
+            case Condition():
+                return method.condition_met()
+            case _:
+                args = self.args[key] if key in self.args else None
+                res = method(**args) if args else method()
+                return res
+
+
+    def condition_met(self) -> bool:
+        if not self.methods:
+            return True
+
+        if len(self.methods) == 1:
+            for k, v in self.methods.items():
+               return self._execute_method(key=k, method=v)
+
+        else:
+            cond_list = []
+            for k, v in self.methods.items():
+                res = self._execute_method(key=k, method=v)
+                if self.type == ConditionType.OR and res == True:
+                    return True
+                elif self.type == ConditionType.AND and res == False:
+                    return False
+            return bool(len([item for item in cond_list if item == True]) == len(cond_list))
 
 
 class TaskStatus(enum.Enum):
@@ -52,7 +101,6 @@ class Node(BaseModel):
     assigned_to: InstanceOf[Agent] = Field(default=None)
     status: TaskStatus = Field(default=TaskStatus.NOT_STARTED)
 
-
     @field_validator("id", mode="before")
     @classmethod
     def _deny_user_set_id(cls, v: Optional[UUID4]) -> None:
@@ -83,7 +131,6 @@ class Node(BaseModel):
         self.status = TaskStatus.COMPLETED if res else TaskStatus.ERROR
         return res
 
-
     @property
     def in_degrees(self) -> int:
         return len(self.in_degree_nodes) if self.in_degree_nodes else 0
@@ -101,6 +148,11 @@ class Node(BaseModel):
         """Unique identifier of the node"""
         return f"{str(self.id)}"
 
+    @property
+    def label(self) -> str:
+        """Human friendly label for visualization"""
+        return self.task.name if self.task.name else self.task.description[0: 8]
+
     def __str__(self):
         if self.task:
             return f"{self.identifier}: {self.task.name if self.task.name else self.task.description[0: 12]}"
@@ -110,19 +162,17 @@ class Node(BaseModel):
 
 class Edge(BaseModel):
     """
-    A class to store an edge object that connects source and target nodes.
+    A Pydantic class to store an edge object that connects source and target nodes.
     """
 
     source: Node = Field(default=None)
     target: Node = Field(default=None)
 
     description: Optional[str] = Field(default=None)
-    weight: Optional[float | int] = Field(default=1, description="est. duration for the task execution or respective weight of the target node (1 low - 10 high priority)")
-
+    weight: Optional[float | int] = Field(default=1, description="est. duration of the task execution or respective weight of the target node at any scale i.e., 1 low - 10 high priority")
     dependency_type: DependencyType = Field(default=DependencyType.FINISH_TO_START)
     required: bool = Field(default=True, description="whether to consider the source's status")
-    condition: Optional[Callable] = Field(default=None, description="conditional function to start executing the dependency")
-    condition_kwargs: Optional[Dict[str, Any]] = Field(default_factory=dict)
+    condition: Optional[Condition] = Field(default=None)
 
     lag: Optional[float | int] = Field(default=None, description="lag time (sec) from the dependency met to the task execution")
     data_transfer: bool = Field(default=True, description="whether the data transfer is required. by default transfer plane text output from in-degree nodes as context")
@@ -150,35 +200,36 @@ class Edge(BaseModel):
         False	Given	Condition True (predecessor status irrelevant)	Yes
         """
 
-        if not self.required:
-            return self.condition(**self.condition_kwargs) if self.condition else True
+        if self.required == False:
+            return self.condition.condition_met() if self.condition else True
+            # return self.condition(**self.condition_kwargs) if self.condition else True
 
         match self.dependency_type:
             case DependencyType.FINISH_TO_START:
                 """target starts after source finishes"""
                 if not self.source or self.source.status == TaskStatus.COMPLETED:
-                    return self.condition(**self.conditon_kwargs) if self.condition else True
+                    return self.condition.condition_met() if self.condition else True
                 else:
                     return False
 
             case DependencyType.START_TO_START:
                 """target starts when source starts"""
                 if not self.source or self.source.status != TaskStatus.NOT_STARTED:
-                    return self.condition(**self.conditon_kwargs) if self.condition else True
+                    return self.condition.condition_met() if self.condition else True
                 else:
                     return False
 
             case DependencyType.FINISH_TO_FINISH:
                 """target finish when source start"""
                 if not self.source or self.source.status != TaskStatus.COMPLETED:
-                    return self.condition(**self.conditon_kwargs) if self.condition else True
+                    return self.condition.condition_met() if self.condition else True
                 else:
                     return False
 
             case DependencyType.START_TO_FINISH:
                 """target finishes when source start"""
                 if not self.source or self.source.status == TaskStatus.IN_PROGRESS:
-                    return self.condition(**self.conditon_kwargs) if self.condition else True
+                    return self.condition.condition_met() if self.condition else True
                 else:
                     return False
 
@@ -203,6 +254,11 @@ class Edge(BaseModel):
         context = self.source.task.output.raw if self.data_transfer else None
         res = self.target.handle_task_execution(context=context, response_format=response_format)
         return res
+
+    @property
+    def label(self):
+        """Human friendly label for visualization."""
+        return f"e{self.source.label}-{self.target.label}"
 
 
 class Graph(ABC, BaseModel):
@@ -383,7 +439,7 @@ class TaskGraph(Graph):
         edge = Edge()
         for k in Edge.model_fields.keys():
             v = edge_attributes.get(k, None)
-            if v:
+            if v is not None:
                 setattr(edge, k, v)
             else:
                 pass
@@ -564,7 +620,7 @@ class TaskGraph(Graph):
             return res, self.outputs
 
 
-    def evaluate(self, eval_criteria: List[str] = None):
+    def evaluate(self, eval_criteria: List[str] = None) -> Evaluation | None:
         """Evaluates the conclusion based on the given eval criteria."""
 
         if not isinstance(self.concl, TaskOutput):

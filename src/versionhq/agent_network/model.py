@@ -13,7 +13,7 @@ from pydantic_core import PydanticCustomError, core_schema
 
 from versionhq.agent.model import Agent
 from versionhq.task.model import Task, TaskOutput, TaskExecutionType, ResponseField
-from versionhq.task_graph.model import TaskGraph, Node, Edge, TaskStatus, DependencyType
+from versionhq.task_graph.model import TaskGraph, Node, Edge, TaskStatus, DependencyType, Condition
 from versionhq._utils.logger import Logger
 # from versionhq.recording.usage_metrics import UsageMetrics
 
@@ -81,7 +81,7 @@ class AgentNetwork(BaseModel):
     # task execution rules
     prompt_file: str = Field(default="", description="absolute file path to the prompt file that stores jsonified prompts")
     process: TaskHandlingProcess = Field(default=TaskHandlingProcess.SEQUENTIAL)
-    consent_trigger: Optional[Callable] = Field(default=None, description="returns bool")
+    consent_trigger: Optional[Callable | Condition] = Field(default=None, description="returns bool")
 
     # callbacks
     pre_launch_callbacks: List[Callable[..., Any]]= Field(default_factory=list, description="list of callback funcs called before the network launch")
@@ -111,6 +111,9 @@ class AgentNetwork(BaseModel):
             Logger().log(level="error", message="Need to define the consent trigger function that returns bool", color="red")
             raise PydanticCustomError("invalid_process", "Need to define the consent trigger function that returns bool", {})
 
+
+        if self.consent_trigger and isinstance(self.consent_trigger, Callable):
+            self.consent_trigger = Condition(methods={"0": self.consent_trigger})
         return self
 
 
@@ -277,6 +280,7 @@ class AgentNetwork(BaseModel):
         task_graph = TaskGraph(nodes={node.identifier: node for node in nodes})
 
         for i in range(0, len(nodes) - 1):
+            condition = self.consent_trigger if isinstance(self.consent_trigger, Condition) else Condition(methods={"0": self.consent_trigger }) if self.consent_trigger else None
             task_graph.add_edge(
                 source=nodes[i].identifier,
                 target=nodes[i+1].identifier,
@@ -284,7 +288,7 @@ class AgentNetwork(BaseModel):
                     weight=3 if nodes[i].task in self.manager_tasks else 1,
                     dependency_type=DependencyType.FINISH_TO_START if self.process == TaskHandlingProcess.HIERARCHY else DependencyType.START_TO_START,
                     required=bool(self.process == TaskHandlingProcess.CONSENSUAL),
-                    condition=self.consent_trigger,
+                    condition=condition,
                     data_transfer=bool(self.process == TaskHandlingProcess.HIERARCHY),
                 )
             )

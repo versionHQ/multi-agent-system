@@ -103,7 +103,7 @@ class Evaluation(BaseModel):
                 new_res = filter(lambda x: "score" in x["metadata"], res)
                 new_res = list(new_res)
                 new_res.sort(key=lambda x: x["metadata"]["score"], reverse=True)
-                if new_res[0]['data']:
+                if new_res and new_res[0]['data']:
                     c = new_res[0]['data']['task_output']
                     w = new_res[len(new_res)-1]['data']['task_output'] if new_res[len(new_res)-1]['metadata']['score'] < new_res[0]['metadata']['score'] else ""
                     shot_prompt = SHOTS.format(c=c, w=w)
