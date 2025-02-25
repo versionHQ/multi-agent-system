@@ -35,8 +35,8 @@ class Agent(BaseModel):
     config: Optional[Dict[str, Any]] = Field(default=None, exclude=True, description="values to add to the Agent class")
 
     id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True)
-    role: str = Field(description="role of the agent - used in summary and logs")
-    goal: str = Field(description="concise goal of the agent (details are set in the Task instance)")
+    role: str = Field(description="required. agent's role")
+    goal: Optional[str] = Field(default=None)
     backstory: Optional[str] = Field(default=None, description="developer prompt to the llm")
     skillsets: Optional[List[str]] = Field(default_factory=list)
     tools: Optional[List[Any]] = Field(default_factory=list)
@@ -92,7 +92,7 @@ class Agent(BaseModel):
 
     @model_validator(mode="after")
     def validate_required_fields(self) -> Self:
-        required_fields = ["role", "goal"]
+        required_fields = ["role",]
         for field in required_fields:
             if getattr(self, field) is None:
                 raise ValueError(f"{field} must be provided either directly or through config")
@@ -172,7 +172,7 @@ class Agent(BaseModel):
             skills = ", ".join([item for item in self.skillsets]) if self.skillsets else ""
             tools = ", ".join([item.name for item in self.tools if hasattr(item, "name") and item.name is not None]) if self.tools else ""
             role = self.role.lower()
-            goal = self.goal.lower()
+            goal = self.goal.lower() if self.goal else ""
 
             if self.tools or self.skillsets:
                 backstory = BACKSTORY_FULL.format(role=role, goal=goal, skills=skills, tools=tools)
@@ -494,7 +494,7 @@ class Agent(BaseModel):
         Defines and executes a task when it is not given and returns TaskOutput object.
         """
 
-        if not self.goal or not self.role:
+        if not self.role or not self.goal:
             return None
 
         from versionhq.task.model import Task
@@ -595,7 +595,7 @@ class Agent(BaseModel):
 
 
     def __repr__(self):
-        return f"Agent(role={self.role}, goal={self.goal}"
+        return f"Agent(role={self.role}, id={str(self.id)}"
 
     def __str__(self):
         return super().__str__()

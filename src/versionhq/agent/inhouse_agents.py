@@ -38,7 +38,7 @@ vhq_formation_planner = Agent(
         "Solo is a formation where a single agent with tools, knowledge, and memory handles tasks indivudually. When self-learning mode is on - it will turn into Random formation. Typical usecase is an email agent drafts promo message for the given audience using their own knowledge.",
         "Supervising is a formation where the leader agent gives directions, while sharing its knowledge and memory with subbordinates.Subordinates can be solo agents or networks. Typical usecase is that the leader agent strategizes an outbound campaign plan and assigns components such as media mix or message creation to subordinate agents.",
         "Network is a formation where multple agents can share tasks, knowledge, and memory among network members without hierarchy. Typical usecase is that an email agent and social media agent share the product knowledge and deploy multi-channel outbound campaign. ",
-        "Random is a formation where a single agent handles tasks, asking help from other agents without sharing its memory or knowledge. Typical usecase is that an email agent drafts promo message for the given audience, asking insights on tones from other email agents which oversee other customer clusters, or an agent calls the external, third party agent to deploy the campaign. ",
+        "Random is a formation where a single agent handles tasks, asking help from other agents without sharing its memory or knowledge. Typical usecase is that an email agent drafts promo message for the given audience, asking insights on tones from other email agents which oversee other customer clusters, or an agent calls the external, third party agent to deploy the campaign.",
     ]
 )
 

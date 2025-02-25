@@ -7,7 +7,7 @@ tags:
 
 <class>`class` versionhq.agent.model.<bold>Agent<bold></class>
 
-A Pydantic class to store `Agent` objects and handle `Task` execution as well as `LLM` configuration.
+A Pydantic class to store an `Agent` object that handles `Task` execution.
 
 
 ## Quick Start

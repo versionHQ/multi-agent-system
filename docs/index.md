@@ -113,10 +113,7 @@ The following code snippet demonstrates agent customization:
 ```python
 import versionhq as vhq
 
-agent = vhq.Agent(
-   role="Marketing Analyst",
-   goal="my amazing goal"
-) # assuming this agent was created during the network formation
+agent = vhq.Agent(role="Marketing Analyst")
 
 # update the agent
 agent.update(

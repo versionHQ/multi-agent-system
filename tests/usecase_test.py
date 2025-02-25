@@ -31,10 +31,7 @@ def test_demo_agent_customization():
     import pathlib
     current_path = pathlib.Path(__file__).parent.resolve()
 
-    agent = vhq.Agent(
-        role='Demo Manager',
-        goal='run a demo successfully'
-    )
+    agent = vhq.Agent(role='Demo Manager')
 
     agent.update(
         llm='gemini-2.0',

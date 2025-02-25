@@ -25,7 +25,7 @@ def test_doc_index_b():
         return f"""{message}: {test1}, {", ".join(test2)}"""
 
 
-    agent = vhq.Agent(role="demo", goal="amazing project goal", maxit=1)
+    agent = vhq.Agent(role="demo", maxit=1)
 
     task = vhq.Task(
         description="Amazing task",
@@ -42,8 +42,8 @@ def test_doc_index_b():
 def test_doc_index_c():
     import versionhq as vhq
 
-    agent_a = vhq.Agent(role="agent a", goal="My amazing goals", llm="llm-of-your-choice")
-    agent_b = vhq.Agent(role="agent b", goal="My amazing goals", llm="llm-of-your-choice")
+    agent_a = vhq.Agent(role="agent a", llm="llm-of-your-choice")
+    agent_b = vhq.Agent(role="agent b", llm="llm-of-your-choice")
 
     task_1 = vhq.Task(
         description="Analyze the client's business model.",

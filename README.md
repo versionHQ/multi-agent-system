@@ -141,10 +141,7 @@ The following code snippet demonstrates agent customization:
 ```python
 import versionhq as vhq
 
-agent = vhq.Agent(
-   role="Marketing Analyst",
-   goal="my amazing goal"
-) # assuming this agent was created during the network formation
+agent = vhq.Agent(role="Marketing Analyst")
 
 # update the agent
 agent.update(
@@ -235,8 +232,8 @@ To create an agent network with one or more manager agents, designate members us
 ```python
 import versionhq as vhq
 
-agent_a = vhq.Agent(role="agent a", goal="My amazing goals", llm="llm-of-your-choice")
-agent_b = vhq.Agent(role="agent b", goal="My amazing goals", llm="llm-of-your-choice")
+agent_a = vhq.Agent(role="agent a", llm="llm-of-your-choice")
+agent_b = vhq.Agent(role="agent b", llm="llm-of-your-choice")
 
 task_1 = vhq.Task(
    description="Analyze the client's business model.",

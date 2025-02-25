@@ -13,13 +13,10 @@ LITELLM_API_KEY = os.environ.get("LITELLM_API_KEY")
 
 
 def test_build_agent_with_minimal_input():
-    agent = Agent(
-        role="analyst",
-        goal="analyze the company's website and retrieve the product overview"
-    )
+    agent = Agent(role="analyst")
 
     assert agent.role == "analyst"
-    assert agent.backstory == BACKSTORY_SHORT.format(role=agent.role.lower(), goal=agent.goal.lower())
+    assert agent.backstory == BACKSTORY_SHORT.format(role=agent.role.lower(), goal="")
     assert isinstance(agent.llm, LLM)
     assert agent.llm.model == DEFAULT_MODEL_NAME
     assert agent.llm.api_key == LITELLM_API_KEY

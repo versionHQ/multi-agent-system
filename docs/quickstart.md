@@ -48,7 +48,7 @@ def dummy_func(message: str, test1: str, test2: list[str]) -> str:
    return f"""{message}: {test1}, {", ".join(test2)}"""
 
 
-agent = vhq.Agent(role="demo", goal="amazing project goal")
+agent = vhq.Agent(role="demo manager")
 
 task = vhq.Task(
    description="Amazing task",
