@@ -15,7 +15,7 @@ exclude = ["test*", "__pycache__", "*.egg-info"]
 
 [project]
 name = "versionhq"
-version = "1.2.2.3"
+version = "1.2.2.4"
 authors = [{ name = "Kuriko Iwai", email = "kuriko@versi0n.io" }]
 description = "An agentic orchestration framework for building agent networks that handle task automation."
 readme = "README.md"
@@ -30,7 +30,7 @@ dependencies = [
   "typing",
   "json-repair",
   "litellm>=1.55.8",
-  "openai>=1.57.0",
+  "openai>=1.64.0",
   "composio-openai>=0.6.9",
   "composio>=0.1.0",
   "setuptools>=75.6.0",
@@ -71,7 +71,7 @@ docling = [
     "docling>=2.17.0",
 ]
 mem0ai = [
-    "mem0ai>=0.1.48",
+    "mem0ai>=0.1.55",
 ]
 pdfplumber = [
     "pdfplumber>=0.11.5",
@@ -84,6 +84,13 @@ numpy = [
 ]
 pygraphviz = [
     "pygraphviz>=1.14",
+]
+tools = [
+    "html2text>=2024.2.26",
+    "sec-api>=1.0.28",
+]
+eval = [
+    "scikit-learn>=1.6.1",
 ]
 
 [tool.uv]

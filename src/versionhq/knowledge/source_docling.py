@@ -83,7 +83,8 @@ class DoclingSource(BaseKnowledgeSource):
             yield chunk.text
 
 
-    def _validate_url(self, url: str) -> bool:
+    @staticmethod
+    def _validate_url(url: str) -> bool:
         try:
             result = urlparse(url)
             return all(

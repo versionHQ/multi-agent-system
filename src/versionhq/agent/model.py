@@ -8,7 +8,7 @@ from pydantic import UUID4, BaseModel, Field, InstanceOf, PrivateAttr, model_val
 from pydantic_core import PydanticCustomError
 
 from versionhq.llm.model import LLM, DEFAULT_CONTEXT_WINDOW_SIZE, DEFAULT_MODEL_NAME, PROVIDERS
-from versionhq.tool.model import Tool, ToolSet
+from versionhq.tool.model import Tool, ToolSet, BaseTool
 from versionhq.knowledge.model import BaseKnowledgeSource, Knowledge
 from versionhq.memory.contextual_memory import ContextualMemory
 from versionhq.memory.model import ShortTermMemory, LongTermMemory, UserMemory
@@ -39,7 +39,7 @@ class Agent(BaseModel):
     goal: str = Field(description="concise goal of the agent (details are set in the Task instance)")
     backstory: Optional[str] = Field(default=None, description="developer prompt to the llm")
     skillsets: Optional[List[str]] = Field(default_factory=list)
-    tools: Optional[List[InstanceOf[Tool | ToolSet] | Type[Tool] | Any]] = Field(default_factory=list)
+    tools: Optional[List[Any]] = Field(default_factory=list)
 
     # knowledge
     knowledge_sources: Optional[List[BaseKnowledgeSource | Any]] = Field(default=None)
@@ -122,29 +122,41 @@ class Agent(BaseModel):
         """
         Similar to the LLM set up, when the agent has tools, we will declare them using the Tool class.
         """
+        from versionhq.tool.rag_tool import RagTool
+
         if not self.tools:
-            pass
+            return self
 
-        else:
-            tool_list = []
-
-            for item in self.tools:
-                if isinstance(item, Tool) or isinstance(item, ToolSet):
+        tool_list = []
+        for item in self.tools:
+            match item:
+                case RagTool() | BaseTool():
                     tool_list.append(item)
 
-                elif isinstance(item, dict) and "func" in item:
-                    tool = Tool(**item)
-                    tool_list.append(tool)
+                case Tool():
+                    if item.func is not None:
+                        tool_list.append(item)
 
-                elif type(item) is Tool and hasattr(item, "func"):
-                    tool_list.append(item)
+                case ToolSet():
+                    if item.tool and item.tool.func is not None:
+                        tool_list.append(item)
 
-                else:
-                    Logger(**self.loger_config, filename=self.key).log(level="error", message=f"Tool {str(item)} is missing a function.", color="red")
-                    raise PydanticCustomError("invalid_tool", f"The tool {str(item)} is missing a function.", {})
+                case dict():
+                    if "func" in item:
+                        tool = Tool(func=item["func"])
+                        for k, v in item.items():
+                            if k in Tool.model_fields.keys() and k != "func" and  v is not None:
+                                setattr(tool, k, v)
+                        tool_list.append(tool)
 
-            self.tools = tool_list
+                case _:
+                    if item.__base__ == BaseTool or item.__base__ == RagTool or item.__base__ == Tool:
+                        tool_list.append(item)
+                    else:
+                        Logger(**self._logger_config, filename=self.key).log(level="error", message=f"Tool {str(item)} is missing a function.", color="red")
+                        raise PydanticCustomError("invalid_tool", f"The tool {str(item)} is missing a function.", {})
 
+        self.tools = tool_list
         return self
 
 
@@ -158,7 +170,7 @@ class Agent(BaseModel):
             from versionhq.agent.TEMPLATES.Backstory import BACKSTORY_FULL, BACKSTORY_SHORT
             backstory = ""
             skills = ", ".join([item for item in self.skillsets]) if self.skillsets else ""
-            tools = ", ".join([item.name for item in self.tools if hasattr(item, "name")]) if self.tools else ""
+            tools = ", ".join([item.name for item in self.tools if hasattr(item, "name") and item.name is not None]) if self.tools else ""
             role = self.role.lower()
             goal = self.goal.lower()
 
@@ -199,7 +211,7 @@ class Agent(BaseModel):
                     if isinstance(item, BaseKnowledgeSource):
                         knowledge_sources.append(item)
 
-                    elif isinstance(item, str) and "http" in item:
+                    elif isinstance(item, str) and "http" in item and DoclingSource._validate_url(url=item) == True:
                         docling_fp.append(item)
 
                     elif isinstance(item, str):
@@ -223,8 +235,8 @@ class Agent(BaseModel):
 
                 self._knowledge = Knowledge(sources=knowledge_sources, embedder_config=self.embedder_config, collection_name=collection_name)
 
-            except:
-                Logger(**self._logger_config, filename=self.key).log(level="warning", message="We cannot find the format for the source. Add BaseKnowledgeSource objects instead.", color="yellow")
+            except Exception as e:
+                Logger(**self._logger_config, filename=self.key).log(level="warning", message=f"We cannot find the format for the source. Add BaseKnowledgeSource objects instead. {str(e)}", color="yellow")
 
         return self
 
@@ -506,10 +518,13 @@ class Agent(BaseModel):
         """
 
         from versionhq.task.model import Task
+        from versionhq.tool.rag_tool import RagTool
         from versionhq.knowledge._utils import extract_knowledge_context
 
         task: InstanceOf[Task] = task
-        tools: Optional[List[InstanceOf[Tool | ToolSet] | Type[Tool]]] = task_tools + self.tools if task.can_use_agent_tools else task_tools
+        all_tools: Optional[List[Tool | ToolSet | RagTool | Type[BaseTool]]] = task_tools + self.tools if task.can_use_agent_tools else task_tools
+        rag_tools: Optional[List[RagTool]] = [item for item in all_tools if isinstance(item, RagTool)] if all_tools else None
+        tools: Optional[List[Tool | ToolSet | RagTool | Type[BaseTool]]] = [item for item in all_tools if not isinstance(item, RagTool)] if all_tools else None
 
         if self.max_rpm and self._rpm_controller:
             self._rpm_controller._reset_request_count()
@@ -523,6 +538,12 @@ class Agent(BaseModel):
                 if agent_knowledge_context:
                     task_prompt += agent_knowledge_context
 
+        if rag_tools:
+            for item in rag_tools:
+                rag_tool_context = item.run(agent=self, query=task.description)
+                if rag_tool_context:
+                    task_prompt += ",".join(rag_tool_context) if isinstance(rag_tool_context, list) else str(rag_tool_context)
+
         if self.with_memory == True:
             contextual_memory = ContextualMemory(
                 memory_config=self.memory_config, stm=self.short_term_memory, ltm=self.long_term_memory, um=self.user_memory
@@ -532,7 +553,6 @@ class Agent(BaseModel):
             memory = contextual_memory.build_context_for_task(query=query)
             if memory.strip() != "":
                 task_prompt += memory.strip()
-
 
         ## comment out for now
         # if self.networks and self.networks._train:

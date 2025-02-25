@@ -43,7 +43,6 @@ class BaseTool(ABC, BaseModel):
             { "__annotations__": { k: v for k, v in cls._run.__annotations__.items() if k != "return" }},
         )
 
-
     @field_validator("properties", mode="before")
     @classmethod
     def _default_properties(cls, v: Dict[str, Any]) -> Dict[str, Any]:
@@ -81,9 +80,8 @@ class BaseTool(ABC, BaseModel):
         return self
 
     @abstractmethod
-    def _run(self, *args: Any, **kwargs: Any,) -> Any:
+    def _run(self, *args: Any, **kwargs: Any) -> Any:
         """any handling"""
-
 
     @staticmethod
     def _get_arg_annotations(annotation: type[Any] | None) -> str:
@@ -143,10 +141,8 @@ class BaseTool(ABC, BaseModel):
         return create_model(schema_name, **fields)
 
 
-
 class Tool(BaseTool):
     func: Callable = Field(default=None)
-
 
     @model_validator(mode="after")
     def validate_func(self) -> Self:

@@ -195,6 +195,7 @@ def test_agent_with_random_dict_tools():
     assert [tool._run() == "empty function" for tool in agent.tools]
     assert agent.tools[0].name == "tool 1"
 
+test_agent_with_random_dict_tools()
 
 def test_agent_with_custom_tools():
     def send_message(message: str) -> str:

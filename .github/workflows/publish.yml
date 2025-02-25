@@ -5,6 +5,7 @@ on:
     types: [released]
 
 permissions:
+  id-token: write
   contents: read
 
 jobs:
@@ -58,5 +59,6 @@ jobs:
           packages-dir: dist/
           repository-url: https://upload.pypi.org/legacy/
           verbose: true
-          user: __token__
-          password: ${{ secrets.PYPI_API_TOKEN }}
+          # user: krik8235
+          # user: __token__
+          # password: ${{ secrets.PYPI_API_TOKEN }}

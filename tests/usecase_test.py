@@ -70,3 +70,18 @@ def test_solo_tg_eval():
         eval_criteria=["cost", "", "{criteria_3}"]
     )
     assert isinstance(eval, vhq.Evaluation)
+
+
+def test_llm_as_judge():
+    from versionhq._utils.llm_as_a_judge import LLMJudge, generate_summaries, validate
+    class MockSummarizer:
+        def summarize(self, text: str) -> str:
+            return f"Summary of: {text[:50]}..."
+
+    from pathlib import Path
+    current_dir = Path(__file__).parent
+    file_path = current_dir / "sample.json"
+    summaries = generate_summaries(file_path=file_path, summarizer=MockSummarizer())
+    results = validate(judge=LLMJudge(), data=summaries, threshold=0.6)
+
+    assert results is not None

@@ -125,7 +125,8 @@ class KnowledgeStorage(BaseKnowledgeStorage):
     def search(self, query: List[str], limit: int = 3, filter: Optional[dict] = None, score_threshold: float = 0.35) -> List[Dict[str, Any]]:
         with suppress_logging():
             if self.collection:
-                fetched = self.collection.query(query_texts=query, n_results=limit, where=filter)
+                query_texts = ", ".join(query) if isinstance(query, list) else str(query)
+                fetched = self.collection.query(query_texts=query_texts, n_results=limit, where=filter)
                 results = []
                 for i in range(len(fetched["ids"][0])):
                     result = {

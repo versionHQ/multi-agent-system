@@ -21,6 +21,7 @@ from versionhq.task_graph.model import TaskStatus, TaskGraph, Node, Edge, Depend
 from versionhq.task.model import Task, TaskOutput, ResponseField, TaskExecutionType
 from versionhq.task.evaluation import Evaluation, EvaluationItem
 from versionhq.tool.model import Tool, ToolSet
+from versionhq.tool.rag_tool import RagTool
 from versionhq.tool.cache_handler import CacheHandler
 from versionhq.tool.tool_handler import ToolHandler
 from versionhq.tool.composio_tool import ComposioHandler
@@ -31,7 +32,7 @@ from versionhq.agent_network.formation import form_agent_network
 from versionhq.task_graph.draft import workflow
 
 
-__version__ = "1.2.2.3"
+__version__ = "1.2.2.4"
 __all__ = [
     "Agent",
 
@@ -80,6 +81,7 @@ __all__ = [
 
     "Tool",
     "ToolSet",
+    "RagTool",
     "CacheHandler",
     "ToolHandler",
     "ComposioHandler",
