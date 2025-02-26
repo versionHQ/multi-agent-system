@@ -281,9 +281,9 @@ class Agent(BaseModel):
 
             case dict():
                 model_name = llm.pop("model_name", llm.pop("deployment_name", str(llm)))
-                llm = LLM(model=model_name if model_name else DEFAULT_MODEL_NAME)
+                llm_obj = LLM(model=model_name if model_name else DEFAULT_MODEL_NAME)
                 config = llm.update(self.llm_config) if self.llm_config else llm
-                return self._set_llm_params(llm, config=config)
+                return self._set_llm_params(llm_obj, config=config)
 
             case _:
                 model_name = (getattr(self.llm, "model_name") or getattr(self.llm, "deployment_name") or str(self.llm))
