@@ -50,3 +50,11 @@ def test_create_llm_from_provider():
     assert llm._supports_function_calling() == True
     assert llm._supports_stop_words() == True
     assert litellm.callbacks == [dummy_func,]
+
+
+def test_llm_config():
+    llm = LLM(provider="gemini", llm_config=dict(max_tokens=5000, dummy="dummy", temperature=1))
+
+    assert "dummy" not in llm.llm_config
+    assert llm.llm_config["max_tokens"] == 5000
+    assert llm.llm_config["temperature"] == 1

@@ -17,22 +17,20 @@ def test_demo_network():
         expected_outcome='email subject and body in string',
         context="use email_subject and email_body as keys in your response."
     )
-
     assert isinstance(network, vhq.AgentNetwork) and isinstance(network.formation, vhq.Formation)
 
     res, _ = network.launch()
-
     assert res.pydantic is not None
-
 
 
 def test_demo_agent_customization():
     import versionhq as vhq
-    import pathlib
-    current_path = pathlib.Path(__file__).parent.resolve()
+    from pathlib import Path
+
+    current_dir = Path(__file__).parent
+    file_path = current_dir / "_sample/sample.csv"
 
     agent = vhq.Agent(role='Demo Manager')
-
     agent.update(
         llm='gemini-2.0',
         llm_config = dict(
@@ -43,15 +41,23 @@ def test_demo_agent_customization():
         ),
         knowledge_sources = [
             'https://business.linkedin.com',
-            f'{current_path}/demo.csv',
+            file_path
         ],
         with_memory=True
     )
 
     assert "gemini-2.0" in agent.llm.model
-    assert agent.llm.temperature == 1 and agent.llm.top_p == 0.1 and agent.llm.n == 1 and agent.llm.stop == "test"
-    assert agent.knowledge_sources == ['https://business.linkedin.com', f'{current_path}/demo.csv',]
+    assert agent.llm.llm_config["temperature"] == 1
+    assert agent.llm.llm_config["top_p"] == 0.1
+    assert agent.llm.llm_config["n"] == 1
+    assert agent.llm.llm_config["stop"] == "test"
+    assert agent.knowledge_sources == ['https://business.linkedin.com', file_path]
     assert agent.with_memory == True
+
+    res = agent.start()
+    assert isinstance(res, vhq.TaskOutput)
+    assert res.raw is not None
+
 
 
 def test_solo_tg_eval():
@@ -77,7 +83,7 @@ def test_llm_as_judge():
 
     from pathlib import Path
     current_dir = Path(__file__).parent
-    file_path = current_dir / "sample.json"
+    file_path = current_dir / "_sample/sample.json"
     summaries = generate_summaries(file_path=file_path, summarizer=MockSummarizer())
     results = validate(judge=LLMJudge(), data=summaries, threshold=0.6)
 

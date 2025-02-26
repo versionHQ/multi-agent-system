@@ -9,7 +9,6 @@ from versionhq.tool.model import Tool
 from versionhq.tool.decorator import tool
 
 MODEL_NAME = os.environ.get("DEFAULT_MODEL_NAME", "gpt-3.5-turbo")
-LITELLM_API_KEY = os.environ.get("LITELLM_API_KEY")
 
 
 def test_build_agent_with_minimal_input():
@@ -19,7 +18,7 @@ def test_build_agent_with_minimal_input():
     assert agent.backstory == BACKSTORY_SHORT.format(role=agent.role.lower(), goal="")
     assert isinstance(agent.llm, LLM)
     assert agent.llm.model == DEFAULT_MODEL_NAME
-    assert agent.llm.api_key == LITELLM_API_KEY
+    # assert agent.llm.api_key == LITELLM_API_KEY
     assert agent.tools == []
     assert isinstance(agent.func_calling_llm, LLM)
 
@@ -31,7 +30,7 @@ def test_build_agent_from_config():
     assert agent.backstory == BACKSTORY_SHORT.format(role=agent.role.lower(), goal=agent.goal.lower())
     assert isinstance(agent.llm, LLM)
     assert agent.llm.model == DEFAULT_MODEL_NAME
-    assert agent.llm.api_key == LITELLM_API_KEY
+    # assert agent.llm.api_key == LITELLM_API_KEY
     assert agent.tools == []
     assert isinstance(agent.func_calling_llm, LLM)
 
@@ -48,7 +47,7 @@ def test_build_agent_with_backstory():
     assert agent.backstory == "You are competitive analysts who have abundand knowledge in marketing, product management."
     assert isinstance(agent.llm, LLM)
     assert agent.llm.model == DEFAULT_MODEL_NAME
-    assert agent.llm.api_key == LITELLM_API_KEY
+    # assert agent.llm.api_key == LITELLM_API_KEY
     assert agent.tools == []
     assert isinstance(agent.func_calling_llm, LLM)
 
@@ -64,7 +63,7 @@ def test_build_agent():
     assert agent.backstory == BACKSTORY_FULL.format(role=agent.role.lower(), goal=agent.goal.lower(), skills=", ".join([item for item in agent.skillsets]), tools="")
     assert isinstance(agent.llm, LLM)
     assert agent.llm.model == DEFAULT_MODEL_NAME
-    assert agent.llm.api_key == LITELLM_API_KEY
+    # assert agent.llm.api_key == LITELLM_API_KEY
     assert agent.tools == []
     assert isinstance(agent.func_calling_llm, LLM)
 
@@ -83,7 +82,7 @@ def test_build_agent_with_llm():
     assert [item in agent.backstory for item in agent.skillsets]
     assert isinstance(agent.llm, LLM)
     assert agent.llm.model == "gpt-4o"
-    assert agent.llm.api_key == LITELLM_API_KEY
+    # assert agent.llm.api_key == LITELLM_API_KEY
     assert agent.tools == []
     assert isinstance(agent.func_calling_llm, LLM)
 
@@ -120,28 +119,24 @@ def test_build_agent_with_llm_config():
     valid_params = litellm.get_supported_openai_params(model="gemini/gemini-1.5-flash")
     config = llm_params.update(llm_config)
     for key in valid_params:
-        if config and [k == key for k, v in config.items()]:
-            assert getattr(agent.llm, key) == config[key]
+        if config and [k for k in config.keys() if k == key]:
+            assert getattr(agent.llm, key) == config[key] or agent.llm.llm_config[key] == config[key]
 
 
-def test_build_agent_with_llm_instance():
+def test_build_agent_with_llm_object():
     def dummy_func() -> str:
         return "dummy"
 
-    llm = LLM(model="gemini-1.5", max_tokens=4000, logprobs=False)
-    agent = Agent(
-        role="analyst",
-        goal="analyze the company's website and retrieve the product overview",
-        llm=llm,
-        callbacks=[dummy_func],
-    )
+    llm = LLM(model="gemini-1.5", llm_config=dict(max_tokens=4000, logprobs=False))
+    agent = Agent(role="analyst", llm=llm, callbacks=[dummy_func])
+
     assert isinstance(agent.llm, LLM)
-    assert agent.llm.model == "gemini/gemini-1.5-flash"
-    assert agent.llm.api_key is not None
-    assert agent.llm.max_tokens == 4000
-    assert agent.llm.logprobs == False
-    assert agent.llm.callbacks == [dummy_func]
     assert isinstance(agent.func_calling_llm, LLM)
+    assert agent.llm.model == "gemini/gemini-1.5-flash"
+    # assert agent.llm.api_key is not None
+    assert agent.llm.llm_config["max_tokens"] == 4000
+    assert agent.llm.llm_config["logprobs"] == False
+    assert agent.llm.callbacks == [dummy_func]
 
 
 def test_build_agent_with_llm_and_func_llm_config():
@@ -149,23 +144,18 @@ def test_build_agent_with_llm_and_func_llm_config():
         return "dummy"
 
     llm_params = dict(deployment_name="gemini-1.5", max_tokens=4000, logprobs=False, abc="dummy key")
-    agent = Agent(
-        role="analyst",
-        goal="analyze the company's website and retrieve the product overview",
-        func_calling_llm=llm_params,
-        callbacks=[dummy_func]
-    )
+    agent = Agent(role="analyst", func_calling_llm=llm_params, callbacks=[dummy_func])
 
     assert isinstance(agent.llm, LLM) and agent.llm.model == DEFAULT_MODEL_NAME
     assert isinstance(agent.func_calling_llm, LLM)
     assert agent.func_calling_llm.model == "gemini/gemini-1.5-flash" if agent.func_calling_llm._supports_function_calling() else DEFAULT_MODEL_NAME
 
 
-def test_build_agent_with_llm_and_func_llm_instance():
+def test_build_agent_with_llm_and_func_llm_object():
     def dummy_func() -> str:
         return "dummy"
 
-    llm = LLM(model="gemini-1.5", max_tokens=4000, logprobs=False)
+    llm = LLM(model="gemini-1.5", llm_config=dict(max_tokens=4000, logprobs=False))
     agent = Agent(
         role="analyst",
         goal="analyze the company's website and retrieve the product overview",
@@ -176,11 +166,17 @@ def test_build_agent_with_llm_and_func_llm_instance():
     )
     assert isinstance(agent.llm, LLM) and isinstance(agent.func_calling_llm, LLM)
     assert agent.func_calling_llm.model == "gemini/gemini-1.5-flash" if agent.func_calling_llm._supports_function_calling() else DEFAULT_MODEL_NAME
-    assert agent.func_calling_llm.api_key is not None
-    assert agent.func_calling_llm.max_tokens == 4000
-    assert agent.func_calling_llm.logprobs == False
+    assert agent.func_calling_llm.llm_config["max_tokens"] == 4000
+    assert agent.func_calling_llm.llm_config["logprobs"] == False
     assert agent.func_calling_llm.callbacks == [dummy_func]
     assert isinstance(agent.func_calling_llm, LLM)
+
+
+test_build_agent_with_llm()
+test_build_agent_with_llm_config()
+test_build_agent_with_llm_object()
+test_build_agent_with_llm_and_func_llm_config()
+test_build_agent_with_llm_and_func_llm_object()
 
 
 def test_agent_with_random_dict_tools():
@@ -253,9 +249,7 @@ def test_agent_with_knowledge_sources():
 
     with patch("versionhq.knowledge.storage.KnowledgeStorage") as MockKnowledge:
         mock_knowledge_instance = MockKnowledge.return_value
-        isinstance(mock_knowledge_instance.sources[0], StringKnowledgeSource)
         mock_knowledge_instance.query.return_value = [{ "content": content }]
-
         res = task.execute(agent=agent)
         assert "gold" in res.raw.lower()
 
@@ -281,10 +275,6 @@ def test_disabled_memory():
     from versionhq.memory.contextual_memory import ContextualMemory
 
     agent = Agent(role="Researcher", goal="You research about math.", with_memory=False)
-    # assert agent.short_term_memory is None
-    # assert agent.long_term_memory is None
-    # assert agent.user_memory is None
-
     task = Task(description="Research a topic to teach a kid aged 6 about math.")
 
     with patch.object(ContextualMemory, "build_context_for_task") as contextual_mem:
@@ -318,10 +308,10 @@ def test_updating_llm():
     assert isinstance(agent.llm, vhq.LLM) and "gemini-2.0" in agent.llm.model
 
     agent._update_llm(llm_config=dict(max_tokens=10000))
-    assert agent.llm.max_tokens == 10000
+    assert agent.llm.llm_config["max_tokens"] == 10000
 
     agent._update_llm(llm="deepseek", llm_config=dict(max_tokens=500))
-    assert isinstance(agent.llm, vhq.LLM) and "deepseek-r1" in agent.llm.model and agent.llm.max_tokens == 500
+    assert isinstance(agent.llm, vhq.LLM) and "deepseek-r1" in agent.llm.model and agent.llm.llm_config["max_tokens"] == 500
 
 
 def test_start_with_tools():

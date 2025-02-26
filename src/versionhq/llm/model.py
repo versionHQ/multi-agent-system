@@ -4,14 +4,15 @@ import sys
 import threading
 import warnings
 from dotenv import load_dotenv
-import litellm
-from litellm import JSONSchemaValidationError
 from contextlib import contextmanager
 from typing import Any, Dict, List, Optional
 from typing_extensions import Self
+
+import litellm
+from litellm import JSONSchemaValidationError
 from pydantic import BaseModel, Field, PrivateAttr, model_validator, ConfigDict
 
-from versionhq.llm.llm_vars import LLM_CONTEXT_WINDOW_SIZES, MODELS, PARAMS, PROVIDERS, ENDPOINT_PROVIDERS
+from versionhq.llm.llm_vars import LLM_CONTEXT_WINDOW_SIZES, MODELS, PARAMS, PROVIDERS, ENDPOINT_PROVIDERS, ENV_VARS
 from versionhq.tool.model import Tool, ToolSet
 from versionhq._utils.logger import Logger
 
@@ -68,42 +69,31 @@ class LLM(BaseModel):
 
     _logger: Logger = PrivateAttr(default_factory=lambda: Logger(verbose=True))
     _init_model_name: str = PrivateAttr(default=None)
-    _tokens: int = PrivateAttr(default=0) # accumulate total tokens used for the call
-    model_config = ConfigDict(extra="allow")
+    _init_config: Optional[Dict[str, Any]] = PrivateAttr(default_factory=dict) # stores llm config passed by client or agent
+    _tokens: int = PrivateAttr(default=0) # aggregate number of tokens consumed
 
     model: str = Field(default=None)
     provider: Optional[str] = Field(default=None, description="model provider")
-    endpoint_provider: Optional[str] = Field(default=None, description="custom endpoint provider for pass through llm call. must need base_url")
+    endpoint_provider: Optional[str] = Field(default=None, description="custom endpoint provider for pass through llm call. require base_url")
     base_url: Optional[str] = Field(default=None, description="api base url for endpoint provider")
-    api_key: Optional[str] = Field(default=None, description="api key to access the model")
 
     # optional params
     response_format: Optional[Any] = Field(default=None)
+    llm_config: Optional[Dict[str, Any]] = Field(default_factory=dict, description="stores valid llm config params")
+    callbacks: Optional[List[Any]] = Field(default_factory=list)
+    tools: Optional[List[Dict[str, Any]]] = Field(default_factory=list, description="stores a list of tool properties")
     timeout: Optional[float | int] = Field(default=None)
-    max_tokens: Optional[int] = Field(default=None)
-    max_completion_tokens: Optional[int] = Field(default=None)
     context_window_size: Optional[int] = Field(default=DEFAULT_CONTEXT_WINDOW_SIZE)
-    temperature: Optional[float] = Field(default=None)
-    top_p: Optional[float] = Field(default=None)
-    n: Optional[int] = Field(default=None)
-    stop: Optional[str | List[str]] = Field(default=None)
-    presence_penalty: Optional[float] = Field(default=None)
-    frequency_penalty: Optional[float] = Field(default=None)
-    logit_bias: Optional[Dict[int, float]] = Field(default=None)
-    seed: Optional[int] = Field(default=None)
-    logprobs: Optional[bool] = Field(default=None)
-    top_logprobs: Optional[int] = Field(default=None)
-    tools: Optional[List[Dict[str, Any]]] = Field(default_factory=list, description="store a list of tool properties")
-    callbacks: List[Any] = Field(default_factory=list)
-    other_valid_config: Optional[Dict[str, Any]] = Field(default_factory=dict, description="store other valid values in dict to cascade to the model")
 
-    # LiteLLM specific fields
+    # LiteLLM specific config
     api_base: Optional[str] = Field(default=None, description="litellm specific field - api base of the model provider")
     api_version: Optional[str] = Field(default=None)
     num_retries: Optional[int] = Field(default=1)
     context_window_fallback_dict: Optional[Dict[str, Any]] = Field(default=None, description="A mapping of model to use if call fails due to context window error")
     fallbacks: Optional[List[Any]]= Field(default=None, description="A list of model names + params to be used, in case the initial call fails")
     metadata: Optional[Dict[str, Any]] = Field(default=None)
+
+    model_config = ConfigDict(extra="allow")
 
     litellm.drop_params = True
     litellm.set_verbose = True
@@ -187,9 +177,9 @@ class LLM(BaseModel):
 
 
     @model_validator(mode="after")
-    def validate_model_params(self) -> Self:
+    def setup_config(self) -> Self:
         """
-        Set up valid params to the model after setting up a valid model, provider, interface provider names.
+        Set up valid config params after setting up a valid model, provider, interface provider names.
         """
         self._tokens = 0
 
@@ -198,28 +188,28 @@ class LLM(BaseModel):
 
         self.context_window_size = self._get_context_window_size()
 
-        api_key_name = self.provider.upper() + "_API_KEY" if self.provider else None
-        if api_key_name:
-            self.api_key = os.environ.get(api_key_name, None)
-
         base_url_key_name = self.endpoint_provider.upper() + "_API_BASE" if self.endpoint_provider else None
-
         if base_url_key_name:
             self.base_url = os.environ.get(base_url_key_name)
             self.api_base = self.base_url
+
+        if self.llm_config:
+            self._create_valid_params(config=self.llm_config)
 
         return self
 
 
     def _create_valid_params(self, config: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Return valid params (model + litellm original params) from the given config dict.
+        Returns valid params incl. model + litellm original params) from the given config dict.
         """
 
-        valid_params, valid_keys = dict(), list()
+        valid_config, valid_keys = dict(), list()
 
         if self.model:
-            valid_keys = litellm.get_supported_openai_params(model=self.model, custom_llm_provider=self.endpoint_provider, request_type="chat_completion")
+            valid_keys = litellm.get_supported_openai_params(
+                model=self.model, custom_llm_provider=self.endpoint_provider, request_type="chat_completion"
+            )
 
         if not valid_keys:
             valid_keys = PARAMS.get("common")
@@ -227,14 +217,30 @@ class LLM(BaseModel):
         valid_keys += PARAMS.get("litellm")
 
         for item in valid_keys:
-            if hasattr(self, item) and getattr(self, item):
-                valid_params[item] = getattr(self, item)
-            elif item in self.other_valid_config and self.other_valid_config[item]:
-                valid_params[item] = self.other_valid_config[item]
-            elif item in config and config[item]:
-                valid_params[item] = config[item]
+            if hasattr(self, item) and (getattr(self, item) or getattr(self, item) == False):
+                valid_config[item] = getattr(self, item)
 
-        return valid_params
+            elif item in self.llm_config and (self.llm_config[item] or self.llm_config[item]==False):
+                valid_config[item] = self.llm_config[item]
+
+            elif item in config and (config[item] or config[item] == False):
+                valid_config[item] = config[item]
+
+            else:
+                pass
+
+        self.llm_config = valid_config
+        return valid_config
+
+
+    def _set_env_vars(self) -> None:
+        env_vars = ENV_VARS.get(self.provider, None) if self.provider else None
+
+        if not env_vars:
+            return None
+
+        for item in env_vars:
+            os.environ[item] = os.environ.get(item, None)
 
 
     def _supports_function_calling(self) -> bool:
@@ -285,10 +291,11 @@ class LLM(BaseModel):
         """
 
         litellm.drop_params = True
+        self._set_env_vars()
 
         with suppress_warnings():
             if len(self.callbacks) > 0:
-                self._set_callbacks(self.callbacks) # passed by agent
+                self._set_callbacks(self.callbacks)
 
             try:
                 res, tool_res = None, ""

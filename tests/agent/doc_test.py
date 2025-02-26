@@ -17,28 +17,11 @@ def test_docs_core_agent_a():
 
 def test_docs_core_agent_b1():
     from versionhq import Agent
-    agent = Agent(
-        role="Marketing Analyst",
-        goal="Coping with price competition in saturated markets",
-        llm="gemini-2.0",
-    )
+    agent = Agent(role="Marketing Analyst", llm="gemini-2.0")
 
     from versionhq.llm.model import LLM
     assert "gemini-2.0" in agent.llm.model and isinstance(agent.llm, LLM)
 
-
-# def test_docs_core_agent_b2():
-#     import versionhq as vhq
-
-#     agent = vhq.Agent(
-#         role="Marketing Analyst",
-#         goal="Coping with price competition in saturated markets",
-#         llm="gemini-2.0"
-#     )
-
-#     agent._update_llm(llm="deepseek", llm_config=dict(max_tokens=3000))
-#     assert "deepseek-r1" in agent.llm.model
-#     assert agent.llm.max_tokens == 3000
 
 
 def test_docs_core_agent_b3():
@@ -158,7 +141,6 @@ def test_docs_core_agent_f():
 
     agent = vhq.Agent(
         role="Marketing Analyst",
-        goal="Coping with increased price competition in saturated markets.",
         respect_context_window=False,
         max_execution_time=60,
         max_rpm=5,
@@ -171,10 +153,11 @@ def test_docs_core_agent_f():
             )
         )
     assert isinstance(agent.llm, vhq.LLM)
-    assert agent.llm.temperature == 1
-    assert agent.llm.top_p == 0.1
-    assert agent.llm.n == 1
-    assert agent.llm.stop == "answer"
+    assert agent.llm.llm_config["temperature"] == 1
+    assert agent.llm.llm_config["top_p"] == 0.1
+    assert agent.llm.llm_config["n"] == 1
+    assert agent.llm.llm_config["stop"] == "answer"
+
 
 
 def test_docs_core_agent_g():

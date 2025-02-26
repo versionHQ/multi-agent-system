@@ -276,64 +276,32 @@ class Agent(BaseModel):
                 return self._set_llm_params(llm=llm, config=self.llm_config)
 
             case str():
-                llm_obj = LLM(model=llm)
-                return self._set_llm_params(llm=llm_obj, config=self.llm_config)
+                llm = LLM(model=llm)
+                return self._set_llm_params(llm=llm, config=self.llm_config)
 
             case dict():
                 model_name = llm.pop("model_name", llm.pop("deployment_name", str(llm)))
-                llm_obj = LLM(model=model_name if model_name else DEFAULT_MODEL_NAME)
+                llm = LLM(model=model_name if model_name else DEFAULT_MODEL_NAME)
                 config = llm.update(self.llm_config) if self.llm_config else llm
-                return self._set_llm_params(llm_obj, config=config)
+                return self._set_llm_params(llm, config=config)
 
             case _:
                 model_name = (getattr(self.llm, "model_name") or getattr(self.llm, "deployment_name") or str(self.llm))
-                llm_obj = LLM(model=model_name if model_name else DEFAULT_MODEL_NAME)
+                llm = LLM(model=model_name if model_name else DEFAULT_MODEL_NAME)
                 llm_params = {
-                    "max_tokens": (getattr(llm, "max_tokens") or 3000),
                     "timeout": getattr(llm, "timeout", self.max_execution_time),
                     "callbacks": getattr(llm, "callbacks", None),
-                    "temperature": getattr(llm, "temperature", None),
-                    "logprobs": getattr(llm, "logprobs", None),
-                    "api_key": getattr(llm, "api_key", os.environ.get("LITELLM_API_KEY", None)),
+                    "llm_config": getattr(llm, "llm_config", None),
                     "base_url": getattr(llm, "base_url", None),
                 }
                 config = llm_params.update(self.llm_config) if self.llm_config else llm_params
-                return self._set_llm_params(llm=llm_obj, config=config)
+                return self._set_llm_params(llm=llm, config=config)
 
 
     def _set_llm_params(self, llm: LLM, config: Dict[str, Any] = None) -> LLM:
         """
         Add valid params to the LLM object.
         """
-
-        import litellm
-        from versionhq.llm.llm_vars import PARAMS
-
-        valid_config = {k: v for k, v in config.items() if v} if config else {}
-
-        if valid_config:
-            valid_keys = list()
-            try:
-                valid_keys = litellm.get_supported_openai_params(model=llm.model, custom_llm_provider=self.endpoint_provider, request_type="chat_completion")
-                if not valid_keys:
-                    valid_keys = PARAMS.get("common")
-            except:
-                valid_keys = PARAMS.get("common")
-
-            valid_keys += PARAMS.get("litellm")
-
-            for key in valid_keys:
-                if key in valid_config and valid_config[key]:
-                    val = valid_config[key]
-                    if [key == k for k, v in LLM.model_fields.items()]:
-                        setattr(llm, key, val)
-                    else:
-                        llm.other_valid_config.update({ key: val})
-
-
-        llm.timeout = self.max_execution_time if llm.timeout is None else llm.timeout
-        # llm.max_tokens = self.max_tokens if self.max_tokens else llm.max_tokens
-
         if llm.provider is None:
             provider_name = llm.model.split("/")[0]
             valid_provider = provider_name if provider_name in PROVIDERS else None
@@ -345,6 +313,12 @@ class Agent(BaseModel):
 
         if self.respect_context_window == False:
             llm.context_window_size = DEFAULT_CONTEXT_WINDOW_SIZE
+
+        llm.timeout = self.max_execution_time if llm.timeout is None else llm.timeout
+
+        if config:
+            llm.llm_config = {k: v for k, v in config.items() if v or v == False}
+            llm.setup_config()
 
         return llm
 
@@ -494,7 +468,7 @@ class Agent(BaseModel):
         Defines and executes a task when it is not given and returns TaskOutput object.
         """
 
-        if not self.role or not self.goal:
+        if not self.role:
             return None
 
         from versionhq.task.model import Task
@@ -504,7 +478,7 @@ class Agent(BaseModel):
             steps: list[str]
 
         task = Task(
-            description=f"Generate a simple result in a sentence to achieve the goal: {self.goal}. If needed, list up necessary steps in concise manner.",
+            description=f"Generate a simple result in a sentence to achieve the goal: {self.goal if self.goal else self.role}. If needed, list up necessary steps in concise manner.",
             pydantic_output=Output,
             tool_res_as_final=tool_res_as_final,
         )

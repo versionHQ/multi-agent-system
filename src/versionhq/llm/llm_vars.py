@@ -19,17 +19,9 @@ PROVIDERS = [
 
 ENDPOINT_PROVIDERS = [
     "huggingface",
+    "ollama",
 ]
 
-"""
-List of models available on the framework.
-Model names align with the LiteLLM's key names defined in the JSON URL.
-Provider names align with the custom provider or model provider names.
--> model_key = custom_provider_name/model_name
-
-Option
-litellm.pick_cheapest_chat_models_from_llm_provider(custom_llm_provider: str, n=1)
-"""
 
 MODELS = {
     "openai": [
@@ -63,65 +55,22 @@ MODELS = {
     "huggingface": [
         "huggingface/qwen/qwen2.5-VL-72B-Instruct",
     ],
-    # "sagemaker": [
-    #     "sagemaker/huggingface-text2text-flan-t5-base",
-    #     "sagemaker/huggingface-llm-gemma-7b",
-    #     "sagemaker/jumpstart-dft-meta-textgeneration-llama-2-13b",
-    #     "sagemaker/jumpstart-dft-meta-textgeneration-llama-2-70b",
-    #     "sagemaker/jumpstart-dft-meta-textgeneration-llama-3-8b",
-    #     "sagemaker/jumpstart-dft-meta-textgeneration-llama-3-70b",
-    #     "sagemaker/huggingface-llm-mistral-7b"
-    # ], #https://docs.aws.amazon.com/sagemaker/latest/dg/jumpstart-foundation-models-latest.html
     "ollama": [
       "ollama/llama3.1",
       "ollama/mixtral",
       "ollama/mixtral-8x22B-Instruct-v0.1",
     ],
-    # "watson": [
-    #     "watsonx/meta-llama/llama-3-1-70b-instruct",
-    #     "watsonx/meta-llama/llama-3-1-8b-instruct",
-    #     "watsonx/meta-llama/llama-3-2-11b-vision-instruct",
-    #     "watsonx/meta-llama/llama-3-2-1b-instruct",
-    #     "watsonx/meta-llama/llama-3-2-90b-vision-instruct",
-    #     "watsonx/meta-llama/llama-3-405b-instruct",
-    #     "watsonx/mistral/mistral-large",
-    #     "watsonx/ibm/granite-3-8b-instruct",
-    # ],
-    "bedrock": [
-        "bedrock/anthropic.claude-3-5-sonnet-20240620-v1:0",
-        "bedrock/anthropic.claude-3-sonnet-20240229-v1:0",
-        "bedrock/anthropic.claude-3-haiku-20240307-v1:0",
-        "bedrock/anthropic.claude-3-opus-20240229-v1:0",
-        "bedrock/anthropic.claude-v2",
-        "bedrock/anthropic.claude-instant-v1",
-        "bedrock/meta.llama3-1-405b-instruct-v1:0",
-        "bedrock/meta.llama3-1-70b-instruct-v1:0",
-        "bedrock/meta.llama3-1-8b-instruct-v1:0",
-        "bedrock/meta.llama3-70b-instruct-v1:0",
-        "bedrock/meta.llama3-8b-instruct-v1:0",
-        "bedrock/amazon.titan-text-lite-v1",
-        "bedrock/amazon.titan-text-express-v1",
-        "bedrock/cohere.command-text-v14",
-        "bedrock/ai21.j2-mid-v1",
-        "bedrock/ai21.j2-ultra-v1",
-        "bedrock/ai21.jamba-instruct-v1:0",
-        "bedrock/meta.llama2-13b-chat-v1",
-        "bedrock/meta.llama2-70b-chat-v1",
-        "bedrock/mistral.mistral-7b-instruct-v0:2",
-        "bedrock/mistral.mixtral-8x7b-instruct-v0:1",
-    ],
 }
 
 
-
-KEYS = {
+ENV_VARS = {
     "openai": ["OPENAI_API_KEY"],
     "gemini": ["GEMINI_API_KEY"],
     "anthropic": ["ANTHROPIC_API_KEY"],
     "huggingface": ["HUGGINGFACE_API_KEY", ],
+    "bedrock": ["AWS_ACCESS_KEY_ID", "ADW_SECURET_ACCESS_KEY", "AWS_REGION_NAME"],
     "sagemaker": ["AWS_ACCESS_KEY_ID", "ADW_SECURET_ACCESS_KEY", "AWS_REGION_NAME"],
 }
-
 
 
 """
@@ -193,8 +142,8 @@ PARAMS = {
         "response_format",
         "n",
         "stop",
-        "base_url",
-        "api_key",
+        # "base_url",
+        # "api_key",
     ],
     "openai": [
         "timeout",
@@ -216,7 +165,10 @@ PARAMS = {
     ],
     "gemini": [
         "topK",
-    ]
+    ],
+    "bedrock": {
+        "top-k",
+    }
 }
 
 

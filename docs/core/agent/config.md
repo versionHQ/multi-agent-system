@@ -11,11 +11,7 @@ By default, when the model provider name is provided, we will select the most co
 ```python
 import versionhq as vhq
 
-agent = vhq.Agent(
-	role="Marketing Analyst",
-	goal="Coping with price competition in saturated markets",
-	llm="gemini-2.0"
-)
+agent = vhq.Agent(role="Marketing Analyst", llm="gemini-2.0")
 ```
 
 <hr/>
@@ -34,7 +30,6 @@ import versionhq as vhq
 
 agent = vhq.Agent(
     role="Marketing Analyst",
-    goal="Coping with increased price competition in saturated markets.",
     respect_context_window=False,
     max_execution_time=60,
     max_rpm=5,
@@ -48,10 +43,10 @@ agent = vhq.Agent(
     )
 
 assert isinstance(agent.llm, vhq.LLM)
-assert agent.llm.temperature == 1
-assert agent.llm.top_p == 0.1
-assert agent.llm.n == 1
-assert agent.llm.stop == "answer"
+assert agent.llm.llm_config["temperature"] == 1
+assert agent.llm.llm_config["top_p"] == 0.1
+assert agent.llm.llm_config["n"] == 1
+assert agent.llm.llm_config["stop"] == "answer"
 ```
 
 <hr>
