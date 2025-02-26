@@ -61,7 +61,7 @@ def test_docs_core_task_e():
 
     # 1. Define and execute a sub task with Pydantic output.
     class Sub(BaseModel):
-        sub1: list[dict[str, Any]]
+        sub1: str
         sub2: dict[str, Any]
 
     sub_task = vhq.Task(description="generates a random value that strictly follows the given format.", pydantic_output=Sub)
@@ -74,7 +74,7 @@ def test_docs_core_task_e():
     def format_response(sub, main1, main2) -> Main:
         if main1:
             main1.append(sub)
-        main = Main(main1=main1, main2=main2)
+        main = Main(main1=main1, main2=str(main2))
         return main
 
     main_task = vhq.Task(
