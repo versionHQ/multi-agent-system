@@ -709,11 +709,11 @@ Ref. Output image: {output_formats_to_follow}
         #     )
         #     self._save_file(content)
 
-
-        # successful output will be evaluated and stored in the logs
         if raw_output:
             if self.should_evaluate:
                 task_output.evaluate(task=self)
+                self.output = task_output
+
             self._create_short_and_long_term_memories(agent=agent, task_output=task_output)
 
             if self.callback and isinstance(self.callback, Callable):
@@ -723,7 +723,7 @@ Ref. Output image: {output_formats_to_follow}
                 valid_kwargs = { k: kwargs[k] if  k in kwargs else None for k in valid_keys }
                 callback_res = self.callback(**valid_kwargs)
                 task_output.callback_output = callback_res
-
+                self.output = task_output
             self._store_logs()
 
         return task_output

@@ -69,7 +69,7 @@ class LLM(BaseModel):
 
     _logger: Logger = PrivateAttr(default_factory=lambda: Logger(verbose=True))
     _init_model_name: str = PrivateAttr(default=None)
-    _init_config: Optional[Dict[str, Any]] = PrivateAttr(default_factory=dict) # stores llm config passed by client or agent
+    # _init_config: Optional[Dict[str, Any]] = PrivateAttr(default_factory=dict) # stores llm config passed by client or agent
     _tokens: int = PrivateAttr(default=0) # aggregate number of tokens consumed
 
     model: str = Field(default=None)
@@ -233,14 +233,22 @@ class LLM(BaseModel):
         return valid_config
 
 
-    def _set_env_vars(self) -> None:
+    def _set_env_vars(self) -> Dict[str, Any]:
+        if self.provider == "openai":
+            return {}
+
+        cred = dict()
         env_vars = ENV_VARS.get(self.provider, None) if self.provider else None
 
         if not env_vars:
-            return None
+            return {}
 
         for item in env_vars:
-            os.environ[item] = os.environ.get(item, None)
+            val = os.environ.get(item, None)
+            if val:
+                cred[str(item).lower()] = val
+
+        return cred
 
 
     def _supports_function_calling(self) -> bool:
@@ -248,6 +256,8 @@ class LLM(BaseModel):
             if self.model:
                 params = litellm.get_supported_openai_params(model=self.model)
                 return "response_format" in params if params else False
+            else:
+                return False
         except Exception as e:
             self._logger.log(level="warning", message=f"Failed to get supported params: {str(e)}", color="yellow")
             return False
@@ -291,7 +301,6 @@ class LLM(BaseModel):
         """
 
         litellm.drop_params = True
-        self._set_env_vars()
 
         with suppress_warnings():
             if len(self.callbacks) > 0:
@@ -299,11 +308,12 @@ class LLM(BaseModel):
 
             try:
                 res, tool_res = None, ""
+                cred = self._set_env_vars()
 
                 if not tools:
                     self.response_format = response_format
                     params = self._create_valid_params(config=config)
-                    res = litellm.completion(model=self.model, messages=messages, stream=False, **params)
+                    res = litellm.completion(model=self.model, messages=messages, stream=False, **params, **cred)
                     self._tokens += int(res["usage"]["total_tokens"])
                     return res["choices"][0]["message"]["content"]
 
@@ -312,7 +322,7 @@ class LLM(BaseModel):
                         self.response_format = { "type": "json_object" }  if tool_res_as_final and self.provider != "gemini" else response_format
                         self.tools = [item.tool.properties if isinstance(item, ToolSet) else item.properties for item in tools]
                         params = self._create_valid_params(config=config)
-                        res = litellm.completion(model=self.model, messages=messages, **params)
+                        res = litellm.completion(model=self.model, messages=messages, **params, **cred)
                         tool_calls = res.choices[0].message.tool_calls
 
                         if tool_calls:
@@ -374,7 +384,7 @@ class LLM(BaseModel):
                 if tool_res_as_final:
                     return tool_res
                 else:
-                    res = litellm.completion(model=self.model, messages=messages, **params)
+                    res = litellm.completion(model=self.model, messages=messages, **params, **cred)
                     self._tokens += int(res["usage"]["total_tokens"])
                     return res.choices[0].message.content
 

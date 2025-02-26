@@ -6,20 +6,13 @@ PROVIDERS = [
     "openai",
     "gemini",
     "openrouter",
-    "huggingface",
     "anthropic",
-    "sagemaker",
     "bedrock",
-    "ollama",
-    "watson",
-    "azure",
-    "cerebras",
-    "llama",
+    "huggingface",
 ]
 
 ENDPOINT_PROVIDERS = [
     "huggingface",
-    "ollama",
 ]
 
 
@@ -37,6 +30,7 @@ MODELS = {
         "gemini/gemini-2.0-flash-exp",
     ],
     "anthropic": [
+        "claude-3-7-sonnet-latest",
         "claude-3-5-sonnet-20241022",
         "claude-3-5-sonnet-20240620",
         "claude-3-haiku-2024030",
@@ -45,20 +39,38 @@ MODELS = {
     ],
     "openrouter": [
         "openrouter/deepseek/deepseek-r1",
+
         "openrouter/qwen/qwen-2.5-72b-instruct",
+
         "openrouter/google/gemini-2.0-flash-thinking-exp:free",
         "openrouter/google/gemini-2.0-flash-thinking-exp-1219:free",
         "openrouter/google/gemini-2.0-flash-001",
+
         "openrouter/meta-llama/llama-3.3-70b-instruct",
         "openrouter/mistralai/mistral-large-2411",
+        "openrouter/cohere/command-r-plus",
+    ],
+    "bedrock": [
+        "bedrock/converse/llama-3.3-70B-Instruct",
+        "bedrock/meta.llama3-2-1b-instruct-v1:0",
+        "bedrock/meta.llama3-2-3b-instruct-v1:0",
+        "bedrock/meta.llama3-2-11b-instruct-v1:0",
+
+        "bedrock/mistral.mistral-7b-instruct-v0:2",
+        "bedrock/mistral.mixtral-8x7b-instruct-v0:1",
+        "bedrock/mistral.mistral-large-2407-v1:0",
+
+        "bedrock/amazon.titan-text-lite-v1",
+        "bedrock/amazon.titan-text-express-v1",
+        "bedrock/amazon.titan-text-premier-v1:0",
+
+        "bedrock/cohere.command-r-plus-v1:0",
+        "bedrock/cohere.command-r-v1:0",
+        "bedrock/cohere.command-text-v14",
+        "bedrock/cohere.command-light-text-v14",
     ],
     "huggingface": [
         "huggingface/qwen/qwen2.5-VL-72B-Instruct",
-    ],
-    "ollama": [
-      "ollama/llama3.1",
-      "ollama/mixtral",
-      "ollama/mixtral-8x22B-Instruct-v0.1",
     ],
 }
 
@@ -68,8 +80,8 @@ ENV_VARS = {
     "gemini": ["GEMINI_API_KEY"],
     "anthropic": ["ANTHROPIC_API_KEY"],
     "huggingface": ["HUGGINGFACE_API_KEY", ],
-    "bedrock": ["AWS_ACCESS_KEY_ID", "ADW_SECURET_ACCESS_KEY", "AWS_REGION_NAME"],
-    "sagemaker": ["AWS_ACCESS_KEY_ID", "ADW_SECURET_ACCESS_KEY", "AWS_REGION_NAME"],
+    "bedrock": ["AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_REGION_NAME"],
+    "sagemaker": ["AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_REGION_NAME"],
 }
 
 

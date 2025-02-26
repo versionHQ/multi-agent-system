@@ -165,7 +165,7 @@ import versionhq as vhq
 from pydantic import BaseModel
 from typing import Any
 
-# 1. Define and execute a sub task with Pydantic output.
+# 1. Defines a sub task
 class Sub(BaseModel):
     sub1: list[dict[str, Any]]
     sub2: dict[str, Any]
@@ -176,27 +176,28 @@ sub_task = vhq.Task(
 )
 sub_res = sub_task.execute()
 
-# 2. Define a main task, callback function to format the final response.
+# 2. Defines a main task with callbacks
 class Main(BaseModel):
-    main1: list[Any] # <= assume expecting to store Sub object in this field.
-    # error_main1: list[InstanceOf[Sub]]  # as this will trigger 400 error!
+    main1: list[Any] # <= assume expecting to store Sub object.
     main2: dict[str, Any]
 
-def format_response(sub: InstanceOf[Sub], main1: list[Any], main2: dict[str, Any]) -> Main:
-    main1.append(sub)
+def format_response(sub, main1, main2) -> Main:
+    if main1:
+        main1.append(sub)
     main = Main(main1=main1, main2=main2)
     return main
 
-# 3. Execute
+# 3. Executes
 main_task = vhq.Task(
-    description="generate random values that strictly follows the given format",
+    description="generate random values that strictly follows the given format.",
     pydantic_output=Main,
     callback=format_response,
-    callback_kwargs=dict(sub=Sub(sub1=sub_res.pydantic.sub1, sub2=sub_res.pydantic.sub2)),
+    callback_kwargs=dict(sub=sub_res.json_dict),
 )
-res = main_task.execute(context=sub_res.raw) # [Optional] Adding sub_task as a context.
+res = main_task.execute(context=sub_res.raw) # [Optional] Adding sub_task's response as context.
 
-assert [item for item in res.callback_output.main1 if isinstance(item, Sub)]
+assert res.callback_output.main1 is not None
+assert res.callback_output.main2 is not None
 ```
 
 To automate these manual setups, refer to <a href="/core/agent-network">AgentNetwork</a> class.

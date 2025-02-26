@@ -68,10 +68,10 @@ class Agent(BaseModel):
     # llm settings cascaded to the LLM model
     llm: str | InstanceOf[LLM] | Dict[str, Any] = Field(default=None)
     func_calling_llm: str | InstanceOf[LLM] | Dict[str, Any] = Field(default=None)
-    respect_context_window: bool = Field(default=True,description="keep messages under the context window size")
+    respect_context_window: bool = Field(default=True, description="keep messages under the context window size")
     max_execution_time: Optional[int] = Field(default=None, description="max. task execution time in seconds")
     max_rpm: Optional[int] = Field(default=None, description="max. number of requests per minute")
-    llm_config: Optional[Dict[str, Any]] = Field(default=None, description="other llm config cascaded to the LLM model")
+    llm_config: Optional[Dict[str, Any]] = Field(default=None, description="other llm config cascaded to the LLM class")
 
     # # cache, error, ops handling
     # formatting_errors: int = Field(default=0, description="number of formatting errors.")
