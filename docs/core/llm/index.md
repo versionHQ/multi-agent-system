@@ -49,10 +49,10 @@ You can specify a model and integration platform from the list. Else, we'll use 
     "openrouter/cohere/command-r-plus",
 ],
 "bedrock": [
-    "bedrock/converse/llama-3.3-70B-Instruct",
-    "bedrock/meta.llama3-2-1b-instruct-v1:0",
-    "bedrock/meta.llama3-2-3b-instruct-v1:0",
-    "bedrock/meta.llama3-2-11b-instruct-v1:0",
+    "bedrock/converse/us.meta.llama3-3-70b-instruct-v1:0",
+    "bedrock/us.meta.llama3-2-1b-instruct-v1:0",
+    "bedrock/us.meta.llama3-2-3b-instruct-v1:0",
+    "bedrock/us.meta.llama3-2-11b-instruct-v1:0",
 
     "bedrock/mistral.mistral-7b-instruct-v0:2",
     "bedrock/mistral.mixtral-8x7b-instruct-v0:1",

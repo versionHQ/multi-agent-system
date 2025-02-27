@@ -25,7 +25,7 @@ A Python framework for agentic orchestration that handles complex task automatio
 
 `versionhq` is a Python framework for agent networks that handle complex task automation without human interaction.
 
-Agents are model-agnostic, and will improve task output, while oprimizing token cost and job latency, by sharing their memory, knowledge base, and RAG tools with other agents in the network.
+Agents are model-agnostic, and will improve task output, while optimizing token cost and job latency, by sharing their memory, knowledge base, and RAG tools with other agents in the network.
 
 
 ### Agent Network

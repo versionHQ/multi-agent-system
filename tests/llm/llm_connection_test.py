@@ -13,13 +13,12 @@ Test connection to the llm via endpoint provider or litellm.
 
 def set_agent(llm: str) -> Agent:
     agent = Agent(role="LLM Connection Tester", llm=llm, maxit=1, max_retry_limit=1, llm_config=dict(max_tokens=3000))
-    assert isinstance(agent.llm, LLM)
-    assert agent.llm._init_model_name == llm and agent.llm.provider and agent.llm.llm_config["max_tokens"] == agent.llm_config["max_tokens"]
     return agent
 
 @pytest.fixture(scope='module')
 def simple_task():
     return Task(description="write a random poem.")
+
 
 @pytest.fixture(scope='module')
 def tool_task():
@@ -27,25 +26,30 @@ def tool_task():
         func: Callable[..., Any] = lambda x: "Demo"
     return Task(description="Simply execute the given tools.", tools=[DemoTool,], tool_res_as_final=True)
 
+
 @pytest.fixture(scope='module')
 def schema_task():
     return Task(description="generates an unique random value strictly following the given format.", pydantic_output=Demo)
+
 
 @pytest.fixture(scope='module')
 def res_field_task():
     return Task(description="return random values strictly following the given response format.", response_fields=demo_response_fields)
 
 
-def test_bedrock(simple_task, tool_task, schema_task, res_field_task):
+def test_con(simple_task, tool_task, schema_task, res_field_task):
     llms_to_test = [
-        "bedrock/llama-3.3-70B-Instruct",
-        "bedrock/us-east-1/meta.llama3-8b-instruct-v1:0",
+        "bedrock/converse/us.meta.llama3-3-70b-instruct-v1:0"
+        "bedrock/us.meta.llama3-2-11b-instruct-v1:0",
         "bedrock/mistral.mistral-7b-instruct-v0:2",
         "bedrock/amazon.titan-text-lite-v1",
     ]
     agents = [set_agent(llm=llm) for llm in llms_to_test]
 
     for agent in agents:
+        assert isinstance(agent.llm, LLM)
+        assert agent.llm._init_model_name and agent.llm.provider and agent.llm.llm_config["max_tokens"] == agent.llm_config["max_tokens"]
+
         res_1 = simple_task.execute(agent=agent, context="running a test")
         assert res_1.raw is not None
 

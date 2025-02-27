@@ -37,10 +37,6 @@ jobs:
 
       - name: Set up the project
         run: |
-          rm -rf .logs
-          rm -rf .pytest_cache
-          rm -rf uv.lock
-          uv cache clean
           uv venv --python 3.12.8
           source .venv/bin/activate
           uv lock --upgrade
