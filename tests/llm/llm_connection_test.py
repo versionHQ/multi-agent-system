@@ -39,7 +39,7 @@ def res_field_task():
 
 def test_con(simple_task, tool_task, schema_task, res_field_task):
     llms_to_test = [
-        "bedrock/converse/us.meta.llama3-3-70b-instruct-v1:0"
+        "bedrock/converse/us.meta.llama3-3-70b-instruct-v1:0",
         "bedrock/us.meta.llama3-2-11b-instruct-v1:0",
         "bedrock/mistral.mistral-7b-instruct-v0:2",
         "bedrock/amazon.titan-text-lite-v1",
