@@ -12,10 +12,10 @@ Agentic orchestration framework for multi-agent networks and task graphs for com
 
 **Visit:**
 
-- [Playground](https://versi0n.io/playground)
+- [Playground](https://versi0n.io/)
 - [Docs](https://docs.versi0n.io)
-- [Github Repository](https://github.com/versionHQ/multi-agent-system)
-- [PyPI](https://pypi.org/project/versionhq/)
+- [Github](https://github.com/versionHQ/)
+- [Python SDK](https://pypi.org/project/versionhq/)
 
 <hr />
 
@@ -30,9 +30,10 @@ Agentic orchestration framework for multi-agent networks and task graphs for com
   - [Optimization](#optimization)
 - [Quick Start](#quick-start)
   - [Package installation](#package-installation)
-  - [Forming a agent network](#forming-a-agent-network)
-  - [Executing tasks](#executing-tasks)
-  - [Supervising](#supervising)
+  - [Launching an agent](#launching-an-agent)
+  - [Automating workflows](#automating-workflows)
+  - [Executing a single task](#executing-a-single-task)
+  - [Supervising agents](#supervising-agents)
 - [Technologies Used](#technologies-used)
 - [Project Structure](#project-structure)
 - [Setting Up Your Project](#setting-up-your-project)
@@ -160,33 +161,45 @@ agent.update(
 
 ### Package installation
 
-   ```
-   pip install versionhq
-   ```
+```
+pip install versionhq
+```
 
 (Python 3.11 / 3.12)
 
-### Forming a agent network
 
-   ```python
-   import versionhq as vhq
-
-   network = work(
-      task="YOUR AMAZING TASK OVERVIEW",
-      expected_outcome="YOUR OUTCOME EXPECTATION",
-   )
-   res, tg = network.launch()
-   ```
-
-This will form a agent network with multiple agents on `Formation` and return response in `TaskOutput` object and `TaskGraph` that connects multiple tasks as nodes.
+### Launching an agent
 
 
-### Executing tasks
+```python
+import versionhq as vhq
 
-You can simply build an agent using `Agent` model and execute the task using `Task` class.
+agent = vhq.Agent(role="Marketer")
+res = agent.start()
 
-By default, agents prioritize JSON over plane text outputs.
+assert isinstance(res, vhq.TaskOutput) # contains agent's response in text, JSON, Pydantic formats with usage recordes and eval scores.
+```
 
+
+### Automating workflows
+
+```python
+import versionhq as vhq
+
+network = vhq.form_agent_network(
+   task="draft a promo plan",
+   expected_outcome="marketing plan, budget, KPI targets",
+)
+res, tg = network.launch()
+
+assert isinstance(res, vhq.TaskOutput) # the latest output from the workflow
+assert isinstance(tg, vhq.TaskGraph) # contains task nodes and edges that connect the nodes with dep-met conditions
+```
+
+
+### Executing a single task
+
+You can simply build and execute a task using `Task` class.
 
 ```python
 import versionhq as vhq
@@ -206,34 +219,20 @@ task = vhq.Task(
    callback_kwargs=dict(message="Hi! Here is the result: ")
 )
 
-res = task.execute(context="context to consider")
-
+res = task.execute(context="testing a task function")
 assert isinstance(res, vhq.TaskOutput)
 ```
 
-This will return a `TaskOutput` object that stores response in plane text, JSON, and Pydantic model: `CustomOutput` formats with a callback result, tool output (if given), and evaluation results (if given).
 
-```python
-res == vhq.TaskOutput(
-   task_id=UUID('<TASK UUID>'),
-   raw='{\"test1\":\"random str\", \"test2\":[\"str item 1\", \"str item 2\", \"str item 3\"]}',
-   json_dict={'test1': 'random str', 'test2': ['str item 1', 'str item 2', 'str item 3']},
-   pydantic=<class '__main__.CustomOutput'>,
-   tool_output=None,
-   callback_output='Hi! Here is the result: random str, str item 1, str item 2, str item 3', # returned a plain text summary
-   evaluation=None
-)
-```
-
-### Supervising
+### Supervising agents
 
 To create an agent network with one or more manager agents, designate members using the `is_manager` tag.
 
 ```python
 import versionhq as vhq
 
-agent_a = vhq.Agent(role="agent a", llm="llm-of-your-choice")
-agent_b = vhq.Agent(role="agent b", llm="llm-of-your-choice")
+agent_a = vhq.Agent(role="Member", llm="gpt-4o")
+agent_b = vhq.Agent(role="Leader", llm="gemini-2.0")
 
 task_1 = vhq.Task(
    description="Analyze the client's business model.",
@@ -255,11 +254,9 @@ network =vhq.AgentNetwork(
 )
 res, tg = network.launch()
 
-assert isinstance(res, vhq.TaskOutput)
-assert agent_b.key in task_1.processed_agents
-assert agent_b.key in task_2.processed_agents
-
-assert isinstance(tg, vhq.TaskGraph)
+assert isinstance(res, vhq.NetworkOutput)
+assert not [item for item in task_1.processed_agents if "vhq-Delegated-Agent" == item]
+assert [item for item in task_1.processed_agents if "agent b" == item]
 ```
 
 This will return a list with dictionaries with keys defined in the `ResponseField` of each task.
@@ -423,7 +420,7 @@ Create `.env` file in the project root and add secret vars following `.env.sampl
 
    * Test functions within the files must begin with `test_`.
 
-   * Pytest priorities are `1. playground demo > 2. docs use cases > 3. other features`
+   * Pytest priorities are `1. playground > 2. docs use cases > 3. other features`
 
 
 4. Update `docs` accordingly.
@@ -511,4 +508,4 @@ Common issues and solutions:
 ## Frequently Asked Questions (FAQ)
 **Q. Where can I see if the agent is working?**
 
-A. Visit [playground](https://versi0n.io/playground).
+A. Visit [playground](https://versi0n.io).
