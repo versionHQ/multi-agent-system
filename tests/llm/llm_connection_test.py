@@ -48,6 +48,7 @@ def test_con(simple_task, tool_task, schema_task, res_field_task):
 
     for agent in agents:
         assert isinstance(agent.llm, LLM)
+        assert agent.llm.provider == "bedrock"
         assert agent.llm._init_model_name and agent.llm.provider and agent.llm.llm_config["max_tokens"] == agent.llm_config["max_tokens"]
 
         res_1 = simple_task.execute(agent=agent, context="running a test")

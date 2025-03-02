@@ -228,6 +228,10 @@ class LLM(BaseModel):
             else:
                 pass
 
+        if "max_tokens" in valid_config:
+            if self.context_window_size and valid_config["max_tokens"] > self.context_window_size:
+                valid_config["max_tokens"] = self.context_window_size
+
         self.llm_config = valid_config
         return valid_config
 
