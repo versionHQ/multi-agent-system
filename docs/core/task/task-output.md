@@ -18,9 +18,10 @@ A Pydantic class to store and manage response from the `Task` object.
 | **`task_id`**   | UUID  | uuid.uuid4() | False | Stores task `id` as an identifier. |
 | **`raw`**       | str   | None | False | Stores response in plane text format. `None` or `""` when the model returned errors.|
 | **`json_dict`** | Dict[str, Any] | None | False | Stores response in JSON serializable dictionary. When the system failed formatting or executing tasks without response_fields, `{ output: <res.raw> }` will be returned. |
-| **`pydantic`** | Type[`BaseModel`]  | None | True | Populates and stores Pydantic class defined in the `pydantic_output` field. `None` if `pydantic_output` is NOT given. |
+| **`pydantic`** | Type[`BaseModel`]  | None | True | Populates and stores Pydantic class object defined in the `pydantic_output` field. `None` if `pydantic_output` is NOT given. |
 | **`tool_output`** |  Optional[Any] | None | True | Stores results from the tools of the task or agents ONLY when `tool_res_as_final` set as `True`. |
 | **`callback_output`** |  Optional[Any] | None | True | Stores results from callback functions if any. |
+| **`latency`** |  Optional[float] | None | True | Stores job latency in milseconds. |
 | **`evaluation`** |  Optional[InstanceOf[`Evaluation`]] | None | True | Stores overall evaluations and usage of the task output. |
 
 

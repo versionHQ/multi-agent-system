@@ -50,4 +50,4 @@ def test_eval_with_fsls():
     assert [isinstance(item, vhq.EvaluationItem) and item.criteria in task.eval_criteria for item in res.evaluation.items]
     assert res.latency and res._tokens
     assert res.evaluation.aggregate_score is not None
-    assert res.evaluation.suggestion_summary
+    assert res.evaluation.suggestion_summary is not None

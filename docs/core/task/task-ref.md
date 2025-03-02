@@ -1,4 +1,6 @@
-## Variables `Task`
+## `Task`
+
+### Variables
 
 | <div style="width:160px">**Variable**</div> | **Data Type** | **Default** | **Nullable** | **Description** |
 | :---               | :---  | :--- | :--- | :--- |
@@ -23,16 +25,81 @@
 | **`output`** | Optional[TaskOutput] | None | True | [Ops] Stores `TaskOutput` object after the execution |
 
 
-## Class Methods `Task`
+### Class Methods
 
 | <div style="width:120px">**Method**</div> |  <div style="width:300px">**Params**</div> | **Returns** | **Description** |
 | :---               | :---  | :--- | :--- |
 | **`execute`**  | <p>type: TaskExecutionType = None<br>agent: Optional["vhq.Agent"] = None<br>context: Optional[Any] = None</p> | InstanceOf[`TaskOutput`] or None (error) |  A main method to handle task execution. Auto-build an agent when the agent is not given. |
 
 
-## Properties `Task`
+### Properties
 
 | <div style="width:120px">**Property**</div> | **Returns** | **Description** |
 | :---               | :---  | :--- |
 | **`key`**   | str | Returns task key based on its description and output format. |
 | **`summary`**  | str   | Returns a summary of the task based on its id, description and tools. |
+
+<hr>
+
+## `TaskOutput`
+
+### Variables
+
+| <div style="width:120px">**Variable**</div> | **Data Type** | **Default** | **Nullable** | **Description** |
+| :---               | :---  | :--- | :--- | :--- |
+| **`task_id`**   | UUID  | uuid.uuid4() | False | Stores task `id` as an identifier. |
+| **`raw`**       | str   | None | False | Stores response in plane text format. `None` or `""` when the model returned errors.|
+| **`json_dict`** | Dict[str, Any] | None | False | Stores response in JSON serializable dictionary. When the system failed formatting or executing tasks without response_fields, `{ output: <res.raw> }` will be returned. |
+| **`pydantic`** | Type[`BaseModel`]  | None | True | Populates and stores Pydantic class object defined in the `pydantic_output` field. `None` if `pydantic_output` is NOT given. |
+| **`tool_output`** |  Optional[Any] | None | True | Stores results from the tools of the task or agents ONLY when `tool_res_as_final` set as `True`. |
+| **`callback_output`** |  Optional[Any] | None | True | Stores results from callback functions if any. |
+| **`latency`** |  Optional[float] | None | True | Stores job latency in milseconds. |
+| **`evaluation`** |  Optional[InstanceOf[`Evaluation`]] | None | True | Stores overall evaluations and usage of the task output. |
+
+
+### Class Methods
+
+| <div style="width:120px">**Method**</div> | **Params** | **Returns** | **Description** |
+| :---               | :---  | :--- | :--- |
+| **`evaluate`**   | task: InstanceOf[`Task`]  | InstanceOf[`Evaluation`]  | Evaluates task output based on the criteria |
+
+
+### Property
+
+| <div style="width:120px">**Property**</div> | **Returns** | **Description** |
+| :---               | :---  | :--- |
+| **`aggregate_score`**   | float | Calucurates weighted average eval scores of the task output. |
+| **`json_string`**       | str   | Returns `json_dict` in string format. |
+
+
+<hr>
+
+## `Evaluation`
+
+### Variables
+
+| <div style="width:120px">**Variable**</div> | **Data Type** | **Default** | **Nullable** | **Description** |
+| :---            | :---  | :--- | :--- | :--- |
+| **`items`**     | List[InstanceOf[EvaluationItem]]  | list() | - | Stores evaluation items. |
+| **`eval_by`**   | Any   | None | True | Stores an agent evaluated the output. |
+
+
+### Property
+
+| <div style="width:120px">**Property**</div> | **Returns** | **Description** |
+| :---               | :---  | :--- |
+| **`aggregate_score`**   | float | Calucurates weighted average eval scores of the task output. |
+| **`suggestion_summary`**  | str   | Returns summary of the suggestions. |
+
+
+<hr>
+
+## `EvaluationItem`
+
+### Variables
+
+| <div style="width:120px">**Variable**</div> | **Data Type** | **Default** | **Nullable** | **Description** |
+| :---            | :---  | :--- | :--- | :--- |
+| **`criteria`**     | str  | None | False | Stores evaluation criteria given by the client. |
+| **`suggestion`**   | str   | None | True | Stores suggestion on improvement from the evaluator agent. |
+| **`score`**   | float   | None | True | Stores the score on a 0 to 1 scale. |
