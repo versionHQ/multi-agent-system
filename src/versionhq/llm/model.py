@@ -69,7 +69,6 @@ class LLM(BaseModel):
 
     _logger: Logger = PrivateAttr(default_factory=lambda: Logger(verbose=True))
     _init_model_name: str = PrivateAttr(default=None)
-    # _init_config: Optional[Dict[str, Any]] = PrivateAttr(default_factory=dict) # stores llm config passed by client or agent
     _tokens: int = PrivateAttr(default=0) # aggregate number of tokens consumed
 
     model: str = Field(default=None)

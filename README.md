@@ -4,7 +4,7 @@
 ![MIT license](https://img.shields.io/badge/License-MIT-green)
 [![Publisher](https://github.com/versionHQ/multi-agent-system/actions/workflows/publish.yml/badge.svg)](https://github.com/versionHQ/multi-agent-system/actions/workflows/publish.yml)
 ![PyPI](https://img.shields.io/badge/PyPI-v1.2.2+-blue)
-![python ver](https://img.shields.io/badge/Python-3.11/3.12-purple)
+![python ver](https://img.shields.io/badge/Python-3.11|3.12-purple)
 ![pyenv ver](https://img.shields.io/badge/pyenv-2.5.0-orange)
 
 

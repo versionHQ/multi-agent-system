@@ -36,11 +36,8 @@ You can specify a model and integration platform from the list. Else, we'll use 
 "openrouter": [
     "openrouter/deepseek/deepseek-r1",
     "openrouter/qwen/qwen-2.5-72b-instruct",
-    "openrouter/google/gemini-2.0-flash-thinking-exp:free",
-    "openrouter/google/gemini-2.0-flash-thinking-exp-1219:free",
     "openrouter/google/gemini-2.0-flash-001",
-    "openrouter/meta-llama/llama-3.3-70b-instruct",
-    "openrouter/mistralai/mistral-large-2411",
+    "openrouter/mistralai/mistral-large",
     "openrouter/cohere/command-r-plus",
     "openrouter/databricks/dbrx-instruct",
 ],
