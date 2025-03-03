@@ -12,7 +12,7 @@ But you can choose to generate Pydantic class or specifig JSON object as respons
 
 `[var]`<bold>`pydantic_output: Optional[Type[BaseModel]] = None`</bold>
 
-Create and add a `custom Pydantic class` as a structured response format to the `pydantic_output` field.
+Add a `custom Pydantic class` as a structured response format to the `pydantic_output` field.
 
 The custom class can accept **one layer of a nested child** as you can see in the following code snippet:
 

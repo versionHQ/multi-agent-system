@@ -108,5 +108,6 @@ class RagTool(BaseTool):
                     results.append(str(item))
             return results
 
+
     def run(self, *args, **kwargs):
         return self._run(*args, **kwargs)

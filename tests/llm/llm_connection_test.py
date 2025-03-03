@@ -37,7 +37,7 @@ def res_field_task():
     return Task(description="return random values strictly following the given response format.", response_fields=demo_response_fields)
 
 
-def test_con(simple_task, tool_task, schema_task, res_field_task):
+def test_con_bedrock(simple_task, tool_task, schema_task, res_field_task):
     llms_to_test = [
         "bedrock/converse/us.meta.llama3-3-70b-instruct-v1:0",
         "bedrock/us.meta.llama3-2-11b-instruct-v1:0",
@@ -49,6 +49,33 @@ def test_con(simple_task, tool_task, schema_task, res_field_task):
     for agent in agents:
         assert isinstance(agent.llm, LLM)
         assert agent.llm.provider == "bedrock"
+        assert agent.llm._init_model_name and agent.llm.provider and agent.llm.llm_config["max_tokens"] == agent.llm_config["max_tokens"]
+
+        res_1 = simple_task.execute(agent=agent, context="running a test")
+        assert res_1.raw is not None
+
+        res_2 = tool_task.execute(agent=agent, context="running a test")
+        assert res_2.tool_output is not None
+
+        res_3 = schema_task.execute(agent=agent, context="running a test")
+        assert [
+            getattr(res_3.pydantic, k) and v.annotation == Demo.model_fields[k].annotation
+            for k, v in res_3.pydantic.model_fields.items()
+        ]
+
+        res_4 = res_field_task.execute(agent=agent, context="running a test")
+        assert [v and type(v) == res_field_task.response_fields[i].data_type for i, (k, v) in enumerate(res_4.json_dict.items())]
+
+
+def test_con_gpt(simple_task, tool_task, schema_task, res_field_task):
+    llms_to_test = [
+        "gpt-4.5-preview-2025-02-27",
+    ]
+    agents = [set_agent(llm=llm) for llm in llms_to_test]
+
+    for agent in agents:
+        assert isinstance(agent.llm, LLM)
+        assert agent.llm.provider == "openai"
         assert agent.llm._init_model_name and agent.llm.provider and agent.llm.llm_config["max_tokens"] == agent.llm_config["max_tokens"]
 
         res_1 = simple_task.execute(agent=agent, context="running a test")

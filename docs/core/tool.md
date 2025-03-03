@@ -7,7 +7,8 @@ tags:
 
 <class>`class` versionhq.tool.model.<bold>Tool<bold></class>
 
-Tool is an unique function that the agent can utilize when they execute the task with or without LLM.
+A Pydantic class to store the tool object.
+
 
 ## Quick Start
 

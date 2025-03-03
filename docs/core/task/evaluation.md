@@ -7,6 +7,9 @@ tags:
 
 <class>`class` versionhq.task.evaluate.<bold>Evaluation<bold></class>
 
+A Pydantic class to store conditions and results of the evaluation.
+
+
 ### Variables
 
 | <div style="width:120px">**Variable**</div> | **Data Type** | **Default** | **Nullable** | **Description** |

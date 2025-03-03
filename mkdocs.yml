@@ -131,9 +131,12 @@ nav:
       - Executing: 'core/task/task-execution.md'
       - Outputs: 'core/task/task-output.md'
       - Evaluating: 'core/task/evaluation.md'
-      - Reference: 'core/task/task-ref.md'
+      - Reference: 'core/task/reference.md'
   - Components:
     - Tool: 'core/tool.md'
+    - RAG Tool: core/rag-tool.md
+    - Memory: core/memory.md
+    - Knowledge: core/knowledge.md
   - Archive: 'tags.md'
   - Cases:
     - Playground: https://versi0n.io/playground

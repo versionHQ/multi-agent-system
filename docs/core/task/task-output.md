@@ -7,7 +7,7 @@ tags:
 
 <class>`class` versionhq.task.model.<bold>TaskOutput<bold></class>
 
-A Pydantic class to store and manage response from the `Task` object.
+A Pydantic class to store and manage results of `Task`.
 
 <hr />
 

@@ -19,6 +19,7 @@ ENDPOINT_PROVIDERS = [
 
 MODELS = {
     "openai": [
+        "gpt-4.5-preview-2025-02-27",
         "gpt-4",
         "gpt-4o",
         "gpt-4o-mini",
@@ -82,9 +83,10 @@ ENV_VARS = {
 Max input token size by the model.
 """
 LLM_CONTEXT_WINDOW_SIZES = {
-    "gpt-4": 8192,
+    "gpt-4.5-preview-2025-02-27": 128000,
     "gpt-4o": 128000,
     "gpt-4o-mini": 128000,
+    "gpt-4": 8192,
     "o1-preview": 128000,
     "o1-mini": 128000,
 

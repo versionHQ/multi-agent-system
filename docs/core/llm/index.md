@@ -16,9 +16,10 @@ You can specify a model and integration platform from the list. Else, we'll use 
 
 ```python
 "openai": [
-    "gpt-4",
+    "gpt-4.5-preview-2025-02-27",
     "gpt-4o",
     "gpt-4o-mini",
+    "gpt-4",
     "o1-mini",
     "o1-preview",
 ],

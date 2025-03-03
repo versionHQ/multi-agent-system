@@ -13,7 +13,7 @@ Agentic orchestration framework for multi-agent networks and task graphs for com
 **Visit:**
 
 - [Playground](https://versi0n.io/)
-- [Docs](https://docs.versi0n.io)
+- [Documentation](https://docs.versi0n.io)
 - [Github](https://github.com/versionHQ/)
 - [Python SDK](https://pypi.org/project/versionhq/)
 
