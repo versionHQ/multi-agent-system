@@ -22,6 +22,3 @@ composio-core==0.7.0
 networkx>=3.4.2
 matplotlib>=3.10.0
 boto3>=1.37.1
-scikit-learn>=1.6.1
-numpy>=1.21.0
-pandas>=2.2.3

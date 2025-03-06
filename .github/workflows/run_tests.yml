@@ -38,7 +38,7 @@ jobs:
 
       - name: Set up the project
         run: |
-          uv venv
+          uv venv python --3.13.1
           source .venv/bin/activate
           uv lock --upgrade
           uv sync --all-extras --no-extra pygraphviz
