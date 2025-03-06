@@ -113,11 +113,11 @@ dev-dependencies = [
 
 [tool.uv.sources]
 torch = [
-  { index = "pytorch-cpu", extra = "torch", marker = "sys_platform == 'darwin'" },
+  { index = "pytorch-cpu", extra = "torch", marker = "sys_platform != 'win32' and sys_platform != 'linux'" },
   { index = "pytorch-cu124", extra = "torch", marker = "sys_platform == 'win32' or sys_platform == 'linux'" },
 ]
 torchvision = [
-  { index = "pytorch-cpu", extra = "torch",  marker = "sys_platform == 'darwin'" },
+  { index = "pytorch-cpu", extra = "torch",  marker = "sys_platform != 'win32' and sys_platform != 'linux'" },
   { index = "pytorch-cu124", extra = "torch", marker = "sys_platform == 'win32' or sys_platform == 'linux'" },
 ]
 

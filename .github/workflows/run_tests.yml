@@ -37,12 +37,12 @@ jobs:
 
       - name: Set up the project
         run: |
-          rm -rf uv.lock
           uv cache clean
           uv venv
           source .venv/bin/activate
+          uv pip install --upgrade pip pytest
           uv lock --upgrade
-          uv sync --all-extras --no-extra pygraphviz  --no-extra torch
+          uv sync --all-extras --no-extra pygraphviz
 
       - name: Run tests
         run: uv run pytest tests -vv --cache-clear
