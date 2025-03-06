@@ -1,6 +1,8 @@
 deploy.py
 destinations.py
 
+auth/
+
 refine.py
 
 train.py

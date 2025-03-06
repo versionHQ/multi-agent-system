@@ -1,6 +1,5 @@
 import re
 import requests
-import html2text
 import gzip
 import http.client
 import urllib.request
@@ -36,6 +35,11 @@ class RagTool(BaseTool):
 
         if isinstance(source_code, bytes):
             source_code = source_code.decode('utf-8')
+
+        try:
+            import html2text
+        except:
+            Logger().log(message="Dependencies for tools are missing. Add tool packages by running: `uv add versionhq[tool]`.", color="red", level="error")
 
         h = html2text.HTML2Text()
         h.ignore_links = False

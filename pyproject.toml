@@ -15,11 +15,11 @@ exclude = ["test*", "__pycache__", "*.egg-info"]
 
 [project]
 name = "versionhq"
-version = "1.2.2.10"
+version = "1.2.3.0"
 authors = [{ name = "Kuriko Iwai", email = "kuriko@versi0n.io" }]
 description = "An agentic orchestration framework for building agent networks that handle task automation."
 readme = "README.md"
-requires-python = ">=3.11,<3.13"
+requires-python = ">=3.11"
 license = { file = "LICENSE" }
 keywords = ["orchestration framework", "orchestration", "ai agent", "multi-agent system", "RAG", "agent", "agentic orchestration", "llm"]
 dependencies = [
@@ -53,6 +53,7 @@ classifiers = [
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
   "License :: OSI Approved :: MIT License",
   "Operating System :: OS Independent",
   "Development Status :: 3 - Alpha",
@@ -68,8 +69,13 @@ Repository = "https://github.com/versionHQ/multi-agent-system"
 Issues = "https://github.com/versionHQ/multi-agent-system/issues"
 
 [project.optional-dependencies]
+torch = [
+    "torch>=2.6.0",
+    "torchvision>=0.21.0",
+    "pytorch-triton-xpu>=3.2.0 ; sys_platform == 'linux'",
+]
 docling = [
-    "docling>=2.17.0",
+    "docling>=2.25.2",
 ]
 mem0ai = [
     "mem0ai>=0.1.55",
@@ -109,6 +115,22 @@ dev-dependencies = [
   "mkdocstrings>=0.28.0",
   "pillow>=10.4.0",
 ]
+
+[tool.uv.sources]
+torch = [
+  { index = "pytorch-xpu", marker = "sys_platform == 'win32' or sys_platform == 'linux'" },
+]
+torchvision = [
+  { index = "pytorch-xpu", marker = "sys_platform == 'win32' or sys_platform == 'linux'" },
+]
+pytorch-triton-xpu = [
+  { index = "pytorch-xpu", marker = "sys_platform == 'linux'" },
+]
+
+[[tool.uv.index]]
+name = "pytorch-xpu"
+url = "https://download.pytorch.org/whl/xpu"
+explicit = true
 
 [tool.uv.workspace]
 members = ["Kuriko", "krik8235", "Kuriko IWAI"]

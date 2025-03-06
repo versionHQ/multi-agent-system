@@ -4,7 +4,7 @@
 ![MIT license](https://img.shields.io/badge/License-MIT-green)
 [![Publisher](https://github.com/versionHQ/multi-agent-system/actions/workflows/publish.yml/badge.svg)](https://github.com/versionHQ/multi-agent-system/actions/workflows/publish.yml)
 ![PyPI](https://img.shields.io/badge/PyPI-v1.2.2+-blue)
-![python ver](https://img.shields.io/badge/Python-3.11|3.12-purple)
+![python ver](https://img.shields.io/badge/Python-3.11|3.12|3.13-purple)
 ![pyenv ver](https://img.shields.io/badge/pyenv-2.5.0-orange)
 
 
@@ -165,7 +165,7 @@ agent.update(
 pip install versionhq
 ```
 
-(Python 3.11 / 3.12)
+(Python 3.11 | 3.12 | 3.13)
 
 
 ### Launching an agent
@@ -297,7 +297,6 @@ Tasks can be delegated to a manager, peers within the agent network, or a comple
 
 **Deployment**
 
-* **Python**: Primary programming language. v3.12.x is recommended
 * [uv](https://docs.astral.sh/uv/): Python package installer and resolver
 * [pre-commit](https://pre-commit.com/): Manage and maintain pre-commit hooks
 * [setuptools](https://pypi.org/project/setuptools/): Build python modules
@@ -385,8 +384,6 @@ pyproject.toml                # Project config
       ```
       uv sync --all-extras --no-extra pygraphviz
       ```
-
-   - `torch`/`Docling` related errors: Set up default Python version either `3.11.x` or `3.12.x` (same as AssertionError)
 
 ### Adding env secrets to .env file
 
@@ -492,8 +489,6 @@ Common issues and solutions:
 * Database connection issues: Check if the Chroma DB is properly initialized and accessible.
 
 * Memory errors: If processing large contracts, you may need to increase the available memory for the Python process.
-
-* Issues related to the Python version: Docling/Pytorch is not ready for Python 3.13 as of Jan 2025. Use Python 3.12.x as default by running `uv venv --python 3.12.8` and `uv python pin 3.12.8`.
 
 * Issues related to dependencies: `rm -rf uv.lock`, `uv cache clean`, `uv venv`, and run `uv pip install -r requirements.txt -v`.
 
