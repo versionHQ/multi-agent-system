@@ -31,19 +31,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v4
+      - uses: actions/setup-python@v4
         with:
-          version: "0.5.11"
-
-      - name: Set up the project
+          python-version: "3.13"
+      
+      - name: test
         run: |
-          uv cache clean
+          echo "VIRTUAL_ENV=${Python_ROOT_DIR}" >> $GITHUB_ENV
+          pip install --upgrade pip pytest
+          pip install uv
           uv venv
           source .venv/bin/activate
           uv pip install --upgrade pip pytest
           uv lock --upgrade
           uv sync --all-extras --no-extra pygraphviz
-
-      - name: Run tests
-        run: uv run pytest tests -vv --cache-clear
+          uv run pytest tests -vv --cache-clear
