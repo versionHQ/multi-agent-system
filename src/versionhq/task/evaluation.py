@@ -2,63 +2,21 @@ from typing import List, Optional, Dict, Any
 from typing_extensions import Self
 
 from pydantic import BaseModel, model_validator
+import pandas as pd
+from sklearn.preprocessing import MinMaxScaler
 
 from versionhq.memory.model import MemoryMetadata
-
-"""
-Evaluate task output from accuracy, token consumption, and latency perspectives, and mark the score from 0 to 1.
-"""
-
-
-class ScoreFormat:
-    def __init__(self, rate: float | int = 0, weight: int = 1):
-        self.rate = rate
-        self.weight = weight
-        self.aggregate = rate * weight
-
-
-class Score:
-    """
-    Evaluate the score on 0 (no performance) to 1 scale.
-    `rate`: Any float from 0.0 to 1.0 given by an agent.
-    `weight`: Importance of each factor to the aggregated score.
-    """
-
-    def __init__(self, config: Optional[Dict[str, ScoreFormat]] = None):
-        self.config = config
-
-        if self.config:
-            for k, v in self.config.items():
-                if isinstance(v, ScoreFormat):
-                    setattr(self, k, v)
-
-
-    def result(self) -> float:
-        aggregate_score, denominator = 0, 0
-
-        for k, v in self.__dict__.items():
-            aggregate_score += v.aggregate
-            denominator += v.weight
-
-        if denominator == 0:
-            return 0
-
-        return round(aggregate_score / denominator, 3)
 
 
 class EvaluationItem(BaseModel):
     """
     A Pydantic class to store the evaluation result with scoring and suggestion based on the given criteria.
+    This class will be used as a response format for the eval task.
     """
     criteria: str
     suggestion: str
     score: float
-
-    def _format_score(self, weight: int = 1) -> ScoreFormat | None:
-        if self.score and isinstance(self.score, float):
-            return ScoreFormat(rate=self.score, weight=weight)
-
-        else: return None
+    weight: int = 1
 
 
 class Evaluation(BaseModel):
@@ -111,33 +69,43 @@ class Evaluation(BaseModel):
         return shot_prompt
 
 
+    def _normalize_df(self) -> pd.DataFrame:
+        """
+        Creates a pandas DataFrame from a list of EvaluationItem objects containing 'weight' and 'score' columns, and normalizes them using MinMaxScaler.
+
+        Args:
+            items: A list of EvaluationItem objects.
+
+        Returns:
+            A pandas DataFrame with normalized 'weight' and 'score' columns, or an empty DataFrame if the input is empty.
+        """
+        if not self.items:
+            return pd.DataFrame()
+
+        data = { 'weight': [item.weight for item in self.items], 'score': [item.score for item in self.items] }
+        df = pd.DataFrame(data)
+
+        scaler = MinMaxScaler(feature_range=(0, 1))
+        df[['weight', 'score']] = scaler.fit_transform(df[['weight', 'score']])
+
+        return df
+
+
     @property
-    def aggregate_score(self) -> float:
-        """
-        Calcurate aggregate score from evaluation items.
-        """
+    def aggregate_score(self) -> int | float:
         if not self.items:
             return 0
 
-        aggregate_score = 0
-        denominator = 0
-
-        for item in self.items:
-            score_format = item._format_score()
-            aggregate_score += score_format.aggregate if score_format else 0
-            denominator += score_format.weight if score_format else 0
-
-        if denominator == 0:
-            return 0
-
-        return round(aggregate_score / denominator, 2)
+        df = self._normalize_df()
+        df['weighted_score'] = df['weight'] * df['score']
+        aggregate_score = round(df['weighted_score'].sum(), 3)
+        return aggregate_score
 
 
     @property
     def suggestion_summary(self) -> str | None:
-        """
-        Returns a summary of the suggestions
-        """
+        """Returns a summary of the suggestions"""
+
         if not self.items:
             return None
 

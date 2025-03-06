@@ -228,13 +228,21 @@ class TaskOutput(BaseModel):
             self._tokens += task_eval._tokens
 
             if res.pydantic:
-                item = EvaluationItem(score=res.pydantic.score, suggestion=res.pydantic.suggestion, criteria=res.pydantic.criteria)
+                item = EvaluationItem(
+                    score=res.pydantic.score,
+                    weight=res.pydantic.weight,
+                    suggestion=res.pydantic.suggestion,
+                    criteria=res.pydantic.criteria
+                )
                 self.evaluation.items.append(item)
 
             else:
                 try:
                     item = EvaluationItem(
-                        score=float(res.json_dict["score"]), suggestion=res.json_dict["suggestion"], criteria=res.json_dict["criteria"]
+                        score=float(res.json_dict["score"]),
+                        weight=float(res.json_dict["weight"]),
+                        suggestion=res.json_dict["suggestion"],
+                        criteria=res.json_dict["criteria"]
                     )
                     self.evaluation.items.append(item)
                 except Exception as e:
@@ -246,10 +254,7 @@ class TaskOutput(BaseModel):
 
     @property
     def aggregate_score(self) -> float | int:
-        if self.evaluation is None:
-            return 0
-        else:
-            self.evaluation.aggregate_score
+        return self.evaluation.aggregate_score if self.evaluation is not None else 0
 
 
     @property

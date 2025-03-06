@@ -2,90 +2,23 @@ import uuid
 from abc import ABC
 from datetime import datetime
 from typing import Any, Dict, List, Optional
-from typing_extensions import Self
+
 from pydantic import UUID4, InstanceOf, BaseModel, ConfigDict, Field, field_validator, model_validator
 from pydantic_core import PydanticCustomError
 
-from versionhq.clients.product.model import Product
-from versionhq.clients.customer.model import Customer
 from versionhq.agent.model import Agent
 from versionhq.agent_network.model import AgentNetwork
+from versionhq.clients.product.model import Product
+from versionhq.clients.customer.model import Customer
 from versionhq.tool.composio_tool_vars import ComposioAppName
-
-
-class ScoreFormat:
-    def __init__(self, rate: float | int = 0, weight: int = 1):
-        self.rate = rate
-        self.weight = weight
-        self.aggregate = rate * weight
-
-
-class Score:
-    """
-    Evaluate the score on 0 (no performance) to 1 scale.
-    `rate`: Any float from 0.0 to 1.0 given by an agent.
-    `weight`: Importance of each factor to the aggregated score.
-    """
-
-    def __init__(
-        self,
-        brand_tone: ScoreFormat = ScoreFormat(0, 0),
-        audience: ScoreFormat = ScoreFormat(0, 0),
-        track_record: ScoreFormat = ScoreFormat(0, 0),
-        **kwargs: Optional[Dict[str, ScoreFormat]],
-    ):
-        self.brand_tone = brand_tone
-        self.audience = audience
-        self.track_record = track_record
-        self.kwargs = kwargs
-
-
-    def result(self) -> int:
-        aggregate_score = int(self.brand_tone.aggregate) + int(self.audience.aggregate) + int(self.track_record.aggregate)
-        denominator = self.brand_tone.weight + self.audience.weight + self.track_record.weight
-
-        for k, v in self.kwargs.items():
-            aggregate_score += v.aggregate
-            denominator += v.weight
-
-        if denominator == 0:
-            return 0
-
-        return round(aggregate_score / denominator, 2)
-
 
 
 class MessagingComponent(ABC, BaseModel):
     layer_id: int = Field(default=0, description="add id of the layer: 0, 1, 2")
     message: str = Field(default=None, max_length=1024, description="text message content to be sent")
-    score: InstanceOf[Score] = Field(default=None)
+    score: Optional[float | int] = Field(default=None)
     condition: str = Field(default=None, description="condition to execute the next component")
     interval: Optional[str] = Field(default=None, description="ideal interval to set to assess the condition")
-
-
-    def store_scoring_result(self, subject: str, score_raw: int | Score | ScoreFormat = None) -> Self:
-        """
-        Set up the `score` field
-        """
-
-        if isinstance(score_raw, Score):
-            setattr(self, "score", score_raw)
-
-        elif isinstance(score_raw, ScoreFormat):
-            score_instance = Score()
-            setattr(score_instance, subject, score_raw)
-            setattr(self, "score", score_instance)
-
-        elif isinstance(score_raw, int) or isinstance(score_raw, float):
-            score_instance, score_format_instance = Score(), ScoreFormat(rate=score_raw, weight=1)
-            setattr(score_instance, "kwargs", { subject: score_format_instance })
-            setattr(self, "score", score_instance)
-
-        else:
-            pass
-
-        return self
-
 
 
 class MessagingWorkflow(ABC, BaseModel):

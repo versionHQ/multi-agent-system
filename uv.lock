@@ -601,7 +601,7 @@ wheels = [
 
 [[package]]
 name = "composio-langchain"
-version = "0.7.5"
+version = "0.7.6"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "composio-core" },
@@ -610,22 +610,22 @@ dependencies = [
     { name = "langchainhub" },
     { name = "pydantic" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/d3/01/84289b27ba85f7e83d200cabda58fd8a08a006cdcd4df3f412c438f0f988/composio_langchain-0.7.5.tar.gz", hash = "sha256:55e3f5e9b834c5e2fc2cff5aeac1839b1b3692cf4e23a5c36372b5c35470faeb", size = 4435 }
+sdist = { url = "https://files.pythonhosted.org/packages/91/65/c0471754c4c21b23673c23b5d088efefddae05bf165524937c1bd8d6bdf1/composio_langchain-0.7.6.tar.gz", hash = "sha256:851720a3a3ecd826b1e01d580413fa4807eeb625aa34c326789f028fa25b4253", size = 4427 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/5a/27/41a2006f320e8644d4001149e14ac1d04c67fd630c40d4b40dabaf37ca79/composio_langchain-0.7.5-py3-none-any.whl", hash = "sha256:a995bafbd9acb1bd0469f29b4bf43ef2c2ea224c072ec2e8ceb1031d504eab5a", size = 4846 },
+    { url = "https://files.pythonhosted.org/packages/93/0e/454aaac05221a616d11c83715c91b3724153c5a9298373ffdfd7cb0f2099/composio_langchain-0.7.6-py3-none-any.whl", hash = "sha256:d7cfe69760a43a688319ba6d38d9a93c945c9956eb76348c562fce9b711fb382", size = 4844 },
 ]
 
 [[package]]
 name = "composio-openai"
-version = "0.7.5"
+version = "0.7.6"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "composio-core" },
     { name = "openai" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/07/85/ec94aca23beadb0eaf99815dcd74cca0c85622d3c7e2de7b5860979e9b60/composio_openai-0.7.5.tar.gz", hash = "sha256:7fe0fd721342fffb6b38c4599e4dc8e304a91cde49ec297a3b6ab735ff91e753", size = 4651 }
+sdist = { url = "https://files.pythonhosted.org/packages/9c/4d/ef23fc6410474735f7fd33feda64ceafa09bbce8feb829575e892593b11e/composio_openai-0.7.6.tar.gz", hash = "sha256:c23c451af2c92e7f8d798fb26c340b2352e4e4e3d0df3e769c4db688ad97e19f", size = 4638 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/b7/6d/248ede9eac41ce183f1dcb91b3148f216f204f64696778cae05cd125c290/composio_openai-0.7.5-py3-none-any.whl", hash = "sha256:75d00bfecf89aab0ae45ca7af601d1e747d9b9b60968dfd53007507d9ccbe82c", size = 5088 },
+    { url = "https://files.pythonhosted.org/packages/f1/f8/450f313121358252ee6273d8aa3f8f4e7a416c7dff711612e86149e52f8e/composio_openai-0.7.6-py3-none-any.whl", hash = "sha256:0a9426248f1b0bf724eab4b8512ced6709f9f6a04d66dd921f10a74fd14bed33", size = 5090 },
 ]
 
 [[package]]
@@ -803,7 +803,7 @@ wheels = [
 
 [[package]]
 name = "docling-core"
-version = "2.21.1"
+version = "2.21.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "jsonref" },
@@ -817,9 +817,9 @@ dependencies = [
     { name = "typer" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/14/43/0b879ffc96124e644d06433242fa1a19cce2aa268bd086e3408ae5ce4541/docling_core-2.21.1.tar.gz", hash = "sha256:3ccc50197d24a3156cfc6c22c8404c58757749646d876a1c1c69fd800f664a4f", size = 76636 }
+sdist = { url = "https://files.pythonhosted.org/packages/08/5a/0c87e7320231188eb8d3c1b8ef68c7f7d29eb2d0c23206fef70b6bb0dde6/docling_core-2.21.2.tar.gz", hash = "sha256:df55415439837dc2e600dab447bfb28f0250e2fea447162bb106c36fa01204db", size = 76656 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/d5/a6/ab424dc71f94dd83e2b2968baf0ac3c2c1bac8ed4a5d3e495205d867b662/docling_core-2.21.1-py3-none-any.whl", hash = "sha256:b8112915728cdc14f328f636f6c0ed36e6bbcc02ff940cc0bf85e303738671c3", size = 96822 },
+    { url = "https://files.pythonhosted.org/packages/07/fa/04d6a0fcea822823a22884ebf77b01401524e1d09e793550d838e0f4c089/docling_core-2.21.2-py3-none-any.whl", hash = "sha256:fa8a53b6a9e22f2708f44d64a5a17cb5210015ad1f10647895663ee1d8cbb653", size = 96827 },
 ]
 
 [package.optional-dependencies]
@@ -4828,7 +4828,7 @@ wheels = [
 
 [[package]]
 name = "versionhq"
-version = "1.2.2.11"
+version = "1.2.3.1"
 source = { editable = "." }
 dependencies = [
     { name = "appdirs" },
@@ -4845,11 +4845,15 @@ dependencies = [
     { name = "litellm" },
     { name = "matplotlib" },
     { name = "networkx" },
+    { name = "numpy", version = "1.26.4", source = { registry = "https://pypi.org/simple" }, marker = "platform_machine == 'x86_64' and sys_platform == 'darwin'" },
+    { name = "numpy", version = "2.2.3", source = { registry = "https://pypi.org/simple" }, marker = "platform_machine != 'x86_64' or sys_platform != 'darwin'" },
     { name = "openai" },
+    { name = "pandas" },
     { name = "pydantic" },
     { name = "python-dotenv" },
     { name = "regex" },
     { name = "requests" },
+    { name = "scikit-learn" },
     { name = "setuptools" },
     { name = "typing" },
     { name = "werkzeug" },
@@ -4860,18 +4864,8 @@ dependencies = [
 docling = [
     { name = "docling" },
 ]
-eval = [
-    { name = "scikit-learn" },
-]
 mem0ai = [
     { name = "mem0ai" },
-]
-numpy = [
-    { name = "numpy", version = "1.26.4", source = { registry = "https://pypi.org/simple" }, marker = "platform_machine == 'x86_64' and sys_platform == 'darwin'" },
-    { name = "numpy", version = "2.2.3", source = { registry = "https://pypi.org/simple" }, marker = "platform_machine != 'x86_64' or sys_platform != 'darwin'" },
-]
-pandas = [
-    { name = "pandas" },
 ]
 pdfplumber = [
     { name = "pdfplumber" },
@@ -4926,9 +4920,9 @@ requires-dist = [
     { name = "matplotlib", specifier = ">=3.10.0" },
     { name = "mem0ai", marker = "extra == 'mem0ai'", specifier = ">=0.1.55" },
     { name = "networkx", specifier = ">=3.4.2" },
-    { name = "numpy", marker = "extra == 'numpy'", specifier = ">=1.26.4" },
+    { name = "numpy", specifier = ">=1.26.4" },
     { name = "openai", specifier = ">=1.64.0" },
-    { name = "pandas", marker = "extra == 'pandas'", specifier = ">=2.2.3" },
+    { name = "pandas", specifier = ">=2.2.3" },
     { name = "pdfplumber", marker = "extra == 'pdfplumber'", specifier = ">=0.11.5" },
     { name = "pydantic", specifier = ">=2.10.6" },
     { name = "pygraphviz", marker = "extra == 'pygraphviz'", specifier = ">=1.14" },
@@ -4936,7 +4930,7 @@ requires-dist = [
     { name = "pytorch-triton-xpu", marker = "sys_platform == 'linux' and extra == 'torch'", specifier = ">=3.2.0", index = "https://download.pytorch.org/whl/xpu" },
     { name = "regex", specifier = "==2024.11.6" },
     { name = "requests", specifier = ">=2.32.3" },
-    { name = "scikit-learn", marker = "extra == 'eval'", specifier = ">=1.6.1" },
+    { name = "scikit-learn", specifier = ">=1.6.1" },
     { name = "sec-api", marker = "extra == 'tools'", specifier = ">=1.0.28" },
     { name = "setuptools", specifier = ">=75.6.0" },
     { name = "torch", marker = "(sys_platform == 'linux' and extra == 'torch') or (sys_platform == 'win32' and extra == 'torch')", specifier = ">=2.6.0", index = "https://download.pytorch.org/whl/xpu" },

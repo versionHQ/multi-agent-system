@@ -10,23 +10,8 @@ def test_store_scores():
     Test if the final result will be calcurated using a random subject
     """
 
-    messaging_component = MessagingComponent(message="demo")
-    score_raw = 15
-    messaging_component.store_scoring_result("demo", score_raw=score_raw)
-
-    assert messaging_component.score is not None
-    assert messaging_component.score.result() is not None
-
-
-def test_score_result():
-    messaging_component = MessagingComponent(message="demo")
-    score_raw = 15
-    messaging_component.store_scoring_result("demo", score_raw=score_raw)
-
-    result = messaging_component.score.result()
-
-    assert result is not None
-    assert result != 0
+    messaging_component = MessagingComponent(message="demo", score=15)
+    assert messaging_component.score == 15
 
 
 def test_setup_messaging_workflow_with_anonymous_provider():
