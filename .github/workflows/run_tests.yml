@@ -37,6 +37,7 @@ jobs:
 
       - name: Set up the project
         run: |
+          rm -rf uv.lock
           uv cache clean
           uv venv
           source .venv/bin/activate
