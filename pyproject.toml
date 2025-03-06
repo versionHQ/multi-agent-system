@@ -91,7 +91,7 @@ torch = [
 ]
 evals = [
     "scikit-learn>=1.6.1",
-    "numpy>=0.0.0",
+    "numpy>=1.26.4",
     "pandas>=2.2.3",
 ]
 

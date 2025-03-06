@@ -38,10 +38,11 @@ jobs:
 
       - name: Set up the project
         run: |
-          uv venv --python 3.13.1
+          uv cache clean
+          uv venv
           source .venv/bin/activate
           uv lock --upgrade
-          uv sync --all-extras --no-extra pygraphviz
+          uv sync --all-extras --no-extra pygraphviz  --no-extra torch
 
       - name: Run tests
         run: uv run pytest tests -vv --cache-clear
