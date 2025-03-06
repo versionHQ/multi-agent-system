@@ -4808,15 +4808,11 @@ dependencies = [
     { name = "litellm" },
     { name = "matplotlib" },
     { name = "networkx" },
-    { name = "numpy", version = "1.26.4", source = { registry = "https://pypi.org/simple" }, marker = "(platform_machine == 'x86_64' and sys_platform == 'darwin') or sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "numpy", version = "2.2.3", source = { registry = "https://pypi.org/simple" }, marker = "(platform_machine != 'x86_64' and sys_platform == 'darwin') or (sys_platform != 'darwin' and sys_platform != 'linux' and sys_platform != 'win32')" },
     { name = "openai" },
-    { name = "pandas" },
     { name = "pydantic" },
     { name = "python-dotenv" },
     { name = "regex" },
     { name = "requests" },
-    { name = "scikit-learn" },
     { name = "setuptools" },
     { name = "typing" },
     { name = "werkzeug" },
@@ -4826,6 +4822,12 @@ dependencies = [
 [package.optional-dependencies]
 docling = [
     { name = "docling" },
+]
+eval = [
+    { name = "numpy", version = "1.26.4", source = { registry = "https://pypi.org/simple" }, marker = "(platform_machine == 'x86_64' and sys_platform == 'darwin') or sys_platform == 'linux' or sys_platform == 'win32'" },
+    { name = "numpy", version = "2.2.3", source = { registry = "https://pypi.org/simple" }, marker = "(platform_machine != 'x86_64' and sys_platform == 'darwin') or (sys_platform != 'darwin' and sys_platform != 'linux' and sys_platform != 'win32')" },
+    { name = "pandas" },
+    { name = "scikit-learn" },
 ]
 mem0ai = [
     { name = "mem0ai" },
@@ -4884,16 +4886,16 @@ requires-dist = [
     { name = "matplotlib", specifier = ">=3.10.0" },
     { name = "mem0ai", marker = "extra == 'mem0ai'", specifier = ">=0.1.55" },
     { name = "networkx", specifier = ">=3.4.2" },
-    { name = "numpy", specifier = ">=1.21.0" },
+    { name = "numpy", marker = "extra == 'eval'", specifier = ">=1.21.0" },
     { name = "openai", specifier = ">=1.64.0" },
-    { name = "pandas", specifier = ">=2.2.3" },
+    { name = "pandas", marker = "extra == 'eval'", specifier = ">=2.2.3" },
     { name = "pdfplumber", marker = "extra == 'pdfplumber'", specifier = ">=0.11.5" },
     { name = "pydantic", specifier = ">=2.10.6" },
     { name = "pygraphviz", marker = "extra == 'pygraphviz'", specifier = ">=1.14" },
     { name = "python-dotenv", specifier = ">=1.0.0" },
     { name = "regex", specifier = "==2024.11.6" },
     { name = "requests", specifier = ">=2.32.3" },
-    { name = "scikit-learn", specifier = ">=1.6.1" },
+    { name = "scikit-learn", marker = "extra == 'eval'", specifier = ">=1.6.1" },
     { name = "sec-api", marker = "extra == 'tools'", specifier = ">=1.0.28" },
     { name = "setuptools", specifier = ">=75.6.0" },
     { name = "torch", marker = "(sys_platform == 'linux' and extra == 'torch') or (sys_platform == 'win32' and extra == 'torch')", specifier = ">=2.6.0", index = "https://download.pytorch.org/whl/cu124", conflict = { package = "versionhq", extra = "torch" } },

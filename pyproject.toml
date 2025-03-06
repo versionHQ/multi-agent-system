@@ -46,10 +46,7 @@ dependencies = [
   "composio-core==0.7.0",
   "networkx>=3.4.2",
   "matplotlib>=3.10.0",
-  "boto3>=1.37.1",
-  "scikit-learn>=1.6.1",
-  "numpy>=1.21.0",
-  "pandas>=2.2.3",
+  "boto3>=1.37.1"
 ]
 classifiers = [
   "Programming Language :: Python",
@@ -75,6 +72,11 @@ Issues = "https://github.com/versionHQ/multi-agent-system/issues"
 torch = [
     "torch>=2.6.0",
     "torchvision>=0.21.0",
+]
+eval = [
+    "scikit-learn>=1.6.1",
+    "numpy>=1.21.0",
+    "pandas>=2.2.3",
 ]
 docling = [
     "docling>=2.25.2",
