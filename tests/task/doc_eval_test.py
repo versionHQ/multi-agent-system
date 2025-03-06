@@ -16,6 +16,6 @@ def test_eval():
     res = task.execute()
 
     assert isinstance(res.evaluation, vhq.Evaluation)
-    assert [item for item in res.evaluation.items if item.criteria == "Uniquness" or item.criteria == "Fit to audience"]
+    assert len(res.evaluation.items) == 2
     assert res.evaluation.aggregate_score is not None
     assert res.evaluation.suggestion_summary is not None
