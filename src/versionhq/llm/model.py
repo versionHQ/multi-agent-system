@@ -8,8 +8,7 @@ from contextlib import contextmanager
 from typing import Any, Dict, List, Optional
 from typing_extensions import Self
 
-import litellm
-from litellm import JSONSchemaValidationError
+from litellm import JSONSchemaValidationError, get_supported_openai_params
 from pydantic import BaseModel, Field, PrivateAttr, model_validator, ConfigDict
 
 from versionhq.llm.llm_vars import LLM_CONTEXT_WINDOW_SIZES, MODELS, PARAMS, PROVIDERS, ENDPOINT_PROVIDERS, ENV_VARS
@@ -48,6 +47,7 @@ class FilteredStream:
 @contextmanager
 def suppress_warnings():
     with warnings.catch_warnings():
+        import litellm
         litellm.set_verbose = False
         warnings.filterwarnings(action="ignore")
         old_stdout = sys.stdout
@@ -94,8 +94,6 @@ class LLM(BaseModel):
 
     model_config = ConfigDict(extra="allow")
 
-    litellm.drop_params = True
-    litellm.set_verbose = True
     os.environ['LITELLM_LOG'] = 'DEBUG'
 
 
@@ -104,6 +102,8 @@ class LLM(BaseModel):
         """
         Validate the given model, provider, interface provider.
         """
+        import litellm
+        litellm.drop_params = True
 
         self._init_model_name = self.model
 
@@ -180,6 +180,9 @@ class LLM(BaseModel):
         """
         Set up valid config params after setting up a valid model, provider, interface provider names.
         """
+        import litellm
+        litellm.drop_params = True
+
         self._tokens = 0
 
         if self.callbacks:
@@ -202,11 +205,10 @@ class LLM(BaseModel):
         """
         Returns valid params incl. model + litellm original params) from the given config dict.
         """
-
         valid_config, valid_keys = dict(), list()
 
         if self.model:
-            valid_keys = litellm.get_supported_openai_params(
+            valid_keys = get_supported_openai_params(
                 model=self.model, custom_llm_provider=self.endpoint_provider, request_type="chat_completion"
             )
 
@@ -257,7 +259,7 @@ class LLM(BaseModel):
     def _supports_function_calling(self) -> bool:
         try:
             if self.model:
-                params = litellm.get_supported_openai_params(model=self.model)
+                params = get_supported_openai_params(model=self.model)
                 return "response_format" in params if params else False
             else:
                 return False
@@ -267,7 +269,8 @@ class LLM(BaseModel):
 
 
     def _supports_stop_words(self) -> bool:
-        supported_params = litellm.get_supported_openai_params(model=self.model, custom_llm_provider=self.endpoint_provider)
+        import litellm
+        supported_params = get_supported_openai_params(model=self.model, custom_llm_provider=self.endpoint_provider)
         return "stop" in supported_params if supported_params else False
 
 
@@ -279,6 +282,7 @@ class LLM(BaseModel):
 
 
     def _set_callbacks(self, callbacks: List[Any]):
+        import litellm
         callback_types = [type(callback) for callback in callbacks]
         for callback in litellm.success_callback[:]:
             if type(callback) in callback_types:
@@ -302,8 +306,9 @@ class LLM(BaseModel):
         """
         Execute LLM based on the agent's params and model params.
         """
-
+        import litellm
         litellm.drop_params = True
+        litellm.set_verbose = True
 
         with suppress_warnings():
             if len(self.callbacks) > 0:

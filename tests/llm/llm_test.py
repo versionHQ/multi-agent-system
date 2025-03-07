@@ -1,5 +1,3 @@
-import litellm
-
 from versionhq.llm.llm_vars import MODELS, LLM_CONTEXT_WINDOW_SIZES
 from versionhq.llm.model import LLM, DEFAULT_CONTEXT_WINDOW_SIZE
 
@@ -23,6 +21,8 @@ def test_create_llm_from_valid_name():
             assert llm.context_window_size == int(LLM_CONTEXT_WINDOW_SIZES.get(model_name) *0.75) if LLM_CONTEXT_WINDOW_SIZES.get(model_name) is not None else DEFAULT_CONTEXT_WINDOW_SIZE
             assert llm._supports_function_calling() is not None
             assert llm._supports_stop_words() is not None
+
+            import litellm
             assert litellm.callbacks == [dummy_func,]
 
 
@@ -38,6 +38,8 @@ def test_create_llm_from_invalid_name():
     assert llm.context_window_size == int(128000 * 0.75)
     assert llm._supports_function_calling() == True
     assert llm._supports_stop_words() == True
+
+    import litellm
     assert litellm.callbacks == [dummy_func,]
 
 
@@ -49,6 +51,8 @@ def test_create_llm_from_provider():
     assert llm.context_window_size == int(LLM_CONTEXT_WINDOW_SIZES.get(llm.model) *0.75)
     assert llm._supports_function_calling() == True
     assert llm._supports_stop_words() == True
+
+    import litellm
     assert litellm.callbacks == [dummy_func,]
 
 
