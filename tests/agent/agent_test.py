@@ -56,11 +56,11 @@ def test_build_agent():
     agent = Agent(
         role="analyst",
         goal="analyze the company's website and retrieve the product overview",
-        skillsets=["financial analysis", "product management", ]
+        skills=["financial analysis", "product management", ]
     )
 
     assert agent.role == "analyst"
-    assert agent.backstory == BACKSTORY_FULL.format(role=agent.role.lower(), goal=agent.goal.lower(), skills=", ".join([item for item in agent.skillsets]), tools="")
+    assert agent.backstory == BACKSTORY_FULL.format(role=agent.role.lower(), goal=agent.goal.lower(), skills=", ".join([item for item in agent.skills]), tools="")
     assert isinstance(agent.llm, LLM)
     assert agent.llm.model == DEFAULT_MODEL_NAME
     # assert agent.llm.api_key == LITELLM_API_KEY
@@ -72,14 +72,14 @@ def test_build_agent_with_llm():
     agent = Agent(
         role="analyst",
         goal="analyze the company's website and retrieve the product overview",
-        skillsets=["financial analysis", "product management", ],
+        skills=["financial analysis", "product management", ],
         llm="gpt-4o"
     )
 
     assert agent.role == "analyst"
     assert agent.role in agent.backstory
     assert agent.goal in agent.backstory
-    assert [item in agent.backstory for item in agent.skillsets]
+    assert [item in agent.backstory for item in agent.skills]
     assert isinstance(agent.llm, LLM)
     assert agent.llm.model == "gpt-4o"
     # assert agent.llm.api_key == LITELLM_API_KEY

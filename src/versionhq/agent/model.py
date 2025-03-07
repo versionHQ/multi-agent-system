@@ -32,13 +32,15 @@ class Agent(BaseModel):
     _request_within_rpm_limit: Any = PrivateAttr(default=None)
     _times_executed: int = PrivateAttr(default=0)
     _logger_config: Dict[str, Any] = PrivateAttr(default=dict(verbose=True, info_file_save=True))
+
+    api_key: Optional[str] = Field(default=None)
     config: Optional[Dict[str, Any]] = Field(default=None, exclude=True, description="values to add to the Agent class")
 
     id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True)
     role: str = Field(description="required. agent's role")
     goal: Optional[str] = Field(default=None)
     backstory: Optional[str] = Field(default=None, description="developer prompt to the llm")
-    skillsets: Optional[List[str]] = Field(default_factory=list)
+    skills: Optional[List[str]] = Field(default_factory=list, description="list up the agent's tangible skills in natural language")
     tools: Optional[List[Any]] = Field(default_factory=list)
 
     # knowledge
@@ -149,8 +151,12 @@ class Agent(BaseModel):
                                 setattr(tool, k, v)
                         tool_list.append(tool)
 
+                case callable():
+                    tool = Tool(func=item)
+                    tool_list.append(tool)
+
                 case _:
-                    if item.__base__ == BaseTool or item.__base__ == RagTool or item.__base__ == Tool:
+                    if hasattr(item, "__base__") and (item.__base__ == BaseTool or item.__base__ == RagTool or item.__base__ == Tool):
                         tool_list.append(item)
                     else:
                         Logger(**self._logger_config, filename=self.key).log(level="error", message=f"Tool {str(item)} is missing a function.", color="red")
@@ -169,12 +175,12 @@ class Agent(BaseModel):
         if self.backstory is None:
             from versionhq.agent.TEMPLATES.Backstory import BACKSTORY_FULL, BACKSTORY_SHORT
             backstory = ""
-            skills = ", ".join([item for item in self.skillsets]) if self.skillsets else ""
+            skills = ", ".join([item for item in self.skills]) if self.skills else ""
             tools = ", ".join([item.name for item in self.tools if hasattr(item, "name") and item.name is not None]) if self.tools else ""
             role = self.role.lower()
             goal = self.goal.lower() if self.goal else ""
 
-            if self.tools or self.skillsets:
+            if self.tools or self.skills:
                 backstory = BACKSTORY_FULL.format(role=role, goal=goal, skills=skills, tools=tools)
             else:
                 backstory = BACKSTORY_SHORT.format(role=role, goal=goal)
@@ -371,7 +377,7 @@ class Agent(BaseModel):
         messages = []
         messages.append({ "role": "user", "content": prompts })
         if self.use_developer_prompt:
-            messages.append({ "role": "system", "content": self.backstory })
+            messages.append({ "role": "developer", "content": self.backstory })
 
         try:
             if self._rpm_controller and self.max_rpm:

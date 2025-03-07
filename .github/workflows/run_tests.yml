@@ -46,5 +46,6 @@ jobs:
           uv lock --upgrade
           uv sync --all-extras --no-extra pygraphviz
 
+          uv run pytest tests -vv --cache-clear
       - name: Pytest
         run: uv run pytest tests -vv --cache-clear

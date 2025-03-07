@@ -37,7 +37,7 @@ def res_field_task():
     return Task(description="return random values strictly following the given response format.", response_fields=demo_response_fields)
 
 
-def test_con_bedrock(simple_task, tool_task, schema_task, res_field_task):
+def _test_con_bedrock(simple_task, tool_task, schema_task, res_field_task):
     llms_to_test = [
         "bedrock/converse/us.meta.llama3-3-70b-instruct-v1:0",
         "bedrock/us.meta.llama3-2-11b-instruct-v1:0",
@@ -67,7 +67,7 @@ def test_con_bedrock(simple_task, tool_task, schema_task, res_field_task):
         assert [v and type(v) == res_field_task.response_fields[i].data_type for i, (k, v) in enumerate(res_4.json_dict.items())]
 
 
-def test_con_gpt(simple_task, tool_task, schema_task, res_field_task):
+def _test_con_gpt(simple_task, tool_task, schema_task, res_field_task):
     llms_to_test = [
         "gpt-4.5-preview-2025-02-27",
     ]

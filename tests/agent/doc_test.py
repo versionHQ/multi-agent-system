@@ -62,7 +62,7 @@ def test_docs_core_agent_c1():
         goal="Coping with price competition in saturated markets"
     )
 
-    assert agent.backstory == "You are an expert marketing analyst with relevant skillsets and abilities to query relevant information from the given knowledge sources. Leveraging these, you will identify competitive solutions to achieve the following goal: coping with price competition in saturated markets."
+    assert agent.backstory == "You are an expert marketing analyst with relevant skills and abilities to query relevant information from the given knowledge sources. Leveraging these, you will identify competitive solutions to achieve the following goal: coping with price competition in saturated markets."
 
 
 def test_docs_core_agent_c2():

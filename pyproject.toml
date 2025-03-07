@@ -15,7 +15,7 @@ exclude = ["test*", "__pycache__", "*.egg-info"]
 
 [project]
 name = "versionhq"
-version = "1.2.3.4"
+version = "1.2.3.5"
 authors = [{ name = "Kuriko Iwai", email = "kuriko@versi0n.io" }]
 description = "An agentic orchestration framework for building agent networks that handle task automation."
 readme = "README.md"
@@ -46,7 +46,10 @@ dependencies = [
   "composio-core==0.7.0",
   "networkx>=3.4.2",
   "matplotlib>=3.10.0",
-  "boto3>=1.37.1"
+  "boto3>=1.37.1",
+  "scikit-learn>=1.6.1",
+  "numpy>=1.26.4",
+  "pandas>=2.2.3",
 ]
 classifiers = [
   "Programming Language :: Python",
@@ -89,11 +92,7 @@ torch = [
     "torch>=2.6.0",
     "torchvision>=0.21.0",
 ]
-evals = [
-    "scikit-learn>=1.6.1",
-    "numpy>=1.26.4",
-    "pandas>=2.2.3",
-]
+
 
 [tool.uv]
 dev-dependencies = [

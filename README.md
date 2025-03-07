@@ -54,9 +54,9 @@ Agentic orchestration framework for multi-agent networks and task graphs for com
 
 ## Key Features
 
-`versionhq` is a Python framework for agent networks that handle complex task automation without human interaction.
+`versionhq` is a Python framework designed for automating complex, multi-step tasks using autonomous agent networks.
 
-Agents are model-agnostic, and will improve task output, while optimizing token cost and job latency, by sharing their memory, knowledge base, and RAG tools with other agents in the network.
+Users can either configure their agents and network manually or allow the system to automatically manage the process based on provided task goals.
 
 
 ###  Agent Network
@@ -83,7 +83,7 @@ Each node is triggered by specific events and executed by an assigned agent once
 While the network automatically reconfigures itself, you retain the ability to direct the agents using `should_reform` variable.
 
 
-The following code snippet demonstrates the `TaskGraph` and its visualization, saving the diagram to the `uploads` directory.
+The following code snippet explicitly demonstrates the `TaskGraph` and its visualization, saving the diagram to the `uploads` directory.
 
 ```python
 import versionhq as vhq
@@ -125,15 +125,13 @@ A `TaskGraph` represents tasks as `nodes` and their execution dependencies as `e
 
 `Agent Networks` can handle `TaskGraph` objects by optimizing their formations.
 
-The following example demonstrates a simple concept of a `supervising` agent network handling a task graph with three tasks and one critical edge.
-
 <img src="https://res.cloudinary.com/dfeirxlea/image/upload/v1739337639/pj_m_home/zfg4ccw1m1ww1tpnb0pa.png">
 
 <hr />
 
 ### Optimization
 
-Agents are model-agnostic and can handle multiple tasks, leveraging their own and their peers' knowledge sources, memories, and tools.
+Autonomous agents are model-agnostic and can leverage their own and their peers' knowledge sources, memories, and tools.
 
 Agents are optimized during network formation, but customization is possible before or after.
 
@@ -492,7 +490,9 @@ Common issues and solutions:
 
 * Issues related to dependencies: `rm -rf uv.lock`, `uv cache clean`, `uv venv`, and run `uv pip install -r requirements.txt -v`.
 
-* Issues related to agents and other systems: Check `.logs` directory located in the root directory for error messages and stack traces.
+* Issues related to `torch` installation: Add optional dependencies by `uv add versionhq[torch]`.
+
+* Issues related to agents and other systems: Check `.logs` directory located at the root of the project directory for error messages and stack traces.
 
 * Issues related to `Python quit unexpectedly`: Check [this stackoverflow article](https://stackoverflow.com/questions/59888499/macos-catalina-python-quit-unexpectedly-error).
 

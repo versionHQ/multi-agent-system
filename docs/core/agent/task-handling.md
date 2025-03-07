@@ -25,7 +25,7 @@ agent = vhq.Agent(
 	goal="Coping with price competition in saturated markets"
 )
 
-assert agent.backstory == "You are an expert marketing analyst with relevant skillsets and abilities to query relevant information from the given knowledge sources. Leveraging these, you will identify competitive solutions to achieve the following goal: coping with price competition in saturated markets."
+assert agent.backstory == "You are an expert marketing analyst with relevant skills and abilities to query relevant information from the given knowledge sources. Leveraging these, you will identify competitive solutions to achieve the following goal: coping with price competition in saturated markets."
 ```
 
 You can also specify your own backstory by simply adding the value to the backstory field of the Agent model:
