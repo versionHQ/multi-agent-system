@@ -7,13 +7,13 @@ from dotenv import load_dotenv
 from pydantic import UUID4, BaseModel, Field, InstanceOf, PrivateAttr, model_validator, field_validator
 from pydantic_core import PydanticCustomError
 
-from versionhq.llm.model import LLM, DEFAULT_CONTEXT_WINDOW_SIZE, DEFAULT_MODEL_NAME, PROVIDERS
+import versionhq as vhq
+from versionhq.agent.rpm_controller import RPMController
 from versionhq.tool.model import Tool, ToolSet, BaseTool
 from versionhq.knowledge.model import BaseKnowledgeSource, Knowledge
 from versionhq.memory.contextual_memory import ContextualMemory
 from versionhq.memory.model import ShortTermMemory, LongTermMemory, UserMemory
 from versionhq._utils.logger import Logger
-from versionhq.agent.rpm_controller import RPMController
 from versionhq._utils.process_config import process_config
 
 
@@ -68,8 +68,8 @@ class Agent(BaseModel):
     callbacks: Optional[List[Callable]] = Field(default_factory=list, description="callback functions to execute after any task execution")
 
     # llm settings cascaded to the LLM model
-    llm: str | InstanceOf[LLM] | Dict[str, Any] = Field(default=None)
-    func_calling_llm: str | InstanceOf[LLM] | Dict[str, Any] = Field(default=None)
+    llm: str | InstanceOf[vhq.LLM] | Dict[str, Any] = Field(default=None)
+    func_calling_llm: str | InstanceOf[vhq.LLM] | Dict[str, Any] = Field(default=None)
     respect_context_window: bool = Field(default=True, description="keep messages under the context window size")
     max_execution_time: Optional[int] = Field(default=None, description="max. task execution time in seconds")
     max_rpm: Optional[int] = Field(default=None, description="max. number of requests per minute")
@@ -77,7 +77,6 @@ class Agent(BaseModel):
 
     # # cache, error, ops handling
     # formatting_errors: int = Field(default=0, description="number of formatting errors.")
-
 
     @field_validator("id", mode="before")
     @classmethod
@@ -106,6 +105,8 @@ class Agent(BaseModel):
         """
         Set up `llm` and `func_calling_llm` as valid LLM objects using the given kwargs.
         """
+        from versionhq.llm.model import DEFAULT_MODEL_NAME
+
         self.llm = self._convert_to_llm_object(llm=self.llm)
 
         func_calling_llm = self.func_calling_llm if self.func_calling_llm else self.llm if self.llm else None
@@ -115,7 +116,7 @@ class Agent(BaseModel):
         elif self.llm._supports_function_calling():
             self.func_calling_llm = self.llm
         else:
-            self.func_calling_llm = self._convert_to_llm_object(llm=LLM(model=DEFAULT_MODEL_NAME))
+            self.func_calling_llm = self._convert_to_llm_object(llm=vhq.LLM(model=DEFAULT_MODEL_NAME))
         return self
 
 
@@ -267,33 +268,35 @@ class Agent(BaseModel):
         return self
 
 
-    def _convert_to_llm_object(self, llm: Any = None) -> LLM:
+    def _convert_to_llm_object(self, llm: Any = None) -> vhq.LLM:
         """
         Convert the given value to LLM object.
         When `llm` is dict or self.llm_config is not None, add these values to the LLM object after validating them.
         """
+        from versionhq.llm.model import DEFAULT_MODEL_NAME
+
         llm = llm if llm else self.llm if self.llm else DEFAULT_MODEL_NAME
 
         if not llm:
             pass
 
         match llm:
-            case LLM():
+            case vhq.LLM():
                 return self._set_llm_params(llm=llm, config=self.llm_config)
 
             case str():
-                llm = LLM(model=llm)
+                llm = vhq.LLM(model=llm)
                 return self._set_llm_params(llm=llm, config=self.llm_config)
 
             case dict():
                 model_name = llm.pop("model_name", llm.pop("deployment_name", str(llm)))
-                llm_obj = LLM(model=model_name if model_name else DEFAULT_MODEL_NAME)
+                llm_obj = vhq.LLM(model=model_name if model_name else DEFAULT_MODEL_NAME)
                 config = llm.update(self.llm_config) if self.llm_config else llm
                 return self._set_llm_params(llm_obj, config=config)
 
             case _:
                 model_name = (getattr(self.llm, "model_name") or getattr(self.llm, "deployment_name") or str(self.llm))
-                llm = LLM(model=model_name if model_name else DEFAULT_MODEL_NAME)
+                llm = vhq.LLM(model=model_name if model_name else DEFAULT_MODEL_NAME)
                 llm_params = {
                     "timeout": getattr(llm, "timeout", self.max_execution_time),
                     "callbacks": getattr(llm, "callbacks", None),
@@ -304,10 +307,12 @@ class Agent(BaseModel):
                 return self._set_llm_params(llm=llm, config=config)
 
 
-    def _set_llm_params(self, llm: LLM, config: Dict[str, Any] = None) -> LLM:
+    def _set_llm_params(self, llm: vhq.LLM, config: Dict[str, Any] = None) -> vhq.LLM:
         """
         Add valid params to the LLM object.
         """
+        from versionhq.llm.model import DEFAULT_CONTEXT_WINDOW_SIZE, PROVIDERS
+
         if llm.provider is None:
             provider_name = llm.model.split("/")[0]
             valid_provider = provider_name if provider_name in PROVIDERS else None
@@ -352,7 +357,7 @@ class Agent(BaseModel):
         """
         Fine-tuned the base model using OpenAI train framework.
         """
-        if not isinstance(self.llm, LLM):
+        if not isinstance(self.llm, vhq.LLM):
             pass
 
 
