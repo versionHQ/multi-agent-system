@@ -144,6 +144,11 @@ class BaseTool(ABC, BaseModel):
 class Tool(BaseTool):
     func: Callable = Field(default=None)
 
+    # def __init__(self, func: Callable = None, *args, **kwargs):
+    #     self.func = func
+    #     super().__init__(*args, **kwargs)
+
+
     @model_validator(mode="after")
     def validate_func(self) -> Self:
         if not self.func and not self._run:

@@ -23,7 +23,6 @@ def test_docs_core_agent_b1():
     assert "gemini-2.0" in agent.llm.model and isinstance(agent.llm, LLM)
 
 
-
 def test_docs_core_agent_b3():
     import versionhq as vhq
 
@@ -135,7 +134,6 @@ def test_docs_core_agent_e2():
     assert litellm.callbacks == agent.callbacks and len(agent.callbacks) == 2
 
 
-
 def test_docs_core_agent_f():
     import versionhq as vhq
 
@@ -157,7 +155,6 @@ def test_docs_core_agent_f():
     assert agent.llm.llm_config["top_p"] == 0.1
     assert agent.llm.llm_config["n"] == 1
     assert agent.llm.llm_config["stop"] == "answer"
-
 
 
 def test_docs_core_agent_g():

@@ -282,7 +282,6 @@ def test_pdf_knowledge_source(mock_vector_db):
     mock_vector_db.query.assert_called_once()
 
 
-
 # @pytest.mark.vcr(filter_headers=["authorization"])
 def test_csv_knowledge_source(mock_vector_db, tmpdir):
     csv_content = [

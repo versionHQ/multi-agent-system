@@ -151,7 +151,7 @@ class Agent(BaseModel):
                                 setattr(tool, k, v)
                         tool_list.append(tool)
 
-                case callable():
+                case func if callable(func):
                     tool = Tool(func=item)
                     tool_list.append(tool)
 

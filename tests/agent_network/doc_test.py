@@ -12,7 +12,6 @@ def test_doc_an_formation_a():
     assert network.tasks # auto-defined sub-tasks to achieve the main task goal
 
 
-
 def test_doc_an_formation_b():
     import versionhq as vhq
     from pydantic import BaseModel
@@ -31,6 +30,7 @@ def test_doc_an_formation_b():
     assert isinstance(network, vhq.AgentNetwork)
     assert network.members
     assert network.tasks
+
 
 def test_doc_an_formation_c():
     import versionhq as vhq
@@ -86,7 +86,6 @@ def test_doc_an_formation_d():
     assert network.formation == vhq.Formation.SUPERVISING
 
 
-
 def test_doc_an_config_a():
     import versionhq as vhq
 
@@ -99,6 +98,7 @@ def test_doc_an_config_a():
         ]
     )
     assert isinstance(network.members[0].agent, vhq.Agent)
+
 
 def test_doc_an_config_b():
     import versionhq as vhq
@@ -113,6 +113,7 @@ def test_doc_an_config_b():
     )
 
     assert network.formation == vhq.Formation.SQUAD
+
 
 def test_doc_an_config_c():
     import versionhq as vhq

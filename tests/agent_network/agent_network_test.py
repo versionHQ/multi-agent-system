@@ -326,6 +326,3 @@ def test_network_eval():
 
     res, _ = network.launch()
     assert res._tokens and res.latency
-
-
-test_network_eval()

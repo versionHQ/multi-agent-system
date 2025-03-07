@@ -59,7 +59,6 @@ def test_demo_agent_customization():
     assert res.raw is not None
 
 
-
 def test_solo_tg_eval():
     import versionhq as vhq
 

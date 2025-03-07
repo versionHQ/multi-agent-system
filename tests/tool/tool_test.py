@@ -119,7 +119,6 @@ def test_custom_tool_with_cache():
     assert tool.tool_handler.last_used_tool == ToolSet(tool=tool, kwargs=dict(demo_list=["demo1", "demo2"]))
 
 
-
 def test_cache_tool():
     my_tool = Tool(
         name="my tool",

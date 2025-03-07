@@ -172,23 +172,22 @@ def test_build_agent_with_llm_and_func_llm_object():
     assert isinstance(agent.func_calling_llm, LLM)
 
 
-test_build_agent_with_llm()
-test_build_agent_with_llm_config()
-test_build_agent_with_llm_object()
-test_build_agent_with_llm_and_func_llm_config()
-test_build_agent_with_llm_and_func_llm_object()
-
-
-def test_agent_with_random_dict_tools():
+def test_agent_with_tools():
     def empty_func():
         return "empty function"
 
-    agent = Agent(role="demo", goal="test a tool", tools=[dict(name="tool 1", func=empty_func), ])
+    def custom_tool(query: str) -> str:
+        return query
 
-    assert [tool._run() == "empty function" for tool in agent.tools]
+    agent = Agent(role="demo", goal="test a tool", tools=[dict(name="tool 1", func=empty_func), lambda x: x, custom_tool,])
+
+    assert agent.tools[0]._run() ==  "empty function"
     assert agent.tools[0].name == "tool 1"
+    assert agent.tools[1]._run(x="hey") == "hey"
+    assert agent.tools[1].name == "random_func"
+    assert agent.tools[2]._run(query="hey") == "hey"
+    assert agent.tools[2].name == "custom_tool"
 
-test_agent_with_random_dict_tools()
 
 def test_agent_with_custom_tools():
     def send_message(message: str) -> str:

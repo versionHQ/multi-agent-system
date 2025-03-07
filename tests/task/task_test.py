@@ -177,7 +177,6 @@ def test_task_with_tools():
     assert res.tool_output is not None
 
 
-
 def test_task_without_response_format():
     task = Task(description="return a simple output with any random values.")
     res = task.execute()
