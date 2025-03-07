@@ -1,7 +1,8 @@
 import pytest
 from typing import Any, Callable
 
-from versionhq.agent.model import Agent, LLM
+from versionhq.agent.model import Agent
+from versionhq.llm.model import LLM
 from versionhq.task.model import Task
 from versionhq.tool.model import Tool
 

@@ -1,7 +1,8 @@
 from unittest.mock import patch
 from typing import Callable
 
-from versionhq.agent.model import Agent, LLM
+from versionhq.agent.model import Agent
+from versionhq.llm.model import LLM
 from versionhq.task.model import Task, ResponseField, TaskOutput
 from versionhq.tool.model import Tool, ToolSet
 from versionhq.tool.decorator import tool
