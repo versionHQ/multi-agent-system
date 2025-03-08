@@ -87,3 +87,27 @@ def test_llm_as_judge():
     results = validate(judge=LLMJudge(), data=summaries, threshold=0.6)
 
     assert results is not None
+
+
+def test_collab():
+    import versionhq as vhq
+    from pathlib import Path
+
+    current_dir = Path(__file__).parent
+    file_path = current_dir / "_sample/screenshot.png"
+
+    def custom_tool(query: str):
+        return query
+
+    agent = vhq.Agent(
+        role="DEMO Computer Use",
+        goal="Make a query to check the weather using the web browser. The screenshot of the web browser will be provided.",
+        llm="gemini-2.0",
+        tools=[custom_tool,],
+        maxit=1,
+        max_retry_limit=1
+    )
+    assert [item for item in agent.tools if isinstance(item, vhq.Tool)]
+
+    res = agent.start(image=str(file_path))
+    assert res.json_dict is not None

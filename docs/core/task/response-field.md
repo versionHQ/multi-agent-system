@@ -4,20 +4,6 @@
 
 A Pydantic class to store response formats to generate a structured response in JSON.
 
-<hr/>
-
-## Variables
-
-| <div style="width:120px">**Variable**</div> | **Data Type** | **Default** | **Nullable** | **Description** |
-| :---               | :---  | :--- | :--- | :--- |
-| **`title`**   | str | None | False | Stores a field title. |
-| **`data_type`**       | Type | None | False | Stores data type of the response. |
-| **`items`** | Type | None | True | Stores data type of items in the list. Can leave it None when `data_type` is not list. |
-| **`properties`** | List[`ResponseField`] | None | True | Stores properties as a list of `ResponseFormat` objects when the `data_type` is dict. |
-| **`nullable`** |  bool | False | False | If the field is nullable. |
-| **`config`** | Dict[str, Any] | None | True | Stores other configs passed to response schema. |
-
-
 **Quick Start**
 
 Define a response format with field titles and data types.
@@ -210,3 +196,5 @@ response_field = vhq.ResponseField(
 # Agent output:
 # summary-with-config: <AGENT_RESPONSE_IN_STRING>
 ```
+
+Ref. <a href="/core/task/reference/#responsefield">List of variables</a>

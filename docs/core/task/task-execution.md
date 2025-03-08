@@ -24,10 +24,10 @@ context = [sub_res, sub_task_2, "context to add in string"]
 res = task.execute(context=context)
 
 # Explicitly mentioned. `task.execute()` will trigger the following:
-task_prompt = task._prompt(context=context)
+task_prompt = task._user_prompt(context=context)
 
-assert sub_res.to_context_prompt() in task_prompt
-assert sub_task_2.output and sub_task_2.output.to_context_prompt() in task_prompt  # sub tasks' outputs are included in the task prompt.
+assert sub_res._to_context_prompt() in task_prompt
+assert sub_task_2.output and sub_task_2.output._to_context_prompt() in task_prompt  # sub tasks' outputs are included in the task prompt.
 assert "context to add in string" in task_promp
 assert res
 ```
@@ -55,7 +55,7 @@ task.execute()
 
 assert task.output is not None
 assert task.processed_agents is not None # auto assigned
-assert task.delegations ==1
+assert task._delegations ==1
 ```
 
 <hr>
@@ -83,7 +83,7 @@ with patch.object(vhq.Agent, "execute_task", return_value="test") as execute:
 
 <hr>
 
-## Using Tools
+## Tools
 
 `[var]`<bold>`tools: Optional[List[ToolSet | Tool | Any]] = None`</bold>
 
@@ -116,7 +116,9 @@ res = task.execute()
 assert res.tool_output == "empty func_demo"
 ```
 
-Ref. <a href="/core/tool">Tool</a> class / <a href="/core/task/task-output">TaskOutput</a> class
+Ref 1. <a href="/core/tool">Tool</a> class / <a href="/core/rag-tool">RAGTool</a> class
+
+Ref 2. <a href="/core/task/task-output">TaskOutput</a> class
 
 <hr>
 
@@ -139,6 +141,29 @@ task = vhq.Task(
 res = task.execute(agent=agent)
 assert res.tool_output == "simple func"
 ```
+
+<hr>
+
+## Image, Audio, File Content
+
+Refer the content by adding an absolute file path to the content file or URL to the task object.
+
+
+```python
+import versionhq as vhq
+from pathlib import Path
+
+current_dir = Path(__file__).parent.parent
+file_path = current_dir / "_sample/screenshot.png"
+audio_path = current_dir / "_sample/sample.mp3"
+
+task = vhq.Task(description="Summarize the given content", image=str(file_path), audio=str(audio_path))
+res = task.execute(agent=vhq.Agent(llm="gemini-2.0", role="Content Interpretator"))
+
+assert res.raw is not None
+```
+
+* Audio files are only applicable to `gemini` models.
 
 <hr>
 

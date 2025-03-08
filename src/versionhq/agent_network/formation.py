@@ -47,8 +47,11 @@ def form_agent_network(
                         Logger(verbose=True).log(level="warning", message=f"The formation {formation} is invalid. We'll recreate a valid formation.", color="yellow")
                         formation = None
 
-                case int() | float():
+                case int():
                     formation = Formation(int(formation))
+
+                case float():
+                    formation = Formation(round(formation))
 
                 case _:
                     Logger(verbose=True).log(level="warning", message=f"The formation {formation} is invalid. We'll recreate a valid formation.", color="yellow")
@@ -71,7 +74,7 @@ def form_agent_network(
         leader_agent: str
 
     vhq_task = Task(
-        description=f"Design a team of specialized agents to fully automate the following task and achieve the expected outcome. For each agent, define its role, task description, and expected outputs via the task with items in a list. Then specify the team formation if the formation is not given. If you think SUPERVISING or HYBRID is the best formation, include a leader_agent role, else leave the leader_agent role blank.\nTask: {str(task)}\nExpected outcome: {prompt_expected_outcome}\nFormation: {prompt_formation}",
+        description=f"Design a team of specialized agents to fully automate the following task and achieve the expected outcome. For each agent, define its role, task description, and expected outputs via the task with items in a list. Then specify the formation if the formation is not given. If you think SUPERVISING or HYBRID is the best formation, include a leader_agent role, else leave the leader_agent role blank.\nTask: {str(task)}\nExpected outcome: {prompt_expected_outcome}\nFormation: {prompt_formation}",
         pydantic_output=Outcome
     )
 

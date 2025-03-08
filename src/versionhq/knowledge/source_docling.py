@@ -1,6 +1,5 @@
 from pathlib import Path
-from typing import Iterator, List, Optional
-from urllib.parse import urlparse
+from typing import Iterator, List
 
 try:
     from docling.datamodel.base_models import InputFormat
@@ -20,7 +19,7 @@ from pydantic import Field
 
 from versionhq.knowledge.source import BaseKnowledgeSource
 from versionhq.storage.utils import fetch_db_storage_path
-from versionhq._utils.vars import KNOWLEDGE_DIRECTORY
+from versionhq._utils import KNOWLEDGE_DIRECTORY, is_valid_url
 
 
 class DoclingSource(BaseKnowledgeSource):
@@ -83,21 +82,6 @@ class DoclingSource(BaseKnowledgeSource):
             yield chunk.text
 
 
-    @staticmethod
-    def _validate_url(url: str) -> bool:
-        try:
-            result = urlparse(url)
-            return all(
-                [
-                    result.scheme in ("http", "https"),
-                    result.netloc,
-                    len(result.netloc.split(".")) >= 2,  # Ensure domain has TLD
-                ]
-            )
-        except Exception:
-            return False
-
-
     def model_post_init(self, _) -> None:
         self.valid_file_paths = self.validate_content()
         self.content.extend(self._load_content())
@@ -109,7 +93,7 @@ class DoclingSource(BaseKnowledgeSource):
             if isinstance(path, str):
                 if path.startswith(("http://", "https://")):
                     try:
-                        if self._validate_url(path):
+                        if is_valid_url(path):
                             processed_paths.append(path)
                         else:
                             raise ValueError(f"Invalid URL format: {path}")

@@ -16,7 +16,7 @@ class EvaluationItem(BaseModel):
     criteria: str
     suggestion: str
     score: float
-    weight: int = 1
+    weight: int
 
 
 class Evaluation(BaseModel):

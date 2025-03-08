@@ -12,8 +12,7 @@ from versionhq.tool.model import Tool, ToolSet, BaseTool
 from versionhq.knowledge.model import BaseKnowledgeSource, Knowledge
 from versionhq.memory.contextual_memory import ContextualMemory
 from versionhq.memory.model import ShortTermMemory, LongTermMemory, UserMemory
-from versionhq._utils.logger import Logger
-from versionhq._utils.process_config import process_config
+from versionhq._utils import Logger, process_config, is_valid_url
 
 
 load_dotenv(override=True)
@@ -217,7 +216,7 @@ class Agent(BaseModel):
                     if isinstance(item, BaseKnowledgeSource):
                         knowledge_sources.append(item)
 
-                    elif isinstance(item, str) and "http" in item and DoclingSource._validate_url(url=item) == True:
+                    elif isinstance(item, str) and "http" in item and is_valid_url(url=item) == True:
                         docling_fp.append(item)
 
                     elif isinstance(item, str):
@@ -369,7 +368,7 @@ class Agent(BaseModel):
 
     def _invoke(
         self,
-        prompts: str,
+        messages: List[Dict[str, str]] = None,
         response_format: Optional[Dict[str, Any]] = None,
         tools: Optional[List[InstanceOf[Tool]| InstanceOf[ToolSet] | Type[Tool]]] = None,
         tool_res_as_final: bool = False,
@@ -384,11 +383,6 @@ class Agent(BaseModel):
         task_execution_counter = 0
         iterations = 0
         raw_response = None
-
-        messages = []
-        messages.append({ "role": "user", "content": prompts })
-        if self.use_developer_prompt:
-            messages.append({ "role": "developer", "content": self.backstory })
 
         try:
             if self._rpm_controller and self.max_rpm:
@@ -480,7 +474,7 @@ class Agent(BaseModel):
         return self
 
 
-    def start(self, context: Any = None, tool_res_as_final: bool = False) -> Any | None:
+    def start(self, context: Any = None, tool_res_as_final: bool = False, image: str = None, file: str = None, audio: str = None) -> Any | None:
         """
         Defines and executes a task when it is not given and returns TaskOutput object.
         """
@@ -498,6 +492,9 @@ class Agent(BaseModel):
             description=f"Generate a simple result in a sentence to achieve the goal: {self.goal if self.goal else self.role}. If needed, list up necessary steps in concise manner.",
             pydantic_output=Output,
             tool_res_as_final=tool_res_as_final,
+            image=image, #REFINEME - query memory/knowledge or self create
+            file=file,
+            audio=audio,
         )
         res = task.execute(agent=self, context=context)
         return res
@@ -520,20 +517,20 @@ class Agent(BaseModel):
         if self.max_rpm and self._rpm_controller:
             self._rpm_controller._reset_request_count()
 
-        task_prompt = task._prompt(model_provider=self.llm.provider, context=context)
+        user_prompt = task._user_prompt(model_provider=self.llm.provider, context=context)
 
         if self._knowledge:
-            agent_knowledge = self._knowledge.query(query=[task_prompt,], limit=5)
+            agent_knowledge = self._knowledge.query(query=[user_prompt,], limit=5)
             if agent_knowledge:
                 agent_knowledge_context = extract_knowledge_context(knowledge_snippets=agent_knowledge)
                 if agent_knowledge_context:
-                    task_prompt += agent_knowledge_context
+                    user_prompt += agent_knowledge_context
 
         if rag_tools:
             for item in rag_tools:
                 rag_tool_context = item.run(agent=self, query=task.description)
                 if rag_tool_context:
-                    task_prompt += ",".join(rag_tool_context) if isinstance(rag_tool_context, list) else str(rag_tool_context)
+                    user_prompt += ",".join(rag_tool_context) if isinstance(rag_tool_context, list) else str(rag_tool_context)
 
         if self.with_memory == True:
             contextual_memory = ContextualMemory(
@@ -543,18 +540,39 @@ class Agent(BaseModel):
             query = f"{task.description} {context_str}".strip()
             memory = contextual_memory.build_context_for_task(query=query)
             if memory.strip() != "":
-                task_prompt += memory.strip()
+                user_prompt += memory.strip()
 
         ## comment out for now
         # if self.networks and self.networks._train:
-        #     task_prompt = self._training_handler(task_prompt=task_prompt)
+        #     user_prompt = self._training_handler(user_prompt=user_prompt)
         # else:
-        #     task_prompt = self._use_trained_data(task_prompt=task_prompt)
+        #     user_prompt = self._use_trained_data(user_prompt=user_prompt)
+
+        content_prompt = task._format_content_prompt()
+
+        messages = []
+        if content_prompt:
+            messages.append(
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": user_prompt
+                        },
+                        content_prompt,
+                    ]
+                })
+        else:
+            messages.append({ "role": "user", "content": user_prompt })
+
+        if self.use_developer_prompt:
+            messages.append({ "role": "developer", "content": self.backstory })
 
         try:
             self._times_executed += 1
             raw_response = self._invoke(
-                prompts=task_prompt,
+                messages=messages,
                 response_format=task._structure_response_format(model_provider=self.llm.provider),
                 tools=tools,
                 tool_res_as_final=task.tool_res_as_final,

@@ -34,7 +34,7 @@ def test_docs_core_task_c():
     assert isinstance(res, vhq.TaskOutput) and res.task_id is task.id
     assert isinstance(res.raw, str) and isinstance(res.json_dict, dict)
     assert [
-        getattr(res.pydantic, k) and v.annotation == Demo.model_fields[k].annotation
+        getattr(res.pydantic, k) is not None and v.annotation == Demo.model_fields[k].annotation
         for k, v in res.pydantic.model_fields.items()
     ]
 
@@ -96,10 +96,9 @@ def test_docs_core_task_f():
     sub_task_2 = vhq.Task(description="Run a sub demo part 2")
     task = vhq.Task(description="Run a main demo")
     # res = task.execute(context=[sub_res, sub_task_2, "context to add in string",])
-    task_prompt = task._prompt(context=[sub_res, sub_task_2, "context to add in string"])
-
-    assert sub_res.to_context_prompt() in task_prompt
-    assert sub_task_2.output and sub_task_2.output.to_context_prompt() in task_prompt
+    task_prompt = task._user_prompt(context=[sub_res, sub_task_2, "context to add in string"])
+    assert sub_res._to_context_prompt() in task_prompt
+    assert sub_task_2.output and sub_task_2.output._to_context_prompt() in task_prompt
     assert "context to add in string" in task_prompt
 
 
@@ -113,7 +112,7 @@ def test_docs_core_task_g():
 
     assert task.output is not None
     assert task.processed_agents is not None
-    assert task.delegations ==1
+    assert task._delegations ==1
 
 
 def test_docs_core_task_h():
@@ -176,3 +175,17 @@ def test_docs_core_task_k():
     assert res and isinstance(res, vhq.TaskOutput)
     assert res.task_id is task.id
     assert "demo for pytest" in res.callback_output
+
+
+def test_docs_core_task_l():
+    import versionhq as vhq
+    from pathlib import Path
+
+    current_dir = Path(__file__).parent.parent
+    file_path = current_dir / "_sample/screenshot.png"
+    audio_path = current_dir / "_sample/sample.mp3"
+
+    task = vhq.Task(description="Summarize the given content", image=str(file_path), audio=str(audio_path))
+    res = task.execute(agent=vhq.Agent(llm="gemini-2.0", role="Content Interpretator"))
+
+    assert res.raw is not None

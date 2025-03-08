@@ -38,7 +38,9 @@ class StructuredObject:
             description = self.field.description if hasattr(self.field, "description") and self.field.description is not None else ""
             field_name = self.field.__name__ if hasattr(self.field, "__name__") and self.field.__name__ else self.title
             self.properties.update({ field_name : { "type": SchemaType(self.field.annotation.__args__).convert() }})
-            self.required.append(field_name)
+
+            if field_name not in self.required:
+                self.required.append(field_name)
 
             return {
                 self.title: {

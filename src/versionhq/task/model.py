@@ -16,7 +16,7 @@ from pydantic_core import PydanticCustomError
 import versionhq as vhq
 from versionhq.task.evaluation import Evaluation, EvaluationItem
 from versionhq.tool.model import Tool, ToolSet
-from versionhq._utils import process_config, Logger
+from versionhq._utils import process_config, Logger, is_valid_url
 
 
 class TaskExecutionType(enum.Enum):
@@ -187,7 +187,7 @@ class TaskOutput(BaseModel):
     evaluation: Optional[InstanceOf[Evaluation]] = Field(default=None, description="stores overall evaluation of the task output. stored in ltm")
 
 
-    def to_context_prompt(self) -> str:
+    def _to_context_prompt(self) -> str:
         """
         Returns response in string as a prompt context.
         """
@@ -288,6 +288,10 @@ class Task(BaseModel):
     can_use_agent_tools: bool = Field(default=True, description="whether the agent can use their own tools when executing the task")
     tool_res_as_final: bool = Field(default=False, description="when set True, tools res will be stored in the `TaskOutput`")
 
+    image: Optional[str] = Field(default=None, description="absolute file path or url in string")
+    file: Optional[str] = Field(default=None, description="absolute file path or url in string")
+    audio: Optional[str] = Field(default=None,  description="absolute file path or url in string")
+
     # executing
     execution_type: TaskExecutionType = Field(default=TaskExecutionType.SYNC)
     allow_delegation: bool = Field(default=False, description="whether to delegate the task to another agent")
@@ -301,9 +305,10 @@ class Task(BaseModel):
 
     # recording
     _tokens: int = 0
+    _tool_errors: int = 0
+    _format_errors: int = 0
+    _delegations: int = 0
     processed_agents: Set[str] = Field(default_factory=set, description="store keys of the agents that executed the task")
-    tool_errors: int = 0
-    delegations: int = 0
     output: Optional[TaskOutput] = Field(default=None, description="store the final TaskOutput object")
 
 
@@ -346,19 +351,19 @@ class Task(BaseModel):
         return self
 
 
-    def _draft_output_prompt(self, model_provider: str) -> str:
-        """
-        Draft prompts on the output format by converting `
-        """
-
+    def _draft_output_prompt(self, model_provider: str = None) -> str:
         output_prompt = ""
 
         if self.pydantic_output:
-            output_prompt = f"""
-Your response MUST STRICTLY follow the given repsonse format:
-JSON schema: {str(self.pydantic_output)}
-"""
+            output_prompt, output_formats_to_follow = "", dict()
+            response_format = str(self._structure_response_format(model_provider=model_provider))
+            for k, v in self.pydantic_output.model_fields.items():
+                output_formats_to_follow[k] = f"<Return your answer in {v.annotation}>"
 
+            output_prompt = f"""Your response MUST be a valid JSON string that strictly follows the response format. Use double quotes for all keys and string values. Do not use single quotes, trailing commas, or any other non-standard JSON syntax.
+Response format: {response_format}
+Ref. Output image: {output_formats_to_follow}
+"""
         elif self.response_fields:
             output_prompt, output_formats_to_follow = "", dict()
             response_format = str(self._structure_response_format(model_provider=model_provider))
@@ -366,13 +371,16 @@ JSON schema: {str(self.pydantic_output)}
                 if item:
                     output_formats_to_follow[item.title] = f"<Return your answer in {item.data_type.__name__}>"
 
-            output_prompt = f"""
-Your response MUST be a valid JSON string that strictly follows the response format. Use double quotes for all keys and string values. Do not use single quotes, trailing commas, or any other non-standard JSON syntax.
+            output_prompt = f"""Your response MUST be a valid JSON string that strictly follows the response format. Use double quotes for all keys and string values. Do not use single quotes, trailing commas, or any other non-standard JSON syntax.
 Response format: {response_format}
 Ref. Output image: {output_formats_to_follow}
 """
+        # elif not self.tools or self.can_use_agent_tools == False:
         else:
-            output_prompt = "You MUST Return your response as a valid JSON serializable string, enclosed in double quotes. Do not use single quotes, trailing commas, or other non-standard JSON syntax."
+            output_prompt = "You MUST return your response as a valid JSON serializable string, enclosed in double quotes. Use double quotes for all keys and string values. Do NOT use single quotes, trailing commas, or other non-standard JSON syntax."
+
+        # else:
+        #     output_prompt = "You will return a response in a concise manner."
 
         return dedent(output_prompt)
 
@@ -394,13 +402,13 @@ Ref. Output image: {output_formats_to_follow}
             case Task():
                 if not context.output:
                     res = context.execute()
-                    context_to_add = res.to_context_prompt()
+                    context_to_add = res._to_context_prompt()
 
                 else:
                     context_to_add = context.output.raw
 
             case TaskOutput():
-                context_to_add = context.to_context_prompt()
+                context_to_add = context._to_context_prompt()
 
 
             case dict():
@@ -416,7 +424,7 @@ Ref. Output image: {output_formats_to_follow}
         return dedent(context_to_add)
 
 
-    def _prompt(self, model_provider: str = None, context: Optional[Any] = None) -> str:
+    def _user_prompt(self, model_provider: str = None, context: Optional[Any] = None) -> str:
         """
         Format the task prompt and cascade it to the agent.
         """
@@ -430,11 +438,36 @@ Ref. Output image: {output_formats_to_follow}
         return "\n".join(task_slices)
 
 
+    def _format_content_prompt(self) -> Dict[str, str]:
+        """Formats content (file, image, audio) prompts that added to the messages sent to the LLM."""
+
+        from pathlib import Path
+        import base64
+
+        content_messages = {}
+
+        if self.image:
+            with open(self.image, "rb") as file:
+                content = file.read()
+                if content:
+                    encoded_file = base64.b64encode(content).decode("utf-8")
+                    img_url = f"data:image/jpeg;base64,{encoded_file}"
+                    content_messages.update({ "type": "image_url", "image_url": { "url": img_url }})
+
+        if self.file:
+            if is_valid_url(self.file):
+                content_messages.update({ "type": "image_url", "image_url": self.file })
+
+        if self.audio:
+            audio_bytes = Path(self.audio).read_bytes()
+            encoded_data = base64.b64encode(audio_bytes).decode("utf-8")
+            content_messages.update({  "type": "image_url", "image_url": "data:audio/mp3;base64,{}".format(encoded_data)})
+
+        return content_messages
+
+
     def _structure_response_format(self, data_type: str = "object", model_provider: str = "gemini") -> Dict[str, Any] | None:
-        """
-        Structure a response format either from`response_fields` or `pydantic_output`.
-        1 nested item is accepted.
-        """
+        """Structures `response_fields` or `pydantic_output` to a LLM response format."""
 
         from versionhq.task.structured_response import StructuredOutput
 
@@ -452,7 +485,7 @@ Ref. Output image: {output_formats_to_follow}
                         required_fields.append(item.title)
 
                 response_schema = {
-                    "type": "object",
+                    "type": data_type,
                     "properties": properties,
                     "required": required_fields,
                     "additionalProperties": False,
@@ -469,10 +502,39 @@ Ref. Output image: {output_formats_to_follow}
             return response_format
 
 
+    def _sanitize_raw_output(self, raw: str) -> Dict[str, str]:
+        """Sanitizes raw output and prepare for json.loads"""
+
+        import re
+        import ast
+
+        output = None
+        r = str(raw).strip()
+        r = r.replace("true", "True").replace("false", "False").replace("```json", '"').replace("```", '"').replace('\n', '').replace('\\', '')
+        r = re.sub("^'", '"', r)
+        r = re.sub(r"'\b", '"', r)
+        r = r.strip()
+        r = r.replace("  ", "")
+        try:
+            output = json.loads(r)
+        except:
+            try: j = json.dumps(eval(r))
+            except:
+                try: j = json.dumps(str(r))
+                except: j = r
+            output = json.loads(j)
+
+        if isinstance(output, dict):
+            return output
+        else:
+            output = ast.literal_eval(j)
+            return output if isinstance(output, dict) else { "output": str(r) }
+
+
     def _create_json_output(self, raw: str) -> Dict[str, Any]:
-        """
-        Create json (dict) output from the raw output and `response_fields` information.
-        """
+        """Creates JSON output from the raw output."""
+
+        output = None
 
         if raw is None or raw == "":
             Logger().log(level="warning", message="The model returned an empty response. Returning an empty dict.", color="yellow")
@@ -480,27 +542,14 @@ Ref. Output image: {output_formats_to_follow}
             return output
 
         try:
-            r = str(raw).replace("true", "True").replace("false", "False")
-            j = json.dumps(eval(r))
-            output = json.loads(j)
+            output = json.loads(raw)
             if isinstance(output, dict):
                 return output
-
             else:
-                r = str(raw).strip().replace("{'", '{"').replace("{ '", '{"').replace("': '", '": "').replace("'}", '"}').replace("' }", '"}').replace("', '", '", "').replace("['", '["').replace("[ '", '[ "').replace("']", '"]').replace("' ]", '" ]').replace("{\n'", '{"').replace("{\'", '{"').replace("true", "True").replace("false", "False").replace('\"', "'")
-                j = json.dumps(eval(r))
-                output = json.loads(j)
-
-                if isinstance(output, dict):
-                    return output
-
-                else:
-                    import ast
-                    output = ast.literal_eval(r)
-                    return output if isinstance(output, dict) else { "output": str(r) }
-
+               output = self._sanitize_raw_output(raw=raw)
+               return output
         except:
-            output = { "output": str(raw) }
+            output = self._sanitize_raw_output(raw=raw)
             return output
 
 
@@ -674,7 +723,7 @@ Ref. Output image: {output_formats_to_follow}
         if self.allow_delegation == True:
             agent_to_delegate = self._select_agent_to_delegate(agent=agent)
             agent = agent_to_delegate
-            self.delegations += 1
+            self._delegations += 1
 
         if self.tool_res_as_final == True:
             started_at = datetime.datetime.now()

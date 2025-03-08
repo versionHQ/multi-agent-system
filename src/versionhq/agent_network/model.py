@@ -306,12 +306,8 @@ class AgentNetwork(BaseModel):
         return res, task_graph
 
 
-    def launch(
-            self, kwargs_pre: Optional[Dict[str, str]] = None, kwargs_post: Optional[Dict[str, Any]] = None, start_index: int = None
-        ) -> Tuple[TaskOutput, TaskGraph]:
-        """
-        Launch the agent network - executing tasks and recording their outputs.
-        """
+    def launch(self, kwargs_pre: Optional[Dict[str, str]] = None, kwargs_post: Optional[Dict[str, Any]] = None, start_index: int = None) -> Tuple[TaskOutput, TaskGraph]:
+        """Launches agent network by executing tasks in the network and recording the outputs"""
 
         self._assign_tasks()
 

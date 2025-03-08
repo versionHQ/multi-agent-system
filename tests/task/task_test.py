@@ -8,111 +8,6 @@ from versionhq.tool.model import Tool, ToolSet
 from versionhq.tool.decorator import tool
 
 
-# def test_async_execute_task():
-#     task = Task(description="Return string: 'test'", type=TaskExecutionType.ASYNC)
-
-#     with patch.object(Agent, "execute_task", return_value="test") as execute:
-#         res = task.execute()
-#         assert res.raw == "test"
-#         execute.assert_called_once_with(task=task, context=None, task_tools=list())
-
-
-# def test_sync_execute_with_task_context():
-#     """
-#     Use case = One agent handling multiple tasks sequentially using context set in the main task.
-#     """
-#     sub_task = Task(
-#         description="return the output following the given prompt.",
-#         response_fields=[
-#             ResponseField(title="subtask_result", data_type=str, required=True),
-#         ]
-#     )
-#     main_task = Task(
-#         description="return the output following the given prompt.",
-#         response_fields=[
-#             ResponseField(title="test1", data_type=int, required=True),
-#             ResponseField(title="test2", data_type=str, required=True),
-#         ],
-#     )
-#     res = main_task.execute(context=[sub_task])
-
-#     assert isinstance(res, TaskOutput)
-#     assert res.task_id is main_task.id
-#     assert res.raw is not None
-#     assert isinstance(res.raw, str)
-#     assert res.json_dict is not None
-#     assert isinstance(res.json_dict, dict)
-#     assert res.pydantic is None
-#     assert sub_task.output is not None
-#     assert sub_task.output.json_dict is not None
-#     assert "subtask_result" in main_task._prompt()
-
-
-
-# def test_callback():
-#     """
-#     See if the callback function is executed well with kwargs.
-#     """
-
-#     def callback_func(condition: str, test1: str):
-#         # task_id = str(id) if id else None
-#         return f"Result: {test1}, condition added: {condition}"
-
-#     task = Task(
-#         description="return the output following the given prompt.",
-#         response_fields=[
-#             ResponseField(title="test1", data_type=str, required=True),
-#         ],
-#         callback=callback_func,
-#         callback_kwargs=dict(condition="demo for pytest")
-#     )
-#     res = task.execute()
-
-#     assert res and isinstance(res, TaskOutput)
-#     assert res.task_id is task.id
-#     assert "demo for pytest" in res.callback_output
-
-
-# def test_delegate():
-#     # agent = Agent(role="demo agent 6", goal="My amazing goals", maxit=1, max_tokens=3000)
-#     task = Task(
-#         description="return the output following the given prompt.",
-#         response_fields=[
-#             ResponseField(title="test1", data_type=str, required=True),
-#         ],
-#         allow_delegation=True
-#     )
-#     task.execute()
-
-#     assert task.output is not None
-#     assert "vhq-Delegated-Agent" in task.processed_agents
-#     assert task.delegations != 0
-
-
-# def test_conditional_task():
-#     task = Task(
-#         description="erturn the output following the given prompt.",
-#         response_fields=[ResponseField(title="test1", data_type=str, required=True),],
-#     )
-#     res = task.execute_sync(agent=base_agent)
-
-#     conditional_task = ConditionalTask(
-#         description="return the output following the given prompt.",
-#         response_fields=[ResponseField(title="test1", data_type=str, required=True),],
-#         condition=lambda x: bool("zzz" in task.output.raw)
-#     )
-#     should_execute = conditional_task.should_execute(context=res)
-
-#     assert res.raw is not None
-#     assert should_execute is False
-
-#     conditional_res = conditional_task._handle_conditional_task(task_outputs=[res,], task_index=1, was_replayed=False)
-#     if not should_execute:
-#         assert conditional_res is None
-#     else:
-#         assert conditional_res.task_id is conditional_task.id
-
-
 def test_store_task_log():
     task = Task(
         description="return the output following the given prompt.",
@@ -199,27 +94,6 @@ def test_build_agent_without_developer_prompt():
     assert res and isinstance(res, TaskOutput)
     assert res.json_dict and isinstance(res.json_dict, dict)
     assert res.pydantic is None
-
-
-# def test_callback_with_custom_output():
-#     class CustomOutput(BaseModel):
-#         test1: str
-#         test2: list[str]
-
-#     def dummy_func(message: str, test1: str, test2: list[str]) -> str:
-#         return f"""{message}: {test1}, {", ".join(test2)}"""
-
-#     task = Task(
-#         description="Amazing task",
-#         pydantic_output=CustomOutput,
-#         callback=dummy_func,
-#         callback_kwargs=dict(message="Hi! Here is the result: ")
-#     )
-#     res = task.execute(context="amazing context to consider.")
-
-#     assert res.task_id == task.id
-#     assert res.pydantic.test1 and res.pydantic.test2
-#     assert "Hi! Here is the result: " in res.callback_output and res.pydantic.test1 in res.callback_output and ", ".join(res.pydantic.test2) in res.callback_output
 
 
 def test_task_with_agent_callback():

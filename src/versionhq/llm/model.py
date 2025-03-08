@@ -8,12 +8,13 @@ from contextlib import contextmanager
 from typing import Any, Dict, List, Optional
 from typing_extensions import Self
 
+import litellm
 from litellm import JSONSchemaValidationError, get_supported_openai_params
 from pydantic import BaseModel, Field, PrivateAttr, model_validator, ConfigDict
 
 from versionhq.llm.llm_vars import LLM_CONTEXT_WINDOW_SIZES, MODELS, PARAMS, PROVIDERS, ENDPOINT_PROVIDERS, ENV_VARS
 from versionhq.tool.model import Tool, ToolSet
-from versionhq._utils.logger import Logger
+from versionhq._utils import Logger
 
 
 load_dotenv(override=True)
@@ -47,7 +48,6 @@ class FilteredStream:
 @contextmanager
 def suppress_warnings():
     with warnings.catch_warnings():
-        import litellm
         litellm.set_verbose = False
         warnings.filterwarnings(action="ignore")
         old_stdout = sys.stdout
@@ -102,7 +102,6 @@ class LLM(BaseModel):
         """
         Validate the given model, provider, interface provider.
         """
-        import litellm
         litellm.drop_params = True
 
         self._init_model_name = self.model
@@ -180,7 +179,6 @@ class LLM(BaseModel):
         """
         Set up valid config params after setting up a valid model, provider, interface provider names.
         """
-        import litellm
         litellm.drop_params = True
 
         self._tokens = 0
@@ -208,9 +206,7 @@ class LLM(BaseModel):
         valid_config, valid_keys = dict(), list()
 
         if self.model:
-            valid_keys = get_supported_openai_params(
-                model=self.model, custom_llm_provider=self.endpoint_provider, request_type="chat_completion"
-            )
+            valid_keys = get_supported_openai_params(model=self.model, custom_llm_provider=self.endpoint_provider, request_type="chat_completion")
 
         if not valid_keys:
             valid_keys = PARAMS.get("common")
@@ -269,7 +265,6 @@ class LLM(BaseModel):
 
 
     def _supports_stop_words(self) -> bool:
-        import litellm
         supported_params = get_supported_openai_params(model=self.model, custom_llm_provider=self.endpoint_provider)
         return "stop" in supported_params if supported_params else False
 
@@ -282,7 +277,6 @@ class LLM(BaseModel):
 
 
     def _set_callbacks(self, callbacks: List[Any]):
-        import litellm
         callback_types = [type(callback) for callback in callbacks]
         for callback in litellm.success_callback[:]:
             if type(callback) in callback_types:
@@ -306,7 +300,6 @@ class LLM(BaseModel):
         """
         Execute LLM based on the agent's params and model params.
         """
-        import litellm
         litellm.drop_params = True
         litellm.set_verbose = True
 
@@ -318,8 +311,12 @@ class LLM(BaseModel):
                 res, tool_res = None, ""
                 cred = self._set_env_vars()
 
-                if not tools:
+                if self.provider == "gemini":
+                    self.response_format = { "type": "json_object" } if not tools else None
+                else:
                     self.response_format = response_format
+
+                if not tools:
                     params = self._create_valid_params(config=config)
                     res = litellm.completion(model=self.model, messages=messages, stream=False, **params, **cred)
                     self._tokens += int(res["usage"]["total_tokens"])
@@ -327,7 +324,6 @@ class LLM(BaseModel):
 
                 else:
                     try:
-                        self.response_format = { "type": "json_object" }  if tool_res_as_final and self.provider != "gemini" else response_format
                         self.tools = [item.tool.properties if isinstance(item, ToolSet) else item.properties for item in tools]
                         params = self._create_valid_params(config=config)
                         res = litellm.completion(model=self.model, messages=messages, **params, **cred)
