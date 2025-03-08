@@ -8,7 +8,7 @@
 ![pyenv ver](https://img.shields.io/badge/pyenv-2.5.0-orange)
 
 
-Agentic orchestration framework for multi-agent networks and task graphs for complex task automation.
+A Python framework for autonomous agent networks that handle task automation with multi-step reasoning.
 
 **Visit:**
 

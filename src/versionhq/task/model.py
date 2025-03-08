@@ -508,7 +508,7 @@ Ref. Output image: {output_formats_to_follow}
         import re
         import ast
 
-        output = None
+        output, j = None, None
         r = str(raw).strip()
         r = r.replace("true", "True").replace("false", "False").replace("```json", '"').replace("```", '"').replace('\n', '').replace('\\', '')
         r = re.sub("^'", '"', r)
@@ -518,7 +518,6 @@ Ref. Output image: {output_formats_to_follow}
         try:
             output = json.loads(r)
         except:
-            j = None
             try: j = json.dumps(eval(r))
             except:
                 try: j = json.dumps(str(r))
@@ -528,7 +527,11 @@ Ref. Output image: {output_formats_to_follow}
         if isinstance(output, dict):
             return output
         else:
-            output = ast.literal_eval(j)
+            try:
+                output = ast.literal_eval(j)
+            except:
+                output = ast.literal_eval(r)
+
             return output if isinstance(output, dict) else { "output": str(r) }
 
 
