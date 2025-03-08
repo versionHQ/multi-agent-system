@@ -21,9 +21,9 @@ def test_draft():
             human=True
         )
 
-        assert task_graph
+        assert task_graph is not None
         assert [k == node.identifier and node.task and isinstance(node, vhq.Node) for k, node in task_graph.nodes.items()]
-        assert [isinstance(edge.dependency_type, vhq.DependencyType) and isinstance(edge, vhq.Edge) for k, edge in task_graph.edges.items()]
+        assert [isinstance(edge.dependency_type, vhq.DependencyType) and isinstance(edge, vhq.Edge) for edge in task_graph.edges.values()]
         assert [k in task_graph.nodes.keys() and v.status == vhq.TaskStatus.NOT_STARTED for k, v in task_graph.nodes.items()]
 
 

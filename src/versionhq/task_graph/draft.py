@@ -33,12 +33,11 @@ def workflow(final_output: Type[BaseModel], context: Any = None, human: bool = F
 
     dep_type_prompt = ", ".join([k for k in DependencyType._member_map_.keys()])
 
-    graph_expert = Agent(
-        role="vhq-G Expert",
+    vhq_graph_expert = Agent(
+        role="vhq-Graph Expert",
         goal="design the most resource-efficient workflow graph to achieve the given goal",
         knowledge_sources=[
             "https://en.wikipedia.org/wiki/Graph_theory",
-            # "https://www.geeksforgeeks.org/graph-data-structure-and-algorithms/?ref=lbp",
             "https://www.geeksforgeeks.org/graph-and-its-representations/",
             ", ".join([k for k in DependencyType._member_map_.keys()]),
         ],
@@ -60,12 +59,16 @@ def workflow(final_output: Type[BaseModel], context: Any = None, human: bool = F
             ])
         ]
     )
-    res = task.execute(agent=graph_expert, context=[context_prompt, context])
+    res = task.execute(agent=vhq_graph_expert, context=[context_prompt, context])
 
     if not res:
         return None
 
-    task_items = res.json_dict["tasks"]
+    task_items = res.json_dict["tasks"] if "tasks" in res.json_dict else []
+
+    if not task_items:
+        return None
+
     tasks, nodes = [], []
 
     for item in task_items:
@@ -91,7 +94,6 @@ def workflow(final_output: Type[BaseModel], context: Any = None, human: bool = F
                 dependency_type = dependency_types[i]
                 task_graph.add_dependency(
                     source=source.identifier, target=target.identifier, dependency_type=dependency_type)
-
 
     task_graph.visualize()
 

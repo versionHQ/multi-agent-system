@@ -83,9 +83,12 @@ def form_agent_network(
 
     res = vhq_task.execute(agent=vhq_formation_planner, context=context)
 
-    formation_keys = ([k for k in Formation._member_map_.keys() if k == res.pydantic.formation.upper()]
-                      if res.pydantic else [k for k in Formation._member_map_.keys() if k == res.json_dict["formation"].upper()]
-                      if "formation" in res.json_dict else [])
+    formation_keys = []
+    if hasattr(res.pydantic, "formation"):
+        formation_keys = [k for k in Formation._member_map_.keys() if k == res.pydantic.formation.upper()]
+    elif "formation" in res.json_dict:
+        formation_keys = [k for k in Formation._member_map_.keys() if k == res.json_dict["formation"].upper()]
+
     _formation = Formation[formation_keys[0]] if formation_keys else Formation.SUPERVISING
 
     network_tasks = []
