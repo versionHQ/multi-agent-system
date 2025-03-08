@@ -13,7 +13,6 @@ def test_minimum_inputs():
     assert isinstance(network.formation, vhq.Formation)
     assert network.managers if network.formation in (vhq.Formation.SUPERVISING, vhq.Formation.HYBRID) else not network.managers
 
-
 def _test_specific_formation():
     import versionhq as vhq
 
