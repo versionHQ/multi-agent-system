@@ -518,6 +518,7 @@ Ref. Output image: {output_formats_to_follow}
         try:
             output = json.loads(r)
         except:
+            j = None
             try: j = json.dumps(eval(r))
             except:
                 try: j = json.dumps(str(r))
