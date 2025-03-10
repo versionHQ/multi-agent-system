@@ -47,4 +47,15 @@ assert res.tool_output is None
 assert res.evaluation and isinstance(res.evaluation, vhq.Evaluation)
 ```
 
+
+The `TaskOutput` object has a `final` field that contains the task's definitive result.
+
+Result priority is: `callback` > `tool` (when tool_res_as_final is true) > `pydantic` > `json_dict` > `raw` output.
+
+
+```python
+assert res.final == res.callback_output
+```
+
+
 Ref. <a href="/core/task/reference/#taskoutput">List of variables and class methods</a>

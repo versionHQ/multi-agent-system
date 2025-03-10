@@ -6,16 +6,17 @@ def test_doc_core_taskoutput_a():
         test1: str
         test2: list[str]
 
-    def dummy_tool():
+    def mock_tool():
         return "dummy"
-    def dummy_func(message: str, test1: str, test2: list[str]) -> str:
+
+    def mock_func(message: str, test1: str, test2: list[str]) -> str:
         return f"""{message}: {test1}, {", ".join(test2)}"""
 
     task = vhq.Task(
         description="Research a topic to teach a kid aged 6 about math.",
         pydantic_output=CustomOutput,
-        tools=[dummy_tool],
-        callback=dummy_func,
+        tools=[mock_tool],
+        callback=mock_func,
         callback_kwargs=dict(message="Hi! Here is the result: "),
         should_evaluate=True,
         eval_criteria=["Uniquness", "Fit to audience",],
@@ -33,3 +34,4 @@ def test_doc_core_taskoutput_a():
     assert [isinstance(item, vhq.EvaluationItem) and item.criteria in task.eval_criteria for item in res.evaluation.items]
     assert res.latency and res._tokens
     assert res.evaluation.aggregate_score is not None and res.evaluation.suggestion_summary
+    assert res.final == res.callback_output

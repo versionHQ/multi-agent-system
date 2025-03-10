@@ -1,6 +1,8 @@
 deploy.py
 destinations.py
 
+auto-prompt-feedback.py
+
 _auth/
 
 cli/

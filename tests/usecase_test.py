@@ -56,7 +56,7 @@ def test_demo_agent_customization():
 
     res = agent.start()
     assert isinstance(res, vhq.TaskOutput)
-    assert res.raw is not None
+    assert res.final is not None
 
 
 def test_solo_tg_eval():

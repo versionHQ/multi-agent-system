@@ -1,11 +1,21 @@
 from unittest.mock import patch
 from typing import Callable
 
+from pydantic import BaseModel
+
 from versionhq.agent.model import Agent
 from versionhq.llm.model import LLM
 from versionhq.task.model import Task, ResponseField, TaskOutput
 from versionhq.tool.model import Tool, ToolSet
 from versionhq.tool.decorator import tool
+
+
+class CustomOutput(BaseModel):
+    test1: str
+    test2: list[str]
+
+def mock_tool() -> str:
+    return "mock"
 
 
 def test_store_task_log():
@@ -99,15 +109,15 @@ def test_build_agent_without_developer_prompt():
 def test_task_with_agent_callback():
     import litellm
 
-    def dummy_func(*args, **kwargs) -> str:
+    def mock_func() -> str:
         return "Demo func"
 
-    agent = Agent(role="demo", goal="amazing project goal", maxit=1, max_tokens=3000, callbacks=[dummy_func,])
+    agent = Agent(role="demo", goal="amazing project goal", maxit=1, max_tokens=3000, callbacks=[mock_func,])
     task = Task(description="Amazing task")
     res = task.execute(agent=agent)
 
     assert res.raw and res.task_id == task.id
-    assert litellm.callbacks == [dummy_func]
+    assert litellm.callbacks == [mock_func]
 
 
 def test_rpm():
@@ -137,3 +147,44 @@ def test_maxit():
     with patch.object(LLM, "call", wraps=agent.llm.call) as mock:
         task.execute(agent=agent)
         assert mock.call_count <= 2
+
+
+def test_taskoutput_final_a():
+    task = Task(
+        description="Research any topic.",
+        pydantic_output=CustomOutput,
+        tools=[mock_tool],
+        tool_res_as_final=True
+    )
+    res = task.execute()
+
+    assert res.final == res.tool_output
+    assert res._to_context_prompt() is not None
+
+
+def test_taskoutput_final_b():
+    task = Task(
+        description="Research any topic.",
+        tools=[mock_tool],
+        tool_res_as_final=False
+    )
+    res = task.execute()
+
+    assert res.final == res.json_dict
+    assert res._to_context_prompt() is not None
+
+
+def test_taskoutput_final_c():
+    task = Task(description="Research any topic.")
+    res = task.execute()
+
+    assert res.final == res.json_dict
+    assert res._to_context_prompt() is not None
+
+
+def test_taskoutput_final_c():
+    task = Task(description="Research any topic.",  pydantic_output=CustomOutput)
+    res = task.execute()
+
+    assert res.final == res.pydantic
+    assert res._to_context_prompt() is not None

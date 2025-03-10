@@ -42,8 +42,10 @@ def test_draft_prompt(main_task, sub_task, rag_tool):
     from versionhq._prompt.model import Prompt
 
     agent = vhq.Agent(llm="gemini-2.0", role="Content Interpretator")
-    messages = Prompt(task=main_task, agent=agent, context=["test", "test2", sub_task]).format(rag_tools=[rag_tool])
+    user_prompt, dev_prompt, messages = Prompt(task=main_task, agent=agent, context=["test", "test2", sub_task]).format_core(rag_tools=[rag_tool])
 
+    assert user_prompt is not None
+    assert dev_prompt is not None
     assert messages[0]["role"] == "user"
     assert isinstance(messages[0]["content"], list)
     assert messages[1]["role"] == "developer"
@@ -55,8 +57,10 @@ def test_draft_prompt_with_tools(main_task, sub_task, rag_tool):
     from versionhq._prompt.model import Prompt
 
     agent = vhq.Agent(llm="gemini-2.0", role="Content Interpretator", tools=[rag_tool])
-    messages = Prompt(task=main_task, agent=agent, context=["test", "test2", sub_task]).format()
+    user_prompt, dev_prompt, messages = Prompt(task=main_task, agent=agent, context=["test", "test2", sub_task]).format_core()
 
+    assert user_prompt is not None
+    assert dev_prompt is not None
     assert messages[0]["role"] == "user"
     assert isinstance(messages[0]["content"], list)
     assert messages[1]["role"] == "developer"

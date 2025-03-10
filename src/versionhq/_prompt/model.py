@@ -1,5 +1,5 @@
 
-from typing import Any, Dict, List
+from typing import Dict, List, Tuple, Any
 from textwrap import dedent
 
 from pydantic import InstanceOf
@@ -13,7 +13,6 @@ class Prompt:
     task: Any = None
     agent: Any = None
     context: Any = None
-    messages: List[Dict[str, str]] = list()
 
 
     def __init__(self, task, agent, context):
@@ -99,23 +98,8 @@ Ref. Output image: {output_formats_to_follow}
         return dedent(context_to_add)
 
 
-    def _user_prompt(self) -> str:
-        """
-        Format the task prompt and cascade it to the agent.
-        """
-
-        output_prompt = self._draft_output_prompt()
-        task_slices = [self.task.description, output_prompt, ]
-
-        if self.context:
-            context_prompt = self._draft_context_prompt(context=self.context)
-            task_slices.insert(len(task_slices), f"Consider the following context when responding: {context_prompt}")
-
-        return "\n".join(task_slices)
-
-
     def _format_content_prompt(self) -> Dict[str, str]:
-        """Formats content (file, image, audio) prompts that added to the messages sent to the LLM."""
+        """Formats content (file, image, audio) prompt message."""
 
         import base64
         from pathlib import Path
@@ -137,7 +121,7 @@ Ref. Output image: {output_formats_to_follow}
         if self.task.audio and self.agent.llm.provider == "gemini":
             audio_bytes = Path(self.task.audio).read_bytes()
             encoded_data = base64.b64encode(audio_bytes).decode("utf-8")
-            content_messages.update({  "type": "image_url", "image_url": "data:audio/mp3;base64,{}".format(encoded_data)})
+            content_messages.update({ "type": "image_url", "image_url": "data:audio/mp3;base64,{}".format(encoded_data)})
 
         return content_messages
 
@@ -157,13 +141,26 @@ Ref. Output image: {output_formats_to_follow}
         return tools
 
 
-    def format(self, rag_tools: List[Any] = None) -> List[Dict[str, str]]:
-        """Formats messages sent to LLM."""
+    def draft_user_prompt(self) -> str:
+        """Draft task prompts from its description and context."""
+
+        output_prompt = self._draft_output_prompt()
+        task_slices = [self.task.description, output_prompt, ]
+
+        if self.context:
+            context_prompt = self._draft_context_prompt(context=self.context)
+            task_slices.insert(len(task_slices), f"Consider the following context when responding: {context_prompt}")
+
+        return "\n".join(task_slices)
+
+
+    def format_core(self, rag_tools: List[Any] = None) -> Tuple[str, str, List[Dict[str, str]]]:
+        """Formats prompt messages sent to the LLM, then returns task prompt, developer prompt, and messages."""
 
         from versionhq.knowledge._utils import extract_knowledge_context
         from versionhq.memory.contextual_memory import ContextualMemory
 
-        user_prompt = self._user_prompt()
+        user_prompt = self.draft_user_prompt()
         rag_tools = rag_tools if rag_tools else self._find_rag_tools()
 
         if self.agent._knowledge:
@@ -218,4 +215,4 @@ Ref. Output image: {output_formats_to_follow}
         if self.agent.use_developer_prompt:
             messages.append({ "role": "developer", "content": self.agent.backstory })
 
-        return messages
+        return user_prompt, self.agent.backstory if self.agent.use_developer_prompt else None, messages

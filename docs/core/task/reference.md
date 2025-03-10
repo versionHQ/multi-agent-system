@@ -85,6 +85,7 @@
 
 | <div style="width:160px">**Property**</div>   | **Data_Type** | **Description**                                               |
 | :---                                          | :---          | :---                                                          |
+| **`final`**                                   | Any           | Returns the final output of the task                          |
 | **`aggregate_score`**                         | float         | Calucurates weighted average eval scores of the task output.  |
 | **`json_string`**                             | str           | Returns `json_dict` in string format.                         |
 

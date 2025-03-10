@@ -146,37 +146,6 @@ def test_launch_with_task_callback():
     assert "pytest" in demo_list[1]
 
 
-# def test_delegate_in_network():
-#     """
-#     When the agent belongs to the agent network, its manager or peers are prioritized to delegete the task.
-#     """
-
-#     agent_a = Agent(role="agent a", goal="My amazing goals", llm=DEFAULT_MODEL_NAME)
-#     agent_b = Agent(role="agent b", goal="My amazing goals", llm=DEFAULT_MODEL_NAME)
-#     task_1 = Task(
-#         description="Analyze the client's business model.",
-#         response_fields=[ResponseField(title="test1", data_type=str, required=True),],
-#         allow_delegation=True
-#     )
-#     task_2 = Task(
-#         description="Define the cohort.",
-#         response_fields=[ResponseField(title="test1", data_type=int, required=True),],
-#         allow_delegation=False
-#     )
-#     network = AgentNetwork(
-#         members=[
-#             Member(agent=agent_a, is_manager=False, tasks=[task_1,]),
-#             Member(agent=agent_b, is_manager=False, tasks=[task_2,]),
-#         ],
-#     )
-#     res = network.launch()
-#
-#     assert res.raw is not None
-#     assert res.json_dict is not None
-#     assert "vhq-Delegated-Agent" in task_1.processed_agents
-
-
-
 def test_launch_with_leader():
     agent_a = Agent(role="agent a", goal="My amazing goals", llm=DEFAULT_MODEL_NAME)
     agent_b = Agent(role="agent b", goal="My amazing goals", llm=DEFAULT_MODEL_NAME)

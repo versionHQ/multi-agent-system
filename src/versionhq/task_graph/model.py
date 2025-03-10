@@ -15,7 +15,7 @@ from pydantic_core import PydanticCustomError
 
 from versionhq.agent.model import Agent
 from versionhq.task.model import Task, TaskOutput, Evaluation
-from versionhq._utils.logger import Logger
+from versionhq._utils import Logger
 
 class ConditionType(enum.Enum):
     AND = 1
@@ -238,7 +238,6 @@ class Edge(BaseModel):
         """
         Activates the edge to initiate task execution of the target node.
         """
-
         if not self.source or not self.target:
             Logger(verbose=True).log(level="warning", message="Cannot find source or target nodes. We'll return None.", color="yellow")
             return None
@@ -251,9 +250,10 @@ class Edge(BaseModel):
             import time
             time.sleep(self.lag)
 
-        context = self.source.task.output.raw if self.data_transfer else None
+        context = self.source.task.output._to_context_prompt() if self.data_transfer else None
         res = self.target.handle_task_execution(context=context, response_format=response_format)
         return res
+
 
     @property
     def label(self):
@@ -383,6 +383,8 @@ class TaskGraph(Graph):
     concl_template: Optional[Dict[str, Any] | Type[BaseModel]] = Field(default=None, description="stores final response format in Pydantic class or JSON dict")
     concl: Optional[TaskOutput] = Field(default=None, description="stores the final or latest conclusion of the entire task graph")
 
+    # def __init__(self, *args, **kwargs):
+    #     super().__init__(self, *args, **kwargs)
 
     def _save(self, title: str, abs_file_path: str = None) -> None:
         """

@@ -516,7 +516,7 @@ class Agent(BaseModel):
         if self.max_rpm and self._rpm_controller:
             self._rpm_controller._reset_request_count()
 
-        messages = Prompt(task=task, agent=self, context=context).format(rag_tools=rag_tools)
+        _, _, messages = Prompt(task=task, agent=self, context=context).format_core(rag_tools=rag_tools)
 
         try:
             self._times_executed += 1

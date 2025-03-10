@@ -27,5 +27,5 @@ def test_use_rag_tool():
     task = vhq.Task(description="return a simple response", can_use_agent_tools=True, tool_res_as_final=True)
     res = task.execute(agent=agent)
 
-    assert res.raw is not None
+    assert res.final == res.tool_output
     assert res.tool_output is not None

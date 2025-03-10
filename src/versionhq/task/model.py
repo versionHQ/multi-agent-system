@@ -187,18 +187,18 @@ class TaskOutput(BaseModel):
 
 
     def _to_context_prompt(self) -> str:
-        """
-        Returns response in string as a prompt context.
-        """
+        """Formats prompt context in text formats from the final response."""
+
         context = ""
-        try:
-            context = json.dumps(self.json_dict)
-        except:
-            try:
-                if self.pydantic:
-                    context = self.pydantic.model_dump()
-            except:
-                context = self.raw
+        match self.final:
+            case dict() | self.pydantic:
+                try:
+                    context = json.dumps(self.final)
+                except:
+                    context = str(self.final)
+            case _:
+                context = str(self.final)
+
         return context
 
 
@@ -252,6 +252,24 @@ class TaskOutput(BaseModel):
 
 
     @property
+    def final(self) -> Any:
+        """Returns final output from the task."""
+
+        output = None
+
+        if self.callback_output:
+            output = self.callback_output
+
+        elif self.tool_output and str(self.tool_output) == self.raw: # tool_output_as_final
+            output = self.tool_output
+
+        else:
+            output = self.pydantic if self.pydantic else self.json_dict if self.json_dict else self.raw
+
+        return output
+
+
+    @property
     def aggregate_score(self) -> float | int:
         return self.evaluation.aggregate_score if self.evaluation is not None else 0
 
@@ -290,6 +308,9 @@ class Task(BaseModel):
     image: Optional[str] = Field(default=None, description="absolute file path or url in string")
     file: Optional[str] = Field(default=None, description="absolute file path or url in string")
     audio: Optional[str] = Field(default=None,  description="absolute file path or url in string")
+
+    # test run
+    should_test_run: bool = Field(default=False)
 
     # executing
     execution_type: TaskExecutionType = Field(default=TaskExecutionType.SYNC)
@@ -557,16 +578,16 @@ class Task(BaseModel):
 
 
     # task execution
-    def execute(
-            self, type: TaskExecutionType = None, agent: Optional["vhq.Agent"] = None, context: Optional[Any] = None
-        ) -> TaskOutput | Future[TaskOutput]:
-        """
-        A main method to handle task execution. Build an agent when the agent is not given.
-        """
+    def execute(self, type: TaskExecutionType = None, agent: "vhq.Agent" = None, context: Any = None) -> TaskOutput | Future[TaskOutput]:
+        """A main method to handle task execution."""
+
         type = type if type else  self.execution_type if self.execution_type else TaskExecutionType.SYNC
 
         if not agent:
             agent = self._build_agent_from_task(task_description=self.description)
+
+        if self.should_test_run:
+            self.test_time_computation()
 
         match type:
             case TaskExecutionType.SYNC:
@@ -669,6 +690,18 @@ class Task(BaseModel):
             self._store_logs()
 
         return task_output
+
+
+    def _test_time_computation(self):
+        """Handles test-time computation of the task."""
+
+        if self.should_test_run == False:
+            return
+
+
+
+
+
 
 
     @property

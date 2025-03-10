@@ -21,7 +21,7 @@ rag_tool = vhq.RagTool(url="https://github.com/chroma-core/chroma/issues/3233", 
 
 # Explicitly mentioned for explanation purpose. By default, `task.execute()` will trigger this formula.
 from versionhq._prompt.model import Prompt
-messages = Prompt(task=main_task, agent=agent, context=["context 1", "context 2", sub_task]).format()
+_, _, messages = Prompt(task=main_task, agent=agent, context=["context 1", "context 2", sub_task]).format_core()
 
 assert messages[0]["role"] == "user"
 assert isinstance(messages[0]["content"], list) # adding context and image, file, audio data to the prompt

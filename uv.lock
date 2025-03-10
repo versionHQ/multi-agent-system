@@ -596,7 +596,7 @@ wheels = [
 
 [[package]]
 name = "composio-langchain"
-version = "0.7.6"
+version = "0.7.7"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "composio-core" },
@@ -605,22 +605,22 @@ dependencies = [
     { name = "langchainhub" },
     { name = "pydantic" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/91/65/c0471754c4c21b23673c23b5d088efefddae05bf165524937c1bd8d6bdf1/composio_langchain-0.7.6.tar.gz", hash = "sha256:851720a3a3ecd826b1e01d580413fa4807eeb625aa34c326789f028fa25b4253", size = 4427 }
+sdist = { url = "https://files.pythonhosted.org/packages/d6/83/cf500018e3245dd235ee37ee94356dbdcf5b2d48d0b884d6d5587e08a80e/composio_langchain-0.7.7.tar.gz", hash = "sha256:9d520c523222c068a2601f5396acee9bcb3e25649069eea229c65adf9c26147b", size = 4421 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/93/0e/454aaac05221a616d11c83715c91b3724153c5a9298373ffdfd7cb0f2099/composio_langchain-0.7.6-py3-none-any.whl", hash = "sha256:d7cfe69760a43a688319ba6d38d9a93c945c9956eb76348c562fce9b711fb382", size = 4844 },
+    { url = "https://files.pythonhosted.org/packages/0a/b3/7950e333e37f7ca2de0c917a055209fd225abea59800b1d8fa5f8d1f0428/composio_langchain-0.7.7-py3-none-any.whl", hash = "sha256:514ce3ccdb3dbea5ce24df55a967fa7297384235195eb1976d47e39bfe745252", size = 4843 },
 ]
 
 [[package]]
 name = "composio-openai"
-version = "0.7.6"
+version = "0.7.7"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "composio-core" },
     { name = "openai" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/9c/4d/ef23fc6410474735f7fd33feda64ceafa09bbce8feb829575e892593b11e/composio_openai-0.7.6.tar.gz", hash = "sha256:c23c451af2c92e7f8d798fb26c340b2352e4e4e3d0df3e769c4db688ad97e19f", size = 4638 }
+sdist = { url = "https://files.pythonhosted.org/packages/bf/65/01ff8741ea46544f2d39d9a3a6e51f5944cda3ef995a7320c41ee5df96f7/composio_openai-0.7.7.tar.gz", hash = "sha256:4418fd2503df81528a8b7822829b0f45c76cb7f47a34aa64e779262ea5136ba8", size = 4652 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f1/f8/450f313121358252ee6273d8aa3f8f4e7a416c7dff711612e86149e52f8e/composio_openai-0.7.6-py3-none-any.whl", hash = "sha256:0a9426248f1b0bf724eab4b8512ced6709f9f6a04d66dd921f10a74fd14bed33", size = 5090 },
+    { url = "https://files.pythonhosted.org/packages/ca/30/b1f25772c0e6df144a89fbc70fba450bfb59a48a4ec52a64080b1b2c45c1/composio_openai-0.7.7-py3-none-any.whl", hash = "sha256:ec2e9d999db574750d15fb1cdf812dd16479ca1f1df15dbe67616e07d0930822", size = 5090 },
 ]
 
 [[package]]

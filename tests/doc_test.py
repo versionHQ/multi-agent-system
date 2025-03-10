@@ -10,7 +10,7 @@ def test_doc_index_a():
         expected_outcome="YOUR OUTCOME EXPECTATION",
     )
     res, _ = network.launch()
-    assert res.raw is not None
+    assert res.final is not None
 
 
 def test_doc_index_b():
