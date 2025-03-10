@@ -15,7 +15,7 @@ exclude = ["test*", "__pycache__", "*.egg-info"]
 
 [project]
 name = "versionhq"
-version = "1.2.4.1"
+version = "1.2.4.2"
 authors = [{ name = "Kuriko Iwai", email = "kuriko@versi0n.io" }]
 description = "A Python framework for autonomous agent networks that handle task automation with multi-step reasoning."
 readme = "README.md"

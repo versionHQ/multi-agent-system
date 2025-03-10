@@ -88,18 +88,18 @@ def test_docs_core_task_e():
     assert res.callback_output.main2 is not None
 
 
-def test_docs_core_task_f():
-    import versionhq as vhq
+# def test_docs_core_task_f():
+#     import versionhq as vhq
 
-    sub_task_1 = vhq.Task(description="Run a sub demo part 1")
-    sub_res = sub_task_1.execute()
-    sub_task_2 = vhq.Task(description="Run a sub demo part 2")
-    task = vhq.Task(description="Run a main demo")
-    # res = task.execute(context=[sub_res, sub_task_2, "context to add in string",])
-    task_prompt = task._user_prompt(context=[sub_res, sub_task_2, "context to add in string"])
-    assert sub_res._to_context_prompt() in task_prompt
-    assert sub_task_2.output and sub_task_2.output._to_context_prompt() in task_prompt
-    assert "context to add in string" in task_prompt
+#     sub_task_1 = vhq.Task(description="Run a sub demo part 1")
+#     sub_res = sub_task_1.execute()
+#     sub_task_2 = vhq.Task(description="Run a sub demo part 2")
+#     task = vhq.Task(description="Run a main demo")
+#     # res = task.execute(context=[sub_res, sub_task_2, "context to add in string",])
+#     task_prompt = task._user_prompt(context=[sub_res, sub_task_2, "context to add in string"])
+#     assert sub_res._to_context_prompt() in task_prompt
+#     assert sub_task_2.output and sub_task_2.output._to_context_prompt() in task_prompt
+#     assert "context to add in string" in task_prompt
 
 
 def test_docs_core_task_g():

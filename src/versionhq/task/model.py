@@ -4,7 +4,6 @@ import datetime
 import uuid
 import inspect
 import enum
-from textwrap import dedent
 from concurrent.futures import Future
 from hashlib import md5
 from typing import Any, Dict, List, Set, Optional, Callable, Type
@@ -16,7 +15,7 @@ from pydantic_core import PydanticCustomError
 import versionhq as vhq
 from versionhq.task.evaluation import Evaluation, EvaluationItem
 from versionhq.tool.model import Tool, ToolSet
-from versionhq._utils import process_config, Logger, is_valid_url
+from versionhq._utils import process_config, Logger
 
 
 class TaskExecutionType(enum.Enum):
@@ -349,121 +348,6 @@ class Task(BaseModel):
                     tool_list.append(item) # address custom tool
             self.tools = tool_list
         return self
-
-
-    def _draft_output_prompt(self, model_provider: str = None) -> str:
-        output_prompt = ""
-
-        if self.pydantic_output:
-            output_prompt, output_formats_to_follow = "", dict()
-            response_format = str(self._structure_response_format(model_provider=model_provider))
-            for k, v in self.pydantic_output.model_fields.items():
-                output_formats_to_follow[k] = f"<Return your answer in {v.annotation}>"
-
-            output_prompt = f"""Your response MUST be a valid JSON string that strictly follows the response format. Use double quotes for all keys and string values. Do not use single quotes, trailing commas, or any other non-standard JSON syntax.
-Response format: {response_format}
-Ref. Output image: {output_formats_to_follow}
-"""
-        elif self.response_fields:
-            output_prompt, output_formats_to_follow = "", dict()
-            response_format = str(self._structure_response_format(model_provider=model_provider))
-            for item in self.response_fields:
-                if item:
-                    output_formats_to_follow[item.title] = f"<Return your answer in {item.data_type.__name__}>"
-
-            output_prompt = f"""Your response MUST be a valid JSON string that strictly follows the response format. Use double quotes for all keys and string values. Do not use single quotes, trailing commas, or any other non-standard JSON syntax.
-Response format: {response_format}
-Ref. Output image: {output_formats_to_follow}
-"""
-        # elif not self.tools or self.can_use_agent_tools == False:
-        else:
-            output_prompt = "You MUST return your response as a valid JSON serializable string, enclosed in double quotes. Use double quotes for all keys and string values. Do NOT use single quotes, trailing commas, or other non-standard JSON syntax."
-
-        # else:
-        #     output_prompt = "You will return a response in a concise manner."
-
-        return dedent(output_prompt)
-
-
-    def _draft_context_prompt(self, context: Any) -> str:
-        """
-        Create a context prompt from the given context in any format: a task object, task output object, list, dict.
-        """
-
-        context_to_add = None
-        if not context:
-            # Logger().log(level="error", color="red", message="Missing a context to add to the prompt. We'll return ''.")
-            return context_to_add
-
-        match context:
-            case str():
-                context_to_add = context
-
-            case Task():
-                if not context.output:
-                    res = context.execute()
-                    context_to_add = res._to_context_prompt()
-
-                else:
-                    context_to_add = context.output.raw
-
-            case TaskOutput():
-                context_to_add = context._to_context_prompt()
-
-
-            case dict():
-                context_to_add = str(context)
-
-            case list():
-                res = ", ".join([self._draft_context_prompt(context=item) for item in context])
-                context_to_add = res
-
-            case _:
-                pass
-
-        return dedent(context_to_add)
-
-
-    def _user_prompt(self, model_provider: str = None, context: Optional[Any] = None) -> str:
-        """
-        Format the task prompt and cascade it to the agent.
-        """
-        output_prompt = self._draft_output_prompt(model_provider=model_provider)
-        task_slices = [self.description, output_prompt, ]
-
-        if context:
-            context_prompt = self._draft_context_prompt(context=context)
-            task_slices.insert(len(task_slices), f"Consider the following context when responding: {context_prompt}")
-
-        return "\n".join(task_slices)
-
-
-    def _format_content_prompt(self) -> Dict[str, str]:
-        """Formats content (file, image, audio) prompts that added to the messages sent to the LLM."""
-
-        from pathlib import Path
-        import base64
-
-        content_messages = {}
-
-        if self.image:
-            with open(self.image, "rb") as file:
-                content = file.read()
-                if content:
-                    encoded_file = base64.b64encode(content).decode("utf-8")
-                    img_url = f"data:image/jpeg;base64,{encoded_file}"
-                    content_messages.update({ "type": "image_url", "image_url": { "url": img_url }})
-
-        if self.file:
-            if is_valid_url(self.file):
-                content_messages.update({ "type": "image_url", "image_url": self.file })
-
-        if self.audio:
-            audio_bytes = Path(self.audio).read_bytes()
-            encoded_data = base64.b64encode(audio_bytes).decode("utf-8")
-            content_messages.update({  "type": "image_url", "image_url": "data:audio/mp3;base64,{}".format(encoded_data)})
-
-        return content_messages
 
 
     def _structure_response_format(self, data_type: str = "object", model_provider: str = "gemini") -> Dict[str, Any] | None:

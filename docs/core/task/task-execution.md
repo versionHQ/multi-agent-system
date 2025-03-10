@@ -3,33 +3,30 @@
 
 ## Prompt Engineering
 
-Prompts are generated automatically based on the task `description`, response format, context, agent `role`, and `goal`.
+Prompt messages are generated automatically based on the task `description`, response format, context, agent `role`, and `goal`.
 
 
 **Context**
 
-The following snippet demonstrates how to add `context` to the prompt.
+The following snippet demonstrates adding `context` from tools and sub tasks as well as `multi-modal content` to the prompt.
 
 ```python
 import versionhq as vhq
 
-sub_task_1 = vhq.Task(description="Run a sub demo part 1")
-sub_res = sub_task_1.execute()
+agent = vhq.Agent(llm="gemini-2.0", role="Content Interpretator", tools=[rag_tool])
+task = vhq.Task(description="dummy task", image="image file path")
+sub_task = vhq.Task(description="sub task")
+rag_tool = vhq.RagTool(url="https://github.com/chroma-core/chroma/issues/3233", query="What is the next action plan?")
 
-sub_task_2 = vhq.Task(description="Run a sub demo part 2")
 
-task = vhq.Task(description="Run a main demo")
+# Explicitly mentioned for explanation purpose. By default, `task.execute()` will trigger this formula.
+from versionhq._prompt.model import Prompt
+messages = Prompt(task=main_task, agent=agent, context=["context 1", "context 2", sub_task]).format()
 
-context = [sub_res, sub_task_2, "context to add in string"]
-res = task.execute(context=context)
-
-# Explicitly mentioned. `task.execute()` will trigger the following:
-task_prompt = task._user_prompt(context=context)
-
-assert sub_res._to_context_prompt() in task_prompt
-assert sub_task_2.output and sub_task_2.output._to_context_prompt() in task_prompt  # sub tasks' outputs are included in the task prompt.
-assert "context to add in string" in task_promp
-assert res
+assert messages[0]["role"] == "user"
+assert isinstance(messages[0]["content"], list) # adding context and image, file, audio data to the prompt
+assert messages[1]["role"] == "developer" # adding developer prompt
+assert messages[1]["content"] == agent.backstory
 ```
 
 Context can consist of `Task` objects, `TaskOutput` objects, plain text `strings`, or `lists` containing any of these.

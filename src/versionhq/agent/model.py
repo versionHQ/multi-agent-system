@@ -10,7 +10,6 @@ from pydantic_core import PydanticCustomError
 from versionhq.agent.rpm_controller import RPMController
 from versionhq.tool.model import Tool, ToolSet, BaseTool
 from versionhq.knowledge.model import BaseKnowledgeSource, Knowledge
-from versionhq.memory.contextual_memory import ContextualMemory
 from versionhq.memory.model import ShortTermMemory, LongTermMemory, UserMemory
 from versionhq._utils import Logger, process_config, is_valid_url
 
@@ -337,25 +336,6 @@ class Agent(BaseModel):
         return llm
 
 
-    def _update_llm(self, llm: Any = None, llm_config: Optional[Dict[str, Any]] = None) -> Self:
-        """
-        Update llm and llm_config of the exsiting agent. (Other conditions will remain the same.)
-        """
-
-        if not llm and not llm_config:
-            Logger(**self._logger_config, filename=self.key).log(level="error", message="Missing llm or llm_config values to update", color="red")
-            pass
-
-        self.llm = llm
-        if llm_config:
-            if self.llm_config:
-                self.llm_config.update(llm_config)
-            else:
-                self.llm_config = llm_config
-
-        return self.set_up_llm()
-
-
     def _train(self) -> Self:
         """
         Fine-tuned the base model using OpenAI train framework.
@@ -420,6 +400,25 @@ class Agent(BaseModel):
             if not raw_response:
                 Logger(**self._logger_config, filename=self.key).log(level="error", message="Received None or empty response from the model", color="red")
                 raise ValueError("Invalid response from LLM call - None or empty.")
+
+
+    def _update_llm(self, llm: Any = None, llm_config: Optional[Dict[str, Any]] = None) -> Self:
+        """
+        Updates llm and llm_config of the exsiting agent. (Other conditions will remain the same.)
+        """
+
+        if not llm and not llm_config:
+            Logger(**self._logger_config, filename=self.key).log(level="error", message="Missing llm or llm_config values to update", color="red")
+            pass
+
+        self.llm = llm
+        if llm_config:
+            if self.llm_config:
+                self.llm_config.update(llm_config)
+            else:
+                self.llm_config = llm_config
+
+        return self.set_up_llm()
 
 
     def update(self, **kwargs) -> Self:
@@ -507,7 +506,7 @@ class Agent(BaseModel):
 
         from versionhq.task.model import Task
         from versionhq.tool.rag_tool import RagTool
-        from versionhq.knowledge._utils import extract_knowledge_context
+        from versionhq._prompt.model import Prompt
 
         task: InstanceOf[Task] = task
         all_tools: Optional[List[Tool | ToolSet | RagTool | Type[BaseTool]]] = task_tools + self.tools if task.can_use_agent_tools else task_tools
@@ -517,57 +516,7 @@ class Agent(BaseModel):
         if self.max_rpm and self._rpm_controller:
             self._rpm_controller._reset_request_count()
 
-        user_prompt = task._user_prompt(model_provider=self.llm.provider, context=context)
-
-        if self._knowledge:
-            agent_knowledge = self._knowledge.query(query=[user_prompt,], limit=5)
-            if agent_knowledge:
-                agent_knowledge_context = extract_knowledge_context(knowledge_snippets=agent_knowledge)
-                if agent_knowledge_context:
-                    user_prompt += agent_knowledge_context
-
-        if rag_tools:
-            for item in rag_tools:
-                rag_tool_context = item.run(agent=self, query=task.description)
-                if rag_tool_context:
-                    user_prompt += ",".join(rag_tool_context) if isinstance(rag_tool_context, list) else str(rag_tool_context)
-
-        if self.with_memory == True:
-            contextual_memory = ContextualMemory(
-                memory_config=self.memory_config, stm=self.short_term_memory, ltm=self.long_term_memory, um=self.user_memory
-            )
-            context_str = task._draft_context_prompt(context=context)
-            query = f"{task.description} {context_str}".strip()
-            memory = contextual_memory.build_context_for_task(query=query)
-            if memory.strip() != "":
-                user_prompt += memory.strip()
-
-        ## comment out for now
-        # if self.networks and self.networks._train:
-        #     user_prompt = self._training_handler(user_prompt=user_prompt)
-        # else:
-        #     user_prompt = self._use_trained_data(user_prompt=user_prompt)
-
-        content_prompt = task._format_content_prompt()
-
-        messages = []
-        if content_prompt:
-            messages.append(
-                {
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "text",
-                            "text": user_prompt
-                        },
-                        content_prompt,
-                    ]
-                })
-        else:
-            messages.append({ "role": "user", "content": user_prompt })
-
-        if self.use_developer_prompt:
-            messages.append({ "role": "developer", "content": self.backstory })
+        messages = Prompt(task=task, agent=self, context=context).format(rag_tools=rag_tools)
 
         try:
             self._times_executed += 1

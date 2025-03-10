@@ -111,7 +111,7 @@
 
 <hr>
 
-## SubClass `EvaluationItem`
+## Sub-class `EvaluationItem`
 
 ### Variables
 
