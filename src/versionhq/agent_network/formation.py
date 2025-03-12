@@ -93,10 +93,11 @@ def form_agent_network(
 
     network_tasks = []
     members = []
-    leader = str(res.pydantic.leader_agent) if res.pydantic and hasattr(res.pydantic, "leader_agent") else str(res.json_dict["leader_agent"]) if "leader_agent" in res.json_dict else None
-
-    agent_roles = res.pydantic.agent_roles if res.pydantic else res.json_dict["agent_roles"]
-    created_agents = [Agent(role=str(item), goal=str(item)) for item in agent_roles]
+    leader = res._fetch_value_of(key="leader_agent")
+    agent_roles =  res._fetch_value_of(key="agent_roles")
+    created_agents = [Agent(role=str(item), goal=str(item)) for item in agent_roles] if agent_roles else []
+    task_descriptions = res._fetch_value_of(key="task_descriptions")
+    task_outcomes = res._fetch_value_of(key="task_outcomes")
 
     if agents:
         for i, agent in enumerate(created_agents):
@@ -108,9 +109,9 @@ def form_agent_network(
 
     created_tasks = []
 
-    if res.pydantic:
-        for i, item in enumerate(res.pydantic.task_outcomes):
-            if len(res.pydantic.task_descriptions) > i and res.pydantic.task_descriptions[i]:
+    if task_outcomes:
+        for i, item in enumerate(task_outcomes):
+            if len(task_descriptions) > i and task_descriptions[i]:
                 fields = {}
                 for ob in item:
                     try:
@@ -119,23 +120,8 @@ def form_agent_network(
                     except:
                         pass
                 output = create_model("Output", **fields) if fields else None
-                _task = Task(description=res.pydantic.task_descriptions[i], pydantic_output=output)
+                _task = Task(description=task_descriptions[i], pydantic_output=output)
                 created_tasks.append(_task)
-
-    elif res.json_dict:
-        for i, item in enumerate(res["task_outcomes"]):
-            if len(res["task_descriptions"]) > i and res["task_descriptions"][i]:
-                fields = {}
-                for ob in item:
-                    try:
-                        field_name = str(ob).lower().split(":")[0].replace(" ", "_")[0: 16]
-                        fields[field_name] = (str, Field(default=None))
-                    except:
-                        pass
-                output = create_model("Output", **fields) if fields else None
-                _task = Task(description=res["task_descriptions"][i], pydantic_output=output)
-                created_tasks.append(_task)
-
 
     if len(created_tasks) <= len(created_agents):
         for i in range(len(created_tasks)):
@@ -158,7 +144,6 @@ def form_agent_network(
             members.append(member)
 
         network_tasks.extend(created_tasks[len(created_agents):len(created_tasks)])
-
 
     if _formation == Formation.SUPERVISING and not [member for member in members if member.is_manager]:
         role = leader if leader else "Leader"

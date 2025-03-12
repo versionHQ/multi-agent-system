@@ -187,6 +187,22 @@ class TaskOutput(BaseModel):
     evaluation: Optional[InstanceOf[Evaluation]] = Field(default=None, description="stores overall evaluation of the task output. stored in ltm")
 
 
+    def _fetch_value_of(self, key: str = None) -> Any:
+        """Returns a value to the given key."""
+
+        if not key:
+            return None
+
+        if self.pydantic and hasattr(self.pydantic, key):
+            return getattr(self.pydantic, key)
+
+        elif self.json_dict and key in self.json_dict:
+            return self.json_dict[key]
+
+        else:
+            return None
+
+
     def _to_context_prompt(self) -> str:
         """Formats prompt context in text formats from the final response."""
 
@@ -433,14 +449,15 @@ class Task(BaseModel):
             output = json.loads(j)
 
         if isinstance(output, dict):
-            return output
+            return output["json_schema"] if "json_schema" in output else output
         else:
             try:
                 output = ast.literal_eval(j)
             except:
                 output = ast.literal_eval(r)
 
-            return output if isinstance(output, dict) else { "output": str(r) }
+
+            return output["json_schema"] if isinstance(output, dict) and "json_schema" in output else output if isinstance(output, dict) else { "output": str(r) }
 
 
     def _create_json_output(self, raw: str) -> Dict[str, Any]:
@@ -456,7 +473,7 @@ class Task(BaseModel):
         try:
             output = json.loads(raw)
             if isinstance(output, dict):
-                return output
+                return output["json_schema"] if "json_schema" in output else output
             else:
                output = self._sanitize_raw_output(raw=raw)
                return output
@@ -721,17 +738,17 @@ class Task(BaseModel):
         pfg = pfg.set_up_graph()
         self._pfg = pfg
 
-        # try:
-        if self._pfg and self.output is None:
-            res, _ = self._pfg.activate()
-            tokens, latency = self._pfg.usage
-            self._tokens = tokens
-            res.latency = latency
-            return res
+        try:
+            if self._pfg and self.output is None:
+                res, _ = self._pfg.activate()
+                tokens, latency = self._pfg.usage
+                self._tokens = tokens
+                res.latency = latency
+                return res
 
-        # except:
-        #     Logger().log(level="error", message="Failed to execute the task.", color="red")
-        #     return None, None
+        except:
+            Logger().log(level="error", message="Failed to execute the task.", color="red")
+            return None
 
 
     @property
