@@ -10,7 +10,7 @@ sys.modules['pydantic.main'].ModelMetaclass = ModelMetaclass
 
 from versionhq.agent.model import Agent
 from versionhq.task.model import ResponseField
-from versionhq.task_graph.model import TaskGraph, Task, DependencyType, Node
+from versionhq.task_graph.model import TaskGraph, Task, DependencyType, Node, ReformTriggerEvent
 from versionhq._utils.logger import Logger
 
 
@@ -81,7 +81,8 @@ def workflow(final_output: Type[BaseModel], context: Any = None, human: bool = F
         nodes={node.identifier: node for node in nodes},
         concl_format=final_output,
         concl=None,
-        should_reform=True,
+        should_reform=human,
+        reform_trigger_event=ReformTriggerEvent.USER_INPUT if human else None,
     )
 
     for res in task_items:
@@ -96,16 +97,5 @@ def workflow(final_output: Type[BaseModel], context: Any = None, human: bool = F
                     source=source.identifier, target=target.identifier, dependency_type=dependency_type)
 
     task_graph.visualize()
-
-    if human:
-        print('Proceed? Y/n:')
-        x = input()
-
-        if x.lower() == "y":
-            print("ok. generating agent network")
-
-        else:
-            request = input("request?")
-            print('ok. regenerating the graph based on your input: ', request)
 
     return task_graph

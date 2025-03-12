@@ -107,7 +107,7 @@ def test_docs_core_task_h():
     task = vhq.Task(description="Return a word: 'test'", type=vhq.TaskExecutionType.ASYNC)
 
     from unittest.mock import patch
-    with patch.object(vhq.Agent, "execute_task", return_value="test") as execute:
+    with patch.object(vhq.Agent, "execute_task", return_value=("user prompt", "dev prompt", "test")) as execute:
         res = task.execute()
         assert res.raw == "test"
         execute.assert_called_once_with(task=task, context=None, task_tools=list())
@@ -175,3 +175,19 @@ def test_docs_core_task_l():
     res = task.execute(agent=vhq.Agent(llm="gemini-2.0", role="Content Interpretator"))
 
     assert res.final is not None
+
+
+def test_docs_core_task_m():
+    import versionhq as vhq
+
+    task = vhq.Task(description="Create a short story.", should_test_run=True, human=False)
+    res = task.execute()
+
+    from versionhq._prompt.auto_feedback import PromptFeedbackGraph
+    assert isinstance(task._pfg, PromptFeedbackGraph)
+    assert task._pfg.should_reform == False
+    assert task._pfg.reform_trigger_event == None
+
+    assert [k for k in task._pfg.user_prompts.keys()] and [k for k in task._pfg.dev_prompts.keys()]
+    assert res.latency is not None
+    assert res._tokens is not None

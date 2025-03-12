@@ -6,7 +6,7 @@ import inspect
 import enum
 from concurrent.futures import Future
 from hashlib import md5
-from typing import Any, Dict, List, Set, Optional, Callable, Type
+from typing import Any, Dict, List, Set, Optional, Callable, Type, Tuple
 from typing_extensions import Annotated, Self
 
 from pydantic import UUID4, BaseModel, Field, PrivateAttr, field_validator, model_validator, InstanceOf, field_validator
@@ -174,6 +174,7 @@ class TaskOutput(BaseModel):
     """
     A class to store the final output of the given task in raw (string), json_dict, and pydantic class formats.
     """
+
     _tokens: int = PrivateAttr(default=0)
 
     task_id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True, description="store Task ID")
@@ -297,6 +298,7 @@ class Task(BaseModel):
     description: str = Field(description="Description of the actual task")
 
     # response format
+    response_schema: Optional[Type[BaseModel] | List[ResponseField]] = Field(default=None)
     pydantic_output: Optional[Type[BaseModel]] = Field(default=None, description="store Pydantic class as structured response format")
     response_fields: Optional[List[ResponseField]] = Field(default_factory=list, description="store list of ResponseField as structured response format")
 
@@ -311,6 +313,8 @@ class Task(BaseModel):
 
     # test run
     should_test_run: bool = Field(default=False)
+    human: bool = Field(default=False)
+    _pfg: Any = None
 
     # executing
     execution_type: TaskExecutionType = Field(default=TaskExecutionType.SYNC)
@@ -399,7 +403,6 @@ class Task(BaseModel):
                     "type": "json_schema",
                     "json_schema": { "name": "outcome", "schema": response_schema }
                 }
-
 
             elif self.pydantic_output:
                 response_format = StructuredOutput(response_format=self.pydantic_output, provider=model_provider)._format()
@@ -582,19 +585,28 @@ class Task(BaseModel):
         """A main method to handle task execution."""
 
         type = type if type else  self.execution_type if self.execution_type else TaskExecutionType.SYNC
+        agent = agent if agent else self._build_agent_from_task(task_description=self.description)
+        res = None
 
-        if not agent:
-            agent = self._build_agent_from_task(task_description=self.description)
+        if (self.should_test_run or agent.self_learn) and not self._pfg:
+            res = self._test_time_computation(agent=agent, context=context)
+            return res
 
-        if self.should_test_run:
-            self.test_time_computation()
+        # if self._pfg:
+        #     res, all_outputs = self.pfg.activate()
+        #     tokens, latency = self.pfg.usage
+        #     self._tokens = tokens
+        #     res.latency = latency
+        #     return res
 
         match type:
             case TaskExecutionType.SYNC:
-                return self._execute_sync(agent=agent, context=context)
+                res = self._execute_sync(agent=agent, context=context)
 
             case TaskExecutionType.ASYNC:
-                return self._execute_async(agent=agent, context=context)
+                res = self._execute_async(agent=agent, context=context)
+
+        return res
 
 
     def _execute_sync(self, agent, context: Optional[Any] = None) -> TaskOutput:
@@ -615,14 +627,14 @@ class Task(BaseModel):
 
 
     def _execute_core(self, agent, context: Optional[Any]) -> TaskOutput:
-        """
-        A core method to execute a task.
-        """
+        """A core method to execute a single task."""
+
         task_output: InstanceOf[TaskOutput] = None
         raw_output: str = None
         tool_output: str | list = None
         task_tools: List[List[InstanceOf[Tool]| InstanceOf[ToolSet] | Type[Tool]]] = []
         started_at, ended_at = datetime.datetime.now(), datetime.datetime.now()
+        user_prompt, dev_prompt = None, None
 
         if self.tools:
             for item in self.tools:
@@ -636,14 +648,14 @@ class Task(BaseModel):
 
         if self.tool_res_as_final == True:
             started_at = datetime.datetime.now()
-            tool_output = agent.execute_task(task=self, context=context, task_tools=task_tools)
+            user_prompt, dev_prompt, tool_output = agent.execute_task(task=self, context=context, task_tools=task_tools)
             raw_output = str(tool_output) if tool_output else ""
             ended_at = datetime.datetime.now()
             task_output = TaskOutput(task_id=self.id, tool_output=tool_output, raw=raw_output)
 
         else:
             started_at = datetime.datetime.now()
-            raw_output = agent.execute_task(task=self, context=context, task_tools=task_tools)
+            user_prompt, dev_prompt, raw_output = agent.execute_task(task=self, context=context, task_tools=task_tools)
             ended_at = datetime.datetime.now()
 
             json_dict_output = self._create_json_output(raw=raw_output)
@@ -672,6 +684,11 @@ class Task(BaseModel):
         #     )
         #     self._save_file(content)
 
+        if self._pfg:
+            index = self._pfg.index
+            self._pfg.user_prompts.update({ index: user_prompt })
+            self._pfg.dev_prompts.update({ index: dev_prompt })
+
         if raw_output:
             if self.should_evaluate:
                 task_output.evaluate(task=self)
@@ -692,16 +709,29 @@ class Task(BaseModel):
         return task_output
 
 
-    def _test_time_computation(self):
-        """Handles test-time computation of the task."""
+    def _test_time_computation(self, agent, context: Optional[Any]) -> TaskOutput | None:
+        """Handles test-time computation."""
 
-        if self.should_test_run == False:
-            return
+        from versionhq.task_graph.model import ReformTriggerEvent
+        from versionhq._prompt.model import Prompt
+        from versionhq._prompt.auto_feedback import PromptFeedbackGraph
 
+        prompt = Prompt(task=self, agent=agent, context=context)
+        pfg = PromptFeedbackGraph(prompt=prompt, should_reform=self.human, reform_trigger_event=ReformTriggerEvent.USER_INPUT if self.human else None)
+        pfg = pfg.set_up_graph()
+        self._pfg = pfg
 
+        # try:
+        if self._pfg and self.output is None:
+            res, _ = self._pfg.activate()
+            tokens, latency = self._pfg.usage
+            self._tokens = tokens
+            res.latency = latency
+            return res
 
-
-
+        # except:
+        #     Logger().log(level="error", message="Failed to execute the task.", color="red")
+        #     return None, None
 
 
     @property

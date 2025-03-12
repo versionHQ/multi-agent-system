@@ -31,6 +31,7 @@ class Agent(BaseModel):
     _logger_config: Dict[str, Any] = PrivateAttr(default=dict(verbose=True, info_file_save=True))
 
     api_key: Optional[str] = Field(default=None)
+    self_learn: bool = Field(default=False)
     config: Optional[Dict[str, Any]] = Field(default=None, exclude=True, description="values to add to the Agent class")
 
     id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True)
@@ -500,9 +501,7 @@ class Agent(BaseModel):
 
 
     def execute_task(self, task, context: Optional[Any] = None, task_tools: Optional[List[Tool | ToolSet]] = list()) -> str:
-        """
-        Format a task prompt, adding context from knowledge and memory (if given), and invoke LLM.
-        """
+        """Handling task execution."""
 
         from versionhq.task.model import Task
         from versionhq.tool.rag_tool import RagTool
@@ -516,7 +515,7 @@ class Agent(BaseModel):
         if self.max_rpm and self._rpm_controller:
             self._rpm_controller._reset_request_count()
 
-        _, _, messages = Prompt(task=task, agent=self, context=context).format_core(rag_tools=rag_tools)
+        user_prompt, dev_prompt, messages = Prompt(task=task, agent=self, context=context).format_core(rag_tools=rag_tools)
 
         try:
             self._times_executed += 1
@@ -531,7 +530,7 @@ class Agent(BaseModel):
         except Exception as e:
             self._times_executed += 1
             Logger(**self._logger_config, filename=self.key).log(level="error", message=f"The agent failed to execute the task. Error: {str(e)}", color="red")
-            raw_response = self.execute_task(task, context, task_tools)
+            user_prompt, dev_prompt, raw_response = self.execute_task(task, context, task_tools)
 
             if self._times_executed > self.max_retry_limit:
                 Logger(**self._logger_config, filename=self.key).log(level="error", message=f"Max retry limit has exceeded.", color="red")
@@ -540,7 +539,7 @@ class Agent(BaseModel):
         if self.max_rpm and self._rpm_controller:
             self._rpm_controller.stop_rpm_counter()
 
-        return raw_response
+        return user_prompt, dev_prompt, raw_response
 
 
     @property

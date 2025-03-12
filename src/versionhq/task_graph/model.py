@@ -17,6 +17,13 @@ from versionhq.agent.model import Agent
 from versionhq.task.model import Task, TaskOutput, Evaluation
 from versionhq._utils import Logger
 
+
+class ReformTriggerEvent(enum.Enum):
+    USER_INPUT = 1 # ask human
+    TEST_TIME_COMPUTATION = 2 # mismatch between actual responses and expected outcome
+    ERROR_DETECTION = 3 # response error
+
+
 class ConditionType(enum.Enum):
     AND = 1
     OR = 2
@@ -46,7 +53,6 @@ class Condition(BaseModel):
                 res = method(**args) if args else method()
                 return res
 
-
     def condition_met(self) -> bool:
         if not self.methods:
             return True
@@ -54,7 +60,6 @@ class Condition(BaseModel):
         if len(self.methods) == 1:
             for k, v in self.methods.items():
                return self._execute_method(key=k, method=v)
-
         else:
             cond_list = []
             for k, v in self.methods.items():
@@ -96,8 +101,8 @@ class Node(BaseModel):
 
     id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True)
     task: InstanceOf[Task] = Field(default=None)
-    in_degree_nodes: List[Any] = Field(default_factory=list, description="list of Node objects")
-    out_degree_nodes: List[Any] = Field(default_factory=list, description="list of Node objects")
+    in_degree_nodes: List["Node"] = Field(default_factory=list, description="list of Node objects")
+    out_degree_nodes: List["Node"] = Field(default_factory=list, description="list of Node objects")
     assigned_to: InstanceOf[Agent] = Field(default=None)
     status: TaskStatus = Field(default=TaskStatus.NOT_STARTED)
 
@@ -107,29 +112,31 @@ class Node(BaseModel):
         if v:
             raise PydanticCustomError("may_not_set_field", "This field is not to be set by client.", {})
 
-
     def is_independent(self) -> bool:
         return not self.in_degree_nodes and not self.out_degree_nodes
 
     def handle_task_execution(self, agent: Agent = None, context: str = None, response_format: Type[BaseModel] = None) -> TaskOutput | None:
         """Executes the task and updates its status"""
 
-        self.status = TaskStatus.IN_PROGRESS
-
         if not self.task:
             Logger().log(level="error", message="Missing a task to execute. We'll return None.", color="red")
             self.status = TaskStatus.ERROR
             return None
 
-        agent = agent if agent else self.assigned_to
-        self.task.pydantic_output = self.task.pydantic_output if self.task.pydantic_output else response_format if type(response_format) == BaseModel else None
-        res = self.task.execute(agent=agent, context=context)
+        if self.status == TaskStatus.COMPLETED:
+            return self.task.output
 
-        if isinstance(res, Future): # activate async
-            res = res.result()
+        else:
+            self.status = TaskStatus.IN_PROGRESS
+            agent = agent if agent else self.assigned_to
+            self.task.pydantic_output = self.task.pydantic_output if self.task.pydantic_output else response_format if type(response_format) == BaseModel else None
+            res = self.task.execute(agent=agent, context=context)
 
-        self.status = TaskStatus.COMPLETED if res else TaskStatus.ERROR
-        return res
+            if isinstance(res, Future): # activate async
+                res = res.result()
+
+            self.status = TaskStatus.COMPLETED if res else TaskStatus.ERROR
+            return res
 
     @property
     def in_degrees(self) -> int:
@@ -283,6 +290,14 @@ class Graph(ABC, BaseModel):
         else:
             return None
 
+    def _format_Graph(self) -> None:
+        """Formats dxGraph using edges and nodes."""
+        edges, nodes = [k for k in self.edges.keys()], [k for k in self.nodes.keys()]
+        if self.graph:
+            self.graph.update(edges=edges, nodes=nodes)
+        else:
+            self.graph = nx.Graph(directed=self.directed, edges=edges, nodes=nodes)
+
     def add_node(self, node: Node) -> None:
         if node.identifier in self.nodes.keys():
             return
@@ -333,13 +348,14 @@ class Graph(ABC, BaseModel):
         critical_edge = max(edges, key=lambda item: item['weight']) if edges else None
         return critical_edge.target if critical_edge else None
 
-    def find_path(self, source: Optional[str] | None, target: str, weight: Optional[Any] | None) -> Any:
+    def find_path(self, target: str, source: Optional[str] = None, weight: Optional[Any] = None) -> Any:
         try:
+            self._format_Graph()
             return nx.shortest_path(self.graph, source=source, target=target, weight=weight)
-        except nx.NetworkXNoPath:
+        except:
             return None
 
-    def find_all_paths(self,  source: str, target: str) -> List[Any]:
+    def find_all_paths(self, source: str, target: str) -> List[Any]:
         return list(nx.all_simple_paths(self.graph, source=source, target=target))
 
     def find_critical_path(self) -> tuple[List[Any], int, Dict[str, int]]:
@@ -378,13 +394,12 @@ class Graph(ABC, BaseModel):
 
 class TaskGraph(Graph):
     id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True)
-    should_reform: bool = Field(default=False)
+    should_reform: bool = False
+    reform_trigger_event: Optional[ReformTriggerEvent] = None
     outputs: Dict[str, TaskOutput] = Field(default_factory=dict, description="stores node identifier and TaskOutput")
     concl_template: Optional[Dict[str, Any] | Type[BaseModel]] = Field(default=None, description="stores final response format in Pydantic class or JSON dict")
     concl: Optional[TaskOutput] = Field(default=None, description="stores the final or latest conclusion of the entire task graph")
 
-    # def __init__(self, *args, **kwargs):
-    #     super().__init__(self, *args, **kwargs)
 
     def _save(self, title: str, abs_file_path: str = None) -> None:
         """
@@ -434,10 +449,8 @@ class TaskGraph(Graph):
         """
         Add an edge that connect task 1 (source) and task 2 (target) using task_node.name as an identifier
         """
-
-        if not edge_attributes:
-            Logger().log(level="error", message="Edge attributes are missing.", color="red")
-
+        # if not edge_attributes:
+        #     Logger().log(level="error", message="Edge attributes are missing.", color="red")
         edge = Edge()
         for k in Edge.model_fields.keys():
             v = edge_attributes.get(k, None)
@@ -445,7 +458,6 @@ class TaskGraph(Graph):
                 setattr(edge, k, v)
             else:
                 pass
-
         self.add_edge(source, target, edge)
 
 
@@ -556,15 +568,10 @@ class TaskGraph(Graph):
 
             # find a shortest path to each in-degree node of the node and see if dependency met.
             node = self._return_node_object(target)
-            sources = node.in_degrees
-            edge_status = []
+            edges = [v for k, v in self.edges.items() if v.target.identifier == node.identifier]
             res = None
 
-            for item in sources:
-                edge = self.find_path(source=item, target=target)
-                edge_status.append(dict(edge=edge if edge else None, dep_met=edge.dependency_met() if edge else False))
-
-            if len([item for item in edge_status if item["dep_met"] == True]) == len(sources):
+            if not edges or len([item for item in edges if item.dependency_met()]) == len(edges):
                 res = node.handle_task_execution()
                 self.outputs.update({ target: res })
 
@@ -600,7 +607,7 @@ class TaskGraph(Graph):
                                     res = node.handle_task_execution()
                                     self.outputs.update({ node.identifier: res })
                 else:
-                    for k, edge in self.edges.items():
+                    for edge in self.edges.values():
                         res = edge.activate()
                         node_identifier = edge.target.identifier
                         self.outputs.update({ node_identifier: res })
@@ -615,6 +622,15 @@ class TaskGraph(Graph):
                     res = edge.activate()
                     node_identifier = edge.target.identifier
                     self.outputs.update({ node_identifier: res })
+
+
+            if self.should_reform:
+                target = [k for k in self.outputs.keys()][-1] if self.outputs else self.find_start_nodes()[0].identifier if self.find_start_nodes() else None
+
+                if not target:
+                    pass
+                else:
+                    res, _ = self.handle_reform(target=target)
 
             self.concl = res
             self.concl_template = self.concl_template if self.concl_template else res.pydantic.__class__ if res.pydantic else None
@@ -639,6 +655,44 @@ class TaskGraph(Graph):
 
         eval = self.concl.evaluate(task=task)
         return eval
+
+
+    def _handle_human_input(self) -> str | None:
+        """Handles input from human."""
+        request = None
+
+        print('Proceed? Y/n:')
+        x = input()
+
+        if x.lower() == "y":
+            Logger().log(message="Ok, proceeding to the next graph execution.", level="info", color="blue")
+
+        else:
+            request = input("Request?")
+
+            if request:
+                Logger().log(message=f"Ok. regenerating the graph based on your input: ', {request}", level="info", color="blue")
+            else:
+                Logger().log(message="Cannot recognize your request.", level="error", color="red")
+
+        return request
+
+
+    def handle_reform(self, target: str = None) -> Self:
+        task_description = "Improve the given output: "
+        if target:
+            output = self.outputs[target].raw if self.outputs and target in self.outputs else None
+            if output:
+                task_description += str(output)
+
+        if self.reform_trigger_event == ReformTriggerEvent.USER_INPUT:
+            request = self._handle_human_input()
+            task_description += f"You MUST follow the instruction: {request}"
+
+        new_node = Node(task=Task(description=task_description))
+        self.add_node(node=new_node)
+        self.add_dependency(source=target, target=new_node.identifier)
+        return self.activate(target=new_node.identifier)
 
 
     @property

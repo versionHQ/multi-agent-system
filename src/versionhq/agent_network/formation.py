@@ -93,7 +93,7 @@ def form_agent_network(
 
     network_tasks = []
     members = []
-    leader = str(res.pydantic.leader_agent) if res.pydantic else str(res.json_dict["leader_agent"])
+    leader = str(res.pydantic.leader_agent) if res.pydantic and hasattr(res.pydantic, "leader_agent") else str(res.json_dict["leader_agent"]) if "leader_agent" in res.json_dict else None
 
     agent_roles = res.pydantic.agent_roles if res.pydantic else res.json_dict["agent_roles"]
     created_agents = [Agent(role=str(item), goal=str(item)) for item in agent_roles]
@@ -139,13 +139,13 @@ def form_agent_network(
 
     if len(created_tasks) <= len(created_agents):
         for i in range(len(created_tasks)):
-            is_manager = bool(created_agents[i].role.lower() == leader.lower())
+            is_manager = False if not leader else bool(created_agents[i].role.lower() == leader.lower())
             member = Member(agent=created_agents[i], is_manager=is_manager, tasks=[created_tasks[i]])
             members.append(member)
 
         for i in range(len(created_tasks), len(created_agents)):
             try:
-                is_manager = bool(created_agents[i].role.lower() == leader.lower())
+                is_manager = False if not leader else bool(created_agents[i].role.lower() == leader.lower())
                 member_w_o_task = Member(agent=created_agents[i], is_manager=is_manager)
                 members.append(member_w_o_task)
             except:
@@ -153,7 +153,7 @@ def form_agent_network(
 
     elif len(created_tasks) > len(created_agents):
         for i in range(len(created_agents)):
-            is_manager = bool(created_agents[i].role.lower() == leader.lower())
+            is_manager = False if not leader else bool(created_agents[i].role.lower() == leader.lower())
             member = Member(agent=created_agents[i], is_manager=is_manager, tasks=[created_tasks[i]])
             members.append(member)
 
@@ -161,7 +161,8 @@ def form_agent_network(
 
 
     if _formation == Formation.SUPERVISING and not [member for member in members if member.is_manager]:
-        manager = Member(agent=Agent(role=leader, goal=leader), is_manager=True)
+        role = leader if leader else "Leader"
+        manager = Member(agent=Agent(role=role), is_manager=True)
         members.append(manager)
 
     members.sort(key=lambda x: x.is_manager == False)

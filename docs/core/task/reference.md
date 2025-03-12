@@ -15,6 +15,8 @@
 | **`image`**               | Optional[str]                         | None                      | Stores an absolute file path or URL to the image file in string |
 | **`file`**                | Optional[str]                         | None                      | Stores an absolute file path or URL to the file in string |
 | **`audio`**               | Optional[str]                         | None                      | Stores an absolute file path or URL to the audio file in string |
+| **`should_test_run`**     | bool                                  | False                     | Whether to turn on auto-feedback learning             |
+| **`human`**               | bool                                  | False                     | Whether to ask human input during the task execution  |
 | **`execution_type`**      | TaskExecutionType                     | TaskExecutionType.SYNC    | Sync or async execution |
 | **`allow_delegation`**    | bool                                  | False                     | Whether to allow the agent to delegate the task to another agent |
 | **`callback`**            | Optional[Callable]                    | None                      | Callback function to be executed after LLM calling |

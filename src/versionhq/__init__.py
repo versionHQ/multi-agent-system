@@ -17,7 +17,7 @@ from versionhq.clients.workflow.model import MessagingWorkflow, MessagingCompone
 from versionhq.knowledge.model import Knowledge, KnowledgeStorage
 from versionhq.knowledge.source import PDFKnowledgeSource, CSVKnowledgeSource, JSONKnowledgeSource, TextFileKnowledgeSource, ExcelKnowledgeSource, StringKnowledgeSource
 from versionhq.knowledge.source_docling import DoclingSource
-from versionhq.task_graph.model import TaskStatus, TaskGraph, Node, Edge, DependencyType, Condition, ConditionType
+from versionhq.task_graph.model import TaskStatus, TaskGraph, Node, Edge, DependencyType, Condition, ConditionType, ReformTriggerEvent
 from versionhq.task.model import Task, TaskOutput, ResponseField, TaskExecutionType
 from versionhq.task.evaluation import Evaluation, EvaluationItem
 from versionhq.tool.model import Tool, ToolSet
@@ -70,6 +70,7 @@ __all__ = [
     "DependencyType",
     "Condition",
     "ConditionType",
+    "ReformTriggerEvent",
 
     "Task",
     "TaskOutput",

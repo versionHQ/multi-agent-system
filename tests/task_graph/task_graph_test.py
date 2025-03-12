@@ -25,9 +25,11 @@ def test_draft():
         assert [k == node.identifier and node.task and isinstance(node, vhq.Node) for k, node in task_graph.nodes.items()]
         assert [isinstance(edge.dependency_type, vhq.DependencyType) and isinstance(edge, vhq.Edge) for edge in task_graph.edges.values()]
         assert [k in task_graph.nodes.keys() and v.status == vhq.TaskStatus.NOT_STARTED for k, v in task_graph.nodes.items()]
+        assert task_graph.should_reform == True
+        assert task_graph.reform_trigger_event == vhq.ReformTriggerEvent.USER_INPUT
 
 
-def test_condition():
+def test_condition_and_human_input():
     import versionhq as vhq
 
     task_a = vhq.Task(description="draft a message")
@@ -81,8 +83,12 @@ def test_condition():
     assert isinstance(edge, vhq.Edge)
     assert edge.required == False
     assert edge.dependency_type == vhq.DependencyType.FINISH_TO_START
-    assert edge.condition == vhq.Condition(
-        methods={ "0": cond_method, "1": cond_method_with_args, "2": complex_condition },
-        type=vhq.ConditionType.AND
-    )
+    assert edge.condition == vhq.Condition(methods={ "0": cond_method, "1": cond_method_with_args, "2": complex_condition }, type=vhq.ConditionType.AND)
     assert edge.dependency_met() == False
+
+    setattr(tg, "should_reform", True)
+    setattr(tg, "reform_trigger_event", vhq.ReformTriggerEvent.USER_INPUT)
+
+    with patch.object(vhq.TaskGraph, "handle_reform", return_value=(vhq.TaskOutput(raw="mock"),{"a": vhq.TaskOutput(raw="mock")})) as mock_handle_reform:
+        tg.activate()
+        mock_handle_reform.assert_called_once()

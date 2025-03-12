@@ -72,34 +72,35 @@ tags:
 ### Variables
 
 | <div style="width:200px">**Variable**</div> | **Data Type** | **Default** | **Description** |
-| :---                                        | :---  | :--- | :--- |
-| **`id`**                                    | UUID4 | uuid.uuid4() | Stores auto-generated ID as identifier. Not editable. |
-| **`role`**                                  | str | None | Stores a role of the agent. |
-| **`goal`**                                  | str | None | Stores a goal of the agent. |
-| **`backstory`**                             | str | None | Stores backstory of the agent. Utilized as system prompt. |
-| **`tools`**                                 | List[InstanceOf[`Tool` \| `ToolSet`] \| Type[`Tool`]] | None | Stores tools to be used when executing a task. |
-| **`knowledge_sources`**                     | List[`BaseKnowledgeSource` \| Any]  | None | Stores knowledge sources in text, file path, or url. |
-| **`embedder_config`**                       | Dict[str, Any] | None | Stores embedding configuration for storing knowledge sources. |
-| **`with_memory`**                           | bool | False | Whether to store tasks and results in memory. |
-| **`memory_config`**                         | Dict[str, Any] | None | Stores configuration of the memory. |
-| **`short_term_memory`**                     | InstanceOf[`ShortTermMemory`] | None | Stores `ShortTermMemory` object. |
-| **`long_term_memory`**                      | InstanceOf[`LongTermMemory`] | None | Stores `LongTermMemory` object. |
-| **`user_memory`**                           | InstanceOf[`UserMemory`] | None | Stores `UserMemory` object. |
-| **`use_developer_prompt`**                  |  bool | True | Whether to use the system (developer) prompt when calling the model. |
-| **`developer_promt_template`**              | str | None | File path to the prompt template. |
-| **`user_promt_template`**                   | str | None | File path to the prompt template. |
-| **`networks`**                              | List[Any]   | list() | Stores a list of agent networks that the agent belongs to. |
-| **`allow_delegation`**                      | bool | False | Whether the agent can delegate assinged tasks to another agent. |
-| **`max_retry_limit`**                       | int | 2 | Maximum number of retries when the task execution failed. |
-| **`maxit`**                                 | int | 25 | Maximum number of total optimization loops conducted when an error occues during the task execution. |
-| **`callbacks`**                             | List[Callabale] | None | Stores a list of callback functions that must be called after every task execution completed.|
-| **`llm`**                                   | str \| InstanceOf[`LLM`] \| Dict[str, Any] | None | Stores the main model that the agent runs on. |
-| **`func_calling_llm`**                      | str \| InstanceOf[`LLM`] \| Dict[str, Any] | None | Stores the function calling model that the agent runs on. |
-| **`respect_context_window`**                | bool | True | Whether to follow the main model's maximum context window size. |
-| **`max_execution_time`**                    | int | None | Stores maximum execution time in seconds. |
-| **`max_rpm`**                               | int | None | Stores maximum number of requests per minute. |
-| **`llm_config`**                            | Dict[str, Any] | None | Stores configuration of `LLM` object. |
-| **`config`**                                | Dict[str, Any] | None | Stores model config. |
+| :---                           | :---  | :--- | :--- |
+| **`id`**                       | UUID4 | uuid.uuid4() | Stores auto-generated ID as identifier. Not editable. |
+| **`role`**                     | str | None | Stores a role of the agent. |
+| **`goal`**                     | str | None | Stores a goal of the agent. |
+| **`backstory`**                | str | None | Stores backstory of the agent. Utilized as system prompt. |
+| **`self_learn`**               | bool | False | Whether to self-learn|
+| **`tools`**                    | List[InstanceOf[`ToolSet`] \| Type[`Tool`]] | None | Stores tools to be used when executing a task. |
+| **`knowledge_sources`**        | List[`BaseKnowledgeSource` \| Any]  | None | Stores knowledge sources in text, file path, or url. |
+| **`embedder_config`**          | Dict[str, Any] | None | Stores embedding configuration for storing knowledge sources. |
+| **`with_memory`**              | bool | False | Whether to store tasks and results in memory. |
+| **`memory_config`**            | Dict[str, Any] | None | Stores configuration of the memory. |
+| **`short_term_memory`**        | InstanceOf[`ShortTermMemory`] | None | Stores `ShortTermMemory` object. |
+| **`long_term_memory`**         | InstanceOf[`LongTermMemory`] | None | Stores `LongTermMemory` object. |
+| **`user_memory`**              | InstanceOf[`UserMemory`] | None | Stores `UserMemory` object. |
+| **`use_developer_prompt`**     |  bool | True | Whether to use the system (developer) prompt when calling the model. |
+| **`developer_promt_template`** | str | None | File path to the prompt template. |
+| **`user_promt_template`**      | str | None | File path to the prompt template. |
+| **`networks`**                 | List[Any]   | list() | Stores a list of agent networks that the agent belongs to. |
+| **`allow_delegation`**         | bool | False | Whether the agent can delegate assinged tasks to another agent. |
+| **`max_retry_limit`**          | int | 2 | Maximum number of retries when the task execution failed. |
+| **`maxit`**                    | int | 25 | Maximum number of total optimization loops during error handling. |
+| **`callbacks`**                | List[Callabale] | None | Stores a list of step callback functions. |
+| **`llm`**                      | str \| InstanceOf[`LLM`] \| Dict[str, Any] | None | Stores the main LLM. |
+| **`func_calling_llm`**         | str \| InstanceOf[`LLM`] \| Dict[str, Any] | None | Stores the function calling LLM. |
+| **`respect_context_window`**   | bool | True | Whether to follow the main model's maximum context window size. |
+| **`max_execution_time`**       | int | None | Stores maximum execution time in seconds. |
+| **`max_rpm`**                  | int | None | Stores maximum number of requests per minute. |
+| **`llm_config`**               | Dict[str, Any] | None | Stores configuration of `LLM` object. |
+| **`config`**                   | Dict[str, Any] | None | Stores model config. |
 
 
 ### Class Methods

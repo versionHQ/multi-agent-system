@@ -33,6 +33,21 @@ Context can consist of `Task` objects, `TaskOutput` objects, plain text `strings
 
 In this scenario, `sub_task_2` executes before the main task. Its string output is then incorporated into the main task's context prompt on top of other context before the main task is executed.
 
+
+**Auto Feedback Learning**
+
+To automatically improve prompts, trigger `test_run` of the task.
+
+```python
+import versionhq as vhq
+
+task = vhq.Task(description="Create a short story.", should_test_run=True, human=True)
+res = task.execute()
+
+assert isinstance(res, vhq.TaskOutput)
+```
+
+
 <hr>
 
 ## Delegation
@@ -72,7 +87,7 @@ task = vhq.Task(
 )
 
 from unittest.mock import patch
-with patch.object(vhq.Agent, "execute_task", return_value="test") as execute:
+with patch.object(vhq.Agent, "execute_task", return_value=("user prompt", "dev prompt", "test")) as execute:
     res = task.execute()
     assert res.raw == "test"
     execute.assert_called_once_with(task=task, context=None, task_tools=list())
