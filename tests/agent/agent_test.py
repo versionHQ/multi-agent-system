@@ -329,6 +329,7 @@ def test_start_with_tools():
 
     res = agent.start(tool_res_as_final=True)
     assert res.tool_output == "demo"
+    assert res.raw == res.tool_output
 
 
 def test_self_learn():

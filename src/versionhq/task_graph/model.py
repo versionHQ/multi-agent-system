@@ -15,7 +15,7 @@ from pydantic_core import PydanticCustomError
 
 from versionhq.agent.model import Agent
 from versionhq.task.model import Task, TaskOutput, Evaluation
-from versionhq._utils import Logger
+from versionhq._utils import Logger, UsageMetrics, ErrorType
 
 
 class ReformTriggerEvent(enum.Enum):
@@ -393,6 +393,8 @@ class Graph(ABC, BaseModel):
 
 
 class TaskGraph(Graph):
+    _usage: Optional[UsageMetrics] = None
+
     id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True)
     should_reform: bool = False
     reform_trigger_event: Optional[ReformTriggerEvent] = None
@@ -416,6 +418,40 @@ class TaskGraph(Graph):
 
         except Exception as e:
             Logger().log(level="error", message=f"Failed to save the graph {str(self.id)}: {str(e)}", color="red")
+
+
+    def _handle_usage(self) -> None:
+        """Returns total tokens and latency spended for the graph execution."""
+        if not self.nodes:
+            return None
+
+        self._usage = self._usage if self._usage else UsageMetrics(id=self.id)
+
+        for node in self.nodes.values():
+            if node.task and node.task._usage:
+                self._usage.aggregate(metrics=node.task._usage)
+
+
+    def _handle_human_input(self) -> str | None:
+        """Handles input from human."""
+        request = None
+
+        print('Proceed? Y/n:')
+        x = input()
+
+        if x.lower() == "y":
+            Logger().log(message="Ok, proceeding to the next graph execution.", level="info", color="blue")
+
+        else:
+            request = input("Request?")
+            if request:
+                Logger().log(message=f"Ok. regenerating the graph based on your input: ', {request}", level="info", color="blue")
+            else:
+                Logger().log(message="Cannot recognize your request.", level="error", color="red")
+                self._usage = self._usage if self._usage else UsageMetrics(id=self.id)
+                self._usage.record_errors(type=ErrorType.HUMAN_INTERACTION)
+
+        return request
 
 
     def add_task(self, task: Node | Task) -> Node:
@@ -635,6 +671,7 @@ class TaskGraph(Graph):
             self.concl = res
             self.concl_template = self.concl_template if self.concl_template else res.pydantic.__class__ if res.pydantic else None
              # last_task_output = [v for v in self.outputs.values()][len([v for v in self.outputs.values()]) - 1] if [v for v in self.outputs.values()] else None
+            self._handle_usage()
             return res, self.outputs
 
 
@@ -657,27 +694,6 @@ class TaskGraph(Graph):
         return eval
 
 
-    def _handle_human_input(self) -> str | None:
-        """Handles input from human."""
-        request = None
-
-        print('Proceed? Y/n:')
-        x = input()
-
-        if x.lower() == "y":
-            Logger().log(message="Ok, proceeding to the next graph execution.", level="info", color="blue")
-
-        else:
-            request = input("Request?")
-
-            if request:
-                Logger().log(message=f"Ok. regenerating the graph based on your input: ', {request}", level="info", color="blue")
-            else:
-                Logger().log(message="Cannot recognize your request.", level="error", color="red")
-
-        return request
-
-
     def handle_reform(self, target: str = None) -> Self:
         task_description = "Improve the given output: "
         if target:
@@ -693,15 +709,3 @@ class TaskGraph(Graph):
         self.add_node(node=new_node)
         self.add_dependency(source=target, target=new_node.identifier)
         return self.activate(target=new_node.identifier)
-
-
-    @property
-    def usage(self) -> Tuple[int, float]:
-        """Returns aggregate number of consumed tokens and job latency in ms during the activation"""
-
-        tokens, latency = 0, 0
-        for v in self.outputs.values():
-            tokens += v._tokens
-            latency += v.latency
-
-        return tokens, latency

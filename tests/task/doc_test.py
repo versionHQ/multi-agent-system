@@ -1,5 +1,8 @@
 """Test code snippets on docs/core/task.md"""
 
+from versionhq._utils import UsageMetrics
+from versionhq._prompt.auto_feedback import PromptFeedbackGraph
+
 
 def test_docs_core_task_a():
     import versionhq as vhq
@@ -181,13 +184,14 @@ def test_docs_core_task_m():
     import versionhq as vhq
 
     task = vhq.Task(description="Create a short story.", should_test_run=True, human=False)
-    res = task.execute()
+    assert isinstance(task._usage, UsageMetrics)
 
-    from versionhq._prompt.auto_feedback import PromptFeedbackGraph
+    task.execute()
     assert isinstance(task._pfg, PromptFeedbackGraph)
     assert task._pfg.should_reform == False
     assert task._pfg.reform_trigger_event == None
-
     assert [k for k in task._pfg.user_prompts.keys()] and [k for k in task._pfg.dev_prompts.keys()]
-    assert res.latency is not None
-    assert res._tokens is not None
+
+    assert task._pfg._usage.total_tokens == task._usage.total_tokens
+    assert task._usage.total_errors == task._pfg._usage.total_errors
+    assert task._usage.latency == task._pfg._usage.latency

@@ -293,5 +293,6 @@ def test_network_eval():
         network_tasks=[Task(description="draft a random poem")]
     )
 
-    res, _ = network.launch()
-    assert res._tokens and res.latency
+    res, tg = network.launch()
+    assert isinstance(res, vhq.TaskOutput)
+    assert isinstance(tg, vhq.TaskGraph)

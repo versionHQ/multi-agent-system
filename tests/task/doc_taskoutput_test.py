@@ -32,6 +32,5 @@ def test_doc_core_taskoutput_a():
     assert res.tool_output is None
     assert isinstance(res.evaluation, vhq.Evaluation)
     assert [isinstance(item, vhq.EvaluationItem) and item.criteria in task.eval_criteria for item in res.evaluation.items]
-    assert res.latency and res._tokens
     assert res.evaluation.aggregate_score is not None and res.evaluation.suggestion_summary
     assert res.final == res.callback_output

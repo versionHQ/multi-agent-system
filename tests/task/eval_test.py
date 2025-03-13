@@ -16,13 +16,13 @@ def test_eval():
         eval_criteria=["Uniquness", "Fit to audience",],
         # fsls=[""]
     )
+    assert task._usage is not None
 
 
     with patch.object(vhq.Evaluation, "_draft_fsl_prompt", return_value="test") as draft_fsl_prompt:
         res = task.execute()
         assert isinstance(res.evaluation, vhq.Evaluation)
         assert [isinstance(item, vhq.EvaluationItem) and item.criteria in task.eval_criteria for item in res.evaluation.items]
-        assert res.latency and res._tokens
         assert res.evaluation.aggregate_score is not None
         assert res.evaluation.suggestion_summary
 
@@ -48,6 +48,5 @@ def test_eval_with_fsls():
     res = task.execute()
     assert isinstance(res.evaluation, vhq.Evaluation)
     assert [isinstance(item, vhq.EvaluationItem) and item.criteria in task.eval_criteria for item in res.evaluation.items]
-    assert res.latency and res._tokens
     assert res.evaluation.aggregate_score is not None
     assert res.evaluation.suggestion_summary is not None

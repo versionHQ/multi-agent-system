@@ -6,7 +6,7 @@ import inspect
 import enum
 from concurrent.futures import Future
 from hashlib import md5
-from typing import Any, Dict, List, Set, Optional, Callable, Type, Tuple
+from typing import Any, Dict, List, Set, Optional, Callable, Type
 from typing_extensions import Annotated, Self
 
 from pydantic import UUID4, BaseModel, Field, PrivateAttr, field_validator, model_validator, InstanceOf, field_validator
@@ -15,7 +15,7 @@ from pydantic_core import PydanticCustomError
 import versionhq as vhq
 from versionhq.task.evaluation import Evaluation, EvaluationItem
 from versionhq.tool.model import Tool, ToolSet
-from versionhq._utils import process_config, Logger
+from versionhq._utils import process_config, Logger, UsageMetrics, ErrorType
 
 
 class TaskExecutionType(enum.Enum):
@@ -175,15 +175,12 @@ class TaskOutput(BaseModel):
     A class to store the final output of the given task in raw (string), json_dict, and pydantic class formats.
     """
 
-    _tokens: int = PrivateAttr(default=0)
-
     task_id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True, description="store Task ID")
     raw: str = Field(default="", description="Raw output of the task")
     json_dict: Dict[str, Any] = Field(default=None, description="`raw` converted to dictionary")
     pydantic: Optional[Any] = Field(default=None)
     tool_output: Optional[Any] = Field(default=None, description="stores tool result when the task takes tool output as its final output")
     callback_output: Optional[Any] = Field(default=None, description="stores task or agent callback outcome")
-    latency: float = Field(default=None, description="job latency in ms")
     evaluation: Optional[InstanceOf[Evaluation]] = Field(default=None, description="stores overall evaluation of the task output. stored in ltm")
 
 
@@ -241,7 +238,6 @@ class TaskOutput(BaseModel):
 
             task_eval = Task(description=description, pydantic_output=EvaluationItem)
             res = task_eval.execute(agent=self.evaluation.eval_by)
-            self._tokens += task_eval._tokens
 
             if res.pydantic:
                 item = EvaluationItem(
@@ -344,9 +340,7 @@ class Task(BaseModel):
     fsls: Optional[list[str]] = Field(default=None, description="stores ideal/weak responses")
 
     # recording
-    _tokens: int = 0
-    _tool_errors: int = 0
-    _format_errors: int = 0
+    _usage: UsageMetrics = PrivateAttr(default=None)
     _delegations: int = 0
     processed_agents: Set[str] = Field(default_factory=set, description="store keys of the agents that executed the task")
     output: Optional[TaskOutput] = Field(default=None, description="store the final TaskOutput object")
@@ -371,6 +365,8 @@ class Task(BaseModel):
         for field in required_fields:
             if getattr(self, field) is None:
                 raise ValueError( f"{field} must be provided either directly or through config")
+
+        self._usage = UsageMetrics(id=self.id)
         return self
 
 
@@ -479,6 +475,7 @@ class Task(BaseModel):
                return output
         except:
             output = self._sanitize_raw_output(raw=raw)
+            self._usage.record_errors(type=ErrorType.FORMAT)
             return output
 
 
@@ -609,13 +606,6 @@ class Task(BaseModel):
             res = self._test_time_computation(agent=agent, context=context)
             return res
 
-        # if self._pfg:
-        #     res, all_outputs = self.pfg.activate()
-        #     tokens, latency = self.pfg.usage
-        #     self._tokens = tokens
-        #     res.latency = latency
-        #     return res
-
         match type:
             case TaskExecutionType.SYNC:
                 res = self._execute_sync(agent=agent, context=context)
@@ -646,11 +636,11 @@ class Task(BaseModel):
     def _execute_core(self, agent, context: Optional[Any]) -> TaskOutput:
         """A core method to execute a single task."""
 
+        start_dt = datetime.datetime.now()
         task_output: InstanceOf[TaskOutput] = None
         raw_output: str = None
         tool_output: str | list = None
         task_tools: List[List[InstanceOf[Tool]| InstanceOf[ToolSet] | Type[Tool]]] = []
-        started_at, ended_at = datetime.datetime.now(), datetime.datetime.now()
         user_prompt, dev_prompt = None, None
 
         if self.tools:
@@ -664,17 +654,14 @@ class Task(BaseModel):
             self._delegations += 1
 
         if self.tool_res_as_final == True:
-            started_at = datetime.datetime.now()
             user_prompt, dev_prompt, tool_output = agent.execute_task(task=self, context=context, task_tools=task_tools)
             raw_output = str(tool_output) if tool_output else ""
-            ended_at = datetime.datetime.now()
+            if not raw_output:
+                self._usage.record_errors(type=ErrorType.TOOL)
             task_output = TaskOutput(task_id=self.id, tool_output=tool_output, raw=raw_output)
 
         else:
-            started_at = datetime.datetime.now()
             user_prompt, dev_prompt, raw_output = agent.execute_task(task=self, context=context, task_tools=task_tools)
-            ended_at = datetime.datetime.now()
-
             json_dict_output = self._create_json_output(raw=raw_output)
             if "outcome" in json_dict_output:
                 json_dict_output = self._create_json_output(raw=str(json_dict_output["outcome"]))
@@ -688,8 +675,6 @@ class Task(BaseModel):
                 json_dict=json_dict_output,
             )
 
-        task_output.latency = round((ended_at - started_at).total_seconds() * 1000, 3)
-        task_output._tokens = self._tokens
         self.output = task_output
         self.processed_agents.add(agent.key)
 
@@ -723,6 +708,8 @@ class Task(BaseModel):
                 self.output = task_output
             self._store_logs()
 
+        end_dt = datetime.datetime.now()
+        self._usage.record_latency(start_dt=start_dt, end_dt=end_dt)
         return task_output
 
 
@@ -733,6 +720,7 @@ class Task(BaseModel):
         from versionhq._prompt.model import Prompt
         from versionhq._prompt.auto_feedback import PromptFeedbackGraph
 
+        # self._usage = None
         prompt = Prompt(task=self, agent=agent, context=context)
         pfg = PromptFeedbackGraph(prompt=prompt, should_reform=self.human, reform_trigger_event=ReformTriggerEvent.USER_INPUT if self.human else None)
         pfg = pfg.set_up_graph()
@@ -740,13 +728,12 @@ class Task(BaseModel):
 
         try:
             if self._pfg and self.output is None:
-                res, _ = self._pfg.activate()
-                tokens, latency = self._pfg.usage
-                self._tokens = tokens
-                res.latency = latency
+                res, all_outputs = self._pfg.activate()
+                if all_outputs: self._usage = self._pfg._usage
                 return res
 
         except:
+            self._usage.record_errors(type=ErrorType.API)
             Logger().log(level="error", message="Failed to execute the task.", color="red")
             return None
 

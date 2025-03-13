@@ -90,7 +90,6 @@ class AgentNetwork(BaseModel):
 
     cache: bool = Field(default=True)
     execution_logs: List[Dict[str, Any]] = Field(default_factory=list, description="list of execution logs of the tasks handled by members")
-    # usage_metrics: Optional[UsageMetrics] = Field(default=None, description="usage metrics for all the llm executions")
 
 
     def __name__(self) -> str:

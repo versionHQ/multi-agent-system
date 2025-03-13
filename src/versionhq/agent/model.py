@@ -11,7 +11,7 @@ from versionhq.agent.rpm_controller import RPMController
 from versionhq.tool.model import Tool, ToolSet, BaseTool
 from versionhq.knowledge.model import BaseKnowledgeSource, Knowledge
 from versionhq.memory.model import ShortTermMemory, LongTermMemory, UserMemory
-from versionhq._utils import Logger, process_config, is_valid_url
+from versionhq._utils import Logger, process_config, is_valid_url, ErrorType
 
 
 load_dotenv(override=True)
@@ -373,16 +373,17 @@ class Agent(BaseModel):
 
             if tool_res_as_final:
                 raw_response = self.func_calling_llm.call(messages=messages, tools=tools, tool_res_as_final=True)
-                task._tokens = self.func_calling_llm._tokens
+                task._usage.record_token_usage(token_usages=self.func_calling_llm._usages)
             else:
                 raw_response = self.llm.call(messages=messages, response_format=response_format, tools=tools)
-                task._tokens = self.llm._tokens
+                task._usage.record_token_usage(token_usages=self.llm._usages)
 
             task_execution_counter += 1
             Logger(**self._logger_config, filename=self.key).log(level="info", message=f"Agent response: {raw_response}", color="green")
             return raw_response
 
         except Exception as e:
+            task._usage.record_errors(type=ErrorType.API)
             Logger(**self._logger_config, filename=self.key).log(level="error", message=f"An error occured. The agent will retry: {str(e)}", color="red")
 
             while not raw_response and task_execution_counter <= self.max_retry_limit:
@@ -526,6 +527,8 @@ class Agent(BaseModel):
                 tool_res_as_final=task.tool_res_as_final,
                 task=task
             )
+            if raw_response:
+                task._usage.successful_requests += 1
 
         except Exception as e:
             self._times_executed += 1

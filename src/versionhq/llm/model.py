@@ -69,7 +69,7 @@ class LLM(BaseModel):
 
     _logger: Logger = PrivateAttr(default_factory=lambda: Logger(verbose=True))
     _init_model_name: str = PrivateAttr(default=None)
-    _tokens: int = PrivateAttr(default=0) # aggregate number of tokens consumed
+    _usages: list[Dict[str, int]] = PrivateAttr(default_factory=list)
 
     model: str = Field(default=None)
     provider: Optional[str] = Field(default=None, description="model provider")
@@ -180,8 +180,6 @@ class LLM(BaseModel):
         Set up valid config params after setting up a valid model, provider, interface provider names.
         """
         litellm.drop_params = True
-
-        self._tokens = 0
 
         if self.callbacks:
             self._set_callbacks(self.callbacks)
@@ -319,7 +317,7 @@ class LLM(BaseModel):
                 if not tools:
                     params = self._create_valid_params(config=config)
                     res = litellm.completion(model=self.model, messages=messages, stream=False, **params, **cred)
-                    self._tokens += int(res["usage"]["total_tokens"])
+                    self._usages.append(res["usage"])
                     return res["choices"][0]["message"]["content"]
 
                 else:
@@ -384,12 +382,11 @@ class LLM(BaseModel):
                         else:
                             pass
 
-
                 if tool_res_as_final:
                     return tool_res
                 else:
                     res = litellm.completion(model=self.model, messages=messages, **params, **cred)
-                    self._tokens += int(res["usage"]["total_tokens"])
+                    self._usages.append(res["usage"])
                     return res.choices[0].message.content
 
 

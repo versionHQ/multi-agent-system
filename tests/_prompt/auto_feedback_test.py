@@ -7,7 +7,7 @@ from versionhq.agent.model import Agent
 from versionhq.task.model import Task, TaskOutput
 
 
-def test_create():
+def test_pfg():
     class Custom(BaseModel):
         schedule: str
         destination: str

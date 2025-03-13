@@ -1,55 +1,72 @@
-from pydantic import BaseModel, Field
+import uuid
+import enum
+import datetime
+from typing import Dict, List
+from typing_extensions import Self
+
+from pydantic import BaseModel, UUID4, InstanceOf
+
+
+class ErrorType(enum.Enum):
+    FORMAT = 1
+    TOOL = 2
+    API = 3
+    OVERFITTING = 4
+    HUMAN_INTERACTION = 5
 
 
 class UsageMetrics(BaseModel):
-    """
-    Model to track usage
-    """
+    """A Pydantic model to manage token usage, errors, job latency."""
 
-    total_tokens: int = Field(default=0, description="total number of tokens used")
-    prompt_tokens: int = Field(default=0, description="number of tokens used in prompts")
-    cached_prompt_tokens: int = Field(default=0, description="number of cached prompt tokens used")
-    completion_tokens: int = Field(default=0, description="number of tokens used in completions")
-    successful_requests: int = Field(default=0, description="number of successful requests made")
+    id: UUID4 = uuid.uuid4() # stores task id or task graph id
+    total_tokens: int = 0
+    prompt_tokens: int = 0
+    completion_tokens: int = 0
+    successful_requests: int = 0
+    total_errors: int = 0
+    error_breakdown: Dict[ErrorType, int] = dict()
+    latency: float = 0.0  # in ms
 
-    def add_usage_metrics(self, usage_metrics: "UsageMetrics") -> None:
-        """
-        Add the usage metrics from another UsageMetrics object.
-        """
-        self.total_tokens += usage_metrics.total_tokens
-        self.prompt_tokens += usage_metrics.prompt_tokens
-        self.cached_prompt_tokens += usage_metrics.cached_prompt_tokens
-        self.completion_tokens += usage_metrics.completion_tokens
-        self.successful_requests += usage_metrics.successful_requests
+    def record_token_usage(self, token_usages: List[Dict[str, int]]) -> None:
+        """Records usage metrics from the raw response of the model."""
+
+        if token_usages:
+            for item in token_usages:
+                self.total_tokens += int(item["total_tokens"]) if "total_tokens" in item else 0
+                self.completion_tokens += int(item["completion_tokens"])  if "completion_tokens" in item else 0
+                self.prompt_tokens += int(item["prompt_tokens"]) if "prompt_tokens" in item else 0
 
 
+    def record_errors(self, type: ErrorType = None) -> None:
+        self.total_errors += 1
+        if type:
+            if type in self.error_breakdown:
+                self.error_breakdown[type] += 1
+            else:
+                self.error_breakdown[type] = 1
 
-# class TokenProcess:
-#     total_tokens: int = 0
-#     prompt_tokens: int = 0
-#     cached_prompt_tokens: int = 0
-#     completion_tokens: int = 0
-#     successful_requests: int = 0
 
-#     def sum_prompt_tokens(self, tokens: int) -> None:
-#         self.prompt_tokens = self.prompt_tokens + tokens
-#         self.total_tokens = self.total_tokens + tokens
+    def record_latency(self, start_dt: datetime.datetime, end_dt: datetime.datetime) -> None:
+        self.latency += round((end_dt - start_dt).total_seconds() * 1000, 3)
 
-#     def sum_completion_tokens(self, tokens: int) -> None:
-#         self.completion_tokens = self.completion_tokens + tokens
-#         self.total_tokens = self.total_tokens + tokens
 
-#     def sum_cached_prompt_tokens(self, tokens: int) -> None:
-#         self.cached_prompt_tokens = self.cached_prompt_tokens + tokens
+    def aggregate(self, metrics: InstanceOf["UsageMetrics"]) -> Self:
+        if not metrics:
+            return self
 
-#     def sum_successful_requests(self, requests: int) -> None:
-#         self.successful_requests = self.successful_requests + requests
+        self.total_tokens += metrics.total_tokens if metrics.total_tokens else 0
+        self.prompt_tokens += metrics.prompt_tokens if metrics.prompt_tokens else 0
+        self.completion_tokens += metrics.completion_tokens if metrics.completion_tokens else 0
+        self.successful_requests += metrics.successful_requests  if metrics.successful_requests else 0
+        self.total_errors += metrics.total_errors if metrics.total_errors else 0
+        self.latency += metrics.latency if metrics.latency else 0.0
+        self.latency = round(self.latency, 3)
 
-#     def get_summary(self) -> UsageMetrics:
-#         return UsageMetrics(
-#             total_tokens=self.total_tokens,
-#             prompt_tokens=self.prompt_tokens,
-#             cached_prompt_tokens=self.cached_prompt_tokens,
-#             completion_tokens=self.completion_tokens,
-#             successful_requests=self.successful_requests,
-#         )
+        if metrics.error_breakdown:
+            for k, v in metrics.error_breakdown.items():
+                if self.error_breakdown and k in self.error_breakdown:
+                    self.error_breakdown[k] += int(v)
+                else:
+                    self.error_breakdown.update({ k: v })
+
+        return self
