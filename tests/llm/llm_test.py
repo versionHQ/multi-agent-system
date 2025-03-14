@@ -46,7 +46,7 @@ def test_create_llm_from_invalid_name():
 def test_create_llm_from_provider():
     llm = LLM(provider="gemini", callbacks=[dummy_func,])
 
-    assert llm.model == "gemini-2.0-flash"
+    assert llm.model == "gemini/gemini-2.0-flash"
     assert llm.provider == "gemini"
     assert llm.context_window_size == int(LLM_CONTEXT_WINDOW_SIZES.get(llm.model) *0.75)
     assert llm._supports_function_calling() == True
