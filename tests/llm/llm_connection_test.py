@@ -30,12 +30,12 @@ def tool_task():
 
 @pytest.fixture(scope='module')
 def schema_task():
-    return Task(description="generates an unique random value strictly following the given format.", pydantic_output=Demo)
+    return Task(description="generates an unique random value strictly following the given format.", response_schema=Demo)
 
 
 @pytest.fixture(scope='module')
 def res_field_task():
-    return Task(description="return random values strictly following the given response format.", response_fields=demo_response_fields)
+    return Task(description="return random values strictly following the given response format.", response_schema=demo_response_fields)
 
 
 def _test_con_bedrock(simple_task, tool_task, schema_task, res_field_task):
@@ -65,7 +65,7 @@ def _test_con_bedrock(simple_task, tool_task, schema_task, res_field_task):
         ]
 
         res_4 = res_field_task.execute(agent=agent, context="running a test")
-        assert [v and type(v) == res_field_task.response_fields[i].data_type for i, (k, v) in enumerate(res_4.json_dict.items())]
+        assert [v and type(v) == res_field_task.response_schema[i].data_type for i, (k, v) in enumerate(res_4.json_dict.items())]
 
 
 def _test_con_gpt(simple_task, tool_task, schema_task, res_field_task):
@@ -92,4 +92,4 @@ def _test_con_gpt(simple_task, tool_task, schema_task, res_field_task):
         ]
 
         res_4 = res_field_task.execute(agent=agent, context="running a test")
-        assert [v and type(v) == res_field_task.response_fields[i].data_type for i, (k, v) in enumerate(res_4.json_dict.items())]
+        assert [v and type(v) == res_field_task.response_schema[i].data_type for i, (k, v) in enumerate(res_4.json_dict.items())]

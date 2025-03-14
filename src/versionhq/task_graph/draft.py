@@ -49,7 +49,7 @@ def workflow(final_output: Type[BaseModel], context: Any = None, human: bool = F
 
     task = Task(
         description=dedent(f"Design a resource-efficient workflow to achieve the following goal: {final_output_prompt}. The workflow should consist of a list of detailed tasks that represent decision making points, each with the following information:\nname: A concise name of the task\ndescription: A concise description of the task.\nconnections: A list of target tasks that this task connects to.\ndependency_types: The type of dependency between this task and each of its connected task. \noutput: key output from the task in a word.\n\nUse the following dependency types: {dep_type_prompt}.\n\nPrioritize minimizing resource consumption (computation, memory, and data transfer) when defining tasks, connections, and dependencies.  Consider how data is passed between tasks and aim to reduce unnecessary data duplication or transfer. Explain any design choices made to optimize resource usage."),
-        response_fields=[
+        response_schema=[
             ResponseField(title="tasks", data_type=list, items=dict, properties=[
                 ResponseField(title="name", data_type=str),
                 ResponseField(title="description", data_type=str),
@@ -73,13 +73,13 @@ def workflow(final_output: Type[BaseModel], context: Any = None, human: bool = F
 
     for item in task_items:
         key = item["output"].lower().replace(" ", "_") if item["output"] else "output"
-        task = Task(name=item["name"], description=item["description"], response_fields=[ResponseField(title=key, data_type=str)])
+        task = Task(name=item["name"], description=item["description"], response_schema=[ResponseField(title=key, data_type=str)])
         tasks.append(task)
         nodes.append(Node(task=task))
 
     task_graph = TaskGraph(
         nodes={node.identifier: node for node in nodes},
-        concl_format=final_output,
+        concl_response_schema=final_output,
         concl=None,
         should_reform=human,
         reform_trigger_event=ReformTriggerEvent.USER_INPUT if human else None,

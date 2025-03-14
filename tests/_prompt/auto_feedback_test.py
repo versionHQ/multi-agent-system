@@ -8,12 +8,12 @@ from versionhq.task.model import Task, TaskOutput
 
 
 def test_pfg():
-    class Custom(BaseModel):
+    class Travel(BaseModel):
         schedule: str
         destination: str
         other_consideration: str
 
-    main_task = Task(description="plan a day trip to Costa Rica", pydantic_output=Custom)
+    main_task = Task(description="plan a day trip to Costa Rica", response_schema=Travel)
     agent = Agent(llm="gemini-2.0", role="Demo Agent")
     prompt  = Prompt(task=main_task, agent=agent, context=["test", "test2"])
     pfg = PromptFeedbackGraph(prompt=prompt)

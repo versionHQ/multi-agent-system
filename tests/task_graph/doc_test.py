@@ -34,6 +34,6 @@ def test_create_and_activate_network():
 
     assert last_task_output is not None and isinstance(last_task_output, vhq.TaskOutput)
     assert [k in task_graph.nodes.keys() and v and isinstance(v, vhq.TaskOutput) for k, v in outputs.items()]
-    assert task_graph.concl == last_task_output and task_graph.concl_template == None
+    assert task_graph.concl == last_task_output and task_graph.concl_response_schema == None
     assert isinstance(task_graph._usage, UsageMetrics)
     assert task_graph._usage.total_tokens != 0

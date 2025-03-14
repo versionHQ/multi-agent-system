@@ -491,7 +491,7 @@ class Agent(BaseModel):
 
         task = Task(
             description=f"Generate a simple result in a sentence to achieve the goal: {self.goal if self.goal else self.role}. If needed, list up necessary steps in concise manner.",
-            pydantic_output=Output,
+            response_schema=Output,
             tool_res_as_final=tool_res_as_final,
             image=image, #REFINEME - query memory/knowledge or self create
             file=file,

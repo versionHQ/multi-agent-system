@@ -2,7 +2,7 @@
 from typing import Dict, List, Tuple, Any
 from textwrap import dedent
 
-from pydantic import InstanceOf
+from pydantic import InstanceOf, BaseModel
 
 from versionhq._utils import is_valid_url
 
@@ -25,34 +25,31 @@ class Prompt:
 
 
     def _draft_output_prompt(self) -> str:
-        """Drafts prompt for output either from `pydantic_output` or `response_fields`"""
+        """Drafts prompt for output format using `response_schema`."""
 
         from versionhq.llm.model import DEFAULT_MODEL_PROVIDER_NAME
+        from versionhq.task.model import ResponseField
 
         output_prompt = ""
+        output_formats_to_follow = dict()
         model_provider = self.agent.llm.provider if self.agent else DEFAULT_MODEL_PROVIDER_NAME
 
-        if self.task.pydantic_output:
-            output_prompt, output_formats_to_follow = "", dict()
+        if self.task.response_schema:
             response_format = str(self.task._structure_response_format(model_provider=model_provider))
-            for k, v in self.task.pydantic_output.model_fields.items():
-                output_formats_to_follow[k] = f"<Return your answer in {v.annotation}>"
+
+            if isinstance(self.task.response_schema, list):
+                for item in self.task.response_schema:
+                    if isinstance(item, ResponseField):
+                        output_formats_to_follow[item.title] = f"<Return your answer in {item.data_type.__name__}>"
+
+            elif issubclass(self.task.response_schema, BaseModel):
+                for k, v in self.task.response_schema.model_fields.items():
+                    output_formats_to_follow[k] = f"<Return your answer in {v.annotation}>"
 
             output_prompt = f"""Your response MUST be a valid JSON string that strictly follows the response format. Use double quotes for all keys and string values. Do not use single quotes, trailing commas, or any other non-standard JSON syntax.
 Response format: {response_format}
 Ref. Output image: {output_formats_to_follow}
-"""
-        elif self.task.response_fields:
-            output_prompt, output_formats_to_follow = "", dict()
-            response_format = str(self.task._structure_response_format(model_provider=model_provider))
-            for item in self.task.response_fields:
-                if item:
-                    output_formats_to_follow[item.title] = f"<Return your answer in {item.data_type.__name__}>"
-
-            output_prompt = f"""Your response MUST be a valid JSON string that strictly follows the response format. Use double quotes for all keys and string values. Do not use single quotes, trailing commas, or any other non-standard JSON syntax.
-Response format: {response_format}
-Ref. Output image: {output_formats_to_follow}
-"""
+    """
         else:
             output_prompt = "You MUST return your response as a valid JSON serializable string, enclosed in double quotes. Use double quotes for all keys and string values. Do NOT use single quotes, trailing commas, or other non-standard JSON syntax."
 

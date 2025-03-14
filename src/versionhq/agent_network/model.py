@@ -206,7 +206,7 @@ class AgentNetwork(BaseModel):
         for unassgined_task in unassigned_tasks:
             task = Task(
                 description=f"Based on the following task summary, draft an agent's role and goal in concise manner. Task summary: {unassgined_task.summary}",
-                response_fields=[
+                response_schema=[
                     ResponseField(title="goal", data_type=str, required=True),
                     ResponseField(title="role", data_type=str, required=True),
                 ],

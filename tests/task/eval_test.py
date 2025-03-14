@@ -11,7 +11,7 @@ def test_eval():
 
     task = vhq.Task(
         description="Research a topic to teach a kid aged 6 about math.",
-        pydantic_output=CustomOutput,
+        response_schema=CustomOutput,
         should_evaluate=True,
         eval_criteria=["Uniquness", "Fit to audience",],
         # fsls=[""]
@@ -39,7 +39,7 @@ def test_eval_with_fsls():
 
     task = vhq.Task(
         description="Research a topic to teach a kid aged 6 about math.",
-        pydantic_output=CustomOutput,
+        response_schema=CustomOutput,
         should_evaluate=True,
         eval_criteria=["Uniquness", "Fit to audience",],
         fsls=["Start by explaining that math is all around us and helps us solve problems in our daily lives. Today, we're going to learn about adding and subtracting using objects.", "Focus on complex concepts like seconds and milliseconds."]

@@ -8,11 +8,11 @@ But you can choose to generate Pydantic class or specifig JSON object as respons
 
 <hr />
 
+`[var]`<bold>`response_schema: Optional[Type[BaseModel] | List[ResponseField]] = None`</bold>
+
 ## 1. Pydantic
 
-`[var]`<bold>`pydantic_output: Optional[Type[BaseModel]] = None`</bold>
-
-Add a `custom Pydantic class` as a structured response format to the `pydantic_output` field.
+Add a `custom Pydantic class` to the `response_schema` field to generate a structured response.
 
 The custom class can accept **one layer of a nested child** as you can see in the following code snippet:
 
@@ -44,7 +44,7 @@ class Demo(BaseModel):
 # 2. Define a task
 task = vhq.Task(
     description="generate random output that strictly follows the given format",
-    pydantic_output=Demo,
+    response_schema=Demo,
 )
 
 # 3. Execute
@@ -63,8 +63,6 @@ assert [
 
 ## 2. JSON
 
-`[var]`<bold>`response_fields: List[InstanceOf[ResponseField]] = None`</bold>
-
 Similar to Pydantic, JSON output structure can be defined by using a list of `ResponseField` objects.
 
 The following code snippet demonstrates how to use `ResponseField` to generate output with a maximum of one level of nesting.
@@ -75,16 +73,15 @@ Custom JSON outputs can accept **one layer of a nested child**.
 
 - `demo_response_fields` in the following case is identical to the previous Demo class, except that titles are specified for nested fields.
 
-- Agents generate JSON output by default, whether or not `response_fields` are used.
+- Agents generate JSON output by default, whether or not `response_schema` is given.
 
-- However, response_fields are REQUIRED to specify JSON key titles and data types.
+- However, `response_schema` is required to specify the key value sets.
 
 ```python
 import versionhq as vhq
 
 # 1. Define a list of ResponseField objects.
 demo_response_fields = [
-    # no nesting
     vhq.ResponseField(title="demo_1", data_type=int),
     vhq.ResponseField(title="demo_2", data_type=float),
     vhq.ResponseField(title="demo_3", data_type=str),
@@ -125,16 +122,15 @@ demo_response_fields = [
 # 2. Define a task
 task = vhq.Task(
     description="Output random values strictly following the data type defined in the given response format.",
-    response_fields=demo_response_fields
+    response_schema=demo_response_fields
 )
 
 
 # 3. Execute
 res = task.execute()
 
-assert isinstance(res, vhq.TaskOutput) and res.task_id is task.id
-assert res.raw and res.json and res.pydantic is None
-assert [v and type(v) == task.response_fields[i].data_type for i, (k, v) in enumerate(res.json_dict.items())]
+assert isinstance(res, vhq.TaskOutput)
+assert [v and type(v) == task.response_schema[i].data_type for i, (k, v) in enumerate(res.json_dict.items())]
 ```
 
 * Ref. <a href="/core/task/response-field">`ResponseField`</a> class
@@ -172,7 +168,7 @@ class Sub(BaseModel):
 
 sub_task = vhq.Task(
     description="generate random values that strictly follows the given format.",
-    pydantic_output=Sub
+    response_schema=Sub
 )
 sub_res = sub_task.execute()
 
@@ -190,7 +186,7 @@ def format_response(sub, main1, main2) -> Main:
 # 3. Executes
 main_task = vhq.Task(
     description="generate random values that strictly follows the given format.",
-    pydantic_output=Main,
+    response_schema=Main,
     callback=format_response,
     callback_kwargs=dict(sub=sub_res.json_dict),
 )

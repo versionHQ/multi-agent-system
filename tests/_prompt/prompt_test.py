@@ -19,7 +19,7 @@ def main_task():
 
     return Task(
         description="return random values strictly following the given response format.",
-        response_fields=demo_response_fields,
+        response_schema=demo_response_fields,
         tools=[lambda x: x, lambda y: y],
         can_use_agent_tools=True,
         image=str(file_path),

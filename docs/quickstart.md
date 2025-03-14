@@ -52,7 +52,7 @@ agent = vhq.Agent(role="demo manager")
 
 task = vhq.Task(
    description="Amazing task",
-   pydantic_output=CustomOutput,
+   response_schema=CustomOutput,
    callback=dummy_func,
    callback_kwargs=dict(message="Hi! Here is the result: ")
 )
@@ -88,13 +88,13 @@ agent_b = vhq.Agent(role="agent b", goal="My amazing goals", llm="llm-of-your-ch
 
 task_1 = vhq.Task(
    description="Analyze the client's business model.",
-   response_fields=[vhq.ResponseField(title="test1", data_type=str, required=True),],
+   response_schema=[vhq.ResponseField(title="test1", data_type=str, required=True),],
    allow_delegation=True
 )
 
 task_2 = vhq.Task(
    description="Define a cohort.",
-   response_fields=[vhq.ResponseField(title="test1", data_type=int, required=True),],
+   response_schema=[vhq.ResponseField(title="test1", data_type=int, required=True),],
    allow_delegation=False
 )
 

@@ -14,7 +14,7 @@ from pydantic import BaseModel, InstanceOf, Field, UUID4, field_validator, model
 from pydantic_core import PydanticCustomError
 
 from versionhq.agent.model import Agent
-from versionhq.task.model import Task, TaskOutput, Evaluation
+from versionhq.task.model import Task, TaskOutput, Evaluation, ResponseField
 from versionhq._utils import Logger, UsageMetrics, ErrorType
 
 
@@ -129,7 +129,7 @@ class Node(BaseModel):
         else:
             self.status = TaskStatus.IN_PROGRESS
             agent = agent if agent else self.assigned_to
-            self.task.pydantic_output = self.task.pydantic_output if self.task.pydantic_output else response_format if type(response_format) == BaseModel else None
+            self.task.response_schema = self.task.response_schema if self.task.response_schema else response_format if type(response_format) == BaseModel or isinstance(response_format, list) else None
             res = self.task.execute(agent=agent, context=context)
 
             if isinstance(res, Future): # activate async
@@ -399,7 +399,7 @@ class TaskGraph(Graph):
     should_reform: bool = False
     reform_trigger_event: Optional[ReformTriggerEvent] = None
     outputs: Dict[str, TaskOutput] = Field(default_factory=dict, description="stores node identifier and TaskOutput")
-    concl_template: Optional[Dict[str, Any] | Type[BaseModel]] = Field(default=None, description="stores final response format in Pydantic class or JSON dict")
+    concl_response_schema: Optional[List[ResponseField] | Type[BaseModel]] = Field(default=None, description="stores final response schema in Pydantic class or response fields")
     concl: Optional[TaskOutput] = Field(default=None, description="stores the final or latest conclusion of the entire task graph")
 
 
@@ -669,7 +669,7 @@ class TaskGraph(Graph):
                     res, _ = self.handle_reform(target=target)
 
             self.concl = res
-            self.concl_template = self.concl_template if self.concl_template else res.pydantic.__class__ if res.pydantic else None
+            self.concl_response_schema = self.concl_response_schema if self.concl_response_schema else res.pydantic.__class__ if res.pydantic else None
              # last_task_output = [v for v in self.outputs.values()][len([v for v in self.outputs.values()]) - 1] if [v for v in self.outputs.values()] else None
             self._handle_usage()
             return res, self.outputs

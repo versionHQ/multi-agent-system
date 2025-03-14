@@ -2,30 +2,29 @@
 
 ### Variables
 
-| <div style="width:160px">**Variable**</div> | **Data Type**       | **Default**               | **Description**                   |
-| :---                      | :---                                  | :---                      | :---                              |
-| **`id`**                  | UUID                                  | uuid.uuid4()              | Stores task `id` as an identifier. |
-| **`name`**                | Optional[str]                         | None                      | Stores a task name (Inherited as `node` identifier if the task is dependent) |
-| **`description`**         | str                                   | None                      | Required field to store a concise task description |
-| **`pydantic_output`**     | Optional[Type[BaseModel]]             | None                      | Stores pydantic custom output class for structured response |
-| **`response_fields`**     | Optional[List[ResponseField]]         | list()                    | Stores JSON formats for stuructured response |
-| **`tools`**               | Optional[List[BaseTool \| ToolSet]]   | None                      | Stores tools to be called when the agent executes the task. |
-| **`can_use_agent_tools`** | bool                                  | True                      | Whether to use the agent tools |
-| **`tool_res_as_final`**   | bool                                  | False                     | Whether to make a tool output as a final response from the agent |
-| **`image`**               | Optional[str]                         | None                      | Stores an absolute file path or URL to the image file in string |
-| **`file`**                | Optional[str]                         | None                      | Stores an absolute file path or URL to the file in string |
-| **`audio`**               | Optional[str]                         | None                      | Stores an absolute file path or URL to the audio file in string |
-| **`should_test_run`**     | bool                                  | False                     | Whether to turn on auto-feedback learning             |
-| **`human`**               | bool                                  | False                     | Whether to ask human input during the task execution  |
-| **`execution_type`**      | TaskExecutionType                     | TaskExecutionType.SYNC    | Sync or async execution |
-| **`allow_delegation`**    | bool                                  | False                     | Whether to allow the agent to delegate the task to another agent |
-| **`callback`**            | Optional[Callable]                    | None                      | Callback function to be executed after LLM calling |
-| **`callback_kwargs`**     | Optional[Dict[str, Any]]              | dict()                    | Args for the callback function (if any)|
-| **`should_evaluate`**     | bool                                  | False                     | Whether to evaluate the task output using eval criteria |
-| **`eval_criteria`**       | Optional[List[str]]                   | list()                    | Evaluation criteria given by the human client |
-| **`fsls`**                | Optional[List[str]]                   | None                      | Examples of competitive and/or weak responses |
-| **`processed_agents`**    | Set[str]                              | set()                     | Stores keys of agents that executed the task |
-| **`output`**              | Optional[TaskOutput]                  | None                      | Stores `TaskOutput` object after the execution |
+| <div style="width:160px">**Variable**</div> | **Data Type**       | **Default**       | **Description**                   |
+| :---                      | :---                                  | :---              | :---                              |
+| **`id`**                  | UUID                                  | uuid.uuid4()      | Stores task `id` as an identifier. |
+| **`name`**                | Optional[str]                         | None              | Stores a task name (Inherited as `node` identifier if the task is dependent) |
+| **`description`**         | str                                   | None              | Required field to store a concise task description |
+| **`response_schema`**     | Optional[Type[BaseModel] \| List[ResponseField]] | None   | Response schema for structured output. |
+| **`tools`**               | Optional[List[BaseTool \| ToolSet]]   | None              | Tools, tool sets, or RAG tools |
+| **`can_use_agent_tools`** | bool                                  | True              | Whether to use the agent tools |
+| **`tool_res_as_final`**   | bool                                  | False             | Whether to make a tool output as a final response from the agent |
+| **`image`**               | Optional[str]                         | None              | Absolute file path or URL to the image file |
+| **`file`**                | Optional[str]                         | None              | Absolute file path or URL to the file |
+| **`audio`**               | Optional[str]                         | None              | Absolute file path or URL to the audio file |
+| **`should_test_run`**     | bool                                  | False             | Whether to turn on auto-feedback learning             |
+| **`human`**               | bool                                  | False             | Whether to ask human input during the task execution  |
+| **`execution_type`**      | TaskExecutionType                     | TaskExecutionType.SYNC | Sync or async execution |
+| **`allow_delegation`**    | bool                                  | False             | Whether to allow the agent to delegate the task to another agent |
+| **`callback`**            | Optional[Callable]                    | None              | Callback function to be executed after LLM calling |
+| **`callback_kwargs`**     | Optional[Dict[str, Any]]              | dict()            | Args for the callback function (if any)|
+| **`should_evaluate`**     | bool                                  | False             | Whether to evaluate the task output using eval criteria |
+| **`eval_criteria`**       | Optional[List[str]]                   | list()            | Evaluation criteria given by the human client |
+| **`fsls`**                | Optional[List[str]]                   | None              | Examples of competitive and/or weak responses |
+| **`processed_agents`**    | Set[str]                              | set()             | Stores keys of agents that executed the task |
+| **`output`**              | Optional[TaskOutput]                  | None              | Stores `TaskOutput` object after the execution |
 
 
 ### Class Methods
@@ -68,8 +67,8 @@
 | :---                      | :---                                  | :---          | :---                                                  |
 | **`task_id`**             | UUID                                  | uuid.uuid4()  | Stores task `id` as an identifier.                    |
 | **`raw`**                 | str                                   | None          | Stores response in plane text format. `None` or `""` when the model returned errors.|
-| **`json_dict`**           | Dict[str, Any]                        | None          | Stores response in JSON serializable dictionary. When the system failed formatting or executing tasks without response_fields, `{ output: <res.raw> }` will be returned. |
-| **`pydantic`**            | Type[`BaseModel`]                     | None          | Populates and stores Pydantic class object defined in the `pydantic_output` field if given. |
+| **`json_dict`**           | Dict[str, Any]                        | None          | Stores response in JSON serializable dictionary. |
+| **`pydantic`**            | Type[`BaseModel`]                     | None          | Populates the given response schema in pydantic class |
 | **`tool_output`**         | Optional[Any]                         | None          | Stores results from the tools of the task or agents ONLY when `tool_res_as_final` set as `True`. |
 | **`callback_output`**     | Optional[Any]                         | None          | Stores results from callback functions if any. |
 | **`latency`**             | Optional[float]                       | None          | Stores job latency in milseconds. |

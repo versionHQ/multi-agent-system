@@ -14,7 +14,7 @@ def test_doc_core_taskoutput_a():
 
     task = vhq.Task(
         description="Research a topic to teach a kid aged 6 about math.",
-        pydantic_output=CustomOutput,
+        response_schema=CustomOutput,
         tools=[mock_tool],
         callback=mock_func,
         callback_kwargs=dict(message="Hi! Here is the result: "),

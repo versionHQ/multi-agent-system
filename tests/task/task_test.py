@@ -21,7 +21,7 @@ def mock_tool() -> str:
 def test_store_task_log():
     task = Task(
         description="return the output following the given prompt.",
-        response_fields=[ResponseField(title="task_1", data_type=str, required=True),],
+        response_schema=[ResponseField(title="task_1", data_type=str, required=True),],
     )
     task.execute()
 
@@ -152,7 +152,7 @@ def test_maxit():
 def test_taskoutput_final_a():
     task = Task(
         description="Research any topic.",
-        pydantic_output=CustomOutput,
+        response_schema=CustomOutput,
         tools=[mock_tool],
         tool_res_as_final=True
     )
@@ -183,7 +183,7 @@ def test_taskoutput_final_c():
 
 
 def test_taskoutput_final_c():
-    task = Task(description="Research any topic.",  pydantic_output=CustomOutput)
+    task = Task(description="Research any topic.",  response_schema=CustomOutput)
     res = task.execute()
 
     assert res.final == res.pydantic

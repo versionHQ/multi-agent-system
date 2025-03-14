@@ -11,14 +11,14 @@ def test_form_agent_network():
     agent_b = Agent(role="agent b", goal="My amazing goals", llm=DEFAULT_MODEL_NAME, max_tokens=3000)
     task_1 = Task(
         description="Analyze the client's business model.",
-        response_fields=[
+        response_schema=[
             ResponseField(title="test1", data_type=str, required=True),
             ResponseField(title="test2", data_type=list, required=True),
         ],
     )
     task_2 = Task(
         description="Define the cohort.",
-        response_fields=[
+        response_schema=[
             ResponseField(title="test1", data_type=int, required=True),
             ResponseField(title="test2", data_type=list, required=True),
         ],
@@ -41,14 +41,14 @@ def test_form_network_without_leader():
     agent_b = Agent(role="agent b", goal="My amazing goals", llm=DEFAULT_MODEL_NAME, max_tokens=3000)
     task_1 = Task(
         description="Analyze the client's business model.",
-        response_fields=[
+        response_schema=[
             ResponseField(title="test1", data_type=str, required=True),
             ResponseField(title="test2", data_type=list, required=True),
         ]
     )
     task_2 = Task(
         description="Define the cohort.",
-        response_fields=[
+        response_schema=[
             ResponseField(title="test1", data_type=int, required=True),
             ResponseField(title="test2", data_type=list, required=True),
         ],
@@ -72,14 +72,14 @@ def test_launch_without_leader():
     agent_b = Agent(role="agent b", goal="My amazing goals", llm=DEFAULT_MODEL_NAME)
     task_1 = Task(
         description="Analyze the client's business model.",
-        response_fields=[
+        response_schema=[
             ResponseField(title="test1", data_type=str, required=True),
             ResponseField(title="test2", data_type=list, required=True),
         ],
     )
     task_2 = Task(
         description="Define the cohort.",
-        response_fields=[
+        response_schema=[
             ResponseField(title="test1", data_type=int, required=True),
             ResponseField(title="test2", data_type=list, required=True),
         ],
@@ -119,14 +119,14 @@ def test_launch_with_task_callback():
 
     task_1 = Task(
         description="Analyze the client's business model.",
-        response_fields=[ResponseField(title="test1", data_type=str, required=True),],
+        response_schema=[ResponseField(title="test1", data_type=str, required=True),],
         callback=demo_callback,
         callback_kwargs=dict(item="pytest demo 1")
     )
 
     task_2 = Task(
         description="Define the cohort.",
-        response_fields=[ResponseField(title="test1", data_type=int, required=True),],
+        response_schema=[ResponseField(title="test1", data_type=int, required=True),],
         callback=demo_callback,
         callback_kwargs=dict(item="pytest demo 2")
     )
@@ -151,11 +151,11 @@ def test_launch_with_leader():
     agent_b = Agent(role="agent b", goal="My amazing goals", llm=DEFAULT_MODEL_NAME)
     task_1 = Task(
         description="Analyze the client's business model.",
-        response_fields=[ResponseField(title="task_1", data_type=str, required=True),],
+        response_schema=[ResponseField(title="task_1", data_type=str, required=True),],
     )
     task_2 = Task(
         description="Define the cohort timeframe.",
-        response_fields=[
+        response_schema=[
             ResponseField(title="task_2_1", data_type=int, required=True),
             ResponseField(title="task_2_2", data_type=list, required=True),
         ],
@@ -186,11 +186,11 @@ def test_hierarchial_process():
     agent_c = Agent(role="agent c", goal="My amazing goals", llm=DEFAULT_MODEL_NAME)
     task_1 = Task(
         description="Analyze the client's business model.",
-        response_fields=[ResponseField(title="task_1", data_type=str, required=True),],
+        response_schema=[ResponseField(title="task_1", data_type=str, required=True),],
     )
     task_2 = Task(
         description="Define the cohort timeframe.",
-        response_fields=[
+        response_schema=[
             ResponseField(title="task_2_1", data_type=int, required=True),
             ResponseField(title="task_2_2", data_type=list, required=True),
         ],
@@ -223,15 +223,15 @@ def test_handle_network_task():
     agent_c = Agent(role="agent c", goal="My amazing goals", llm=DEFAULT_MODEL_NAME)
     network_task = Task(
         description="Define outbound strategies.",
-        response_fields=[ResponseField(title="network_task_1", data_type=str, required=True),],
+        response_schema=[ResponseField(title="network_task_1", data_type=str, required=True),],
     )
     task_1 = Task(
         description="Analyze the client's business model.",
-        response_fields=[ResponseField(title="task_1", data_type=str, required=True),],
+        response_schema=[ResponseField(title="task_1", data_type=str, required=True),],
     )
     task_2 = Task(
         description="Define the cohort timeframe.",
-        response_fields=[
+        response_schema=[
             ResponseField(title="task_2_1", data_type=int, required=True),
             ResponseField(title="task_2_2", data_type=list, required=True),
         ],

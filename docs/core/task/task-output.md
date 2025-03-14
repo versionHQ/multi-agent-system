@@ -27,7 +27,7 @@ def summarize_response(message: str, test1: str, test2: list[str]) -> str:
 
 task = vhq.Task(
     description="Research a topic to teach a kid aged 6 about math.",
-    pydantic_output=CustomOutput,
+    response_schema=CustomOutput,
     tools=[dummy_tool],
     callback=summarize_response,
     callback_kwargs=dict(message="Hi! Here is the result: "),

@@ -67,7 +67,7 @@ class PromptFeedbackGraph(TaskGraph):
         if not agents:
             return None
 
-        self.concl_template = base_task.pydantic_output if base_task.pydantic_output else base_task.response_fields if base_task.response_fields else None
+        self.concl_response_schema = base_task.response_schema
         base_agent.callbacks.append(self._reflect)
         init_node = Node(task=base_task, assigned_to=base_agent)
         self.add_node(init_node)

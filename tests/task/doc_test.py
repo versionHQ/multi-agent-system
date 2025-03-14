@@ -30,7 +30,7 @@ def test_docs_core_task_c():
 
     task = vhq.Task(
         description="generate random output that strictly follows the given format",
-        pydantic_output=Demo,
+        response_schema=Demo,
     )
     res = task.execute()
 
@@ -48,13 +48,14 @@ def test_docs_core_task_d():
 
     task = vhq.Task(
         description="Output random values strictly following the data type defined in the given response format.",
-        response_fields=demo_response_fields
+        response_schema=demo_response_fields
     )
     res = task.execute()
 
     assert isinstance(res, vhq.TaskOutput) and res.task_id is task.id
-    assert res.raw and res.json and res.pydantic is None
-    assert [v and type(v) == task.response_fields[i].data_type for i, (k, v) in enumerate(res.json_dict.items())]
+    assert res.raw is not None and res.json_dict is not None
+    assert res.pydantic is None
+    assert [v and type(v) == task.response_schema[i].data_type for i, (k, v) in enumerate(res.json_dict.items())]
 
 
 def test_docs_core_task_e():
@@ -67,7 +68,7 @@ def test_docs_core_task_e():
         sub1: str
         sub2: dict[str, Any]
 
-    sub_task = vhq.Task(description="generates a random value that strictly follows the given format.", pydantic_output=Sub)
+    sub_task = vhq.Task(description="generates a random value that strictly follows the given format.", response_schema=Sub)
     sub_res = sub_task.execute()
 
     class Main(BaseModel):
@@ -82,7 +83,7 @@ def test_docs_core_task_e():
 
     main_task = vhq.Task(
         description="generates a random value that strictly follows the givne format.",
-        pydantic_output=Main,
+        response_schema=Main,
         callback=format_response,
         callback_kwargs=dict(sub=sub_res.json_dict),
     )

@@ -236,7 +236,7 @@ class TaskOutput(BaseModel):
             description = EVALUATE.format(task_description=task.description, task_output=self.raw, eval_criteria=str(item))
             description = description + fsl_prompt if fsl_prompt else description
 
-            task_eval = Task(description=description, pydantic_output=EvaluationItem)
+            task_eval = Task(description=description, response_schema=EvaluationItem)
             res = task_eval.execute(agent=self.evaluation.eval_by)
 
             if res.pydantic:
@@ -308,11 +308,7 @@ class Task(BaseModel):
     id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True, description="unique identifier for the object, not set by user")
     name: Optional[str] = Field(default=None)
     description: str = Field(description="Description of the actual task")
-
-    # response format
-    response_schema: Optional[Type[BaseModel] | List[ResponseField]] = Field(default=None)
-    pydantic_output: Optional[Type[BaseModel]] = Field(default=None, description="store Pydantic class as structured response format")
-    response_fields: Optional[List[ResponseField]] = Field(default_factory=list, description="store list of ResponseField as structured response format")
+    response_schema: Optional[Type[BaseModel] | List[ResponseField]] = Field(default=None, description="stores response format")
 
     # tool usage
     tools: Optional[List[ToolSet | Tool | Any]] = Field(default_factory=list, description="tools that the agent can use aside from their tools")
@@ -388,7 +384,7 @@ class Task(BaseModel):
 
 
     def _structure_response_format(self, data_type: str = "object", model_provider: str = "gemini") -> Dict[str, Any] | None:
-        """Structures `response_fields` or `pydantic_output` to a LLM response format."""
+        """Structures `response_schema` into the LLM response format."""
 
         from versionhq.task.structured_response import StructuredOutput
 
@@ -398,28 +394,29 @@ class Task(BaseModel):
             return response_format
 
         else:
-            if self.response_fields:
-                properties, required_fields = {}, []
-                for i, item in enumerate(self.response_fields):
-                    if item:
-                        properties.update(item._format_props())
-                        required_fields.append(item.title)
+            if self.response_schema:
+                if isinstance(self.response_schema, list):
+                    properties, required_fields = {}, []
+                    for i, item in enumerate(self.response_schema):
+                        if isinstance(item, ResponseField):
+                            properties.update(item._format_props())
+                            required_fields.append(item.title)
 
-                response_schema = {
-                    "type": data_type,
-                    "properties": properties,
-                    "required": required_fields,
-                    "additionalProperties": False,
-                }
-                response_format = {
-                    "type": "json_schema",
-                    "json_schema": { "name": "outcome", "schema": response_schema }
-                }
+                    response_schema = {
+                        "type": data_type,
+                        "properties": properties,
+                        "required": required_fields,
+                        "additionalProperties": False,
+                    }
+                    response_format = {
+                        "type": "json_schema",
+                        "json_schema": { "name": "outcome", "schema": response_schema }
+                    }
 
-            elif self.pydantic_output:
-                response_format = StructuredOutput(response_format=self.pydantic_output, provider=model_provider)._format()
+                elif issubclass(self.response_schema, BaseModel):
+                    response_format = StructuredOutput(response_format=self.response_schema, provider=model_provider)._format()
 
-            return response_format
+        return response_format
 
 
     def _sanitize_raw_output(self, raw: str) -> Dict[str, str]:
@@ -479,22 +476,24 @@ class Task(BaseModel):
             return output
 
 
-    def _create_pydantic_output(self, raw: str = None, json_dict: Dict[str, Any] = None) -> InstanceOf[BaseModel]:
+    def _create_pydantic_output(self, raw: str = None, json_dict: Dict[str, Any] = None) -> InstanceOf[BaseModel] | None:
         """
         Create pydantic output from raw or json_dict output.
         """
 
-        output_pydantic = self.pydantic_output
+        if self.response_schema and not isinstance(self.response_schema, list):
+            output_pydantic = self.response_schema
+            try:
+                json_dict = json_dict if json_dict else self._create_json_output(raw=raw)
 
-        try:
-            json_dict = json_dict if json_dict else self._create_json_output(raw=raw)
+                for k, v in json_dict.items():
+                    setattr(output_pydantic, k, v)
+            except:
+                pass
+            return output_pydantic
 
-            for k, v in json_dict.items():
-                setattr(output_pydantic, k, v)
-        except:
-            pass
-
-        return output_pydantic
+        else:
+            return None
 
 
     def interpolate_inputs(self, inputs: Dict[str, Any]) -> None:
@@ -666,7 +665,7 @@ class Task(BaseModel):
             if "outcome" in json_dict_output:
                 json_dict_output = self._create_json_output(raw=str(json_dict_output["outcome"]))
 
-            pydantic_output = self._create_pydantic_output(raw=raw_output, json_dict=json_dict_output) if self.pydantic_output else None
+            pydantic_output = self._create_pydantic_output(raw=raw_output, json_dict=json_dict_output)
 
             task_output = TaskOutput(
                 task_id=self.id,
@@ -740,7 +739,7 @@ class Task(BaseModel):
 
     @property
     def key(self) -> str:
-        output_format = "json" if self.response_fields else "pydantic" if self.pydantic_output is not None else "raw"
+        output_format = "json" if self.response_schema else "raw"
         source = [self.description, output_format]
         return md5("|".join(source).encode(), usedforsecurity=False).hexdigest()
 

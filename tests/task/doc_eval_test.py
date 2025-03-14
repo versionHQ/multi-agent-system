@@ -8,7 +8,7 @@ def test_eval():
 
     task = vhq.Task(
         description="Research a topic to teach a kid aged 6 about math.",
-        pydantic_output=CustomOutput,
+        response_schema=CustomOutput,
         should_evaluate=True, # triggers evaluation
         eval_criteria=["Uniquness", "Fit to audience",],
 
