@@ -433,17 +433,14 @@ class Task(BaseModel):
         r = r.strip()
         r = r.replace("  ", "")
 
-        print(output)
         try:
             output = json.loads(r)
-            print(output)
         except:
             try: j = json.dumps(eval(r))
             except:
                 try: j = json.dumps(str(r))
                 except: j = r
             output = json.loads(j)
-            print(output)
 
         if isinstance(output, dict):
             return output["json_schema"] if "json_schema" in output else output

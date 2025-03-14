@@ -542,8 +542,6 @@ class Agent(BaseModel):
         if self.max_rpm and self._rpm_controller:
             self._rpm_controller.stop_rpm_counter()
 
-        print(messages)
-
         return user_prompt, dev_prompt, raw_response
 
 
