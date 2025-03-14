@@ -30,7 +30,7 @@ vhq_task_evaluator = Agent(
 vhq_formation_planner = Agent(
     role="vhq-Formation Planner",
     goal="Plan a formation of agents based on the given task descirption.",
-    llm="gemini/gemini-2.0-flash-exp",
+    llm="gemini/gemini-2.0-flash",
     llm_config=dict(top_p=0.8, topK=40, temperature=0.9),
     maxit=1,
     max_retry_limit=1,
@@ -46,7 +46,7 @@ vhq_formation_planner = Agent(
 vhq_agent_creator = Agent(
     role="vhq-Agent Creator",
     goal="build an agent that can handle the given task",
-    llm="gemini/gemini-2.0-flash-exp",
+    llm="gemini/gemini-2.0-flash",
     maxit=1,
     max_retry_limit=1,
 )

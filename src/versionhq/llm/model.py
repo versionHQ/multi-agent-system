@@ -228,6 +228,9 @@ class LLM(BaseModel):
             if self.context_window_size and valid_config["max_tokens"] > self.context_window_size:
                 valid_config["max_tokens"] = self.context_window_size
 
+        if "model" in valid_config:
+            self.model = valid_config.pop("model")
+
         self.llm_config = valid_config
         return valid_config
 
@@ -388,7 +391,6 @@ class LLM(BaseModel):
                     res = litellm.completion(model=self.model, messages=messages, **params, **cred)
                     self._usages.append(res["usage"])
                     return res.choices[0].message.content
-
 
             except JSONSchemaValidationError as e:
                 self._logger.log(level="error", message="Raw Response: {}".format(e.raw_response), color="red")

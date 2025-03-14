@@ -30,7 +30,7 @@ def tool_task():
 
 @pytest.fixture(scope='module')
 def schema_task():
-    return Task(description="generates an unique random value strictly following the given format.", response_schema=Demo)
+    return Task(description="Generate a random value that adheres strictly to the specified data type.", response_schema=Demo)
 
 
 @pytest.fixture(scope='module')
@@ -85,6 +85,38 @@ def _test_con_gpt(simple_task, tool_task, schema_task, res_field_task):
         res_2 = tool_task.execute(agent=agent, context="running a test")
         assert res_2.tool_output is not None
 
+        res_3 = schema_task.execute(agent=agent, context="running a test")
+        assert [
+            getattr(res_3.pydantic, k) and v.annotation == Demo.model_fields[k].annotation
+            for k, v in res_3.pydantic.model_fields.items()
+        ]
+
+        res_4 = res_field_task.execute(agent=agent, context="running a test")
+        assert [v and type(v) == res_field_task.response_schema[i].data_type for i, (k, v) in enumerate(res_4.json_dict.items())]
+
+
+def _test_con_gemini(simple_task, tool_task, schema_task, res_field_task):
+    llms_to_test = [
+        "gemini/gemini-2.0-flash",
+        "gemini/gemini-2.0-flash-thinking-exp",
+        "gemini/gemini-2.0-flash-lite-preview-02-05",
+        "gemini/gemini-2.0-flash-exp",
+    ]
+
+    agents = [set_agent(llm=llm) for llm in llms_to_test]
+
+    for agent in agents:
+        assert isinstance(agent.llm, LLM)
+        assert agent.llm.provider == "gemini"
+        assert agent.llm._init_model_name and agent.llm.provider and agent.llm.llm_config["max_tokens"] == agent.llm_config["max_tokens"]
+
+        res_1 = simple_task.execute(agent=agent, context="running a test")
+        assert res_1.raw is not None
+
+        res_2 = tool_task.execute(agent=agent, context="running a test")
+        assert res_2.tool_output is not None
+
+        schema_task = Task(description="Generate a random value that adheres strictly to the specified data type.", response_schema=Demo)
         res_3 = schema_task.execute(agent=agent, context="running a test")
         assert [
             getattr(res_3.pydantic, k) and v.annotation == Demo.model_fields[k].annotation

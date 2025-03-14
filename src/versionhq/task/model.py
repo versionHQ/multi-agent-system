@@ -432,14 +432,18 @@ class Task(BaseModel):
         r = re.sub(r"'\b", '"', r)
         r = r.strip()
         r = r.replace("  ", "")
+
+        print(output)
         try:
             output = json.loads(r)
+            print(output)
         except:
             try: j = json.dumps(eval(r))
             except:
                 try: j = json.dumps(str(r))
                 except: j = r
             output = json.loads(j)
+            print(output)
 
         if isinstance(output, dict):
             return output["json_schema"] if "json_schema" in output else output
@@ -448,7 +452,6 @@ class Task(BaseModel):
                 output = ast.literal_eval(j)
             except:
                 output = ast.literal_eval(r)
-
 
             return output["json_schema"] if isinstance(output, dict) and "json_schema" in output else output if isinstance(output, dict) else { "output": str(r) }
 
@@ -468,8 +471,8 @@ class Task(BaseModel):
             if isinstance(output, dict):
                 return output["json_schema"] if "json_schema" in output else output
             else:
-               output = self._sanitize_raw_output(raw=raw)
-               return output
+                output = self._sanitize_raw_output(raw=raw)
+                return output
         except:
             output = self._sanitize_raw_output(raw=raw)
             self._usage.record_errors(type=ErrorType.FORMAT)

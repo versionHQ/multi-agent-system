@@ -27,16 +27,12 @@ class Prompt:
     def _draft_output_prompt(self) -> str:
         """Drafts prompt for output format using `response_schema`."""
 
-        from versionhq.llm.model import DEFAULT_MODEL_PROVIDER_NAME
         from versionhq.task.model import ResponseField
 
         output_prompt = ""
         output_formats_to_follow = dict()
-        model_provider = self.agent.llm.provider if self.agent else DEFAULT_MODEL_PROVIDER_NAME
 
         if self.task.response_schema:
-            response_format = str(self.task._structure_response_format(model_provider=model_provider))
-
             if isinstance(self.task.response_schema, list):
                 for item in self.task.response_schema:
                     if isinstance(item, ResponseField):
@@ -47,7 +43,6 @@ class Prompt:
                     output_formats_to_follow[k] = f"<Return your answer in {v.annotation}>"
 
             output_prompt = f"""Your response MUST be a valid JSON string that strictly follows the response format. Use double quotes for all keys and string values. Do not use single quotes, trailing commas, or any other non-standard JSON syntax.
-Response format: {response_format}
 Ref. Output image: {output_formats_to_follow}
     """
         else:

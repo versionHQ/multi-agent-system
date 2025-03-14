@@ -27,8 +27,9 @@ MODELS = {
         "o1-preview",
     ],
     "gemini": [
-        "gemini/gemini-1.5-flash",
-        "gemini/gemini-1.5-pro",
+        "gemini/gemini-2.0-flash",
+        "gemini/gemini-2.0-flash-thinking-exp",
+        "gemini/gemini-2.0-flash-lite-preview-02-05",
         "gemini/gemini-2.0-flash-exp",
     ],
     "anthropic": [
@@ -75,6 +76,7 @@ ENV_VARS = {
     "huggingface": ["HUGGINGFACE_API_KEY", ],
     "bedrock": ["AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_REGION_NAME"],
     "sagemaker": ["AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_REGION_NAME"],
+    "azure_ai": ["AZURE_AI_API_KEY", "AZURE_AI_API_BASE"],
 }
 
 
@@ -90,9 +92,10 @@ LLM_CONTEXT_WINDOW_SIZES = {
     "o1-preview": 128000,
     "o1-mini": 128000,
 
-    "gemini/gemini-1.5-flash": 1048576,
-    "gemini/gemini-1.5-pro": 2097152,
     "gemini/gemini-2.0-flash-exp": 1048576,
+    "gemini/gemini-2.0-flash": 1048576,
+    "gemini/gemini-2.0-flash-thinking-exp": 1048576,
+    "gemini/gemini-2.0-flash-lite-preview-02-05": 1048576,
 
     "claude-3-7-sonnet-latest": 200000,
     "claude-3-5-haiku-latest": 200000,

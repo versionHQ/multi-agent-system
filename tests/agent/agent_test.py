@@ -91,7 +91,7 @@ def test_build_agent_with_llm_config():
     def dummy_func() -> str:
         return "dummy"
 
-    llm_params = dict(deployment_name="gemini-1.5", max_tokens=4000, logprobs=False, abc="dummy key")
+    llm_params = dict(deployment_name="gemini-2.0", max_tokens=4000, logprobs=False, abc="dummy key")
     llm_config = dict(
         temperature=1,
         top_p=0.1,
@@ -112,11 +112,11 @@ def test_build_agent_with_llm_config():
 
     assert isinstance(agent.llm, LLM)
     assert isinstance(agent.func_calling_llm, LLM)
-    assert agent.llm.model == "gemini/gemini-1.5-flash"
+    assert agent.llm.model == "gemini/gemini-2.0-flash"
     assert agent.llm.callbacks == [dummy_func]
 
     import litellm
-    valid_params = litellm.get_supported_openai_params(model="gemini/gemini-1.5-flash")
+    valid_params = litellm.get_supported_openai_params(model="gemini/gemini-2.0-flash")
     config = llm_params.update(llm_config)
     for key in valid_params:
         if config and [k for k in config.keys() if k == key]:
@@ -127,12 +127,12 @@ def test_build_agent_with_llm_object():
     def dummy_func() -> str:
         return "dummy"
 
-    llm = LLM(model="gemini-1.5", llm_config=dict(max_tokens=4000, logprobs=False))
+    llm = LLM(model="gemini-2.0", llm_config=dict(max_tokens=4000, logprobs=False))
     agent = Agent(role="analyst", llm=llm, callbacks=[dummy_func])
 
     assert isinstance(agent.llm, LLM)
     assert isinstance(agent.func_calling_llm, LLM)
-    assert agent.llm.model == "gemini/gemini-1.5-flash"
+    assert agent.llm.model == "gemini/gemini-2.0-flash"
     # assert agent.llm.api_key is not None
     assert agent.llm.llm_config["max_tokens"] == 4000
     assert agent.llm.llm_config["logprobs"] == False
@@ -143,19 +143,19 @@ def test_build_agent_with_llm_and_func_llm_config():
     def dummy_func() -> str:
         return "dummy"
 
-    llm_params = dict(deployment_name="gemini-1.5", max_tokens=4000, logprobs=False, abc="dummy key")
+    llm_params = dict(deployment_name="gemini-2.0", max_tokens=4000, logprobs=False, abc="dummy key")
     agent = Agent(role="analyst", func_calling_llm=llm_params, callbacks=[dummy_func])
 
     assert isinstance(agent.llm, LLM) and agent.llm.model == DEFAULT_MODEL_NAME
     assert isinstance(agent.func_calling_llm, LLM)
-    assert agent.func_calling_llm.model == "gemini/gemini-1.5-flash" if agent.func_calling_llm._supports_function_calling() else DEFAULT_MODEL_NAME
+    assert agent.func_calling_llm.model == "gemini/gemini-2.0-flash" if agent.func_calling_llm._supports_function_calling() else DEFAULT_MODEL_NAME
 
 
 def test_build_agent_with_llm_and_func_llm_object():
     def dummy_func() -> str:
         return "dummy"
 
-    llm = LLM(model="gemini-1.5", llm_config=dict(max_tokens=4000, logprobs=False))
+    llm = LLM(model="gemini-2.0", llm_config=dict(max_tokens=4000, logprobs=False))
     agent = Agent(
         role="analyst",
         goal="analyze the company's website and retrieve the product overview",
@@ -165,7 +165,7 @@ def test_build_agent_with_llm_and_func_llm_object():
         callbacks=[dummy_func]
     )
     assert isinstance(agent.llm, LLM) and isinstance(agent.func_calling_llm, LLM)
-    assert agent.func_calling_llm.model == "gemini/gemini-1.5-flash" if agent.func_calling_llm._supports_function_calling() else DEFAULT_MODEL_NAME
+    assert agent.func_calling_llm.model == "gemini/gemini-2.0-flash" if agent.func_calling_llm._supports_function_calling() else DEFAULT_MODEL_NAME
     assert agent.func_calling_llm.llm_config["max_tokens"] == 4000
     assert agent.func_calling_llm.llm_config["logprobs"] == False
     assert agent.func_calling_llm.callbacks == [dummy_func]
