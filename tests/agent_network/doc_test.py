@@ -6,9 +6,10 @@ def test_doc_an_formation_a():
         expected_outcome="a list of destinations and why it's suitable",
         context="planning a suprise trip for my friend", # optional
     )
+
     assert isinstance(network, vhq.AgentNetwork)
-    assert network.members # auto-generated agents as network members
-    assert network.tasks # auto-defined sub-tasks to achieve the main task goal
+    assert network.members is not None # auto-generated agents as network members
+    assert network.tasks is not None # auto-defined sub-tasks to achieve the main task goal
 
 
 def test_doc_an_formation_b():

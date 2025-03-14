@@ -1,6 +1,6 @@
 import os
 import uuid
-from typing import Any, Dict, List, Optional, TypeVar, Callable, Type
+from typing import Any, Dict, List, Optional, TypeVar, Callable, Type, Tuple
 from typing_extensions import Self
 from dotenv import load_dotenv
 
@@ -475,9 +475,16 @@ class Agent(BaseModel):
         return self
 
 
-    def start(self, context: Any = None, tool_res_as_final: bool = False, image: str = None, file: str = None, audio: str = None) -> Any | None:
+    def start(
+            self,
+            context: Any = None,
+            tool_res_as_final: bool = False,
+            image: str = None,
+            file: str = None,
+            audio: str = None
+        ) -> Tuple[Any | None, Any | None]:
         """
-        Defines and executes a task when it is not given and returns TaskOutput object.
+        Defines and executes a task, then returns TaskOutput object with the generated task.
         """
 
         if not self.role:
@@ -498,7 +505,7 @@ class Agent(BaseModel):
             audio=audio,
         )
         res = task.execute(agent=self, context=context)
-        return res
+        return res, task
 
 
     def execute_task(self, task, context: Optional[Any] = None, task_tools: Optional[List[Tool | ToolSet]] = list()) -> str:

@@ -327,7 +327,7 @@ def test_start_with_tools():
         tools=[my_tool, ]
     )
 
-    res = agent.start(tool_res_as_final=True)
+    res, _ = agent.start(tool_res_as_final=True)
     assert res.tool_output == "demo"
     assert res.raw == res.tool_output
 

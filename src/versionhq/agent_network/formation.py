@@ -74,7 +74,7 @@ def form_agent_network(
         leader_agent: str
 
     vhq_task = Task(
-        description=f"Design a team of specialized agents to fully automate the following task and achieve the expected outcome. For each agent, define its role, task description, and expected outputs via the task with items in a list. Then specify the formation if the formation is not given. If you think SUPERVISING or HYBRID is the best formation, include a leader_agent role, else leave the leader_agent role blank.\nTask: {str(task)}\nExpected outcome: {prompt_expected_outcome}\nFormation: {prompt_formation}",
+        description=f"Design a team of specialized agents to fully automate the following task and deliver the expected outcome. For each agent, define its role, task description, and expected outputs via the task with items in a list. Then specify the formation if the formation is not given. If you think SUPERVISING or HYBRID is the best formation, include a leader_agent role, else leave the leader_agent role blank.\nTask: {str(task)}\nExpected outcome: {prompt_expected_outcome}\nFormation: {prompt_formation}",
         response_schema=Outcome
     )
 
