@@ -125,3 +125,52 @@ def _test_con_gemini(simple_task, tool_task, schema_task, res_field_task):
 
         res_4 = res_field_task.execute(agent=agent, context="running a test")
         assert [v and type(v) == res_field_task.response_schema[i].data_type for i, (k, v) in enumerate(res_4.json_dict.items())]
+
+
+def test_con_azure(simple_task, tool_task, schema_task, res_field_task):
+    llms_to_test = [
+        "azure_ai/deepseek-r1",
+        "azure_ai/mistral-small",
+        "azure_ai/Llama-3.2-11B-Vision-Instruct",
+        "azure_ai/Llama-3.3-70B-Instruct",
+        "azure_ai/Llama-3.2-90B-Vision-Instruct",
+        # "azure_ai/Meta-Llama-3-70B-Instruct",
+        # "azure_ai/Meta-Llama-3.1-8B-Instruct",
+        # "azure_ai/Meta-Llama-3.1-70B-Instruct",
+        # "azure_ai/Meta-Llama-3.1-405B-Instruct",
+        "azure_ai/Phi-4",
+        "azure_ai/Phi-3.5-mini-instruct",
+        "azure_ai/Phi-3.5-vision-instruct",
+        "azure_ai/Phi-3.5-MoE-instruct",
+        # "azure_ai/Phi-3-mini-4k-instruct",
+        # "azure_ai/Phi-3-mini-128k-instruct",
+        # "azure_ai/Phi-3-small-8k-instruct",
+        # "azure_ai/Phi-3-small-128k-instruct",
+        # "azure_ai/Phi-3-medium-4k-instruct",
+        # "azure_ai/Phi-3-medium-128k-instruct",
+        "azure_ai/cohere-rerank-v3-multilingual",
+        "azure_ai/cohere-rerank-v3-english",
+        "azure_ai/Cohere-embed-v3-english",
+        "azure_ai/Cohere-embed-v3-multilingual",
+    ]
+    agents = [set_agent(llm=llm) for llm in llms_to_test]
+
+    for agent in agents:
+        assert isinstance(agent.llm, LLM)
+        assert agent.llm.provider == "azure_ai"
+        assert agent.llm._init_model_name and agent.llm.provider and agent.llm.llm_config["max_tokens"] == agent.llm_config["max_tokens"]
+
+        res_1 = simple_task.execute(agent=agent, context="running a test")
+        assert res_1.raw is not None
+
+        res_2 = tool_task.execute(agent=agent, context="running a test")
+        assert res_2.tool_output is not None
+
+        res_3 = schema_task.execute(agent=agent, context="running a test")
+        assert [
+            getattr(res_3.pydantic, k) and v.annotation == Demo.model_fields[k].annotation
+            for k, v in res_3.pydantic.model_fields.items()
+        ]
+
+        res_4 = res_field_task.execute(agent=agent, context="running a test")
+        assert [v and type(v) == res_field_task.response_schema[i].data_type for i, (k, v) in enumerate(res_4.json_dict.items())]
