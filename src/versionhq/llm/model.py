@@ -313,7 +313,7 @@ class LLM(BaseModel):
                 cred = self._set_env_vars()
 
                 if self.provider == "gemini":
-                    self.response_format = { "type": "json_object" } if not tools else None
+                    self.response_format = { "type": "json_object" } if not tools and self.model != "gemini/gemini-2.0-flash-thinking-exp" else None
                 else:
                     self.response_format = response_format
 

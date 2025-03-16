@@ -79,6 +79,7 @@ class Evaluation(BaseModel):
         Returns:
             A pandas DataFrame with normalized 'weight' and 'score' columns, or an empty DataFrame if the input is empty.
         """
+
         if not self.items:
             return pd.DataFrame()
 
@@ -87,7 +88,6 @@ class Evaluation(BaseModel):
 
         scaler = MinMaxScaler(feature_range=(0, 1))
         df[['weight', 'score']] = scaler.fit_transform(df[['weight', 'score']])
-
         return df
 
 
@@ -98,7 +98,16 @@ class Evaluation(BaseModel):
 
         df = self._normalize_df()
         df['weighted_score'] = df['weight'] * df['score']
-        aggregate_score = round(df['weighted_score'].sum(), 3)
+        n = df['weighted_score'].sum()
+        if n == 0.0 or n == 1.0:
+            import math
+            s = [[item.score for item in self.items]]
+            w = [[item.weight for item in self.items]]
+            r = [math.sumprod(x, y) for x, y in zip(s, w)]
+            if r and sum(w[0]):
+                n = r[0] / sum(w[0])
+
+        aggregate_score = round(n, 3)
         return aggregate_score
 
 
