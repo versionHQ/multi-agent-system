@@ -1,5 +1,5 @@
 from versionhq import Product, ProductProvider
-from versionhq.tool.composio_tool_vars import ComposioAppName
+from versionhq.tool.composio.params import ComposioAppName
 
 
 def test_create_product_provider():

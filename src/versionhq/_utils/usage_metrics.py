@@ -1,13 +1,13 @@
 import uuid
-import enum
 import datetime
+from enum import IntEnum
 from typing import Dict, List
 from typing_extensions import Self
 
 from pydantic import BaseModel, UUID4, InstanceOf
 
 
-class ErrorType(enum.Enum):
+class ErrorType(IntEnum):
     FORMAT = 1
     TOOL = 2
     API = 3
@@ -22,19 +22,38 @@ class UsageMetrics(BaseModel):
     total_tokens: int = 0
     prompt_tokens: int = 0
     completion_tokens: int = 0
+    input_tokens: int = 0
+    output_tokens: int = 0
     successful_requests: int = 0
     total_errors: int = 0
     error_breakdown: Dict[ErrorType, int] = dict()
     latency: float = 0.0  # in ms
 
-    def record_token_usage(self, token_usages: List[Dict[str, int]]) -> None:
+
+    def record_token_usage(self, *args, **kwargs) -> None:
         """Records usage metrics from the raw response of the model."""
 
-        if token_usages:
-            for item in token_usages:
-                self.total_tokens += int(item["total_tokens"]) if "total_tokens" in item else 0
-                self.completion_tokens += int(item["completion_tokens"])  if "completion_tokens" in item else 0
-                self.prompt_tokens += int(item["prompt_tokens"]) if "prompt_tokens" in item else 0
+        if args:
+            for item in args:
+                match item:
+                    case dict():
+                        if hasattr(self, k):
+                            setattr(self, k, int(getattr(self, k)) + int(v))
+                    case UsageMetrics():
+                        self = self.aggregate(metrics=item)
+                    case _:
+                        try:
+                            self.completion_tokens += item.completion_tokens if hasattr(item, "completion_tokens") else 0
+                            self.prompt_tokens += item.prompt_tokens if hasattr(item, "prompt_tokens") else 0
+                            self.total_tokens += item.total_tokens if hasattr(item, "total_tokens") else 0
+                            self.input_tokens += item.input_tokens if hasattr(item, "input_tokens") else 0
+                            self.output_tokens += item.output_tokens if hasattr(item, "output_tokens") else 0
+                        except:
+                            pass
+        if kwargs:
+            for k, v in kwargs.items():
+                if hasattr(self, k):
+                    setattr(self, k, int(getattr(self, k)) + int(v))
 
 
     def record_errors(self, type: ErrorType = None) -> None:
@@ -54,12 +73,14 @@ class UsageMetrics(BaseModel):
         if not metrics:
             return self
 
-        self.total_tokens += metrics.total_tokens if metrics.total_tokens else 0
-        self.prompt_tokens += metrics.prompt_tokens if metrics.prompt_tokens else 0
-        self.completion_tokens += metrics.completion_tokens if metrics.completion_tokens else 0
-        self.successful_requests += metrics.successful_requests  if metrics.successful_requests else 0
-        self.total_errors += metrics.total_errors if metrics.total_errors else 0
-        self.latency += metrics.latency if metrics.latency else 0.0
+        self.total_tokens += metrics.total_tokens
+        self.prompt_tokens += metrics.prompt_tokens
+        self.completion_tokens += metrics.completion_tokens
+        self.input_tokens += metrics.input_tokens
+        self.output_tokens += metrics.output_tokens
+        self.successful_requests += metrics.successful_requests
+        self.total_errors += metrics.total_errors
+        self.latency += metrics.latency
         self.latency = round(self.latency, 3)
 
         if metrics.error_breakdown:

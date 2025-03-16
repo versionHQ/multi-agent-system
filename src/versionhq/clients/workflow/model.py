@@ -10,7 +10,7 @@ from versionhq.agent.model import Agent
 from versionhq.agent_network.model import AgentNetwork
 from versionhq.clients.product.model import Product
 from versionhq.clients.customer.model import Customer
-from versionhq.tool.composio_tool_vars import ComposioAppName
+from versionhq.tool.composio.params import ComposioAppName
 
 
 class MessagingComponent(ABC, BaseModel):

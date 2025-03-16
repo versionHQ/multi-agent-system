@@ -2,7 +2,6 @@ import json
 import numpy as np
 from sklearn.metrics import precision_score, recall_score, roc_auc_score, cohen_kappa_score
 from typing import List, Tuple, Dict, Any
-from pathlib import Path
 
 
 class LLMJudge:

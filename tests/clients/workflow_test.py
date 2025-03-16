@@ -2,7 +2,7 @@ import datetime
 
 from versionhq.clients.workflow.model import MessagingWorkflow, MessagingComponent
 from versionhq.clients.product.model import Product, ProductProvider
-from versionhq.tool.composio_tool_vars import ComposioAppName
+from versionhq.tool.composio.params import ComposioAppName
 
 
 def test_store_scores():

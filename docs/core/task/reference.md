@@ -8,7 +8,7 @@
 | **`name`**                | Optional[str]                         | None              | Stores a task name (Inherited as `node` identifier if the task is dependent) |
 | **`description`**         | str                                   | None              | Required field to store a concise task description |
 | **`response_schema`**     | Optional[Type[BaseModel] \| List[ResponseField]] | None   | Response schema for structured output. |
-| **`tools`**               | Optional[List[BaseTool \| ToolSet]]   | None              | Tools, tool sets, or RAG tools |
+| **`tools`**               | Optional[List[Any]]                   | None              | Tools, tool sets, or RAG tools |
 | **`can_use_agent_tools`** | bool                                  | True              | Whether to use the agent tools |
 | **`tool_res_as_final`**   | bool                                  | False             | Whether to make a tool output as a final response from the agent |
 | **`image`**               | Optional[str]                         | None              | Absolute file path or URL to the image file |
@@ -69,10 +69,11 @@
 | **`raw`**                 | str                                   | None          | Stores response in plane text format. `None` or `""` when the model returned errors.|
 | **`json_dict`**           | Dict[str, Any]                        | None          | Stores response in JSON serializable dictionary. |
 | **`pydantic`**            | Type[`BaseModel`]                     | None          | Populates the given response schema in pydantic class |
-| **`tool_output`**         | Optional[Any]                         | None          | Stores results from the tools of the task or agents ONLY when `tool_res_as_final` set as `True`. |
+| **`tool_output`**         | Optional[Any]                         | None          | Stores results from the tools of the task or agents when `tool_res_as_final` == True |
 | **`callback_output`**     | Optional[Any]                         | None          | Stores results from callback functions if any. |
-| **`latency`**             | Optional[float]                       | None          | Stores job latency in milseconds. |
+| **`annotations`**         | Optional[Dict[str, Any]]              | None          | Stores annotations given by the model. |
 | **`evaluation`**          | Optional[InstanceOf[`Evaluation`]]    | None          | Stores overall evaluations and usage of the task output. |
+| **`usage`**               | Optional[InstanceOf[`UsageMetrics]`]  | None          | Usage related values. |
 
 
 ### Class Methods

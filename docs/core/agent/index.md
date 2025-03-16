@@ -14,7 +14,7 @@ A Pydantic class to store an `Agent` object that handles `Task` execution.
 
 By defining its role and goal in a simple sentence, the AI agent will be set up to run on <bold>`gpt-4o`</bold> by default.
 
-Calling `.start()` method can start the agent operation, then generate response in text and JSON formats stored in the `TaskOutput` object.
+Calling `.start()` method can start the agent operation and generate response in text and JSON formats stored in the `TaskOutput` object.
 
 ```python
 import versionhq as vhq

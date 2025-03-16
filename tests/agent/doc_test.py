@@ -9,12 +9,9 @@ def test_docs_core_agent_a():
 
     assert agent.id and agent.role == "Marketing Analyst" and agent.goal == "Coping with price competition in saturated markets" and agent.backstory is not None
 
-    res, task = agent.start(context="Planning a new campaign promotion starting this summer")
-
+    res = agent.start(context="Planning a new campaign promotion starting this summer")
     assert isinstance(res, vhq.TaskOutput)
     assert res.json_dict
-    assert isinstance(task, vhq.Task)
-    assert task._usage is not None
 
 
 def test_docs_core_agent_b1():

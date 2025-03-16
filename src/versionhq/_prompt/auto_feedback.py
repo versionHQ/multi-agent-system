@@ -5,7 +5,7 @@ from pydantic import InstanceOf, Field
 
 from versionhq.agent.model import Agent
 from versionhq.task.model import Task
-from versionhq.task_graph.model import TaskGraph, Node, DependencyType, ReformTriggerEvent
+from versionhq.task_graph.model import TaskGraph, Node, DependencyType
 from versionhq._prompt.model import Prompt
 from versionhq._prompt.constants import REFLECT, INTEGRATE, parameter_sets
 

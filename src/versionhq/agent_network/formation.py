@@ -7,7 +7,7 @@ from versionhq.task.model import Task
 from versionhq.agent.model import Agent
 from versionhq.agent_network.model import AgentNetwork, Member, Formation
 from versionhq.agent.inhouse_agents  import vhq_formation_planner
-from versionhq._utils import Logger
+from versionhq._utils import Logger, is_valid_enum
 
 import chromadb
 chromadb.api.client.SharedSystemClient.clear_system_cache()
@@ -83,14 +83,6 @@ def form_agent_network(
 
     res = vhq_task.execute(agent=vhq_formation_planner, context=context)
 
-    formation_keys = []
-    if hasattr(res.pydantic, "formation"):
-        formation_keys = [k for k in Formation._member_map_.keys() if k == res.pydantic.formation.upper()]
-    elif "formation" in res.json_dict:
-        formation_keys = [k for k in Formation._member_map_.keys() if k == res.json_dict["formation"].upper()]
-
-    _formation = Formation[formation_keys[0]] if formation_keys else Formation.SUPERVISING
-
     network_tasks = []
     members = []
     leader = res._fetch_value_of(key="leader_agent")
@@ -98,6 +90,8 @@ def form_agent_network(
     created_agents = [Agent(role=str(item), goal=str(item)) for item in agent_roles] if agent_roles else []
     task_descriptions = res._fetch_value_of(key="task_descriptions")
     task_outcomes = res._fetch_value_of(key="task_outcomes")
+    formation_key = res.json_dict["formation"] if "formation" in res.json_dict else None
+    _formation = Formation[formation_key] if is_valid_enum(key=formation_key, enum=Formation) else Formation.SUPERVISING
 
     if agents:
         for i, agent in enumerate(created_agents):

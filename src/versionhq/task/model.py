@@ -3,7 +3,7 @@ import threading
 import datetime
 import uuid
 import inspect
-import enum
+from enum import IntEnum
 from concurrent.futures import Future
 from hashlib import md5
 from typing import Any, Dict, List, Set, Optional, Callable, Type
@@ -14,11 +14,15 @@ from pydantic_core import PydanticCustomError
 
 import versionhq as vhq
 from versionhq.task.evaluation import Evaluation, EvaluationItem
-from versionhq.tool.model import Tool, ToolSet
+from versionhq.tool.model import Tool, ToolSet, BaseTool
+from versionhq.tool.rag_tool import RagTool
+from versionhq.tool.gpt.web_search import GPTToolWebSearch
+from versionhq.tool.gpt.file_search import GPTToolFileSearch
+from versionhq.tool.gpt.cup import GPTToolCUP
 from versionhq._utils import process_config, Logger, UsageMetrics, ErrorType
 
 
-class TaskExecutionType(enum.Enum):
+class TaskExecutionType(IntEnum):
     """
     Enumeration to store task execution types of independent tasks without dependencies.
     """
@@ -174,14 +178,15 @@ class TaskOutput(BaseModel):
     """
     A class to store the final output of the given task in raw (string), json_dict, and pydantic class formats.
     """
-
-    task_id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True, description="store Task ID")
-    raw: str = Field(default="", description="Raw output of the task")
-    json_dict: Dict[str, Any] = Field(default=None, description="`raw` converted to dictionary")
+    task_id: UUID4 = Field(default_factory=uuid.uuid4)
+    raw: str = Field(default="")
+    json_dict: Dict[str, Any] = Field(default=None)
     pydantic: Optional[Any] = Field(default=None)
     tool_output: Optional[Any] = Field(default=None, description="stores tool result when the task takes tool output as its final output")
     callback_output: Optional[Any] = Field(default=None, description="stores task or agent callback outcome")
+    annotations: Optional[Dict[str, Any]] = Field(default=None)
     evaluation: Optional[InstanceOf[Evaluation]] = Field(default=None, description="stores overall evaluation of the task output. stored in ltm")
+    usage: Optional[UsageMetrics] = Field(default=None)
 
 
     def _fetch_value_of(self, key: str = None) -> Any:
@@ -311,7 +316,7 @@ class Task(BaseModel):
     response_schema: Optional[Type[BaseModel] | List[ResponseField]] = Field(default=None, description="stores response format")
 
     # tool usage
-    tools: Optional[List[ToolSet | Tool | Any]] = Field(default_factory=list, description="tools that the agent can use aside from their tools")
+    tools: Optional[List[Any]] = Field(default_factory=list, description="tools that the agent can use aside from their tools")
     can_use_agent_tools: bool = Field(default=True, description="whether the agent can use their own tools when executing the task")
     tool_res_as_final: bool = Field(default=False, description="when set True, tools res will be stored in the `TaskOutput`")
 
@@ -336,7 +341,6 @@ class Task(BaseModel):
     fsls: Optional[list[str]] = Field(default=None, description="stores ideal/weak responses")
 
     # recording
-    _usage: UsageMetrics = PrivateAttr(default=None)
     _delegations: int = 0
     processed_agents: Set[str] = Field(default_factory=set, description="store keys of the agents that executed the task")
     output: Optional[TaskOutput] = Field(default=None, description="store the final TaskOutput object")
@@ -361,24 +365,30 @@ class Task(BaseModel):
         for field in required_fields:
             if getattr(self, field) is None:
                 raise ValueError( f"{field} must be provided either directly or through config")
-
-        self._usage = UsageMetrics(id=self.id)
         return self
 
 
     @model_validator(mode="after")
     def set_up_tools(self) -> Self:
-        if not self.tools:
-            pass
-        else:
+        if self.tools:
             tool_list = []
             for item in self.tools:
-                if isinstance(item, Tool) or isinstance(item, ToolSet):
-                    tool_list.append(item)
-                elif (isinstance(item, dict) and "function" not in item) or isinstance(item, str):
-                    pass
-                else:
-                    tool_list.append(item) # address custom tool
+                match item:
+                    case Tool() | ToolSet() | BaseTool() | RagTool() | GPTToolCUP() | GPTToolFileSearch() | GPTToolWebSearch():
+                        tool_list.append(item)
+                    case type(item, callable):
+                        tool_list.append(Tool(func=item))
+                    case dict():
+                        tool = None
+                        try:
+                            tool = Tool(**item)
+                        except:
+                            try:
+                                tool = RagTool(**item)
+                            except:
+                                pass
+                    case _:
+                        pass
             self.tools = tool_list
         return self
 
@@ -472,7 +482,6 @@ class Task(BaseModel):
                 return output
         except:
             output = self._sanitize_raw_output(raw=raw)
-            self._usage.record_errors(type=ErrorType.FORMAT)
             return output
 
 
@@ -637,44 +646,47 @@ class Task(BaseModel):
 
         start_dt = datetime.datetime.now()
         task_output: InstanceOf[TaskOutput] = None
-        raw_output: str = None
-        tool_output: str | list = None
-        task_tools: List[List[InstanceOf[Tool]| InstanceOf[ToolSet] | Type[Tool]]] = []
         user_prompt, dev_prompt = None, None
-
-        if self.tools:
-            for item in self.tools:
-                if isinstance(item, ToolSet) or isinstance(item, Tool) or type(item) == Tool:
-                    task_tools.append(item)
 
         if self.allow_delegation == True:
             agent_to_delegate = self._select_agent_to_delegate(agent=agent)
             agent = agent_to_delegate
             self._delegations += 1
 
-        if self.tool_res_as_final == True:
-            user_prompt, dev_prompt, tool_output = agent.execute_task(task=self, context=context, task_tools=task_tools)
-            raw_output = str(tool_output) if tool_output else ""
-            if not raw_output:
-                self._usage.record_errors(type=ErrorType.TOOL)
-            task_output = TaskOutput(task_id=self.id, tool_output=tool_output, raw=raw_output)
+        user_prompt, dev_prompt, raw_output, usage = agent.execute_task(task=self, context=context)
+        match raw_output:
+            case TaskOutput():
+                raw_output.task_id = self.id
+                raw_output.usage = usage
+                task_output = raw_output
 
-        else:
-            user_prompt, dev_prompt, raw_output = agent.execute_task(task=self, context=context, task_tools=task_tools)
-            json_dict_output = self._create_json_output(raw=raw_output)
-            if "outcome" in json_dict_output:
-                json_dict_output = self._create_json_output(raw=str(json_dict_output["outcome"]))
+            case str():
+                json_dict_output = self._create_json_output(raw=raw_output)
+                if "outcome" in json_dict_output:
+                    json_dict_output = self._create_json_output(raw=str(json_dict_output["outcome"]))
 
-            pydantic_output = self._create_pydantic_output(raw=raw_output, json_dict=json_dict_output)
+                pydantic_output = self._create_pydantic_output(raw=raw_output, json_dict=json_dict_output)
+                task_output = TaskOutput(
+                    task_id=self.id,
+                    raw=raw_output if raw_output is not None else "",
+                    pydantic=pydantic_output,
+                    json_dict=json_dict_output,
+                    tool_output=raw_output if self.tool_res_as_final else None,
+                    usage=usage
+                )
 
-            task_output = TaskOutput(
-                task_id=self.id,
-                raw=raw_output if raw_output is not None else "",
-                pydantic=pydantic_output,
-                json_dict=json_dict_output,
-            )
+            case None | "":
+                task_output = TaskOutput(task_id=self.id, raw="", usage=usage)
+                task_output.usage.record_errors(type=ErrorType.FORMAT)
 
-        self.output = task_output
+            case _:
+                task_output = TaskOutput(
+                    task_id=self.id,
+                    raw=raw_output,
+                    tool_output=raw_output if self.tool_res_as_final else None,
+                    usage=usage
+                )
+
         self.processed_agents.add(agent.key)
 
         # if self.output_file: ## disabled for now
@@ -690,10 +702,9 @@ class Task(BaseModel):
             self._pfg.user_prompts.update({ index: user_prompt })
             self._pfg.dev_prompts.update({ index: dev_prompt })
 
-        if raw_output:
+        if task_output.raw:
             if self.should_evaluate:
                 task_output.evaluate(task=self)
-                self.output = task_output
 
             self._create_short_and_long_term_memories(agent=agent, task_output=task_output)
 
@@ -704,11 +715,14 @@ class Task(BaseModel):
                 valid_kwargs = { k: kwargs[k] if  k in kwargs else None for k in valid_keys }
                 callback_res = self.callback(**valid_kwargs)
                 task_output.callback_output = callback_res
-                self.output = task_output
-            self._store_logs()
 
         end_dt = datetime.datetime.now()
-        self._usage.record_latency(start_dt=start_dt, end_dt=end_dt)
+        task_output.usage.record_latency(start_dt=start_dt, end_dt=end_dt)
+        if task_output.json_dict and "output" in task_output.json_dict:
+            task_output.usage.record_errors(type=ErrorType.FORMAT)
+
+        self.output = task_output
+        self._store_logs()
         return task_output
 
 
@@ -719,7 +733,6 @@ class Task(BaseModel):
         from versionhq._prompt.model import Prompt
         from versionhq._prompt.auto_feedback import PromptFeedbackGraph
 
-        # self._usage = None
         prompt = Prompt(task=self, agent=agent, context=context)
         pfg = PromptFeedbackGraph(prompt=prompt, should_reform=self.human, reform_trigger_event=ReformTriggerEvent.USER_INPUT if self.human else None)
         pfg = pfg.set_up_graph()
@@ -728,11 +741,11 @@ class Task(BaseModel):
         try:
             if self._pfg and self.output is None:
                 res, all_outputs = self._pfg.activate()
-                if all_outputs: self._usage = self._pfg._usage
+                if all_outputs:
+                    res.usage = self._pfg.usage
                 return res
-
         except:
-            self._usage.record_errors(type=ErrorType.API)
+            self._pfg.usage.record_errors(type=ErrorType.API)
             Logger().log(level="error", message="Failed to execute the task.", color="red")
             return None
 

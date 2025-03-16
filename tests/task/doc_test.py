@@ -111,10 +111,10 @@ def test_docs_core_task_h():
     task = vhq.Task(description="Return a word: 'test'", type=vhq.TaskExecutionType.ASYNC)
 
     from unittest.mock import patch
-    with patch.object(vhq.Agent, "execute_task", return_value=("user prompt", "dev prompt", "test")) as execute:
+    with patch.object(vhq.Agent, "execute_task", return_value=("user prompt", "dev prompt", "test", UsageMetrics())) as execute:
         res = task.execute()
         assert res.raw == "test"
-        execute.assert_called_once_with(task=task, context=None, task_tools=list())
+        execute.assert_called_once_with(task=task, context=None)
 
 
 def test_docs_core_task_i():
@@ -185,14 +185,11 @@ def test_docs_core_task_m():
     import versionhq as vhq
 
     task = vhq.Task(description="Create a short story.", should_test_run=True, human=False)
-    assert isinstance(task._usage, UsageMetrics)
-
     task.execute()
     assert isinstance(task._pfg, PromptFeedbackGraph)
     assert task._pfg.should_reform == False
     assert task._pfg.reform_trigger_event == None
     assert [k for k in task._pfg.user_prompts.keys()] and [k for k in task._pfg.dev_prompts.keys()]
-
-    assert task._pfg._usage.total_tokens == task._usage.total_tokens
-    assert task._usage.total_errors == task._pfg._usage.total_errors
-    assert task._usage.latency == task._pfg._usage.latency
+    assert task._pfg.usage.total_tokens == task.output.usage.total_tokens
+    assert task.output.usage.total_errors == task._pfg.usage.total_errors
+    assert task.output.usage.latency == task._pfg.usage.latency

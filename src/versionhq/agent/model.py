@@ -11,7 +11,7 @@ from versionhq.agent.rpm_controller import RPMController
 from versionhq.tool.model import Tool, ToolSet, BaseTool
 from versionhq.knowledge.model import BaseKnowledgeSource, Knowledge
 from versionhq.memory.model import ShortTermMemory, LongTermMemory, UserMemory
-from versionhq._utils import Logger, process_config, is_valid_url, ErrorType
+from versionhq._utils import Logger, process_config, is_valid_url, ErrorType, UsageMetrics
 
 
 load_dotenv(override=True)
@@ -124,6 +124,9 @@ class Agent(BaseModel):
         Similar to the LLM set up, when the agent has tools, we will declare them using the Tool class.
         """
         from versionhq.tool.rag_tool import RagTool
+        from versionhq.tool.gpt.web_search import GPTToolWebSearch
+        from versionhq.tool.gpt.file_search import GPTToolFileSearch
+        from versionhq.tool.gpt.cup import GPTToolCUP
 
         if not self.tools:
             return self
@@ -131,7 +134,7 @@ class Agent(BaseModel):
         tool_list = []
         for item in self.tools:
             match item:
-                case RagTool() | BaseTool():
+                case RagTool() | BaseTool() | GPTToolCUP() | GPTToolFileSearch() | GPTToolWebSearch():
                     tool_list.append(item)
 
                 case Tool():
@@ -353,8 +356,8 @@ class Agent(BaseModel):
         response_format: Optional[Dict[str, Any]] = None,
         tools: Optional[List[InstanceOf[Tool]| InstanceOf[ToolSet] | Type[Tool]]] = None,
         tool_res_as_final: bool = False,
-        task: Any = None
-        ) -> Dict[str, Any]:
+        # task: Any = None
+        ) -> Tuple[str, UsageMetrics]:
         """
         Create formatted prompts using the developer prompt and the agent's backstory, then call the base model.
         - Execute the task up to `self.max_retry_limit` times in case of receiving an error or empty response.
@@ -364,6 +367,7 @@ class Agent(BaseModel):
         task_execution_counter = 0
         iterations = 0
         raw_response = None
+        usage = UsageMetrics()
 
         try:
             if self._rpm_controller and self.max_rpm:
@@ -373,17 +377,17 @@ class Agent(BaseModel):
 
             if tool_res_as_final:
                 raw_response = self.func_calling_llm.call(messages=messages, tools=tools, tool_res_as_final=True)
-                task._usage.record_token_usage(token_usages=self.func_calling_llm._usages)
+                usage.record_token_usage(*self.func_calling_llm._usages)
             else:
                 raw_response = self.llm.call(messages=messages, response_format=response_format, tools=tools)
-                task._usage.record_token_usage(token_usages=self.llm._usages)
+                usage.record_token_usage(*self.llm._usages)
 
             task_execution_counter += 1
             Logger(**self._logger_config, filename=self.key).log(level="info", message=f"Agent response: {raw_response}", color="green")
-            return raw_response
+            return raw_response, usage
 
         except Exception as e:
-            task._usage.record_errors(type=ErrorType.API)
+            usage.record_errors(type=ErrorType.API)
             Logger(**self._logger_config, filename=self.key).log(level="error", message=f"An error occured. The agent will retry: {str(e)}", color="red")
 
             while not raw_response and task_execution_counter <= self.max_retry_limit:
@@ -392,12 +396,12 @@ class Agent(BaseModel):
                         self._rpm_controller.check_or_wait()
 
                     raw_response = self.llm.call(messages=messages, response_format=response_format, tools=tools)
-                    task._tokens = self.llm._tokens
+                    usage.record_token_usage(*self.llm._usages)
                     iterations += 1
 
                 task_execution_counter += 1
                 Logger(**self._logger_config, filename=self.key).log(level="info", message=f"Agent #{task_execution_counter} response: {raw_response}", color="green")
-                return raw_response
+                return raw_response, usage
 
             if not raw_response:
                 Logger(**self._logger_config, filename=self.key).log(level="error", message="Received None or empty response from the model", color="red")
@@ -421,6 +425,57 @@ class Agent(BaseModel):
                 self.llm_config = llm_config
 
         return self.set_up_llm()
+
+
+    def _sort_tools(self, task = None) -> Tuple[List[Any], List[Any], List[Any]]:
+        """Sorts agent and task tools by class."""
+
+        from versionhq.tool.rag_tool import RagTool
+        from versionhq.tool.gpt.web_search import GPTToolWebSearch
+        from versionhq.tool.gpt.file_search import GPTToolFileSearch
+        from versionhq.tool.gpt.cup import GPTToolCUP
+
+        all_tools = []
+        if task: all_tools = task.tools + self.tools if task.can_use_agent_tools else task.tools
+        else: all_tools = self.tools
+
+        rag_tools, gpt_tools, tools = [], [], []
+        if all_tools:
+            for item in all_tools:
+                match item:
+                    case RagTool():
+                        rag_tools.append(item)
+
+                    case GPTToolCUP() | GPTToolFileSearch() | GPTToolWebSearch():
+                        gpt_tools.append(item)
+
+                    case Tool() | BaseTool() | ToolSet():
+                        tools.append(item)
+
+        return rag_tools, gpt_tools, tools
+
+
+    def _handle_gpt_tools(self, gpt_tools: list[Any] = None) -> Any: # TaskOutput
+        """Generates k, v pairs from multiple GPT tool results and stores them in TaskOutput class."""
+
+        from versionhq.task.model import TaskOutput
+        from versionhq._utils import UsageMetrics
+
+        if not gpt_tools:
+            return
+
+        tool_res = dict()
+        annotation_set = dict()
+        total_usage = UsageMetrics()
+
+        for i, item in enumerate(gpt_tools):
+            raw, annotations, usage = item.run()
+            tool_res.update({ str(i): raw })
+            annotation_set.update({ str(i): annotations })
+            total_usage.aggregate(metrics=usage)
+
+        res = TaskOutput(raw=str(tool_res), tool_output=tool_res, usage=total_usage, annotations=annotation_set)
+        return res
 
 
     def update(self, **kwargs) -> Self:
@@ -482,15 +537,21 @@ class Agent(BaseModel):
             image: str = None,
             file: str = None,
             audio: str = None
-        ) -> Tuple[Any | None, Any | None]:
+        ) -> Any:
         """
         Defines and executes a task, then returns TaskOutput object with the generated task.
         """
 
-        if not self.role:
-            return None
-
         from versionhq.task.model import Task
+
+        if not self.role:
+            return None, None
+
+        _, gpt_tools, _ = self._sort_tools()
+
+        if gpt_tools and tool_res_as_final == True:
+            res = self._handle_gpt_tools(gpt_tools=gpt_tools)
+            return res
 
         class Output(BaseModel):
             result: str
@@ -503,44 +564,47 @@ class Agent(BaseModel):
             image=image, #REFINEME - query memory/knowledge or self create
             file=file,
             audio=audio,
+            can_use_agent_tools=True if self.tools else False,
         )
         res = task.execute(agent=self, context=context)
-        return res, task
+        return res
 
 
-    def execute_task(self, task, context: Optional[Any] = None, task_tools: Optional[List[Tool | ToolSet]] = list()) -> str:
+    def execute_task(self, task, context: Optional[Any] = None) -> Tuple[str, str, Any, UsageMetrics]:
         """Handling task execution."""
 
-        from versionhq.task.model import Task
-        from versionhq.tool.rag_tool import RagTool
         from versionhq._prompt.model import Prompt
+        from versionhq.task.model import Task
 
         task: InstanceOf[Task] = task
-        all_tools: Optional[List[Tool | ToolSet | RagTool | Type[BaseTool]]] = task_tools + self.tools if task.can_use_agent_tools else task_tools
-        rag_tools: Optional[List[RagTool]] = [item for item in all_tools if isinstance(item, RagTool)] if all_tools else None
-        tools: Optional[List[Tool | ToolSet | RagTool | Type[BaseTool]]] = [item for item in all_tools if not isinstance(item, RagTool)] if all_tools else None
+        rag_tools, gpt_tools, tools = self._sort_tools(task=task)
+        raw_response = ""
+        user_prompt, dev_prompt = "", ""
+        usage = UsageMetrics(id=task.id)
 
         if self.max_rpm and self._rpm_controller:
             self._rpm_controller._reset_request_count()
 
-        user_prompt, dev_prompt, messages = Prompt(task=task, agent=self, context=context).format_core(rag_tools=rag_tools)
+        if task.tool_res_as_final == True and gpt_tools:
+            self._times_executed += 1
+            res = self._handle_gpt_tools(gpt_tools=gpt_tools)
+            return user_prompt, dev_prompt, res, res.usage
+
+        user_prompt, dev_prompt, messages = Prompt(task=task, agent=self, context=context).format_core(rag_tools=rag_tools, gpt_tools=gpt_tools)
 
         try:
             self._times_executed += 1
-            raw_response = self._invoke(
+            raw_response, usage = self._invoke(
                 messages=messages,
                 response_format=task._structure_response_format(model_provider=self.llm.provider),
                 tools=tools,
                 tool_res_as_final=task.tool_res_as_final,
-                task=task
             )
-            if raw_response:
-                task._usage.successful_requests += 1
 
         except Exception as e:
             self._times_executed += 1
             Logger(**self._logger_config, filename=self.key).log(level="error", message=f"The agent failed to execute the task. Error: {str(e)}", color="red")
-            user_prompt, dev_prompt, raw_response = self.execute_task(task, context, task_tools)
+            user_prompt, dev_prompt, raw_response, usage = self.execute_task(task, context)
 
             if self._times_executed > self.max_retry_limit:
                 Logger(**self._logger_config, filename=self.key).log(level="error", message=f"Max retry limit has exceeded.", color="red")
@@ -549,7 +613,7 @@ class Agent(BaseModel):
         if self.max_rpm and self._rpm_controller:
             self._rpm_controller.stop_rpm_counter()
 
-        return user_prompt, dev_prompt, raw_response
+        return user_prompt, dev_prompt, raw_response, usage
 
 
     @property

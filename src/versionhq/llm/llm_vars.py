@@ -80,7 +80,6 @@ ENV_VARS = {
 }
 
 
-
 """
 Max input token size by the model.
 """
@@ -131,7 +130,6 @@ LLM_CONTEXT_WINDOW_SIZES = {
 """
 Params for litellm.completion().
 """
-
 PARAMS = {
     "litellm": [
         "api_base",

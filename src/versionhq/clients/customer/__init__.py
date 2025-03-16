@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import IntEnum
 
 
-class Status(str, Enum):
+class Status(IntEnum):
     NOT_ASSIGNED = 0
     READY_TO_DEPLOY = 1
     ACTIVE_ON_WORKFLOW = 2

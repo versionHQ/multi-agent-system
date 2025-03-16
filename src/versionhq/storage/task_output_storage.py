@@ -147,8 +147,8 @@ class TaskOutputStorageHandler:
             description=str(task.description),
             raw=str(task.output.raw),
             responsible_agents=str(task.processed_agents),
-            tokens=task._usage.total_tokens,
-            latency=task._usage.latency,
+            tokens=task.output.usage.total_tokens,
+            latency=task.output.usage.latency,
             score=task.output.aggregate_score if task.output.aggregate_score else "None",
         )
         self.storage.add(task=task, output=output_to_store, inputs=inputs)

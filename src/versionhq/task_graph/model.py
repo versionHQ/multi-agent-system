@@ -1,15 +1,16 @@
 import matplotlib
 matplotlib.use('agg')
 
-import enum
 import uuid
-import networkx as nx
-import matplotlib.pyplot as plt
+import datetime
+from enum import IntEnum, Enum
 from abc import ABC
 from concurrent.futures import Future
 from typing import List, Any, Optional, Callable, Dict, Type, Tuple
 from typing_extensions import Self
 
+import networkx as nx
+import matplotlib.pyplot as plt
 from pydantic import BaseModel, InstanceOf, Field, UUID4, field_validator, model_validator
 from pydantic_core import PydanticCustomError
 
@@ -18,13 +19,13 @@ from versionhq.task.model import Task, TaskOutput, Evaluation, ResponseField
 from versionhq._utils import Logger, UsageMetrics, ErrorType
 
 
-class ReformTriggerEvent(enum.Enum):
+class ReformTriggerEvent(IntEnum):
     USER_INPUT = 1 # ask human
     TEST_TIME_COMPUTATION = 2 # mismatch between actual responses and expected outcome
     ERROR_DETECTION = 3 # response error
 
 
-class ConditionType(enum.Enum):
+class ConditionType(IntEnum):
     AND = 1
     OR = 2
 
@@ -71,7 +72,7 @@ class Condition(BaseModel):
             return bool(len([item for item in cond_list if item == True]) == len(cond_list))
 
 
-class TaskStatus(enum.Enum):
+class TaskStatus(IntEnum):
     """
     Enum to track the task execution status
     """
@@ -84,7 +85,7 @@ class TaskStatus(enum.Enum):
     ERROR = 7       # tried task execute but returned error. resupmtion follows edge weights and agent settings
 
 
-class DependencyType(enum.Enum):
+class DependencyType(str, Enum):
     """
     Concise enumeration of the edge type.
     """
@@ -393,14 +394,13 @@ class Graph(ABC, BaseModel):
 
 
 class TaskGraph(Graph):
-    _usage: Optional[UsageMetrics] = None
-
     id: UUID4 = Field(default_factory=uuid.uuid4, frozen=True)
     should_reform: bool = False
     reform_trigger_event: Optional[ReformTriggerEvent] = None
     outputs: Dict[str, TaskOutput] = Field(default_factory=dict, description="stores node identifier and TaskOutput")
     concl_response_schema: Optional[List[ResponseField] | Type[BaseModel]] = Field(default=None, description="stores final response schema in Pydantic class or response fields")
     concl: Optional[TaskOutput] = Field(default=None, description="stores the final or latest conclusion of the entire task graph")
+    usage: Optional[UsageMetrics] = None
 
 
     def _save(self, title: str, abs_file_path: str = None) -> None:
@@ -420,18 +420,6 @@ class TaskGraph(Graph):
             Logger().log(level="error", message=f"Failed to save the graph {str(self.id)}: {str(e)}", color="red")
 
 
-    def _handle_usage(self) -> None:
-        """Returns total tokens and latency spended for the graph execution."""
-        if not self.nodes:
-            return None
-
-        self._usage = self._usage if self._usage else UsageMetrics(id=self.id)
-
-        for node in self.nodes.values():
-            if node.task and node.task._usage:
-                self._usage.aggregate(metrics=node.task._usage)
-
-
     def _handle_human_input(self) -> str | None:
         """Handles input from human."""
         request = None
@@ -448,10 +436,25 @@ class TaskGraph(Graph):
                 Logger().log(message=f"Ok. regenerating the graph based on your input: ', {request}", level="info", color="blue")
             else:
                 Logger().log(message="Cannot recognize your request.", level="error", color="red")
-                self._usage = self._usage if self._usage else UsageMetrics(id=self.id)
-                self._usage.record_errors(type=ErrorType.HUMAN_INTERACTION)
+                self.usage = self.usage if self.usage else UsageMetrics(id=self.id)
+                self.usage.record_errors(type=ErrorType.HUMAN_INTERACTION)
 
         return request
+
+
+    def _handle_usage(self, start_dt: datetime = None, end_dt: datetime = None) -> UsageMetrics:
+        usage = self.usage if self.usage else UsageMetrics(id=self.id)
+
+        if self.outputs:
+            for item in self.outputs.values():
+                if isinstance(item.usage, UsageMetrics):
+                    usage = usage.aggregate(metrics=item.usage)
+
+        if start_dt and end_dt:
+            usage.record_latency(start_dt, end_dt)
+
+        self.usage = usage
+        return usage
 
 
     def add_task(self, task: Node | Task) -> Node:
@@ -596,6 +599,7 @@ class TaskGraph(Graph):
         """
 
         Logger().log(color="blue", message=f"Start to activate the graph: {str(self.id)}", level="info")
+        start_dt = datetime.datetime.now()
 
         if target:
             if not [k for k in self.nodes.keys() if k == target]:
@@ -659,7 +663,6 @@ class TaskGraph(Graph):
                     node_identifier = edge.target.identifier
                     self.outputs.update({ node_identifier: res })
 
-
             if self.should_reform:
                 target = [k for k in self.outputs.keys()][-1] if self.outputs else self.find_start_nodes()[0].identifier if self.find_start_nodes() else None
 
@@ -670,8 +673,9 @@ class TaskGraph(Graph):
 
             self.concl = res
             self.concl_response_schema = self.concl_response_schema if self.concl_response_schema else res.pydantic.__class__ if res.pydantic else None
-             # last_task_output = [v for v in self.outputs.values()][len([v for v in self.outputs.values()]) - 1] if [v for v in self.outputs.values()] else None
-            self._handle_usage()
+
+            end_dt = datetime.datetime.now()
+            self._handle_usage(start_dt, end_dt)
             return res, self.outputs
 
 

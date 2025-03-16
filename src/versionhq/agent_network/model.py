@@ -1,7 +1,6 @@
 import uuid
 import warnings
-from enum import Enum
-from concurrent.futures import Future
+from enum import IntEnum
 from hashlib import md5
 from typing import Any, Dict, List, Callable, Optional, Tuple
 from typing_extensions import Self
@@ -30,7 +29,7 @@ GenerateSchema.match_type = match_type
 warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")
 
 
-class Formation(str, Enum):
+class Formation(IntEnum):
     SOLO = 1
     SUPERVISING = 2
     SQUAD = 3
@@ -38,7 +37,7 @@ class Formation(str, Enum):
     HYBRID = 10
 
 
-class TaskHandlingProcess(str, Enum):
+class TaskHandlingProcess(IntEnum):
     """
     A class representing task handling processes to tackle multiple tasks.
     When the agent network has multiple tasks that connect with edges, follow the edge conditions.

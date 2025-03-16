@@ -7,10 +7,9 @@ from typing_extensions import Self
 
 from pydantic import BaseModel, Field, model_validator, field_validator, UUID4, PrivateAttr
 from pydantic_core import PydanticCustomError
-
 from composio import ComposioToolSet
 
-from versionhq.tool.composio_tool_vars import ComposioAppName, ComposioAuthScheme, composio_app_set, ComposioStatus, ComposioAction
+from versionhq.tool.composio.params import ComposioAppName, ComposioAuthScheme, composio_app_set, ComposioStatus, ComposioAction
 from versionhq.tool.cache_handler import CacheHandler
 from versionhq._utils.logger import Logger
 
@@ -22,7 +21,7 @@ DEFAULT_USER_ID = os.environ.get("DEFAULT_USER_ID", None)
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", None)
 
 
-class ComposioHandler(ABC, BaseModel):
+class ComposioBaseTool(ABC, BaseModel):
     """
     A class to handle connecting account with Composio and executing actions using Composio ecosystem.
     `connected_account_id` is set up per `app_name` to call the actions on the given app. i.e., salesforce
@@ -78,8 +77,8 @@ class ComposioHandler(ABC, BaseModel):
         """
         Composio toolset on LangChain for action execution using LLM.
         """
-        from composio_langchain import ComposioToolSet
-        return ComposioToolSet(api_key=os.environ.get("COMPOSIO_API_KEY"), metadata={**metadata})
+        from composio_langchain import ComposioBaseToolSet
+        return ComposioBaseToolSet(api_key=os.environ.get("COMPOSIO_API_KEY"), metadata={**metadata})
 
 
     def _connect(

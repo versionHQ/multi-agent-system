@@ -22,7 +22,7 @@ tags:
 | **`pre_launch_callbacks`**    | List[Callable[..., Any]]    | list()                          | Stores callbacks to run before the network launch.    |
 | **`post_launch_callbacks`**   | List[Callable[..., Any]]    | list()                          | Stores callbacks to run after the network launch.     |
 | **`step_callbacks`**          | Callable[..., Any]          | None                            | Stores callbacks to run at every step of each member agent takes during the activation. |
-| **`cache`**                   | bool                        | True                            | Whether to store cache.                               |
+| **`cache`**                   | bool                        | True                            | Whether to store cache. |
 | **`execution_logs`**          |  List[Dict[str, Any]]       | list()                          | Stores a list of execution logs of all the tasks in the network. |
 
 
@@ -50,13 +50,13 @@ tags:
 
 ### Variable
 
-| <div style="width:200px">**Variable**</div> | **Data Type** | **Default** | **Description**                                                             |
-| :---                        | :---                          | :---        |  :---                                                                       |
-| **`agent`**                 | InstanceOf[`Agent`]           | None        | Agent as a member                                                           |
-| **`is_manager`**            | bool                          | False       | Whether the member is a manager.                                            |
-| **`can_share_knowledge`**   | bool                          | True        | Whether the member can share its knowledge among the other network members. |
-| **`can_share_memory`**      | bool                          | True        | Whether the member can share its memories among the other network members.  |
-| **`tasks`**                 | List[InstanceOf[`Task`]]      | list()      | Assinged tasks.                                                             |
+| <div style="width:200px">**Variable**</div> | **Data Type** | **Default** | **Description** |
+| :---                        | :---                  | :---        |  :---               |
+| **`agent`**                 | InstanceOf[`Agent`]   | None        | Agent as a member   |
+| **`is_manager`**            | bool                  | False       | Whether the member is a manager.  |
+| **`can_share_knowledge`**   | bool                  | True        | Whether the member can share its knowledge among the other network members. |
+| **`can_share_memory`**      | bool                  | True        | Whether the member can share its memories among the other network members.  |
+| **`tasks`**                 | List[InstanceOf[`Task`]] | list()   | Assinged tasks.     |
 
 
 ### Properties
@@ -109,7 +109,7 @@ tags:
 | :---  | :--- | :--- | :--- |
 | **`update`** | **kwargs: Any  | Self | Updates agents with given kwargs. Invalid keys will be ignored. |
 | **`start`** | context: Any = None <br> tool_res_as_final: bool = False  | `TaskOutput` \| None  | Starts to operate the agent. |
-| **`execute_task`** | task: [Task] <br> context: Any = None <br> task_tools: Optional[List[Tool \| ToolSet]] = list() | str | Returns response from the model in plane text format. |
+| **`execute_task`** | task: [Task] <br> context: Any = None | Tuple[str, str, Any, UsageMetrics] | Returns response from the model in plane text format. |
 
 
 ### Properties
@@ -122,7 +122,7 @@ tags:
 ## ENUM `Formation`
 
 ```python
-class Formation(str, Enum):
+class Formation(IntEnum):
     SOLO = 1
     SUPERVISING = 2
     SQUAD = 3
@@ -133,7 +133,7 @@ class Formation(str, Enum):
 ## ENUM `TaskHandlingProcess`
 
 ```python
-class TaskHandlingProcess(str, Enum):
+class TaskHandlingProcess(IntEnum):
     HIERARCHY = 1
     SEQUENTIAL = 2
     CONSENSUAL = 3

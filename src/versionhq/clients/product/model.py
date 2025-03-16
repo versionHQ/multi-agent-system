@@ -1,11 +1,11 @@
 import uuid
-from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Callable, Type, Optional, get_args, get_origin
+from abc import ABC
+from typing import Optional, List
 
-from pydantic import UUID4, InstanceOf, BaseModel, ConfigDict, Field, create_model, field_validator, model_validator
+from pydantic import UUID4, BaseModel, Field, field_validator, model_validator
 from pydantic_core import PydanticCustomError
 
-from versionhq.tool.composio_tool_vars import ComposioAppName
+from versionhq.tool.composio.params import ComposioAppName
 
 
 class ProductProvider(ABC, BaseModel):

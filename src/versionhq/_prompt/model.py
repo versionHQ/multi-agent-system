@@ -4,7 +4,7 @@ from textwrap import dedent
 
 from pydantic import InstanceOf, BaseModel
 
-from versionhq._utils import is_valid_url
+from versionhq._utils import is_valid_url, convert_img_url
 
 
 class Prompt:
@@ -99,12 +99,9 @@ Ref. Output image: {output_formats_to_follow}
         content_messages = {}
 
         if self.task.image:
-            with open(self.task.image, "rb") as file:
-                content = file.read()
-                if content:
-                    encoded_file = base64.b64encode(content).decode("utf-8")
-                    img_url = f"data:image/jpeg;base64,{encoded_file}"
-                    content_messages.update({ "type": "image_url", "image_url": { "url": img_url }})
+            img_url = convert_img_url(self.task.image)
+            if img_url:
+                content_messages.update({ "type": "image_url", "image_url": { "url": img_url }})
 
         if self.task.file:
             if is_valid_url(self.task.file):
@@ -146,7 +143,7 @@ Ref. Output image: {output_formats_to_follow}
         return "\n".join(task_slices)
 
 
-    def format_core(self, rag_tools: List[Any] = None) -> Tuple[str, str, List[Dict[str, str]]]:
+    def format_core(self, rag_tools: List[Any] = None, gpt_tools: List[Any] = None) -> Tuple[str, str, List[Dict[str, str]]]:
         """Formats prompt messages sent to the LLM, then returns task prompt, developer prompt, and messages."""
 
         from versionhq.knowledge._utils import extract_knowledge_context
@@ -167,6 +164,12 @@ Ref. Output image: {output_formats_to_follow}
                 rag_tool_context = item.run(agent=self.agent, query=self.task.description)
                 if rag_tool_context:
                     user_prompt += ",".join(rag_tool_context) if isinstance(rag_tool_context, list) else str(rag_tool_context)
+
+        if gpt_tools:
+            for item in gpt_tools:
+                raw, _, _ = item.run()
+                if raw:
+                    user_prompt += str(raw)
 
         if self.agent.with_memory == True:
             contextual_memory = ContextualMemory(

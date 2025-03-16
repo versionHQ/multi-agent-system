@@ -14,7 +14,7 @@ def test_pfg():
         other_consideration: str
 
     main_task = Task(description="plan a day trip to Costa Rica", response_schema=Travel)
-    agent = Agent(llm="gemini-2.0", role="Demo Agent")
+    agent = Agent(llm="gemini-2.0", role="Demo Agent", maxit=1)
     prompt  = Prompt(task=main_task, agent=agent, context=["test", "test2"])
     pfg = PromptFeedbackGraph(prompt=prompt)
     assert pfg.prompts["0"] == prompt
