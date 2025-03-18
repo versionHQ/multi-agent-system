@@ -88,6 +88,7 @@ class GPTToolFileSearch:
     max_num_results: int = 2
     include: List[str] = ["output[*].file_search_call.search_results"]
     filters: Optional[FilterSchema] = None
+    _usage: UsageMetrics = UsageMetrics()
 
     def __init__(
             self,
@@ -120,7 +121,7 @@ class GPTToolFileSearch:
     def run(self) -> Tuple[str, List[Dict[str, Any]], UsageMetrics] | None:
         raw_res = ""
         annotations = list()
-        usage = UsageMetrics()
+        usage = self._usage if self._usage else UsageMetrics()
         start_dt = datetime.datetime.now()
 
         try:
@@ -138,6 +139,7 @@ class GPTToolFileSearch:
 
         end_dt = datetime.datetime.now()
         usage.record_latency(start_dt=start_dt, end_dt=end_dt)
+        self._usage = usage
         return raw_res, annotations, usage
 
 

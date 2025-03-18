@@ -193,7 +193,8 @@ class GPTToolCUA:
                     match item.type:
                         case "reasoning":
                             raw_res.update(dict(reasoning=item.summary[0].text))
-                            self._response_ids.append(item.id)
+                            if item.id and item.id.startwith('rs'):
+                                self._response_ids.append(item.id)
                         case "computer_call":
                             raw_res.update(dict(action=item.action))
                             # self._response_ids.append(item.id)
@@ -227,8 +228,8 @@ class GPTToolCUA:
                     return None, None, None
 
                 page.goto(self.web_url)
-
                 res, _, usage = self.run()
+                self._usage = usage
                 actions = [v for k, v in res.items() if k =="action"] if res else []
                 action = actions[0] if actions else None
                 start_dt = datetime.datetime.now()
@@ -238,6 +239,7 @@ class GPTToolCUA:
                         self._handle_model_action(page=page, action=action)
                         _, screenshot_base64 = self._take_screenshot(page=page)
                         res, _, usage = self.run(screenshot=screenshot_base64)
+                        self._usage.agggregate(metrics=usage)
                         if not res:
                             usage.record_errors(type=ErrorType.API)
                             break
@@ -247,15 +249,15 @@ class GPTToolCUA:
                         if not action:
                             break
                 else:
-                    usage.record_errors(type=ErrorType.TOOL)
+                    self._usage.record_errors(type=ErrorType.TOOL)
 
         except Exception as e:
             self._logger.log(message=f"Failed to execute. {str(e)}", color="red", level="error")
 
         end_dt = datetime.datetime.now()
-        usage.record_latency(start_dt=start_dt, end_dt=end_dt)
+        self._usage.record_latency(start_dt=start_dt, end_dt=end_dt)
         # browser.close()
-        return res, _, usage
+        return res, _, self._usage
 
 
     @property

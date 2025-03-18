@@ -17,6 +17,7 @@ class GPTToolWebSearch:
     region: str = None # "London"
     search_content_size: str = GPTSizeEnum.MEDIUM.value
     _user_location: Optional[Dict[str, str]] = None
+    _usage: UsageMetrics = UsageMetrics()
 
 
     def __init__(
@@ -53,7 +54,7 @@ class GPTToolWebSearch:
 
         raw_res = ""
         annotations = list()
-        usage = UsageMetrics()
+        usage = self._usage if self._usage else UsageMetrics()
         start_dt = datetime.datetime.now()
 
         try:
@@ -69,6 +70,7 @@ class GPTToolWebSearch:
 
         end_dt = datetime.datetime.now()
         usage.record_latency(start_dt=start_dt, end_dt=end_dt)
+        self._usage = usage
         return raw_res, annotations, usage
 
 

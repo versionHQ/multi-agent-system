@@ -45,6 +45,7 @@ jobs:
           uv pip install --upgrade pip pytest
           uv lock --upgrade
           uv sync --all-extras --no-extra pygraphviz
+          playwright install
 
       - name: Pytest
         run: uv run pytest tests -vv --cache-clear

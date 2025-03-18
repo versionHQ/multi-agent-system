@@ -9,7 +9,6 @@ def test_gpt_cua():
 
     params = dict(
         user_prompt="test",
-        # img_url="/sample.com",
         reasoning_effort="medium",
         browser="firefox",
         tools=vhq.CUAToolSchema(display_width=500, display_height=300, environment="mac", type="computer_use_preview")
@@ -28,7 +27,7 @@ def test_gpt_cua():
     assert tool.schema is not None
 
     raw, _, usage = tool.run()
-    assert raw is not None if usage.total_errors == 0 else raw == list()
+    assert raw is not None if usage.total_errors == 0 else raw == dict()
 
     if raw:
         assert isinstance(usage, UsageMetrics)
@@ -48,6 +47,7 @@ def test_gpt_web_search():
     assert tool.model == "gpt-4o"
     assert tool.input == params["input"]
     assert tool._user_location == None
+    assert isinstance(tool._usage, UsageMetrics)
     assert tool.search_content_size == "high"
     assert tool.schema is not None
 
@@ -72,6 +72,7 @@ def test_gpt_file_search():
     tool = vhq.GPTToolFileSearch(**params)
     assert tool.model == "gpt-4o"
     assert tool.input == params["input"]
+    assert isinstance(tool._usage, UsageMetrics)
     assert tool.vector_store_ids == [params["vector_store_ids"]]
     assert tool.max_num_results == params["max_num_results"]
     assert tool.schema is not None
