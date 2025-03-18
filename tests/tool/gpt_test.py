@@ -4,19 +4,22 @@ from versionhq._utils import UsageMetrics
 from versionhq._prompt.model import Prompt
 
 
-def test_gpt_cup():
+def test_gpt_cua():
     import versionhq as vhq
 
     params = dict(
         user_prompt="test",
-        img_url="/sample.com",
+        # img_url="/sample.com",
         reasoning_effort="medium",
-        tools=vhq.CUPToolSchema(display_width=500, display_height=300, environment="mac", type="computer_use_preview")
+        browser="firefox",
+        tools=vhq.CUAToolSchema(display_width=500, display_height=300, environment="mac", type="computer_use_preview")
     )
-    tool = vhq.GPTToolCUP(**params)
+    tool = vhq.GPTToolCUA(**params)
 
     assert tool.user_prompt == params["user_prompt"]
     assert tool.img_url is None
+    assert tool.web_url is not None
+    assert tool.browser == params["browser"]
     assert tool.reasoning_effort == "medium"
     assert isinstance(tool.tools, list)
     assert tool.tools[0].display_width == 500
@@ -25,9 +28,16 @@ def test_gpt_cup():
     assert tool.schema is not None
 
     raw, _, usage = tool.run()
-    assert raw is not None if usage.total_errors == 0 else raw is ""
-    assert isinstance(usage, UsageMetrics)
-    assert usage.total_tokens is not None
+    assert raw is not None if usage.total_errors == 0 else raw == list()
+
+    if raw:
+        assert isinstance(usage, UsageMetrics)
+        assert usage.total_tokens > 0
+        assert usage.latency > 0
+
+    with patch.object(vhq.GPTToolCUA, "run", return_value=(dict(), None, UsageMetrics())) as mock_run:
+        tool.invoke_playwright()
+        mock_run.assert_called()
 
 
 def test_gpt_web_search():
@@ -42,10 +52,13 @@ def test_gpt_web_search():
     assert tool.schema is not None
 
     raw, annotations, usage = tool.run()
-    assert raw is not None if usage.total_errors == 0 else raw is ""
-    assert isinstance(annotations, list)
-    assert isinstance(usage, UsageMetrics)
-    assert usage.total_tokens is not None
+    assert raw is not None if usage.total_errors == 0 else raw == ""
+
+    if raw:
+        assert isinstance(annotations, list)
+        assert isinstance(usage, UsageMetrics)
+        assert usage.total_tokens > 0
+        assert usage.latency > 0
 
 
 def test_gpt_file_search():

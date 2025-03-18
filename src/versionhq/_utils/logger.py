@@ -51,7 +51,7 @@ class Logger(BaseModel):
     def log(self, level: str, message: str, color="yellow"):
         if self.verbose:
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            self._printer.print(f"\n{timestamp} - versionHQ [{level.upper()}]: {message}", color=color)
+            self._printer.print(f"\n{timestamp} - vhq [{level.upper()}]: {message}", color=color)
 
         self._save(level=level, message=message, filename=self.filename)
 

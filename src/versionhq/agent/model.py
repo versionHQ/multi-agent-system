@@ -126,7 +126,7 @@ class Agent(BaseModel):
         from versionhq.tool.rag_tool import RagTool
         from versionhq.tool.gpt.web_search import GPTToolWebSearch
         from versionhq.tool.gpt.file_search import GPTToolFileSearch
-        from versionhq.tool.gpt.cup import GPTToolCUP
+        from versionhq.tool.gpt.cua import GPTToolCUA
 
         if not self.tools:
             return self
@@ -134,7 +134,7 @@ class Agent(BaseModel):
         tool_list = []
         for item in self.tools:
             match item:
-                case RagTool() | BaseTool() | GPTToolCUP() | GPTToolFileSearch() | GPTToolWebSearch():
+                case RagTool() | BaseTool() | GPTToolCUA() | GPTToolFileSearch() | GPTToolWebSearch():
                     tool_list.append(item)
 
                 case Tool():
@@ -433,7 +433,7 @@ class Agent(BaseModel):
         from versionhq.tool.rag_tool import RagTool
         from versionhq.tool.gpt.web_search import GPTToolWebSearch
         from versionhq.tool.gpt.file_search import GPTToolFileSearch
-        from versionhq.tool.gpt.cup import GPTToolCUP
+        from versionhq.tool.gpt.cua import GPTToolCUA
 
         all_tools = []
         if task: all_tools = task.tools + self.tools if task.can_use_agent_tools else task.tools
@@ -446,7 +446,7 @@ class Agent(BaseModel):
                     case RagTool():
                         rag_tools.append(item)
 
-                    case GPTToolCUP() | GPTToolFileSearch() | GPTToolWebSearch():
+                    case GPTToolCUA() | GPTToolFileSearch() | GPTToolWebSearch():
                         gpt_tools.append(item)
 
                     case Tool() | BaseTool() | ToolSet():

@@ -25,7 +25,7 @@ from versionhq.tool.rag_tool import RagTool
 from versionhq.tool.cache_handler import CacheHandler
 from versionhq.tool.tool_handler import ToolHandler
 from versionhq.tool.composio.model import ComposioBaseTool
-from versionhq.tool.gpt.cup import GPTToolCUP, CUPToolSchema
+from versionhq.tool.gpt.cua import GPTToolCUA, CUAToolSchema
 from versionhq.tool.gpt.file_search import GPTToolFileSearch, FilterSchema
 from versionhq.tool.gpt.web_search import GPTToolWebSearch
 from versionhq.memory.contextual_memory import ContextualMemory
@@ -35,7 +35,7 @@ from versionhq.agent_network.formation import form_agent_network
 from versionhq.task_graph.draft import workflow
 
 
-__version__ = "1.2.4.7"
+__version__ = "1.2.4.8"
 __all__ = [
     "Agent",
 
@@ -90,8 +90,8 @@ __all__ = [
     "ToolHandler",
     "ComposioBaseTool",
 
-    "GPTToolCUP",
-    "CUPToolSchema",
+    "GPTToolCUA",
+    "CUAToolSchema",
     "GPTToolFileSearch",
     "FilterSchema",
     "GPTToolWebSearch",

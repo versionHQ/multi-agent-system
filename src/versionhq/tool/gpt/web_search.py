@@ -1,3 +1,4 @@
+import datetime
 from typing import Dict, Any, Optional, Tuple, List
 
 from versionhq.tool.gpt import openai_client
@@ -53,6 +54,7 @@ class GPTToolWebSearch:
         raw_res = ""
         annotations = list()
         usage = UsageMetrics()
+        start_dt = datetime.datetime.now()
 
         try:
             res = openai_client.responses.create(**self.schema)
@@ -62,10 +64,12 @@ class GPTToolWebSearch:
                 raw_res = res.output[1].content[0].text
                 annotations = [{ "title": item.title, "url": item.url } for item in res.output[1].content[0].annotations]
                 usage.record_token_usage(**res.usage.__dict__)
-            return raw_res, annotations, usage
         except:
             usage.record_errors(ErrorType.TOOL)
-            return raw_res, annotations, usage
+
+        end_dt = datetime.datetime.now()
+        usage.record_latency(start_dt=start_dt, end_dt=end_dt)
+        return raw_res, annotations, usage
 
 
     @property

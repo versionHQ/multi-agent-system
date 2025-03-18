@@ -7,14 +7,14 @@ class GPTSizeEnum(str, Enum):
     HIGH = "high"
 
 
-class GPTCUPEnvironmentEnum(str, Enum):
+class GPTCUAEnvironmentEnum(str, Enum):
     BROWSER = "browser"
     MAC = "mac"
     WINDOWS = "windows"
     UNBUNTU = "ubuntu"
 
 
-class GPTCUPTypeEnum(str, Enum):
+class GPTCUATypeEnum(str, Enum):
     COMPUTER_CALL_OUTPUT = "computer_call_output"
     COMPUTER_USE_PREVIEW = "computer_use_preview"
 

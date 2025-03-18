@@ -18,7 +18,7 @@ from versionhq.tool.model import Tool, ToolSet, BaseTool
 from versionhq.tool.rag_tool import RagTool
 from versionhq.tool.gpt.web_search import GPTToolWebSearch
 from versionhq.tool.gpt.file_search import GPTToolFileSearch
-from versionhq.tool.gpt.cup import GPTToolCUP
+from versionhq.tool.gpt.cua import GPTToolCUA
 from versionhq._utils import process_config, Logger, UsageMetrics, ErrorType
 
 
@@ -374,7 +374,7 @@ class Task(BaseModel):
             tool_list = []
             for item in self.tools:
                 match item:
-                    case Tool() | ToolSet() | BaseTool() | RagTool() | GPTToolCUP() | GPTToolFileSearch() | GPTToolWebSearch():
+                    case Tool() | ToolSet() | BaseTool() | RagTool() | GPTToolCUA() | GPTToolFileSearch() | GPTToolWebSearch():
                         tool_list.append(item)
                     case type(item, callable):
                         tool_list.append(Tool(func=item))
@@ -387,6 +387,8 @@ class Task(BaseModel):
                                 tool = RagTool(**item)
                             except:
                                 pass
+                        if tool:
+                            tool_list.append(tool)
                     case _:
                         pass
             self.tools = tool_list
