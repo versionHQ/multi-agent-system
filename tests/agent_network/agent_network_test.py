@@ -102,7 +102,7 @@ def test_launch_with_task_callback():
     Each task has callback with callback kwargs.
     """
     demo_list = []
-    def demo_callback(item: str) -> None:
+    def demo_callback(item: str, **kwargs) -> None:
         demo_list.append(item)
 
     agent_a = Agent(

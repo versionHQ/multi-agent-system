@@ -62,12 +62,13 @@ class GPTToolWebSearch:
             if not res:
                 usage.record_errors(ErrorType.TOOL)
             else:
-                raw_res = res.output[1].content[0].text
-                annotations = [{ "title": item.title, "url": item.url } for item in res.output[1].content[0].annotations]
-                usage.record_token_usage(**res.usage.__dict__)
+                content = res.output[0].content[0] if len(res.output) == 1 else res.output[1].content[0]
+                if content:
+                    raw_res = content.text
+                    annotations = [{ "title": item.title, "url": item.url } for item in content.annotations] if content.annotations else []
+                    usage.record_token_usage(**res.usage.__dict__)
         except:
             usage.record_errors(ErrorType.TOOL)
-
         end_dt = datetime.datetime.now()
         usage.record_latency(start_dt=start_dt, end_dt=end_dt)
         self._usage = usage

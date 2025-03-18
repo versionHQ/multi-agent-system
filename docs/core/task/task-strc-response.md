@@ -177,10 +177,13 @@ class Main(BaseModel):
     main1: list[Any] # <= assume expecting to store Sub object.
     main2: dict[str, Any]
 
-def format_response(sub, main1, main2) -> Main:
+
+def format_response(sub, **kwargs) -> Main:
+    main1 = kwargs["main1"] if kwargs and "main1" in kwargs else None
     if main1:
         main1.append(sub)
-    main = Main(main1=main1, main2=main2)
+    main2 = kwargs["main2"] if kwargs and "main2" in kwargs else None
+    main = Main(main1=main1, main2=str(main2))
     return main
 
 # 3. Executes

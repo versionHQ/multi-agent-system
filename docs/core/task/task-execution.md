@@ -192,7 +192,7 @@ Callback results will be stored in `callback_output` filed of the `TaskOutput` o
 ```python
 import versionhq as vhq
 
-def callback_func(condition: str, test1: str):
+def callback_func(condition: str, test1: str, **kwargs):
     return f"Result: {test1}, condition added: {condition}"
 
 task = vhq.Task(

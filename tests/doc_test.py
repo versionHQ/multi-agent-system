@@ -21,9 +21,11 @@ def test_doc_index_b():
         test1: str
         test2: list[str]
 
-    def dummy_func(message: str, test1: str, test2: list[str]) -> str:
-        return f"""{message}: {test1}, {", ".join(test2)}"""
-
+    def dummy_func(message: str, **kwargs) -> str:
+        test1 = kwargs["test1"] if kwargs and "test1" in kwargs else ""
+        test2 = kwargs["test2"] if kwargs and "test2" in kwargs else ""
+        if test1 and test2:
+            return f"""{message}: {test1}, {", ".join(test2)}"""
 
     agent = vhq.Agent(role="demo", maxit=1)
 
@@ -36,7 +38,7 @@ def test_doc_index_b():
 
     res = task.execute(agent=agent, context="amazing context to consider.")
     assert "Hi! Here is the result:" in res.callback_output
-    assert [getattr(res.pydantic, k) for k, v in CustomOutput.model_fields.items()]
+    assert [getattr(res.pydantic, k) for k in CustomOutput.model_fields.keys()]
 
 
 def test_doc_index_c():

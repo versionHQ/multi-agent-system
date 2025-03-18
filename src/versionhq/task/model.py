@@ -715,7 +715,7 @@ class Task(BaseModel):
                 sig = inspect.signature(self.callback)
                 valid_keys = [param.name for param in sig.parameters.values() if param.kind == param.POSITIONAL_OR_KEYWORD]
                 valid_kwargs = { k: kwargs[k] if  k in kwargs else None for k in valid_keys }
-                callback_res = self.callback(**valid_kwargs)
+                callback_res = self.callback(**valid_kwargs, **task_output.json_dict )
                 task_output.callback_output = callback_res
 
         end_dt = datetime.datetime.now()

@@ -59,9 +59,10 @@ def test_docs_core_task_d():
 
 
 def test_docs_core_task_e():
-    import versionhq as vhq
-    from pydantic import BaseModel
     from typing import Any
+
+    from pydantic import BaseModel
+    import versionhq as vhq
 
     # 1. Define and execute a sub task with Pydantic output.
     class Sub(BaseModel):
@@ -75,9 +76,11 @@ def test_docs_core_task_e():
         main1: list[Any]
         main2: str
 
-    def format_response(sub, main1, main2) -> Main:
+    def format_response(sub, **kwargs) -> Main:
+        main1 = kwargs["main1"] if kwargs and "main1" in kwargs else None
         if main1:
             main1.append(sub)
+        main2 = kwargs["main2"] if kwargs and "main2" in kwargs else None
         main = Main(main1=main1, main2=str(main2))
         return main
 
@@ -152,7 +155,7 @@ def test_docs_core_task_j():
 def test_docs_core_task_k():
     import versionhq as vhq
 
-    def callback_func(condition: str, test1: str):
+    def callback_func(condition: str, test1: str, **kwargs):
         return f"Result: {test1}, condition added: {condition}"
 
     task = vhq.Task(

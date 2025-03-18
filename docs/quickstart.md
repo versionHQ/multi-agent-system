@@ -44,9 +44,11 @@ class CustomOutput(BaseModel):
    test1: str
    test2: list[str]
 
-def dummy_func(message: str, test1: str, test2: list[str]) -> str:
-   return f"""{message}: {test1}, {", ".join(test2)}"""
-
+def dummy_func(message: str, **kwargs) -> str:
+   test1 = kwargs["test1"] if kwargs and "test1" in kwargs else ""
+   test2 = kwargs["test2"] if kwargs and "test2" in kwargs else ""
+   if test1 and test2:
+      return f"""{message}: {test1}, {", ".join(test2)}"""
 
 agent = vhq.Agent(role="demo manager")
 

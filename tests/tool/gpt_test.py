@@ -85,7 +85,7 @@ def test_gpt_file_search():
 def test_with_agent():
     import versionhq as vhq
 
-    tool_1 = vhq.GPTToolWebSearch(input="Search today's top news.", search_content_size = "high")
+    tool_1 = vhq.GPTToolWebSearch(input="Search today's top news.", search_content_size="high")
     tool_2 = vhq.GPTToolFileSearch(input="Search today's top news.", vector_store_ids="vs_dummy_id", max_num_results=5)
 
     agent = vhq.Agent(role="GPT Tool Handling", tools=[tool_1])
