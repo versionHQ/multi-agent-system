@@ -1,5 +1,4 @@
 import re
-import requests
 import gzip
 import http.client
 import urllib.request
@@ -69,7 +68,7 @@ class RagTool(BaseTool):
             text = self._sanitize_source_code(source_code=res)
             return text
 
-        except requests.exceptions.HTTPError as e:
+        except urllib.request.HTTPError as e:
             Logger().log(level="error", message=f"HTTP error occurred: {str(e)}", color="red")
             return None
 

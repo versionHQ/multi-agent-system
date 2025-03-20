@@ -125,7 +125,7 @@ A `TaskGraph` represents tasks as `nodes` and their execution dependencies as `e
 
 `Agent Networks` can handle `TaskGraph` objects by optimizing their formations.
 
-<img src="https://res.cloudinary.com/dfeirxlea/image/upload/v1739337639/pj_m_home/zfg4ccw1m1ww1tpnb0pa.png">
+<img src="https://res.cloudinary.com/dfeirxlea/image/upload/v1739337639/pj_m_home/zfg4ccw1m1ww1tpnb0pa.png" width="300px">
 
 <hr />
 
