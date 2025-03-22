@@ -8,19 +8,19 @@ PROVIDERS = {
     "openrouter": { "api_key": "OPENROUTER_API_KEY" },
     "anthropic": { "api_key": "ANTHROPIC_API_KEY" },
     "bedrock":  {
-        "AWS_ACCESS_KEY_ID": "AWS_ACCESS_KEY_ID",
-        "AWS_SECRET_ACCESS_KEY": "AWS_SECRET_ACCESS_KEY",
-        "AWS_REGION_NAME": "AWS_REGION_NAME",
+        "aws_access_key_id": "AWS_ACCESS_KEY_ID",
+        "aws_secret_access_key": "AWS_SECRET_ACCESS_KEY",
+        "aws_region_name": "AWS_REGION_NAME",
     },
     "bedrock/converse":  {
-        "AWS_ACCESS_KEY_ID": "AWS_ACCESS_KEY_ID",
-        "AWS_SECRET_ACCESS_KEY": "AWS_SECRET_ACCESS_KEY",
-        "AWS_REGION_NAME": "AWS_REGION_NAME",
+        "aws_access_key_id": "AWS_ACCESS_KEY_ID",
+        "aws_secret_access_key": "AWS_SECRET_ACCESS_KEY",
+        "aws_region_name": "AWS_REGION_NAME",
     },
     "sagemaker":  {
-        "AWS_ACCESS_KEY_ID": "AWS_ACCESS_KEY_ID",
-        "AWS_SECRET_ACCESS_KEY": "AWS_SECRET_ACCESS_KEY",
-        "AWS_REGION_NAME": "AWS_REGION_NAME",
+        "aws_access_key_id": "AWS_ACCESS_KEY_ID",
+        "aws_secret_access_key": "AWS_SECRET_ACCESS_KEY",
+        "aws_region_name": "AWS_REGION_NAME",
     },
     "huggingface": {
         "api_key": "HUGGINGFACE_API_KEY",
