@@ -376,8 +376,6 @@ class Task(BaseModel):
                 match item:
                     case Tool() | ToolSet() | BaseTool() | RagTool() | GPTToolCUA() | GPTToolFileSearch() | GPTToolWebSearch():
                         tool_list.append(item)
-                    case type(item, callable):
-                        tool_list.append(Tool(func=item))
                     case dict():
                         tool = None
                         try:
@@ -390,7 +388,11 @@ class Task(BaseModel):
                         if tool:
                             tool_list.append(tool)
                     case _:
-                        pass
+                        if type(item) == callable:
+                            tool_list.append(Tool(func=item))
+                        else:
+                            pass
+
             self.tools = tool_list
         return self
 

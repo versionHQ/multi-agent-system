@@ -12,7 +12,7 @@ import litellm
 from litellm import JSONSchemaValidationError, get_supported_openai_params
 from pydantic import BaseModel, Field, PrivateAttr, model_validator, ConfigDict
 
-from versionhq.llm.llm_vars import LLM_CONTEXT_WINDOW_SIZES, MODELS, PARAMS, PROVIDERS, ENDPOINT_PROVIDERS, ENV_VARS
+from versionhq.llm.llm_vars import LLM_CONTEXT_WINDOW_SIZES, TEXT_MODELS, MODEL_PARAMS, PROVIDERS, ENDPOINTS
 from versionhq.tool.model import Tool, ToolSet
 from versionhq._utils import Logger
 
@@ -85,8 +85,6 @@ class LLM(BaseModel):
     context_window_size: Optional[int] = Field(default=DEFAULT_CONTEXT_WINDOW_SIZE)
 
     # LiteLLM specific config
-    api_base: Optional[str] = Field(default=None, description="litellm specific field - api base of the model provider")
-    api_version: Optional[str] = Field(default=None)
     num_retries: Optional[int] = Field(default=1)
     context_window_fallback_dict: Optional[Dict[str, Any]] = Field(default=None, description="A mapping of model to use if call fails due to context window error")
     fallbacks: Optional[List[Any]]= Field(default=None, description="A list of model names + params to be used, in case the initial call fails")
@@ -117,7 +115,7 @@ class LLM(BaseModel):
                 self.provider = DEFAULT_MODEL_PROVIDER_NAME
 
             else:
-                provider_model_list = MODELS.get(self.provider)
+                provider_model_list = TEXT_MODELS.get(self.provider)
                 if provider_model_list:
                     self.model = provider_model_list[0]
                     self.provider = self.provider
@@ -129,29 +127,29 @@ class LLM(BaseModel):
         elif self.model and self.provider is None:
             model_match = [
                 item for item in [
-                    [val for val in v if val == self.model][0] for k, v in MODELS.items() if [val for val in v if val == self.model]
+                    [val for val in v if val == self.model][0] for k, v in TEXT_MODELS.items() if [val for val in v if val == self.model]
                 ] if item
             ]
             model_partial_match = [
                 item for item in [
-                    [val for val in v if val.find(self.model) != -1][0] for k, v in MODELS.items() if [val for val in v if val.find(self.model) != -1]
+                    [val for val in v if val.find(self.model) != -1][0] for k, v in TEXT_MODELS.items() if [val for val in v if val.find(self.model) != -1]
                 ] if item
             ]
-            provider_match = [k for k, v in MODELS.items() if k == self.model]
+            provider_match = [k for k, v in TEXT_MODELS.items() if k == self.model]
 
             if model_match:
                 self.model = model_match[0]
-                self.provider = [k for k, v in MODELS.items() if self.model in v][0]
+                self.provider = [k for k, v in TEXT_MODELS.items() if self.model in v][0]
 
             elif model_partial_match:
                 self.model = model_partial_match[0]
-                self.provider = [k for k, v in MODELS.items() if [item for item in v if item.find(self.model) != -1]][0]
+                self.provider = [k for k, v in TEXT_MODELS.items() if [item for item in v if item.find(self.model) != -1]][0]
 
             elif provider_match:
                 provider = provider_match[0]
-                if self.MODELS.get(provider):
+                if self.TEXT_MODELS.get(provider):
                     self.provider = provider
-                    self.model = self.MODELS.get(provider)[0]
+                    self.model = self.TEXT_MODELS.get(provider)[0]
                 else:
                     self.provider = DEFAULT_MODEL_PROVIDER_NAME
                     self.model = DEFAULT_MODEL_NAME
@@ -161,14 +159,14 @@ class LLM(BaseModel):
                 self.provider = DEFAULT_MODEL_PROVIDER_NAME
 
         else:
-            provider_model_list = MODELS.get(self.provider)
+            provider_model_list = TEXT_MODELS.get(self.provider)
             if self.model not in provider_model_list:
                 self._logger.log(level="warning", message=f"The provided model: {self._init_model_name} is not in the list. We will assign a default model.", color="yellow")
                 self.model = DEFAULT_MODEL_NAME
                 self.provider = DEFAULT_MODEL_PROVIDER_NAME
 
-        # trigger pass-through custom endpoint.
-        if self.provider in ENDPOINT_PROVIDERS:
+        # trigger passing through litellm and use original endpoint.
+        if self.provider in ENDPOINTS:
             self.endpoint_provider = self.provider
 
         return self
@@ -181,15 +179,12 @@ class LLM(BaseModel):
         """
         litellm.drop_params = True
 
+        self._set_credentials()
+
         if self.callbacks:
             self._set_callbacks(self.callbacks)
 
         self.context_window_size = self._get_context_window_size()
-
-        base_url_key_name = self.endpoint_provider.upper() + "_API_BASE" if self.endpoint_provider else None
-        if base_url_key_name:
-            self.base_url = os.environ.get(base_url_key_name)
-            self.api_base = self.base_url
 
         if self.llm_config:
             self._create_valid_params(config=self.llm_config)
@@ -201,26 +196,24 @@ class LLM(BaseModel):
         """
         Returns valid params incl. model + litellm original params) from the given config dict.
         """
-        valid_config, valid_keys = dict(), list()
+        valid_keys = list()
 
         if self.model:
             valid_keys = get_supported_openai_params(model=self.model, custom_llm_provider=self.endpoint_provider, request_type="chat_completion")
 
         if not valid_keys:
-            valid_keys = PARAMS.get("common")
+            valid_keys = MODEL_PARAMS.get("common")
 
-        valid_keys += PARAMS.get("litellm")
+        valid_keys += MODEL_PARAMS.get("litellm")
 
+        valid_config = dict()
         for item in valid_keys:
             if hasattr(self, item) and (getattr(self, item) or getattr(self, item) == False):
                 valid_config[item] = getattr(self, item)
-
             elif item in self.llm_config and (self.llm_config[item] or self.llm_config[item]==False):
                 valid_config[item] = self.llm_config[item]
-
             elif item in config and (config[item] or config[item] == False):
                 valid_config[item] = config[item]
-
             else:
                 pass
 
@@ -228,29 +221,22 @@ class LLM(BaseModel):
             if self.context_window_size and valid_config["max_tokens"] > self.context_window_size:
                 valid_config["max_tokens"] = self.context_window_size
 
-        if "model" in valid_config:
-            self.model = valid_config.pop("model")
-
         self.llm_config = valid_config
         return valid_config
 
 
-    def _set_env_vars(self) -> Dict[str, Any]:
-        if self.provider == "openai":
+    def _set_credentials(self) -> Dict[str, Any]:
+        cred = PROVIDERS.get(self.provider, None) if self.provider else None
+        if not cred:
             return {}
 
-        cred = dict()
-        env_vars = ENV_VARS.get(self.provider, None) if self.provider else None
-
-        if not env_vars:
-            return {}
-
-        for item in env_vars:
-            val = os.environ.get(item, None)
+        valid_cred = {}
+        for k, v in cred.items():
+            val = os.environ.get(v, None)
             if val:
-                cred[str(item).lower()] = val
+                valid_cred[str(k)] = val
 
-        return cred
+        return valid_cred
 
 
     def _supports_function_calling(self) -> bool:
@@ -310,7 +296,7 @@ class LLM(BaseModel):
 
             try:
                 res, tool_res = None, ""
-                cred = self._set_env_vars()
+                cred = self._set_credentials()
 
                 if self.provider == "gemini":
                     self.response_format = { "type": "json_object" } if not tools and self.model != "gemini/gemini-2.0-flash-thinking-exp" else None

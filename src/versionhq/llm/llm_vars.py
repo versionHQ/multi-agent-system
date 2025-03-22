@@ -2,22 +2,52 @@ from typing import Type
 
 JSON_URL = "https://raw.githubusercontent.com/BerriAI/litellm/main/model_prices_and_context_window.json"
 
-PROVIDERS = [
-    "openai",
-    "gemini",
-    "openrouter",
-    "anthropic",
-    "bedrock",
-    "bedrock/converse",
+PROVIDERS = {
+    "openai": { "api_key": "OPENAI_API_KEY" },
+    "gemini": { "api_key": "GEMINI_API_KEY" },
+    "openrouter": { "api_key": "OPENROUTER_API_KEY" },
+    "anthropic": { "api_key": "ANTHROPIC_API_KEY" },
+    "bedrock":  {
+        "AWS_ACCESS_KEY_ID": "AWS_ACCESS_KEY_ID",
+        "AWS_SECRET_ACCESS_KEY": "AWS_SECRET_ACCESS_KEY",
+        "AWS_REGION_NAME": "AWS_REGION_NAME",
+    },
+    "bedrock/converse":  {
+        "AWS_ACCESS_KEY_ID": "AWS_ACCESS_KEY_ID",
+        "AWS_SECRET_ACCESS_KEY": "AWS_SECRET_ACCESS_KEY",
+        "AWS_REGION_NAME": "AWS_REGION_NAME",
+    },
+    "sagemaker":  {
+        "AWS_ACCESS_KEY_ID": "AWS_ACCESS_KEY_ID",
+        "AWS_SECRET_ACCESS_KEY": "AWS_SECRET_ACCESS_KEY",
+        "AWS_REGION_NAME": "AWS_REGION_NAME",
+    },
+    "huggingface": {
+        "api_key": "HUGGINGFACE_API_KEY",
+        "base_url": "HUGGINGFACE_API_BASE",
+        "HF_ENDPOINT": "HF_ENDPOINT",
+    },
+    "azure":  {
+        "api_base": "AZURE_OPENAI_ENDPOINT",
+        "api_key":"AZURE_OPENAI_API_KEY",
+        "api_version": "AZURE_OPENAI_API_VERSION",
+    },
+    "azure_ai": {
+        "api_key": "AZURE_AI_API_KEY",
+        "base_url": "AZURE_AI_API_BASE",
+
+    }
+}
+
+ENDPOINTS = [
+    "azure", # endpoints must be aligned with the selected model.
+    "azure_ai", # endpoints must be aligned with the selected model.
     "huggingface",
 ]
 
-ENDPOINT_PROVIDERS = [
-    "huggingface",
-]
 
-
-MODELS = {
+# Resaoning, text gen,
+TEXT_MODELS = {
     "openai": [
         "gpt-4.5-preview-2025-02-27",
         "gpt-4",
@@ -63,36 +93,71 @@ MODELS = {
         "bedrock/cohere.command-text-v14",
         "bedrock/cohere.command-light-text-v14",
     ],
+    "azure": [
+        "azure/DeepSeek-V3",
+        "azure/DeepSeek-R1",
+        "azure/Llama-3.3-70B-Instruct",
+        "azure/Llama-3.2-11B-Vision-Instruct",
+        "azure/Meta-Llama-3.1-405B-Instruct",
+        "azure/Meta-Llama-3.1-8B-Instruct",
+        "azure/Llama-3.2-1B-Instruct",
+        "azure/Meta-Llama-3.1-70B",
+        "azure/Meta-Llama-3.1-8B",
+        "azure/Llama-3.2-3B-Instruct",
+        "azure/Meta-Llama-3-8B-Instruct",
+        "azure/Meta-Llama-3.1-70B-Instruct",
+        "azure/Llama-3.2-90B-Vision-Instruct",
+        "azure/Llama-3.2-3B",
+        "azure/Llama-3.2-1B",
+        "azure/mistral-large-latest",
+        "azure/mistral-large-2402",
+        "azure/command-r-plus",
+        "azure/o3-mini-2025-01-31",
+        "azure/o3-mini",
+        "azure/o1-mini",
+        "azure/Phi-4-mini-instruct",
+        "azure/Phi-4-multimodal-instruct",
+        "azure/Mistral-Large-2411",
+        "azure/Mistral-small"
+        "azure/mistral-small-2503",
+        "azure/Ministral-3B",
+        "azure/mistralai-Mixtral-8x22B-v0-1"
+        "azure/Cohere-rerank-v3.5",
+    ],
     "azure_ai": [
-        "azure_ai/deepseek-r1",
-        "azure_ai/mistral-large",
-        "azure_ai/mistral-small",
-        "azure_ai/Llama-3.2-11B-Vision-Instruct",
+        "azure_ai/DeepSeek-V3",
+        "azure_ai/DeepSeek-R1",
         "azure_ai/Llama-3.3-70B-Instruct",
+        "azure_ai/Llama-3.2-11B-Vision-Instruct",
+        "azure_ai/Meta-Llama-3.1-405B-Instruct",
+        "azure_ai/Meta-Llama-3.1-8B-Instruct",
+        "azure_ai/Llama-3.2-1B-Instruct",
+        "azure_ai/Meta-Llama-3.1-70B",
+        "azure_ai/Meta-Llama-3.1-8B",
+        "azure_ai/Llama-3.2-3B-Instruct",
+        "azure_ai/Meta-Llama-3-8B-Instruct",
+        "azure_ai/Meta-Llama-3.1-70B-Instruct",
         "azure_ai/Llama-3.2-90B-Vision-Instruct",
-        "azure_ai/Phi-4",
-        "azure_ai/Phi-3.5-mini-instruct",
-        "azure_ai/Phi-3.5-vision-instruct",
-        "azure_ai/Phi-3.5-MoE-instruct",
-        "azure_ai/cohere-rerank-v3-multilingual",
-        "azure_ai/cohere-rerank-v3-english",
-        "azure_ai/Cohere-embed-v3-english",
-        "azure_ai/Cohere-embed-v3-multilingual",
+        "azure_ai/Llama-3.2-3B",
+        "azure_ai/Llama-3.2-1B",
+        "azure_ai/mistral-large-latest",
+        "azure_ai/mistral-large-2402",
+        "azure_ai/command-r-plus",
+        "azure_ai/o3-mini-2025-01-31",
+        "azure_ai/o3-mini",
+        "azure_ai/o1-mini",
+        "azure_ai/Phi-4-mini-instruct",
+        "azure_ai/Phi-4-multimodal-instruct",
+        "azure_ai/Mistral-Large-2411",
+        "azure_ai/Mistral-small"
+        "azure_ai/mistral-small-2503",
+        "azure_ai/Ministral-3B",
+        "azure_ai/mistralai-Mixtral-8x22B-v0-1"
+        "azure_ai/Cohere-rerank-v3.5",
     ],
     "huggingface": [
         "huggingface/qwen/qwen2.5-VL-72B-Instruct",
     ],
-}
-
-
-ENV_VARS = {
-    "openai": ["OPENAI_API_KEY"],
-    "gemini": ["GEMINI_API_KEY"],
-    "anthropic": ["ANTHROPIC_API_KEY"],
-    "huggingface": ["HUGGINGFACE_API_KEY", ],
-    "bedrock": ["AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_REGION_NAME"],
-    "sagemaker": ["AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_REGION_NAME"],
-    "azure_ai": ["AZURE_AI_API_KEY", "AZURE_AI_API_BASE"],
 }
 
 
@@ -144,31 +209,27 @@ LLM_CONTEXT_WINDOW_SIZES = {
 
 
 """
-Params for litellm.completion().
+Model config related params for litellm.completion().
 """
-PARAMS = {
+MODEL_PARAMS = {
     "litellm": [
-        "api_base",
-        "api_version,",
         "num_retries",
         "context_window_fallback_dict",
         "fallbacks",
         "metadata",
-        "api_key",
     ],
     "common": [
-        "model",
-        "messages",
+        # "model",
+        # "messages",
+        # "stream",
+        "response_format",
         "temperature",
         "top_p",
         "max_tokens",
-        "stream",
         "tools",
         "tool_choice",
-        "response_format",
         "n",
         "stop",
-        # "base_url",
     ],
     "openai": [
         "timeout",
