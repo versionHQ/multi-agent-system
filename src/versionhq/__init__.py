@@ -35,7 +35,7 @@ from versionhq.agent_network.formation import form_agent_network
 from versionhq.task_graph.draft import workflow
 
 
-__version__ = "1.2.4.10"
+__version__ = "1.2.4.11"
 __all__ = [
     "Agent",
 

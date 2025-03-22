@@ -398,7 +398,7 @@ class Task(BaseModel):
 
 
     def _structure_response_format(self, data_type: str = "object", model_provider: str = "gemini") -> Dict[str, Any] | None:
-        """Structures `response_schema` into the LLM response format."""
+        """Structures `response_schema` to the LLM response format."""
 
         from versionhq.task.structured_response import StructuredOutput
 

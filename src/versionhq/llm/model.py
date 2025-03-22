@@ -9,7 +9,7 @@ from typing import Any, Dict, List, Optional
 from typing_extensions import Self
 
 import litellm
-from litellm import JSONSchemaValidationError, get_supported_openai_params
+from litellm import JSONSchemaValidationError, get_supported_openai_params, supports_response_schema
 from pydantic import BaseModel, Field, PrivateAttr, model_validator, ConfigDict
 
 from versionhq.llm.llm_vars import LLM_CONTEXT_WINDOW_SIZES, TEXT_MODELS, MODEL_PARAMS, PROVIDERS, ENDPOINTS
@@ -239,6 +239,13 @@ class LLM(BaseModel):
         return valid_cred
 
 
+    def _supports_response_schema(self) -> bool:
+        try:
+            return supports_response_schema(model=self.model, custom_llm_provider=self.endpoint_provider)
+        except:
+            return False
+
+
     def _supports_function_calling(self) -> bool:
         try:
             if self.model:
@@ -300,6 +307,8 @@ class LLM(BaseModel):
 
                 if self.provider == "gemini":
                     self.response_format = { "type": "json_object" } if not tools and self.model != "gemini/gemini-2.0-flash-thinking-exp" else None
+                elif response_format and "json_schema" in response_format:
+                    self.response_format = response_format  if self._supports_function_calling() else  { "type": "json_object" }
                 else:
                     self.response_format = response_format
 

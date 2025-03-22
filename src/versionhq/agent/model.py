@@ -356,7 +356,6 @@ class Agent(BaseModel):
         response_format: Optional[Dict[str, Any]] = None,
         tools: Optional[List[InstanceOf[Tool]| InstanceOf[ToolSet] | Type[Tool]]] = None,
         tool_res_as_final: bool = False,
-        # task: Any = None
         ) -> Tuple[str, UsageMetrics]:
         """
         Create formatted prompts using the developer prompt and the agent's backstory, then call the base model.

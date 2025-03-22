@@ -29,7 +29,7 @@ PROVIDERS = {
     },
     "azure":  {
         "api_base": "AZURE_OPENAI_ENDPOINT",
-        "api_key":"AZURE_OPENAI_API_KEY",
+        "api_key": "AZURE_OPENAI_API_KEY",
         "api_version": "AZURE_OPENAI_API_VERSION",
     },
     "azure_ai": {
