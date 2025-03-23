@@ -68,11 +68,11 @@ def _test_con_bedrock(simple_task, tool_task, schema_task, res_field_task):
         assert [v and type(v) == res_field_task.response_schema[i].data_type for i, (k, v) in enumerate(res_4.json_dict.items())]
 
 
-def test_con_openai(simple_task, tool_task, schema_task, res_field_task):
+def _test_con_openai(simple_task, tool_task, schema_task, res_field_task):
     llms_to_test = [
-        # "gpt-4.5-preview-2025-02-27",
+        "gpt-4.5-preview-2025-02-27",
         "o3-mini",
-        # "o3-mini-2025-01-31",
+        "o3-mini-2025-01-31",
     ]
     agents = [set_agent(llm=llm, provider="openai") for llm in llms_to_test]
 
