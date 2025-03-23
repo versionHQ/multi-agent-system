@@ -46,13 +46,15 @@ ENDPOINTS = [
 ]
 
 
-# Resaoning, text gen,
+# Resaoning and text generation models
 TEXT_MODELS = {
     "openai": [
         "gpt-4.5-preview-2025-02-27",
         "gpt-4",
         "gpt-4o",
         "gpt-4o-mini",
+        "o3-mini",
+        "o3-mini-2025-01-31",
         "o1-mini",
         "o1-preview",
     ],
@@ -171,6 +173,8 @@ LLM_CONTEXT_WINDOW_SIZES = {
     "gpt-4": 8192,
     "o1-preview": 128000,
     "o1-mini": 128000,
+    "o3-mini": 200000,
+    "o3-mini-2025-01-31": 200000,
 
     "gemini/gemini-2.0-flash-exp": 1048576,
     "gemini/gemini-2.0-flash": 1048576,

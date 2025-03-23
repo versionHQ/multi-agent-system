@@ -20,6 +20,8 @@ You can specify a model and integration platform from the list. Else, we'll use 
     "gpt-4",
     "gpt-4o",
     "gpt-4o-mini",
+    "o3-mini",
+    "o3-mini-2025-01-31",
     "o1-mini",
     "o1-preview",
 ],

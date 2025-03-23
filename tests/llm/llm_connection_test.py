@@ -12,8 +12,8 @@ from tests import Demo, demo_response_fields
 Test connection to the llm via endpoint provider or litellm.
 """
 
-def set_agent(llm: str) -> Agent:
-    agent = Agent(role="LLM Connection Tester", llm=llm, maxit=1, max_retry_limit=1, llm_config=dict(max_tokens=3000))
+def set_agent(llm: str, **kwargs) -> Agent:
+    agent = Agent(role="LLM Connection Tester", llm=llm, maxit=1, max_retry_limit=1, llm_config=dict(max_tokens=3000), **kwargs)
     return agent
 
 @pytest.fixture(scope='module')
@@ -68,11 +68,13 @@ def _test_con_bedrock(simple_task, tool_task, schema_task, res_field_task):
         assert [v and type(v) == res_field_task.response_schema[i].data_type for i, (k, v) in enumerate(res_4.json_dict.items())]
 
 
-def _test_con_gpt(simple_task, tool_task, schema_task, res_field_task):
+def test_con_openai(simple_task, tool_task, schema_task, res_field_task):
     llms_to_test = [
-        "gpt-4.5-preview-2025-02-27",
+        # "gpt-4.5-preview-2025-02-27",
+        "o3-mini",
+        # "o3-mini-2025-01-31",
     ]
-    agents = [set_agent(llm=llm) for llm in llms_to_test]
+    agents = [set_agent(llm=llm, provider="openai") for llm in llms_to_test]
 
     for agent in agents:
         assert isinstance(agent.llm, LLM)
