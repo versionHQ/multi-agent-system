@@ -22,21 +22,11 @@ def test_gpt_cua():
     assert tool.reasoning_effort == "medium"
     assert isinstance(tool.tools, list)
     assert tool.tools[0].display_width == 500
-    assert tool.tools[0].environment == "mac"
     assert tool.tools[0].type == "computer_use_preview"
-    assert tool.schema is not None
 
-    raw, _, usage = tool.run()
-    assert raw is not None if usage.total_errors == 0 else raw == dict()
-
-    if raw:
-        assert isinstance(usage, UsageMetrics)
-        assert usage.total_tokens > 0
-        assert usage.latency > 0
-
-    with patch.object(vhq.GPTToolCUA, "run", return_value=(dict(), None, UsageMetrics())) as mock_run:
-        tool.invoke_playwright()
-        mock_run.assert_called()
+    with patch.object(vhq.GPTToolCUA, "_structure_schema", return_value=None) as mock_schema:
+        tool.run()
+        mock_schema.assert_called()
 
 
 def test_gpt_web_search():

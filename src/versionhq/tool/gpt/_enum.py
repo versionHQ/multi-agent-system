@@ -7,7 +7,7 @@ class GPTSizeEnum(str, Enum):
     HIGH = "high"
 
 
-class GPTCUAEnvironmentEnum(str, Enum):
+class GPTCUABrowserEnum(str, Enum):
     BROWSER = "browser"
     MAC = "mac"
     WINDOWS = "windows"

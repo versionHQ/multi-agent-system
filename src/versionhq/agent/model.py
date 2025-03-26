@@ -454,14 +454,14 @@ class Agent(BaseModel):
         return rag_tools, gpt_tools, tools
 
 
-    def _handle_gpt_tools(self, gpt_tools: list[Any] = None) -> Any: # TaskOutput
+    def _handle_gpt_tools(self, gpt_tools: list[Any] = None) -> Any: # TaskOutput or None
         """Generates k, v pairs from multiple GPT tool results and stores them in TaskOutput class."""
 
         from versionhq.task.model import TaskOutput
         from versionhq._utils import UsageMetrics
 
         if not gpt_tools:
-            return
+            return None
 
         tool_res = dict()
         annotation_set = dict()
@@ -470,7 +470,9 @@ class Agent(BaseModel):
         for i, item in enumerate(gpt_tools):
             raw, annotations, usage = item.run()
             tool_res.update({ str(i): raw })
-            annotation_set.update({ str(i): annotations })
+
+            if annotations:
+                annotation_set.update({ str(i): annotations })
             total_usage.aggregate(metrics=usage)
 
         res = TaskOutput(raw=str(tool_res), tool_output=tool_res, usage=total_usage, annotations=annotation_set)

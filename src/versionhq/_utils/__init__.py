@@ -5,3 +5,4 @@ from versionhq._utils.is_valid_url import is_valid_url
 from versionhq._utils.usage_metrics import UsageMetrics, ErrorType
 from versionhq._utils.convert_img_url import convert_img_url
 from versionhq._utils.is_valid_enum import is_valid_enum
+from versionhq._utils.handle_directory import handle_directory
