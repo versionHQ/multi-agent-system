@@ -12,9 +12,9 @@ import litellm
 from litellm import JSONSchemaValidationError, get_supported_openai_params, supports_response_schema
 from pydantic import BaseModel, Field, PrivateAttr, model_validator, ConfigDict
 
-from versionhq.llm.llm_vars import LLM_CONTEXT_WINDOW_SIZES, TEXT_MODELS, MODEL_PARAMS, PROVIDERS, ENDPOINTS
+from versionhq.llm.llm_vars import LLM_CONTEXT_WINDOW_SIZES, MODELS, AUDIO_TO_TEXT_MODELS, MODEL_PARAMS, PROVIDERS, ENDPOINTS
 from versionhq.tool.model import Tool, ToolSet
-from versionhq._utils import Logger
+from versionhq._utils import Logger, UsageMetrics, ErrorType
 
 
 load_dotenv(override=True)
@@ -115,7 +115,7 @@ class LLM(BaseModel):
                 self.provider = DEFAULT_MODEL_PROVIDER_NAME
 
             else:
-                provider_model_list = TEXT_MODELS.get(self.provider)
+                provider_model_list = MODELS.get(self.provider)
                 if provider_model_list:
                     self.model = provider_model_list[0]
                     self.provider = self.provider
@@ -127,29 +127,29 @@ class LLM(BaseModel):
         elif self.model and self.provider is None:
             model_match = [
                 item for item in [
-                    [val for val in v if val == self.model][0] for k, v in TEXT_MODELS.items() if [val for val in v if val == self.model]
+                    [val for val in v if val == self.model][0] for k, v in MODELS.items() if [val for val in v if val == self.model]
                 ] if item
             ]
             model_partial_match = [
                 item for item in [
-                    [val for val in v if val.find(self.model) != -1][0] for k, v in TEXT_MODELS.items() if [val for val in v if val.find(self.model) != -1]
+                    [val for val in v if val.find(self.model) != -1][0] for k, v in MODELS.items() if [val for val in v if val.find(self.model) != -1]
                 ] if item
             ]
-            provider_match = [k for k, v in TEXT_MODELS.items() if k == self.model]
+            provider_match = [k for k, v in MODELS.items() if k == self.model]
 
             if model_match:
                 self.model = model_match[0]
-                self.provider = [k for k, v in TEXT_MODELS.items() if self.model in v][0]
+                self.provider = [k for k, v in MODELS.items() if self.model in v][0]
 
             elif model_partial_match:
                 self.model = model_partial_match[0]
-                self.provider = [k for k, v in TEXT_MODELS.items() if [item for item in v if item.find(self.model) != -1]][0]
+                self.provider = [k for k, v in MODELS.items() if [item for item in v if item.find(self.model) != -1]][0]
 
             elif provider_match:
                 provider = provider_match[0]
-                if self.TEXT_MODELS.get(provider):
+                if self.MODELS.get(provider):
                     self.provider = provider
-                    self.model = self.TEXT_MODELS.get(provider)[0]
+                    self.model = self.MODELS.get(provider)[0]
                 else:
                     self.provider = DEFAULT_MODEL_PROVIDER_NAME
                     self.model = DEFAULT_MODEL_NAME
@@ -159,7 +159,7 @@ class LLM(BaseModel):
                 self.provider = DEFAULT_MODEL_PROVIDER_NAME
 
         else:
-            provider_model_list = TEXT_MODELS.get(self.provider)
+            provider_model_list = MODELS.get(self.provider)
             if self.model not in provider_model_list:
                 self._logger.log(level="warning", message=f"The provided model: {self._init_model_name} is not in the list. We will assign a default model.", color="yellow")
                 self.model = DEFAULT_MODEL_NAME
@@ -232,7 +232,16 @@ class LLM(BaseModel):
 
         valid_cred = {}
         for k, v in cred.items():
-            val = os.environ.get(v, None)
+            val = None
+            if '_MODEL_NAME' in v:
+                model_name = self.model.split('/')[-1] if self.model.split('/') else self.model
+                key = v.replace('_MODEL_NAME', f'_{model_name.replace("-", '_').replace(' ', '_').upper()}')
+                val = os.environ.get(key, None)
+                if not val:
+                    val = os.environ.get(v.replace('_MODEL_NAME', ''), None)
+            else:
+                val = os.environ.get(v, None)
+
             if val:
                 valid_cred[str(k)] = val
 
@@ -288,12 +297,12 @@ class LLM(BaseModel):
         messages: List[Dict[str, str]],
         response_format: Optional[Dict[str, Any]] = None,
         tools: Optional[List[Tool | ToolSet | Any ]] = None,
-        config: Optional[Dict[str, Any]] = {}, # any other conditions to pass on to the model.
-        tool_res_as_final: bool = False
+        config: Optional[Dict[str, Any]] = dict(),
+        tool_res_as_final: bool = False,
+        file: str = None
     ) -> str:
-        """
-        Execute LLM based on the agent's params and model params.
-        """
+        """Configures and calls the LLM (chat, text generation, reasoning models)."""
+
         litellm.drop_params = True
         litellm.set_verbose = True
 
@@ -302,8 +311,31 @@ class LLM(BaseModel):
                 self._set_callbacks(self.callbacks)
 
             try:
-                res, tool_res = None, ""
+                res = None
+                tool_res = ""
                 cred = self._set_credentials()
+
+                if file and self.model in AUDIO_TO_TEXT_MODELS:
+                    params = self._create_valid_params(config=config)
+                    audio_file = open(file, 'rb')
+                    res = litellm.transcription(
+                        model=self.model,
+                        file=audio_file,
+                        rompt=messages,
+                        ustom_llm_provider=self.endpoint_provider,
+                        response_format="json",
+                        **cred
+                    )
+                    usage = UsageMetrics()
+                    if res:
+                        usage.latency = res._response_ms if hasattr(res, '_response_ms') else 0
+                        self._usages.append(usage)
+                        return res.text
+                    else:
+                        usage.record_errors(type=ErrorType.API)
+                        self._usages.append(usage)
+                        return None
+
 
                 if self.provider == "gemini":
                     self.response_format = { "type": "json_object" } if not tools and self.model != "gemini/gemini-2.0-flash-thinking-exp" else None

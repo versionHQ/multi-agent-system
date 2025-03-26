@@ -83,7 +83,9 @@ def test_with_agent():
         agent.start(tool_res_as_final=True)
         mock_run.assert_called_once()
 
-    with patch.object(Prompt, "format_core", return_value=("test", "test", ["test"])) as mock_prompt:
+
+    mock_value = ("test", "test", [{ "role": "assistant", "content": ""}])
+    with patch.object(Prompt, "format_core", return_value=mock_value) as mock_prompt:
         agent.start()
         mock_prompt.assert_called_once()
 
@@ -93,7 +95,7 @@ def test_with_agent():
         agent.start(tool_res_as_final=True)
         mock_run.assert_called_once()
 
-    with patch.object(Prompt, "format_core", return_value=("test", "test", ["test"])) as mock_prompt:
+    with patch.object(Prompt, "format_core", return_value=mock_value) as mock_prompt:
         agent.start()
         mock_prompt.assert_called_once()
 
@@ -103,7 +105,7 @@ def test_with_agent():
         agent.start(tool_res_as_final=True)
         mock_run.assert_called_once()
 
-    with patch.object(Prompt, "format_core", return_value=("test", "test", ["test"])) as mock_prompt:
+    with patch.object(Prompt, "format_core", return_value=mock_value) as mock_prompt:
         agent.start()
         mock_prompt.assert_called_once()
 
@@ -115,11 +117,13 @@ def test_with_task():
     tool_2 = vhq.GPTToolFileSearch(input="Search today's top news.", vector_store_ids="vs_dummy_id", max_num_results=5)
 
     task = vhq.Task(description="Test gpt tools", tools=[tool_1], tool_res_as_final=True)
+    mock_value = ("test", "test", [{ "role": "assistant", "content": ""}])
+
     with patch.object(vhq.Agent, "_handle_gpt_tools", return_value=(vhq.TaskOutput(raw="", usage=UsageMetrics()))) as mock_run:
         task.execute()
         mock_run.assert_called_once()
 
-    with patch.object(Prompt, "format_core", return_value=("test", "test", ["test"])) as mock_prompt:
+    with patch.object(Prompt, "format_core", return_value=mock_value) as mock_prompt:
         task.tool_res_as_final = False
         task.execute()
         mock_prompt.assert_called_once()
@@ -130,7 +134,7 @@ def test_with_task():
         task.execute()
         mock_run.assert_called_once()
 
-    with patch.object(Prompt, "format_core", return_value=("test", "test", ["test"])) as mock_prompt:
+    with patch.object(Prompt, "format_core", return_value=mock_value) as mock_prompt:
         task.tool_res_as_final = False
         task.execute()
         mock_prompt.assert_called_once()
@@ -141,7 +145,7 @@ def test_with_task():
         task.execute()
         mock_run.assert_called_once()
 
-    with patch.object(Prompt, "format_core", return_value=("test", "test", ["test"])) as mock_prompt:
+    with patch.object(Prompt, "format_core", return_value=mock_value) as mock_prompt:
         task.tool_res_as_final = False
         task.execute()
         mock_prompt.assert_called_once()

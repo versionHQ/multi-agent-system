@@ -2,37 +2,32 @@ import base64
 import datetime
 import time
 import platform
-from typing import List, Dict, Any, Tuple
+from typing import List, Dict, Any, Tuple, Literal, get_args
 
 from versionhq._utils import convert_img_url
 from versionhq.tool.gpt import openai_client
-from versionhq.tool.gpt._enum import GPTCUABrowserEnum, GPTCUATypeEnum, GPTSizeEnum
+from versionhq.tool.gpt._enum import GPTSizeEnum
 from versionhq._utils import is_valid_enum, UsageMetrics, ErrorType, Logger, is_valid_url, handle_directory
 
-allowed_browsers = ['chromium', 'firefox']
-
+BROWSER = Literal['chromium', 'firefox']
+TYPE = Literal["computer_call_output", "computer_use_preview"]
+ENV =  Literal["browser", "mac", "windows", "ubuntu"]
 
 class CUAToolSchema:
-    type: str = GPTCUATypeEnum.COMPUTER_USE_PREVIEW.value
+    type: TYPE = "computer_use_preview"
+    environment: ENV = "browser"
     display_width: int = 1024
     display_height: int = 768
-    environment: str = GPTCUABrowserEnum.BROWSER.value
 
-    def __init__(
-            self,
-            type: str | GPTCUATypeEnum = None,
-            display_width: int = None,
-            display_height: int = None,
-            environment: str | GPTCUABrowserEnum = None
-        ):
+    def __init__(self, type: str = None, display_width: int = None, display_height: int = None, environment: str = None):
         self.display_height = display_height if display_height else self.display_height
         self.display_width = display_width if display_width else self.display_width
 
-        if type and is_valid_enum(enum=GPTCUATypeEnum, val=type):
-            self.type = type.value if isinstance(type, GPTCUATypeEnum) else type
+        if type and type in get_args(TYPE):
+            self.type = type
 
-        if environment and is_valid_enum(enum=GPTCUABrowserEnum, val=environment):
-            self.environment = environment.value if isinstance(environment, GPTCUABrowserEnum) else environment
+        if environment and environment in get_args(ENV):
+            self.environment = environment
 
     @property
     def schema(self) -> Dict[str, Any]:
@@ -50,7 +45,7 @@ class GPTToolCUA:
     user_prompt: str = None
     img_url: str = None
     web_url: str = "https://www.google.com"
-    browser: str = "firefox"
+    browser: BROWSER = "firefox"
     reasoning_effort: str = GPTSizeEnum.MEDIUM.value
     truncation: str = "auto"
 
@@ -75,7 +70,7 @@ class GPTToolCUA:
     ):
         self.user_prompt = user_prompt
         self.web_url = web_url if is_valid_url(web_url) else None
-        self.browser = browser if browser in allowed_browsers else 'chromium'
+        self.browser = browser if browser in get_args(BROWSER) else 'chromium'
         self.truncation = truncation if truncation else self.truncation
         self._usage = _usage
         self._response_ids = list()
@@ -420,8 +415,6 @@ class GPTToolCUA:
                         res, _, usage = self._run(screenshot=screenshot_base64)
                     else:
                         res, _, usage = self._run()
-
-                    print("res", res)
 
                     self._usage.aggregate(metrics=usage)
                     if not res:

@@ -15,7 +15,7 @@ exclude = ["test*", "__pycache__", "*.egg-info"]
 
 [project]
 name = "versionhq"
-version = "1.2.4.14"
+version = "1.2.4.15"
 authors = [{ name = "Kuriko Iwai", email = "kuriko@versi0n.io" }]
 description = "Autonomous agent networks for task automation with multi-step reasoning."
 readme = "README.md"
@@ -82,7 +82,7 @@ tools = [
     "html2text>=2024.2.26",
     "sec-api>=1.0.28",
     "pytest-playwright>=0.7.0",
-    "selenium>=4.29.0",
+    "selenium>=4.30.0",
 ]
 torch = [
     "torch>=2.6.0",

@@ -10,7 +10,7 @@ load_dotenv(override=True)
 from versionhq.agent.model import Agent
 from versionhq.agent_network.model import AgentNetwork, Formation, Member, TaskHandlingProcess
 from versionhq.llm.model import LLM
-from versionhq.llm.llm_vars import LLM_CONTEXT_WINDOW_SIZES, MODEL_PARAMS, PROVIDERS, TEXT_MODELS
+from versionhq.llm.llm_vars import LLM_CONTEXT_WINDOW_SIZES, MODEL_PARAMS, PROVIDERS, MODELS
 from versionhq.clients.customer.model import Customer
 from versionhq.clients.product.model import Product, ProductProvider
 from versionhq.clients.workflow.model import MessagingWorkflow, MessagingComponent
@@ -35,7 +35,7 @@ from versionhq.agent_network.formation import form_agent_network
 from versionhq.task_graph.draft import workflow
 
 
-__version__ = "1.2.4.14"
+__version__ = "1.2.4.15"
 __all__ = [
     "Agent",
 
@@ -48,7 +48,7 @@ __all__ = [
     "LLM_CONTEXT_WINDOW_SIZES",
     "MODEL_PARAMS",
     "PROVIDERS",
-    "TEXT_MODELS",
+    "MODELS",
 
     "Customer",
     "Product",

@@ -1,0 +1,4 @@
+html2text>=2024.2.26
+sec-api>=1.0.28
+pytest-playwright>=0.7.0
+selenium==4.30.0

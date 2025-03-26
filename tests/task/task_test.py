@@ -188,3 +188,12 @@ def test_taskoutput_final_c():
 
     assert res.final == res.pydantic
     assert res._to_context_prompt() is not None
+
+
+def test_multimodal():
+    import versionhq as vhq
+
+    agent = vhq.Agent(llm="azure/whisper", role="Transcripter")
+    task = vhq.Task(description="trasncript the audio", audio='tests/_sample/sample.mp3', is_multimodal=True)
+    res = task.execute(agent=agent)
+    assert res.raw is not None

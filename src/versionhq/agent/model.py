@@ -356,12 +356,9 @@ class Agent(BaseModel):
         response_format: Optional[Dict[str, Any]] = None,
         tools: Optional[List[InstanceOf[Tool]| InstanceOf[ToolSet] | Type[Tool]]] = None,
         tool_res_as_final: bool = False,
+        file: str = None, # absolute path to the content file (for multimodal use)
         ) -> Tuple[str, UsageMetrics]:
-        """
-        Create formatted prompts using the developer prompt and the agent's backstory, then call the base model.
-        - Execute the task up to `self.max_retry_limit` times in case of receiving an error or empty response.
-        - Pass the task_tools to the model to let them execute.
-        """
+        """Calls LLM."""
 
         task_execution_counter = 0
         iterations = 0
@@ -375,10 +372,10 @@ class Agent(BaseModel):
             Logger(**self._logger_config, filename=self.key).log(level="info", message=f"Messages sent to the model: {messages}", color="blue")
 
             if tool_res_as_final:
-                raw_response = self.func_calling_llm.call(messages=messages, tools=tools, tool_res_as_final=True)
+                raw_response = self.func_calling_llm.call(messages=messages, tools=tools, tool_res_as_final=True, file=file)
                 usage.record_token_usage(*self.func_calling_llm._usages)
             else:
-                raw_response = self.llm.call(messages=messages, response_format=response_format, tools=tools)
+                raw_response = self.llm.call(messages=messages, response_format=response_format, tools=tools, file=file)
                 usage.record_token_usage(*self.llm._usages)
 
             task_execution_counter += 1
@@ -582,6 +579,7 @@ class Agent(BaseModel):
         raw_response = ""
         user_prompt, dev_prompt = "", ""
         usage = UsageMetrics(id=task.id)
+        file = task.audio if task.is_multimodal and task.audio else task.image if task.is_multimodal and task.image else task.file if task.is_multimodal and task.file else None
 
         if self.max_rpm and self._rpm_controller:
             self._rpm_controller._reset_request_count()
@@ -600,6 +598,7 @@ class Agent(BaseModel):
                 response_format=task._structure_response_format(model_provider=self.llm.provider),
                 tools=tools,
                 tool_res_as_final=task.tool_res_as_final,
+                file=file,
             )
 
         except Exception as e:

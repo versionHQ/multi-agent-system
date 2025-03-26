@@ -28,14 +28,13 @@ PROVIDERS = {
         "HF_ENDPOINT": "HF_ENDPOINT",
     },
     "azure":  {
-        "api_base": "AZURE_OPENAI_ENDPOINT",
+        "api_base": "AZURE_OPENAI_ENDPOINT_MODEL_NAME",
         "api_key": "AZURE_OPENAI_API_KEY",
         "api_version": "AZURE_OPENAI_API_VERSION",
     },
     "azure_ai": {
         "api_key": "AZURE_AI_API_KEY",
         "base_url": "AZURE_AI_API_BASE",
-
     }
 }
 
@@ -47,7 +46,7 @@ ENDPOINTS = [
 
 
 # Resaoning and text generation models
-TEXT_MODELS = {
+MODELS = {
     "openai": [
         "gpt-4.5-preview-2025-02-27",
         "gpt-4",
@@ -96,6 +95,10 @@ TEXT_MODELS = {
         "bedrock/cohere.command-light-text-v14",
     ],
     "azure": [
+        "azure/whisper",
+        "azure/whisper-2",
+        "azure/gpt-4o-mini-audio-preview",
+
         "azure/DeepSeek-V3",
         "azure/DeepSeek-R1",
         "azure/Llama-3.3-70B-Instruct",
@@ -161,6 +164,13 @@ TEXT_MODELS = {
         "huggingface/qwen/qwen2.5-VL-72B-Instruct",
     ],
 }
+
+
+AUDIO_TO_TEXT_MODELS = [
+    "azure/whisper",
+    "azure/whisper-2",
+    "azure/gpt-4o-mini-audio-preview",
+]
 
 
 """

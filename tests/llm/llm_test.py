@@ -1,4 +1,4 @@
-from versionhq.llm.llm_vars import TEXT_MODELS, LLM_CONTEXT_WINDOW_SIZES
+from versionhq.llm.llm_vars import MODELS, LLM_CONTEXT_WINDOW_SIZES
 from versionhq.llm.model import LLM, DEFAULT_CONTEXT_WINDOW_SIZE
 
 
@@ -11,7 +11,7 @@ def test_create_llm_from_valid_name():
     Make sure base params are set properly in the LLM class of all the models available in the framework.
     """
 
-    for k, v in TEXT_MODELS.items():
+    for k, v in MODELS.items():
         for model_name in v:
             llm = LLM(model=model_name, callbacks=[dummy_func,])
 

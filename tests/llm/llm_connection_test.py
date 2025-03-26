@@ -133,13 +133,13 @@ def _test_con_azure(simple_task, tool_task, schema_task, res_field_task):
     llms_to_test = [
         "azure/Phi-4-mini-instruct",
         "azure_ai/Phi-4-mini-instruct",
-        "azure_ai/DeepSeek-V3"
+        "azure_ai/DeepSeek-V3",
     ]
     agents = [set_agent(llm=llm) for llm in llms_to_test]
 
     for agent in agents:
         assert isinstance(agent.llm, LLM)
-        assert agent.llm.provider == "azure"
+        assert "azure" in agent.llm.provider
         assert agent.llm._init_model_name and agent.llm.provider and agent.llm.llm_config["max_tokens"] == agent.llm_config["max_tokens"]
 
         res_1 = simple_task.execute(agent=agent, context="running a test")

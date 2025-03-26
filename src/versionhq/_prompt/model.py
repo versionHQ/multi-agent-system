@@ -14,7 +14,6 @@ class Prompt:
     agent: Any = None
     context: Any = None
 
-
     def __init__(self, task, agent, context):
         from versionhq.agent.model import Agent
         from versionhq.task.model import Task
@@ -32,22 +31,24 @@ class Prompt:
         output_prompt = ""
         output_formats_to_follow = dict()
 
-        if self.task.response_schema:
-            if isinstance(self.task.response_schema, list):
-                for item in self.task.response_schema:
-                    if isinstance(item, ResponseField):
-                        output_formats_to_follow[item.title] = f"<Return your answer in {item.data_type.__name__}>"
+        if self.task.is_multimodal == False:
+            if self.task.response_schema:
+                if isinstance(self.task.response_schema, list):
+                    for item in self.task.response_schema:
+                        if isinstance(item, ResponseField):
+                            output_formats_to_follow[item.title] = f"<Return your answer in {item.data_type.__name__}>"
 
-            elif issubclass(self.task.response_schema, BaseModel):
-                for k, v in self.task.response_schema.model_fields.items():
-                    output_formats_to_follow[k] = f"<Return your answer in {v.annotation}>"
+                elif issubclass(self.task.response_schema, BaseModel):
+                    for k, v in self.task.response_schema.model_fields.items():
+                        output_formats_to_follow[k] = f"<Return your answer in {v.annotation}>"
 
-            output_prompt = f"""Your response MUST be a valid JSON string that strictly follows the response format. Use double quotes for all keys and string values. Do not use single quotes, trailing commas, or any other non-standard JSON syntax.
-Ref. Output image: {output_formats_to_follow}
-    """
+                output_prompt = f"""Your response MUST be a valid JSON string that strictly follows the response format. Use double quotes for all keys and string values. Do not use single quotes, trailing commas, or any other non-standard JSON syntax.
+Ref. Output image: {output_formats_to_follow}"""
+            else:
+                output_prompt = "You MUST return your response as a valid JSON serializable string, enclosed in double quotes. Use double quotes for all keys and string values. Do NOT use single quotes, trailing commas, or other non-standard JSON syntax."
+
         else:
-            output_prompt = "You MUST return your response as a valid JSON serializable string, enclosed in double quotes. Use double quotes for all keys and string values. Do NOT use single quotes, trailing commas, or other non-standard JSON syntax."
-
+            output_prompt = "Return your response in concise manner."
         return dedent(output_prompt)
 
 
@@ -98,19 +99,20 @@ Ref. Output image: {output_formats_to_follow}
 
         content_messages = {}
 
-        if self.task.image:
-            img_url = convert_img_url(self.task.image)
-            if img_url:
-                content_messages.update({ "type": "image_url", "image_url": { "url": img_url }})
+        if self.task.is_multimodal == False:
+            if self.task.image:
+                img_url = convert_img_url(self.task.image)
+                if img_url:
+                    content_messages.update({ "type": "image_url", "image_url": { "url": img_url }})
 
-        if self.task.file:
-            if is_valid_url(self.task.file):
-                content_messages.update({ "type": "image_url", "image_url": self.file })
+            if self.task.file:
+                if is_valid_url(self.task.file):
+                    content_messages.update({ "type": "image_url", "image_url": self.file })
 
-        if self.task.audio and self.agent.llm.provider == "gemini":
-            audio_bytes = Path(self.task.audio).read_bytes()
-            encoded_data = base64.b64encode(audio_bytes).decode("utf-8")
-            content_messages.update({ "type": "image_url", "image_url": "data:audio/mp3;base64,{}".format(encoded_data)})
+            if self.task.audio and self.agent.llm.provider == "gemini":
+                audio_bytes = Path(self.task.audio).read_bytes()
+                encoded_data = base64.b64encode(audio_bytes).decode("utf-8")
+                content_messages.update({ "type": "image_url", "image_url": "data:audio/mp3;base64,{}".format(encoded_data)})
 
         return content_messages
 
@@ -187,7 +189,6 @@ Ref. Output image: {output_formats_to_follow}
         #     user_prompt = self.agent._training_handler(user_prompt=user_prompt)
         # else:
         #     user_prompt = self.agent._use_trained_data(user_prompt=user_prompt)
-
 
         content_prompt = self._format_content_prompt()
 

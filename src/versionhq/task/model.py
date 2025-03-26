@@ -314,6 +314,7 @@ class Task(BaseModel):
     name: Optional[str] = Field(default=None)
     description: str = Field(description="Description of the actual task")
     response_schema: Optional[Type[BaseModel] | List[ResponseField]] = Field(default=None, description="stores response format")
+    is_multimodal: bool = False
 
     # tool usage
     tools: Optional[List[Any]] = Field(default_factory=list, description="tools that the agent can use aside from their tools")
