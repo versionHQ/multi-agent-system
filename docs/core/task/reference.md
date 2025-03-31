@@ -11,7 +11,8 @@
 | **`tools`**               | Optional[List[Any]]                   | None              | Tools, tool sets, or RAG tools |
 | **`can_use_agent_tools`** | bool                                  | True              | Whether to use the agent tools |
 | **`tool_res_as_final`**   | bool                                  | False             | Whether to make a tool output as a final response from the agent |
-| **`image`**               | Optional[str]                         | None              | Absolute file path or URL to the image file |
+| **`is_multimodal`**       | bool                                  | False             | Whether to handle multimodals as main task - audio/image/video |
+| **`image`**               | Optional[str]                         | None              | Absolute file path or URL to the image file (either for prompt context or main task) |
 | **`file`**                | Optional[str]                         | None              | Absolute file path or URL to the file |
 | **`audio`**               | Optional[str]                         | None              | Absolute file path or URL to the audio file |
 | **`should_test_run`**     | bool                                  | False             | Whether to turn on auto-feedback learning             |

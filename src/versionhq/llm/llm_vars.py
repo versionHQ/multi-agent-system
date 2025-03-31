@@ -58,6 +58,7 @@ MODELS = {
         "o1-preview",
     ],
     "gemini": [
+        "gemini/gemini-2.5-pro-exp-03-25",
         "gemini/gemini-2.0-flash",
         "gemini/gemini-2.0-flash-thinking-exp",
         "gemini/gemini-2.0-flash-lite-preview-02-05",

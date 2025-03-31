@@ -99,6 +99,7 @@ def _test_con_openai(simple_task, tool_task, schema_task, res_field_task):
 
 def _test_con_gemini(simple_task, tool_task, schema_task, res_field_task):
     llms_to_test = [
+        "gemini/gemini-2.5-pro-exp-03-25"
         "gemini/gemini-2.0-flash",
         "gemini/gemini-2.0-flash-thinking-exp",
         "gemini/gemini-2.0-flash-lite-preview-02-05",

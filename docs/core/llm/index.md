@@ -11,7 +11,6 @@ A Pydantic class to store LLM objects and its task handling rules.
 
 You can specify a model and integration platform from the list. Else, we'll use `gemini` or `gpt` via `LiteLLM` by default.
 
-
 **List of available models**
 
 ```python
@@ -26,10 +25,11 @@ You can specify a model and integration platform from the list. Else, we'll use 
     "o1-preview",
 ],
 "gemini": [
-    "gemini/gemini-2.0-flash-exp",
+    "gemini/gemini-2.5-pro-exp-03-25",
     "gemini/gemini-2.0-flash",
     "gemini/gemini-2.0-flash-thinking-exp",
     "gemini/gemini-2.0-flash-lite-preview-02-05",
+    "gemini/gemini-2.0-flash-exp",
 ],
 "anthropic": [
     "claude-3-7-sonnet-latest",
