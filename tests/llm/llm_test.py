@@ -44,7 +44,7 @@ def test_create_llm_from_invalid_name():
 
 
 def test_create_llm_from_provider():
-    llm = LLM(provider="gemini", callbacks=[dummy_func,])
+    llm = LLM(provider="gemini-2.0", callbacks=[dummy_func,])
 
     assert llm.model == "gemini/gemini-2.0-flash"
     assert llm.provider == "gemini"
