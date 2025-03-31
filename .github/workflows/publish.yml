@@ -22,7 +22,7 @@ jobs:
 
       - name: Build release distributions
         run: |
-          uv venv
+          uv venv --python 3.12.2
           source .venv/bin/activate
           uv pip install --upgrade pip twine
           uv pip install -r requirements.txt

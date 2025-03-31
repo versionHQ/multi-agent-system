@@ -814,7 +814,7 @@ wheels = [
 
 [[package]]
 name = "docling-core"
-version = "2.24.1"
+version = "2.25.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "jsonref" },
@@ -828,9 +828,9 @@ dependencies = [
     { name = "typer" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/6e/0b/0cf7b8f7754228865505ce8ebc17e141505b61b8ab53019eee1fcedfe28d/docling_core-2.24.1.tar.gz", hash = "sha256:ef2da2a4f4332f3d1fda72a168c049403b6be64e9d32d422533ca454ac515374", size = 97517 }
+sdist = { url = "https://files.pythonhosted.org/packages/cb/2a/648888b26d8382ad604ed346773b3e8b5a79c98885f7cc027384ecc98bac/docling_core-2.25.0.tar.gz", hash = "sha256:a2019392592840b2829082ef0c1d1a9096fb3512ae44c3a93dc04a5eaef81b2f", size = 97719 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/3f/cd/c770af64410f4b11e557877a350da0eee73509db9fa6ab7613e1ab26b095/docling_core-2.24.1-py3-none-any.whl", hash = "sha256:fae18cd27953ecb97efa756d00ea1061ce75121e768b447aae5a14ac416b9446", size = 121714 },
+    { url = "https://files.pythonhosted.org/packages/8e/62/8122226fae7056dbc3951b70859fa1a05eb3cf738378b8a6cedd4226f437/docling_core-2.25.0-py3-none-any.whl", hash = "sha256:24fe431005518df8e554b69c33178bca903bcf91c230cdcd31a905369f53a461", size = 121937 },
 ]
 
 [package.optional-dependencies]
@@ -1355,7 +1355,7 @@ http2 = [
 
 [[package]]
 name = "huggingface-hub"
-version = "0.29.3"
+version = "0.30.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "filelock" },
@@ -1366,9 +1366,9 @@ dependencies = [
     { name = "tqdm" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/e5/f9/851f34b02970e8143d41d4001b2d49e54ef113f273902103823b8bc95ada/huggingface_hub-0.29.3.tar.gz", hash = "sha256:64519a25716e0ba382ba2d3fb3ca082e7c7eb4a2fc634d200e8380006e0760e5", size = 390123 }
+sdist = { url = "https://files.pythonhosted.org/packages/f8/b1/b6a403e31a806d3b2560adf73b60881330b954d4000fdfb6b0e3beac5f90/huggingface_hub-0.30.0.tar.gz", hash = "sha256:21ac16bc79c950dc058fad6f25e6e13444d878cc504e386d3a9b83096b3851cb", size = 400791 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/40/0c/37d380846a2e5c9a3c6a73d26ffbcfdcad5fc3eacf42fdf7cff56f2af634/huggingface_hub-0.29.3-py3-none-any.whl", hash = "sha256:0b25710932ac649c08cdbefa6c6ccb8e88eef82927cacdb048efb726429453aa", size = 468997 },
+    { url = "https://files.pythonhosted.org/packages/05/54/ab179a3cbc6cb285b34dfb1686176db4c3e7d9634b23cabf5aff0d00c776/huggingface_hub-0.30.0-py3-none-any.whl", hash = "sha256:17470b2b0f902209beb0344d659a18c48b69bc202af27c1cfc814d637807322f", size = 481128 },
 ]
 
 [[package]]
@@ -1717,7 +1717,7 @@ wheels = [
 
 [[package]]
 name = "langchain"
-version = "0.3.21"
+version = "0.3.22"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "langchain-core" },
@@ -1728,9 +1728,9 @@ dependencies = [
     { name = "requests" },
     { name = "sqlalchemy" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/e7/54/ea3e30df3a7f6f9986cdb5a53d46a219d1e20b5a5e72a480b932a961ff30/langchain-0.3.21.tar.gz", hash = "sha256:a10c81f8c450158af90bf37190298d996208cfd15dd3accc1c585f068473d619", size = 10225431 }
+sdist = { url = "https://files.pythonhosted.org/packages/e9/66/36ccbd6285b29473ada883b0e06fdc0973ca181431d6a0175e473160fbfb/langchain-0.3.22.tar.gz", hash = "sha256:fd7781ef02cac6f074f9c6a902236482c61976e21da96ab577874d4e5396eeda", size = 10225573 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/c3/89/eeab8c671d791ce872225aa77a05805ba67052764a3faa6331fc4674e855/langchain-0.3.21-py3-none-any.whl", hash = "sha256:c8bd2372440cc5d48cb50b2d532c2e24036124f1c467002ceb15bc7b86c92579", size = 1011714 },
+    { url = "https://files.pythonhosted.org/packages/36/0e/032de736a8f9b5b5fcfec77bd92831f9f2c8a8b5072289dd1e5cc95e6edc/langchain-0.3.22-py3-none-any.whl", hash = "sha256:2e7f71a1b0280eb70af9c332c7580f6162a97fb9d5e3e87e9d579ad167f50129", size = 1011714 },
 ]
 
 [[package]]
@@ -2142,7 +2142,7 @@ wheels = [
 
 [[package]]
 name = "mkdocstrings"
-version = "0.29.0"
+version = "0.29.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "jinja2" },
@@ -2152,9 +2152,9 @@ dependencies = [
     { name = "mkdocs-autorefs" },
     { name = "pymdown-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/8e/4d/a9484dc5d926295bdf308f1f6c4f07fcc99735b970591edc414d401fcc91/mkdocstrings-0.29.0.tar.gz", hash = "sha256:3657be1384543ce0ee82112c3e521bbf48e41303aa0c229b9ffcccba057d922e", size = 1212185 }
+sdist = { url = "https://files.pythonhosted.org/packages/41/e8/d22922664a627a0d3d7ff4a6ca95800f5dde54f411982591b4621a76225d/mkdocstrings-0.29.1.tar.gz", hash = "sha256:8722f8f8c5cd75da56671e0a0c1bbed1df9946c0cef74794d6141b34011abd42", size = 1212686 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/15/47/eb876dfd84e48f31ff60897d161b309cf6a04ca270155b0662aae562b3fb/mkdocstrings-0.29.0-py3-none-any.whl", hash = "sha256:8ea98358d2006f60befa940fdebbbc88a26b37ecbcded10be726ba359284f73d", size = 1630824 },
+    { url = "https://files.pythonhosted.org/packages/98/14/22533a578bf8b187e05d67e2c1721ce10e3f526610eebaf7a149d557ea7a/mkdocstrings-0.29.1-py3-none-any.whl", hash = "sha256:37a9736134934eea89cbd055a513d40a020d87dfcae9e3052c2a6b8cd4af09b6", size = 1631075 },
 ]
 
 [[package]]
@@ -4295,15 +4295,15 @@ wheels = [
 
 [[package]]
 name = "sentry-sdk"
-version = "2.24.1"
+version = "2.25.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "certifi" },
     { name = "urllib3" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/f1/ef/4847dcd63e3f3c451cf701a825d21200f1322d46ac97586d5c90a13dfea1/sentry_sdk-2.24.1.tar.gz", hash = "sha256:8ba3c29990fa48865b908b3b9dc5ae7fa7e72407c7c9e91303e5206b32d7b8b1", size = 318124 }
+sdist = { url = "https://files.pythonhosted.org/packages/03/53/5b7e87cc7508a2bafc1e0797d48645d74b925aa875dc7c0d376e8f70d3da/sentry_sdk-2.25.0.tar.gz", hash = "sha256:a6e623691ff03d1758f940fe421e5b65f313f4ac37638079ab94d1b6f052eb15", size = 320406 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/65/95/91137ffe7a5956496155af5ffbe45ee4ddfa795a569136147e766abd14b1/sentry_sdk-2.24.1-py2.py3-none-any.whl", hash = "sha256:36baa6a1128b9d98d2adc5e9b2f887eff0a6af558fc2b96ed51919042413556d", size = 336945 },
+    { url = "https://files.pythonhosted.org/packages/7f/3f/3d2ad64b82c09fdf7a4a38289e0f4e0da1add985455b6360aa1c8518bc85/sentry_sdk-2.25.0-py2.py3-none-any.whl", hash = "sha256:aa0f558209c1819391421d65e25b1c4000f49580e6ecf5c05ff0c6e74f74470b", size = 338490 },
 ]
 
 [[package]]
