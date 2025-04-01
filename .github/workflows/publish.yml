@@ -14,18 +14,18 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: 3.13
+      - uses: astral-sh/setup-uv@v5
         with:
           version: "latest"
-
-      - name: Install Python 3.13
-        run: uv python install 3.13.2
+          python-version: 3.13.2
 
       - name: Build release distributions
         run: |
-          uv venv --python 3.12.2
+          uv pip install --python=3.13.2 pip
+          uv venv
           source .venv/bin/activate
           uv pip install --upgrade pip
           uv pip install -r requirements.txt
