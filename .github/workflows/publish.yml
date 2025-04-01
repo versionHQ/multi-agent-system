@@ -19,7 +19,8 @@ jobs:
         uses: astral-sh/setup-uv@v5
         with:
           version: "latest"
-          python-version: 3.13t
+
+      - name: Install Python 3.13
         run: uv python install 3.13.2
 
       - name: Build release distributions
