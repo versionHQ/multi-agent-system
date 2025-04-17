@@ -15,7 +15,7 @@ You can specify a model and integration platform from the list. Else, we'll use 
 
 ```python
 "openai": [
-    "gpt-4.5-preview-2025-02-27",
+    "gpt-4.1",
     "gpt-4",
     "gpt-4o",
     "gpt-4o-mini",
@@ -63,7 +63,7 @@ You can specify a model and integration platform from the list. Else, we'll use 
     "bedrock/cohere.command-light-text-v14",
 ],
 "azure": [
-    "azure/DeepSeek-V3",
+    "azure/DeepSeek-V3-0324",
     "azure/DeepSeek-R1",
     "azure/Llama-3.3-70B-Instruct",
     "azure/Llama-3.2-11B-Vision-Instruct",
@@ -94,7 +94,7 @@ You can specify a model and integration platform from the list. Else, we'll use 
     "azure/Cohere-rerank-v3.5",
 ],
 "azure_ai": [
-    "azure_ai/DeepSeek-V3",
+    "azure/DeepSeek-V3-0324",
     "azure_ai/DeepSeek-R1",
     "azure_ai/Llama-3.3-70B-Instruct",
     "azure_ai/Llama-3.2-11B-Vision-Instruct",

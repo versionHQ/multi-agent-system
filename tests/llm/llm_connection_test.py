@@ -70,7 +70,7 @@ def _test_con_bedrock(simple_task, tool_task, schema_task, res_field_task):
 
 def _test_con_openai(simple_task, tool_task, schema_task, res_field_task):
     llms_to_test = [
-        "gpt-4.5-preview-2025-02-27",
+        "gpt-4.1",
         "o3-mini",
         "o3-mini-2025-01-31",
     ]
