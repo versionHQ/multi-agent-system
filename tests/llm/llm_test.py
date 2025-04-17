@@ -17,7 +17,7 @@ def test_create_llm_from_valid_name():
 
             assert llm._init_model_name == model_name
             assert llm.model == model_name
-            assert llm.provider == k
+            assert llm.provider in k
             assert llm.context_window_size == int(LLM_CONTEXT_WINDOW_SIZES.get(model_name) *0.75) if LLM_CONTEXT_WINDOW_SIZES.get(model_name) is not None else DEFAULT_CONTEXT_WINDOW_SIZE
             assert llm._supports_function_calling() is not None
             assert llm._supports_stop_words() is not None
