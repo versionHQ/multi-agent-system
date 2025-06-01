@@ -1,95 +1,95 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
-         <loc>https://docs.versi0n.io/</loc>
+         <loc>https://docs.versi0n.io/index.html</loc>
          <lastmod>2025-06-01</lastmod>
     </url>
     <url>
-         <loc>https://docs.versi0n.io/quickstart/</loc>
+         <loc>https://docs.versi0n.io/quickstart.html</loc>
          <lastmod>2025-06-01</lastmod>
     </url>
     <url>
-         <loc>https://docs.versi0n.io/tags/</loc>
+         <loc>https://docs.versi0n.io/tags.html</loc>
          <lastmod>2025-06-01</lastmod>
     </url>
     <url>
-         <loc>https://docs.versi0n.io/core/knowledge/</loc>
+         <loc>https://docs.versi0n.io/core/knowledge.html</loc>
          <lastmod>2025-06-01</lastmod>
     </url>
     <url>
-         <loc>https://docs.versi0n.io/core/memory/</loc>
+         <loc>https://docs.versi0n.io/core/memory.html</loc>
          <lastmod>2025-06-01</lastmod>
     </url>
     <url>
-         <loc>https://docs.versi0n.io/core/rag-tool/</loc>
+         <loc>https://docs.versi0n.io/core/rag-tool.html</loc>
          <lastmod>2025-06-01</lastmod>
     </url>
     <url>
-         <loc>https://docs.versi0n.io/core/tool/</loc>
+         <loc>https://docs.versi0n.io/core/tool.html</loc>
          <lastmod>2025-06-01</lastmod>
     </url>
     <url>
-         <loc>https://docs.versi0n.io/core/agent/</loc>
+         <loc>https://docs.versi0n.io/core/agent/index.html</loc>
          <lastmod>2025-06-01</lastmod>
     </url>
     <url>
-         <loc>https://docs.versi0n.io/core/agent/config/</loc>
+         <loc>https://docs.versi0n.io/core/agent/config.html</loc>
          <lastmod>2025-06-01</lastmod>
     </url>
     <url>
-         <loc>https://docs.versi0n.io/core/agent/task-handling/</loc>
+         <loc>https://docs.versi0n.io/core/agent/task-handling.html</loc>
          <lastmod>2025-06-01</lastmod>
     </url>
     <url>
-         <loc>https://docs.versi0n.io/core/agent-network/</loc>
+         <loc>https://docs.versi0n.io/core/agent-network/index.html</loc>
          <lastmod>2025-06-01</lastmod>
     </url>
     <url>
-         <loc>https://docs.versi0n.io/core/agent-network/config/</loc>
+         <loc>https://docs.versi0n.io/core/agent-network/config.html</loc>
          <lastmod>2025-06-01</lastmod>
     </url>
     <url>
-         <loc>https://docs.versi0n.io/core/agent-network/form/</loc>
+         <loc>https://docs.versi0n.io/core/agent-network/form.html</loc>
          <lastmod>2025-06-01</lastmod>
     </url>
     <url>
-         <loc>https://docs.versi0n.io/core/agent-network/ref/</loc>
+         <loc>https://docs.versi0n.io/core/agent-network/ref.html</loc>
          <lastmod>2025-06-01</lastmod>
     </url>
     <url>
-         <loc>https://docs.versi0n.io/core/llm/</loc>
+         <loc>https://docs.versi0n.io/core/llm/index.html</loc>
          <lastmod>2025-06-01</lastmod>
     </url>
     <url>
-         <loc>https://docs.versi0n.io/core/task/</loc>
+         <loc>https://docs.versi0n.io/core/task/index.html</loc>
          <lastmod>2025-06-01</lastmod>
     </url>
     <url>
-         <loc>https://docs.versi0n.io/core/task/evaluation/</loc>
+         <loc>https://docs.versi0n.io/core/task/evaluation.html</loc>
          <lastmod>2025-06-01</lastmod>
     </url>
     <url>
-         <loc>https://docs.versi0n.io/core/task/reference/</loc>
+         <loc>https://docs.versi0n.io/core/task/reference.html</loc>
          <lastmod>2025-06-01</lastmod>
     </url>
     <url>
-         <loc>https://docs.versi0n.io/core/task/response-field/</loc>
+         <loc>https://docs.versi0n.io/core/task/response-field.html</loc>
          <lastmod>2025-06-01</lastmod>
     </url>
     <url>
-         <loc>https://docs.versi0n.io/core/task/task-execution/</loc>
+         <loc>https://docs.versi0n.io/core/task/task-execution.html</loc>
          <lastmod>2025-06-01</lastmod>
     </url>
     <url>
-         <loc>https://docs.versi0n.io/core/task/task-output/</loc>
+         <loc>https://docs.versi0n.io/core/task/task-output.html</loc>
          <lastmod>2025-06-01</lastmod>
     </url>
     <url>
-         <loc>https://docs.versi0n.io/core/task/task-strc-response/</loc>
+         <loc>https://docs.versi0n.io/core/task/task-strc-response.html</loc>
          <lastmod>2025-06-01</lastmod>
     </url>
     <url>
-         <loc>https://docs.versi0n.io/core/task-graph/</loc>
+         <loc>https://docs.versi0n.io/core/task-graph/index.html</loc>
          <lastmod>2025-06-01</lastmod>
     </url>
 </urlset>

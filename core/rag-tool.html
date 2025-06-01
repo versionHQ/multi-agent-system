@@ -12,28 +12,28 @@
         <meta name="author" content="Version IO Sdn. Bhd.">
       
       
-        <link rel="canonical" href="https://docs.versi0n.io/core/agent/config/">
+        <link rel="canonical" href="https://docs.versi0n.io/core/rag-tool.html">
       
       
-        <link rel="prev" href="../">
+        <link rel="prev" href="tool.html">
       
       
-        <link rel="next" href="../task-handling/">
+        <link rel="next" href="memory.html">
       
       
-      <link rel="icon" href="../../../_logos/favicon.ico">
+      <link rel="icon" href="../_logos/favicon.ico">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.11">
     
     
       
-        <title>Configuration - versionHQ</title>
+        <title>RAG Tool - versionHQ</title>
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.4af4bdda.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.4af4bdda.min.css">
       
         
-        <link rel="stylesheet" href="../../../assets/stylesheets/palette.06af60db.min.css">
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
       
       
   
@@ -93,9 +93,9 @@
       
     
     
-      <link rel="stylesheet" href="../../../stylesheets/main.css">
+      <link rel="stylesheet" href="../stylesheets/main.css">
     
-    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
   
@@ -131,7 +131,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#optimizing-model" class="md-skip">
+        <a href="#rag-tool" class="md-skip">
           Skip to content
         </a>
       
@@ -145,9 +145,9 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../../.." title="versionHQ" class="md-header__button md-logo" aria-label="versionHQ" data-md-component="logo">
+    <a href="../index.html" title="versionHQ" class="md-header__button md-logo" aria-label="versionHQ" data-md-component="logo">
       
-  <img src="../../../_logos/logo192.png" alt="logo">
+  <img src="../_logos/logo192.png" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -164,7 +164,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Configuration
+              RAG Tool
             
           </span>
         </div>
@@ -282,7 +282,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../.." class="md-tabs__link">
+      <a href="../index.html" class="md-tabs__link">
         
   
   
@@ -301,7 +301,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../../quickstart/" class="md-tabs__link">
+      <a href="../quickstart.html" class="md-tabs__link">
         
   
   
@@ -318,13 +318,11 @@
   
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
-        <a href="../../agent-network/" class="md-tabs__link">
+      <li class="md-tabs__item">
+        <a href="agent-network/index.html" class="md-tabs__link">
           
   
   
@@ -346,7 +344,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../task-graph/" class="md-tabs__link">
+        <a href="task-graph/index.html" class="md-tabs__link">
           
   
   
@@ -364,11 +362,13 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="../../tool/" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="tool.html" class="md-tabs__link">
           
   
   
@@ -388,7 +388,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../../tags/" class="md-tabs__link">
+      <a href="../tags.html" class="md-tabs__link">
         
   
   
@@ -466,9 +466,9 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../../.." title="versionHQ" class="md-nav__button md-logo" aria-label="versionHQ" data-md-component="logo">
+    <a href="../index.html" title="versionHQ" class="md-nav__button md-logo" aria-label="versionHQ" data-md-component="logo">
       
-  <img src="../../../_logos/logo192.png" alt="logo">
+  <img src="../_logos/logo192.png" alt="logo">
 
     </a>
     versionHQ
@@ -495,7 +495,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../.." class="md-nav__link">
+      <a href="../index.html" class="md-nav__link">
         
   
   
@@ -517,7 +517,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../quickstart/" class="md-nav__link">
+      <a href="../quickstart.html" class="md-nav__link">
         
   
   
@@ -536,8 +536,6 @@
       
   
   
-    
-  
   
   
     
@@ -561,21 +559,20 @@
     
     
       
-        
-        
-      
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../agent-network/" class="md-nav__link ">
+            <a href="agent-network/index.html" class="md-nav__link ">
               
   
   
@@ -588,13 +585,13 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="">
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             Agent Network
@@ -610,7 +607,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../agent-network/form/" class="md-nav__link">
+      <a href="agent-network/form.html" class="md-nav__link">
         
   
   
@@ -633,7 +630,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../agent-network/config/" class="md-nav__link">
+      <a href="agent-network/config.html" class="md-nav__link">
         
   
   
@@ -653,8 +650,6 @@
                 
   
   
-    
-  
   
   
     
@@ -675,15 +670,17 @@
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4" checked>
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_4" >
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../" class="md-nav__link ">
+            <a href="agent/index.html" class="md-nav__link ">
               
   
   
@@ -702,7 +699,7 @@
             
           </div>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_4_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_4_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_3_4">
             <span class="md-nav__icon md-icon"></span>
             Agent
@@ -715,30 +712,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    Configuration
-    
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="agent/config.html" class="md-nav__link">
         
   
   
@@ -749,60 +726,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#optimizing-model" class="md-nav__link">
-    <span class="md-ellipsis">
-      Optimizing Model
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#building-knowledge" class="md-nav__link">
-    <span class="md-ellipsis">
-      Building Knowledge
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#accessing-memories" class="md-nav__link">
-    <span class="md-ellipsis">
-      Accessing Memories
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#updating-existing-agents" class="md-nav__link">
-    <span class="md-ellipsis">
-      Updating Existing Agents
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -815,7 +738,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../task-handling/" class="md-nav__link">
+      <a href="agent/task-handling.html" class="md-nav__link">
         
   
   
@@ -869,7 +792,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../llm/" class="md-nav__link ">
+            <a href="llm/index.html" class="md-nav__link ">
               
   
   
@@ -907,7 +830,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../agent-network/ref/" class="md-nav__link">
+      <a href="agent-network/ref.html" class="md-nav__link">
         
   
   
@@ -962,7 +885,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../task-graph/" class="md-nav__link ">
+            <a href="task-graph/index.html" class="md-nav__link ">
               
   
   
@@ -1030,7 +953,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../task/" class="md-nav__link ">
+            <a href="task/index.html" class="md-nav__link ">
               
   
   
@@ -1114,7 +1037,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../task/task-strc-response/" class="md-nav__link">
+      <a href="task/task-strc-response.html" class="md-nav__link">
         
   
   
@@ -1137,7 +1060,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../task/response-field/" class="md-nav__link">
+      <a href="task/response-field.html" class="md-nav__link">
         
   
   
@@ -1168,7 +1091,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../task/task-execution/" class="md-nav__link">
+      <a href="task/task-execution.html" class="md-nav__link">
         
   
   
@@ -1191,7 +1114,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../task/task-output/" class="md-nav__link">
+      <a href="task/task-output.html" class="md-nav__link">
         
   
   
@@ -1214,7 +1137,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../task/evaluation/" class="md-nav__link">
+      <a href="task/evaluation.html" class="md-nav__link">
         
   
   
@@ -1237,7 +1160,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../task/reference/" class="md-nav__link">
+      <a href="task/reference.html" class="md-nav__link">
         
   
   
@@ -1272,8 +1195,10 @@
       
   
   
+    
   
   
+  
     
     
       
@@ -1289,19 +1214,20 @@
     
     
       
+        
+        
+      
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
         
           
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
-        
-          
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
             
   
   
@@ -1314,7 +1240,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             Components
@@ -1328,7 +1254,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tool/" class="md-nav__link">
+      <a href="tool.html" class="md-nav__link">
         
   
   
@@ -1348,10 +1274,32 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../rag-tool/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    RAG Tool
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="rag-tool.html" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1362,6 +1310,68 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#quick-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quick Start
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-with-agents" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using with Agents
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Using with Agents">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      Variables
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#class-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      Class Methods
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1374,7 +1384,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../memory/" class="md-nav__link">
+      <a href="memory.html" class="md-nav__link">
         
   
   
@@ -1397,7 +1407,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../knowledge/" class="md-nav__link">
+      <a href="knowledge.html" class="md-nav__link">
         
   
   
@@ -1427,7 +1437,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../tags/" class="md-nav__link">
+      <a href="../tags.html" class="md-nav__link">
         
   
   
@@ -1580,9 +1590,19 @@
                 
                   
 
+  <nav class="md-tags" >
+    
+      
+      
+      
+        <a href="../tags.html#tag:utilities" class="md-tag">Utilities</a>
+      
+    
+  </nav>
+
 
   
-    <a href="https://github.com/versionhq/multi-agent-system/edit/main/docs/core/agent/config.md" title="Edit this page" class="md-content__button md-icon">
+    <a href="https://github.com/versionhq/multi-agent-system/edit/main/docs/core/rag-tool.md" title="Edit this page" class="md-content__button md-icon">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75z"/></svg>
     </a>
@@ -1591,176 +1611,146 @@
     
       
     
-    <a href="https://github.com/versionhq/multi-agent-system/raw/main/docs/core/agent/config.md" title="View source of this page" class="md-content__button md-icon">
+    <a href="https://github.com/versionhq/multi-agent-system/raw/main/docs/core/rag-tool.md" title="View source of this page" class="md-content__button md-icon">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0 8a5 5 0 0 1-5-5 5 5 0 0 1 5-5 5 5 0 0 1 5 5 5 5 0 0 1-5 5m0-12.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5"/></svg>
     </a>
   
 
 
-  <h1>Configuration</h1>
-
-<h2 id="optimizing-model">Optimizing Model<a class="headerlink" href="#optimizing-model" title="Permanent link">&para;</a></h2>
-<p><strong>Model Optimization</strong></p>
-<p><code>[var]</code><bold><code>llm: Optional[str | LLM | Dict[str, Any]] = "gpt-4o"</code></bold></p>
-<p>You can select a model or model provider that the agent will run on.</p>
-<p>By default, when the model provider name is provided, we will select the most cost-efficient model from the given provider.</p>
+<h1 id="rag-tool">RAG Tool<a class="headerlink" href="#rag-tool" title="Permanent link">&para;</a></h1>
+<p><class><code>class</code> versionhq.tool.rag_tool.<bold>RagTool<bold></class></p>
+<p>A Pydantic class to store RAG tools that the agent will use when it executes the task.</p>
+<h2 id="quick-start">Quick Start<a class="headerlink" href="#quick-start" title="Permanent link">&para;</a></h2>
+<p>Similar to the <code>Tool</code> class, you can run the RAG tool using <code>url</code> and <code>query</code> variables.</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">versionhq</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">vhq</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="n">agent</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Agent</span><span class="p">(</span><span class="n">role</span><span class="o">=</span><span class="s2">&quot;Marketing Analyst&quot;</span><span class="p">,</span> <span class="n">llm</span><span class="o">=</span><span class="s2">&quot;gemini-2.0&quot;</span><span class="p">)</span>
-</span></code></pre></div>
-<hr/>
-
-<p><strong>Other LLM Configuration</strong></p>
-<p><code>[var]</code><bold><code>llm_config: Optional[Dict[str, Any]] = None</code></bold></p>
-<p>You can specify any other parameters that the agent needs to follow when they call the LLM. Else, the agent will follow the default settings given by the model provider.</p>
-<p>e.g. Expect longer context and form a short answer</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">versionhq</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">vhq</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">agent</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Agent</span><span class="p">(</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    <span class="n">role</span><span class="o">=</span><span class="s2">&quot;Marketing Analyst&quot;</span><span class="p">,</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="n">respect_context_window</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="n">max_execution_time</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span>
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>    <span class="n">max_rpm</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>    <span class="n">llm_config</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
-</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>            <span class="n">temperature</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>            <span class="n">top_p</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
-</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>            <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>            <span class="n">stop</span><span class="o">=</span><span class="s2">&quot;answer&quot;</span><span class="p">,</span>
-</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>            <span class="n">dummy</span><span class="o">=</span><span class="s2">&quot;I am dummy&quot;</span> <span class="c1"># &lt;- invalid field will be ignored automatically.</span>
-</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>        <span class="p">)</span>
-</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>    <span class="p">)</span>
-</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>
-</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">agent</span><span class="o">.</span><span class="n">llm</span><span class="p">,</span> <span class="n">vhq</span><span class="o">.</span><span class="n">LLM</span><span class="p">)</span>
-</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="k">assert</span> <span class="n">agent</span><span class="o">.</span><span class="n">llm</span><span class="o">.</span><span class="n">llm_config</span><span class="p">[</span><span class="s2">&quot;temperature&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span>
-</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a><span class="k">assert</span> <span class="n">agent</span><span class="o">.</span><span class="n">llm</span><span class="o">.</span><span class="n">llm_config</span><span class="p">[</span><span class="s2">&quot;top_p&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mf">0.1</span>
-</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a><span class="k">assert</span> <span class="n">agent</span><span class="o">.</span><span class="n">llm</span><span class="o">.</span><span class="n">llm_config</span><span class="p">[</span><span class="s2">&quot;n&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span>
-</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a><span class="k">assert</span> <span class="n">agent</span><span class="o">.</span><span class="n">llm</span><span class="o">.</span><span class="n">llm_config</span><span class="p">[</span><span class="s2">&quot;stop&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;answer&quot;</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="n">rt</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">RagTool</span><span class="p">(</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">url</span><span class="o">=</span><span class="s2">&quot;https://github.com/chroma-core/chroma/issues/3233&quot;</span><span class="p">,</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">query</span><span class="o">=</span><span class="s2">&quot;What is the next action plan?&quot;</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="p">)</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="n">res</span> <span class="o">=</span> <span class="n">rt</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="k">assert</span> <span class="n">rt</span><span class="o">.</span><span class="n">text</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="c1"># text source from the url</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="k">assert</span> <span class="n">res</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
 </span></code></pre></div>
 <hr>
 
-<h2 id="building-knowledge">Building Knowledge<a class="headerlink" href="#building-knowledge" title="Permanent link">&para;</a></h2>
-<p><strong>Knowlege Source</strong></p>
-<p><code>[var]</code><bold><code>knowledge_sources: Optional[List[KnowledgeSource]] = None</code></bold></p>
-<p>You can add knowledge sources to the agent in the following formats:</p>
-<ul>
-<li>Plane text</li>
-<li>Excel file</li>
-<li>PPTX</li>
-<li>PDF</li>
-<li>CSV</li>
-<li>JSON</li>
-<li>HTML file</li>
-</ul>
-<p>The agent will run a query in the given knowledge source using the given context, then add the search results to the task prompt context.</p>
+<h2 id="using-with-agents">Using with Agents<a class="headerlink" href="#using-with-agents" title="Permanent link">&para;</a></h2>
+<p>You can call a specific agent when you run a RAG tool.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">versionhq</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">vhq</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">rt</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">RagTool</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="s2">&quot;https://github.com/chroma-core/chroma/issues/3233&quot;</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="s2">&quot;What is the next action plan?&quot;</span><span class="p">)</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="n">agent</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Agent</span><span class="p">(</span><span class="n">role</span><span class="o">=</span><span class="s2">&quot;RAG Tool Tester&quot;</span><span class="p">)</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="n">res</span> <span class="o">=</span> <span class="n">rt</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">agent</span><span class="o">=</span><span class="n">agent</span><span class="p">)</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="k">assert</span> <span class="n">agent</span><span class="o">.</span><span class="n">knowledge_sources</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="k">assert</span> <span class="n">rt</span><span class="o">.</span><span class="n">text</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="k">assert</span> <span class="n">res</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+</span></code></pre></div>
+<p>Agents can own RAG tools.</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">versionhq</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">vhq</span>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">content</span> <span class="o">=</span> <span class="s2">&quot;Kuriko&#39;s favorite color is gold, and she enjoy Japanese food.&quot;</span>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="n">string_source</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">StringKnowledgeSource</span><span class="p">(</span><span class="n">content</span><span class="o">=</span><span class="n">content</span><span class="p">)</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="n">agent</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Agent</span><span class="p">(</span>
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>    <span class="n">role</span><span class="o">=</span><span class="s2">&quot;Information Agent&quot;</span><span class="p">,</span>
-</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>    <span class="n">goal</span><span class="o">=</span><span class="s2">&quot;Provide information based on knowledge sources&quot;</span><span class="p">,</span>
-</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>    <span class="n">knowledge_sources</span><span class="o">=</span><span class="p">[</span><span class="n">string_source</span><span class="p">,]</span>
-</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="p">)</span>
-</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>
-</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="n">task</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Task</span><span class="p">(</span>
-</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Answer the following question: What is Kuriko&#39;s favorite color?&quot;</span>
-</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="p">)</span>
-</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>
-</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="n">res</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">agent</span><span class="o">=</span><span class="n">agent</span><span class="p">)</span>
-</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a><span class="k">assert</span> <span class="s2">&quot;gold&quot;</span> <span class="ow">in</span> <span class="n">res</span><span class="o">.</span><span class="n">raw</span>  <span class="o">==</span> <span class="kc">True</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">rt</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">RagTool</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="s2">&quot;https://github.com/chroma-core/chroma/issues/3233&quot;</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="s2">&quot;What is the next action plan?&quot;</span><span class="p">)</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="n">agent</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Agent</span><span class="p">(</span><span class="n">role</span><span class="o">=</span><span class="s2">&quot;RAG Tool Tester&quot;</span><span class="p">,</span> <span class="n">tools</span><span class="o">=</span><span class="p">[</span><span class="n">rt</span><span class="p">])</span> <span class="c1"># adding RAG tool/s</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="n">task</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Task</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;return a simple response&quot;</span><span class="p">,</span> <span class="n">can_use_agent_tools</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">tool_res_as_final</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="n">res</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">agent</span><span class="o">=</span><span class="n">agent</span><span class="p">)</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="k">assert</span> <span class="n">res</span><span class="o">.</span><span class="n">raw</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="k">assert</span> <span class="n">res</span><span class="o">.</span><span class="n">tool_output</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
 </span></code></pre></div>
-<ul>
-<li>Reference: <bold><code>Knowledge</code> class</bold></li>
-</ul>
-<hr />
-
-<h2 id="accessing-memories">Accessing Memories<a class="headerlink" href="#accessing-memories" title="Permanent link">&para;</a></h2>
-<p>Store task execution results in memory</p>
-<p><code>[var]</code><bold><code>with_memory: bool = False</code></bold></p>
-<p>By turning on the with_memory val True, the agent will create and store the task output and contextualize the memory when they execute the task.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">versionhq.task.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">Agent</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="n">agent</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Agent</span><span class="p">(</span>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    <span class="n">role</span><span class="o">=</span><span class="s2">&quot;Researcher&quot;</span><span class="p">,</span>
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    <span class="n">goal</span><span class="o">=</span><span class="s2">&quot;You research about math.&quot;</span><span class="p">,</span>
-</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="n">with_memory</span><span class="o">=</span><span class="kc">True</span>
-</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="p">)</span>
-</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>
-</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">agent</span><span class="o">.</span><span class="n">short_term_memory</span><span class="p">,</span> <span class="n">vhq</span><span class="o">.</span><span class="n">ShortTermMemory</span><span class="p">)</span>
-</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">agent</span><span class="o">.</span><span class="n">long_term_memory</span><span class="p">,</span> <span class="n">vhq</span><span class="o">.</span><span class="n">LongTermMemory</span><span class="p">)</span>
-</span></code></pre></div>
-<hr />
-
-<p><strong>RAG Storage</strong></p>
-<p>When the agent is not given any <code>memory_config</code> values, they will create <code>RAGStorage</code> to store memory:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">RAGStorage</span><span class="p">(</span>
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>    <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;stm&quot;</span><span class="p">,</span> <span class="c1"># short-term memory</span>
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>    <span class="n">allow_reset</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="c1"># default = True. Explicitly mentioned.</span>
-</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>    <span class="n">embedder_config</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>    <span class="n">agents</span><span class="o">=</span><span class="p">[</span><span class="n">agent</span><span class="p">,]</span>
-</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="p">)</span>
-</span></code></pre></div>
-<p>MEM0 Storage</p>
-<ul>
-<li>Reference: <bold><code>Memory</code></bold> class</li>
-</ul>
-<hr />
-
-<h2 id="updating-existing-agents">Updating Existing Agents<a class="headerlink" href="#updating-existing-agents" title="Permanent link">&para;</a></h2>
-<p><strong>Model configuration</strong></p>
-<p><code>[var]</code><bold><code>config: Optional[Dict[str, Any]] = None</code></bold></p>
-<p>You can create an agent by using model config parameters instead.</p>
-<p>e.g. Using config val</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">versionhq</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">vhq</span>
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
-</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="n">agent</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Agent</span><span class="p">(</span>
-</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>    <span class="n">config</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
-</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>        <span class="n">role</span><span class="o">=</span><span class="s2">&quot;Marketing Analyst&quot;</span><span class="p">,</span>
-</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>        <span class="n">goal</span><span class="o">=</span><span class="s2">&quot;Coping with increased price competition in saturated markets.&quot;</span><span class="p">,</span>
-</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>    <span class="p">)</span>
-</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="p">)</span>
-</span></code></pre></div>
-<p>This is the same as the following:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">versionhq</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">vhq</span>
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
-</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="n">agent</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Agent</span><span class="p">(</span>
-</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>    <span class="n">role</span><span class="o">=</span><span class="s2">&quot;Marketing Analyst&quot;</span><span class="p">,</span>
-</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>    <span class="n">goal</span><span class="o">=</span><span class="s2">&quot;Coping with price competition in saturated markets.&quot;</span><span class="p">,</span>
-</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="p">)</span>
-</span></code></pre></div>
-<hr />
-
-<p><strong>Updating existing agents</strong></p>
-<p><code>[class method]</code><bold><code>update(self, **kwargs) -&gt; Self</code></bold></p>
-<p>You can update values of exsiting agents using <code>update</code> class method.</p>
-<p>This class method will safely trigger some setups that needs to be run before the agent start executing tasks.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">versionhq</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">vhq</span>
-</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>
-</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="n">agent</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Agent</span><span class="p">(</span>
-</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>    <span class="n">role</span><span class="o">=</span><span class="s2">&quot;Marketing Analyst&quot;</span><span class="p">,</span>
-</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>    <span class="n">goal</span><span class="o">=</span><span class="s2">&quot;Coping with price competition in saturated markets&quot;</span>
-</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="p">)</span>
-</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>
-</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="n">tool</span> <span class="o">=</span> <span class="n">vhq</span><span class="o">.</span><span class="n">Tool</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">)</span>
-</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="n">agent</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
-</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>    <span class="n">tools</span><span class="o">=</span><span class="p">[</span><span class="n">tool</span><span class="p">],</span>
-</span><span id="__span-7-11"><a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a>    <span class="n">goal</span><span class="o">=</span><span class="s2">&quot;my new goal&quot;</span><span class="p">,</span> <span class="c1"># updating the goal (this will trigger updating the developer_prompt.)</span>
-</span><span id="__span-7-12"><a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a>    <span class="n">max_rpm</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
-</span><span id="__span-7-13"><a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a>    <span class="n">knowledge_sources</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;testing&quot;</span><span class="p">,</span> <span class="s2">&quot;testing2&quot;</span><span class="p">],</span> <span class="c1"># adding knowledge sources (this will trigger the storage creation.)</span>
-</span><span id="__span-7-14"><a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a>    <span class="n">memory_config</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;user_id&quot;</span><span class="p">:</span> <span class="s2">&quot;0000&quot;</span><span class="p">},</span>
-</span><span id="__span-7-15"><a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a>    <span class="n">llm</span><span class="o">=</span><span class="s2">&quot;gemini-2.0&quot;</span><span class="p">,</span> <span class="c1"># Updating model (The valid llm_config for the new model will be inherited.)</span>
-</span><span id="__span-7-16"><a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a>    <span class="n">use_developer_prompt</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-</span><span id="__span-7-17"><a id="__codelineno-7-17" name="__codelineno-7-17" href="#__codelineno-7-17"></a>    <span class="n">dummy</span><span class="o">=</span><span class="s2">&quot;I am dummy&quot;</span> <span class="c1"># &lt;- Invalid field will be automatically ignored.</span>
-</span><span id="__span-7-18"><a id="__codelineno-7-18" name="__codelineno-7-18" href="#__codelineno-7-18"></a><span class="p">)</span>
-</span></code></pre></div>
+<h3 id="variables">Variables<a class="headerlink" href="#variables" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;"><div style="width:160px"><strong>Variable</strong></div></th>
+<th style="text-align: left;"><strong>Data Type</strong></th>
+<th style="text-align: left;"><strong>Default</strong></th>
+<th style="text-align: left;"><strong>Nullable</strong></th>
+<th style="text-align: left;"><strong>Description</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong><code>api_key_name</code></strong></td>
+<td style="text-align: left;">Optional[str]</td>
+<td style="text-align: left;">None</td>
+<td style="text-align: left;">True</td>
+<td style="text-align: left;">API key name in .env file.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>api_endpoint</code></strong></td>
+<td style="text-align: left;">Optional[str]</td>
+<td style="text-align: left;">None</td>
+<td style="text-align: left;">True</td>
+<td style="text-align: left;">API endpoint.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>url</code></strong></td>
+<td style="text-align: left;">Optional[str]</td>
+<td style="text-align: left;">None</td>
+<td style="text-align: left;">True</td>
+<td style="text-align: left;">URLs to extract the text source.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>headers</code></strong></td>
+<td style="text-align: left;">Optional[Dict[str, Any]]</td>
+<td style="text-align: left;">dict()</td>
+<td style="text-align: left;">-</td>
+<td style="text-align: left;">Request headers</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>query</code></strong></td>
+<td style="text-align: left;">Optional[str]</td>
+<td style="text-align: left;">None</td>
+<td style="text-align: left;">True</td>
+<td style="text-align: left;">Query.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>text</code></strong></td>
+<td style="text-align: left;">Optional[str]</td>
+<td style="text-align: left;">None</td>
+<td style="text-align: left;">True</td>
+<td style="text-align: left;">Text sources extracted from the URL or API call</td>
+</tr>
+</tbody>
+</table>
+<h3 id="class-methods">Class Methods<a class="headerlink" href="#class-methods" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;"><div style="width:120px"><strong>Method</strong></div></th>
+<th style="text-align: left;"><div style="width:300px"><strong>Params</strong></div></th>
+<th style="text-align: left;"><strong>Returns</strong></th>
+<th style="text-align: left;"><strong>Description</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong><code>store_data</code></strong></td>
+<td style="text-align: left;"><p>agent: Optional["vhq.Agent"] = Non</p></td>
+<td style="text-align: left;">None</td>
+<td style="text-align: left;">Stores the retrieved data in the storage.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>run</code></strong></td>
+<td style="text-align: left;">*args, **kwargs</td>
+<td style="text-align: left;">Any</td>
+<td style="text-align: left;">Execute the tool.</td>
+</tr>
+</tbody>
+</table>
 
 
 
 
 
 
+
+  
+  
 
 
 
@@ -1810,7 +1800,7 @@
                 
                 
               
-              Thanks for your feedback! Help us improve this page by using our <a href="https://github.com/versionhq/multi-agent-system/issues/new/?title=[Feedback]+Configuration+-+/core/agent/config/" target="_blank" rel="noopener">feedback form</a>.
+              Thanks for your feedback! Help us improve this page by using our <a href="https://github.com/versionhq/multi-agent-system/issues/new/?title=[Feedback]+RAG%20Tool+-+/core/rag-tool.html" target="_blank" rel="noopener">feedback form</a>.
             </div>
           
         </div>
@@ -1844,7 +1834,7 @@
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../" class="md-footer__link md-footer__link--prev" aria-label="Previous: Agent">
+          <a href="tool.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Tool">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -1854,20 +1844,20 @@
                 Previous
               </span>
               <div class="md-ellipsis">
-                Agent
+                Tool
               </div>
             </div>
           </a>
         
         
           
-          <a href="../task-handling/" class="md-footer__link md-footer__link--next" aria-label="Next: Task Handling">
+          <a href="memory.html" class="md-footer__link md-footer__link--next" aria-label="Next: Memory">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Task Handling
+                Memory
               </div>
             </div>
             <div class="md-footer__button md-icon">
@@ -1935,10 +1925,10 @@
     
     
       
-      <script id="__config" type="application/json">{"base": "../../..", "features": ["content.action.edit", "content.action.view", "content.code.annotate", "content.code.copy", "content.code.select", "content.tabs.link", "content.tooltips", "header.autohide", "navigation.tabs", "navigation.path", "navigation.expand", "navigation.top", "navigation.footer", "navigation.indexes", "navigation.instant", "navigation.instant.progress", "navigation.instant.prefetch", "navigation.tracking", "toc.follow", "toc.integrate", "search.suggest", "search.highlight", "search.share"], "search": "../../../assets/javascripts/workers/search.f8cc74c7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"base": "..", "features": ["content.action.edit", "content.action.view", "content.code.annotate", "content.code.copy", "content.code.select", "content.tabs.link", "content.tooltips", "header.autohide", "navigation.tabs", "navigation.path", "navigation.expand", "navigation.top", "navigation.footer", "navigation.indexes", "navigation.instant", "navigation.instant.progress", "navigation.instant.prefetch", "navigation.tracking", "toc.follow", "toc.integrate", "search.suggest", "search.highlight", "search.share"], "search": "../assets/javascripts/workers/search.f8cc74c7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.c8b220af.min.js"></script>
+      <script src="../assets/javascripts/bundle.c8b220af.min.js"></script>
       
     
   </body>
