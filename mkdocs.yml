@@ -1,10 +1,11 @@
 site_name: versionHQ
 site_author: Version IO Sdn. Bhd.
 site_description: Documentation | Agentic orchestration framework for multi-agent networks and task graph for complex task automation
-site_url: https://docs.versi0n.io/
+# site_url: https://docs.versi0n.io/
 repo_url: https://github.com/versionhq/multi-agent-system/
 repo_name: multi-agent-system
 edit_uri: edit/main/docs/
+use_directory_urls: false
 copyright: Copyright &copy; 2024-2025 Version IO Sdn. Bhd.
 markdown_extensions:
   - abbr
@@ -139,7 +140,7 @@ nav:
     - Knowledge: core/knowledge.md
   - Archive: 'tags.md'
   - Cases:
-    - Playground: https://versi0n.io/playground
+    - Playground: https://versionhq.vercel.app/playground
     - Experiment - Agent Performance: https://github.com/versionHQ/exp-agent-performance
   - Change Log: https://github.com/versionHQ/multi-agent-system/releases
 

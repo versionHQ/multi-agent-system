@@ -16,7 +16,7 @@ exclude = ["test*", "__pycache__", "*.egg-info"]
 [project]
 name = "versionhq"
 version = "1.2.4.17"
-authors = [{ name = "Kuriko Iwai", email = "kuriko@versi0n.io" }]
+authors = [{ name = "Kuriko Iwai", email = "krik8235@gmail.com" }]
 description = "Autonomous agent networks for task automation with multi-step reasoning."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -60,8 +60,8 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://versi0n.io"
-Documentation = "https://docs.versi0n.io"
+Homepage = "https://versionhq.vercel.app"
+Documentation = "https://versionhq.github.io/multi-agent-system"
 Repository = "https://github.com/versionHQ/multi-agent-system"
 Issues = "https://github.com/versionHQ/multi-agent-system/issues"
 
