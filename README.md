@@ -13,7 +13,7 @@ A Python framework for autonomous agent networks that handle task automation wit
 **Visit:**
 
 - [Playground](https://versi0n.io/)
-- [Documentation](https://docs.versi0n.io)
+- [Documentation](https://versionhq.github.io/multi-agent-system/)
 - [Github](https://github.com/versionHQ/)
 - [Python SDK](https://pypi.org/project/versionhq/)
 
